@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Good Foods",
+    "icon": "./assets/images/logo512.png",
+    "splash": {
+      "image": "./assets/images/splash-screen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "version": "1.0.0",
+    "slug": "good-foods-slug0",
+    "ios": {
+      "bundleIdentifier": "com.goodfoods.goodfoods",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.goodfoods.goodfoods",
+      "versionCode": 1
+    },
+    "plugins": [
+      "expo-font",
+      "expo-localization"
+    ]
+  }
+}
