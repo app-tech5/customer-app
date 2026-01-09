@@ -2,10 +2,9 @@ import { View, Text, TouchableOpacity, StyleSheet} from 'react-native'
 import React, { useState, useContext} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {language, currency}  from '../global'
-import { addDoc, serverTimestamp } from 'firebase/firestore'
 import { generateUID } from '../global'
 import Loading from './Loading'
-import { ordersCol } from '../firebase'
+import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
 import Loader from '../screens/Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -19,49 +18,45 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
 
     console.log("IMAGE : ",items[0].restaurantImage)
     const dispatch = useDispatch();   
-    const addOrderToFirebase = () => {
+    const addOrderToFirebase = async () => {
         setViewCartButton(false)
-        addDoc(ordersCol, {
-            orderId: generateUID(),
-            restaurantId: items[0].restaurant.restaurantId,
-            Restaurant: {
-                    //  lat: items[0].restaurant.coordinates.latitude,
-                    //  lng: items[0].restaurant.coordinates.longitude,
-                    //  address: items[0].restaurant.location.display_address.toString(),
-                    //  phone: items[0].restaurant.phone,
-                    //  name: items[0].restaurant.name,
 
+        try {
+            const orderData = {
+                orderId: generateUID(),
+                restaurantId: items[0].restaurant.restaurantId,
+                restaurant: {
                     lat: items[0].restaurant.lat,
-                     lng: items[0].restaurant.lng,
-                     address: items[0].restaurant.address,
-                     phone: items[0].restaurant.phone,
-                     name: items[0].restaurant.name,
-                 },
-            User: {
+                    lng: items[0].restaurant.lng,
+                    address: items[0].restaurant.address,
+                    phone: items[0].restaurant.phone,
+                    name: items[0].restaurant.name,
+                },
+                user: {
                     id: id,
                     name: name,
-                    //  lat: address.location.lat,
-                    //  lng: address.location.lng,
                     lat,
                     lng,
                     phone: phone,
-                    // address: address.description,
                     address,
-                     items: items,
+                    items: items,
                 },
                 status: "pending",
-                createdAt: serverTimestamp(),
-        })
-        .then(()=> {
+                createdAt: new Date().toISOString(),
+            };
+
+            await api.createOrder(orderData);
+
             dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName })
             setLoading(false)
-           navigation.navigate('OrderRequest',{
-            //    lat: address.location.lat,
-            //    lng: address.location.lng
-            lat,
-            lng
-           })
-        })
+            navigation.navigate('OrderRequest',{
+                lat,
+                lng
+            })
+        } catch (error) {
+            console.error('Error creating order:', error);
+            setLoading(false);
+        }
     }
   return (
       <>

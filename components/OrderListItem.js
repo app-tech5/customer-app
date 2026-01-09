@@ -35,7 +35,7 @@ const OrderListItem = ({ order, index}) => {
                                 position: "relative",
                             }}
                             onPress={() => {
-                                addOrderToFirebase()
+                                // TODO: Implement order creation
                                 setModalVisible(false);
                             }}>
                             <Text style={{ color: "white", fontSize: 20 }}>Checkout</Text>

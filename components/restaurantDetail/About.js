@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Icon } from 'react-native-elements';
 import RestaurantDetailComponent from '../RestaurantDetailComponent';
 import { apikey } from '../../global';
-import { getCategoriesFromRestaurant } from '../../firebase';
+import { getCategoriesFromRestaurant } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 
 export default function About(props) {

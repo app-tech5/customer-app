@@ -7,7 +7,7 @@ import RestaurantItems, { localRestaurants } from '../components/home/Restaurant
 import { Divider } from 'react-native-elements'
 import { restaurants, themes } from '../data'
 import HomeHeader from '../components/home/HomeHeader'
-import { addRestaurants, getRestaurantsFromFirebase } from '../firebase'
+import { getRestaurantsFromFirebase } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AntDesign } from '@expo/vector-icons'
 import Loader from './Loader'

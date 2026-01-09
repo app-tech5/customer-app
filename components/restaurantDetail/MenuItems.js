@@ -8,7 +8,7 @@ import {} from 'react-native-tab-view'
 import { NavigationContainer } from '@react-navigation/native';
 import { restaurants } from '../../data';
 import { AntDesign } from '@expo/vector-icons';
-import { getFoods } from '../../firebase';
+import { getFoods } from '../../api';
 import Loader from '../../screens/Loader';
 import QuantityAnimate from '../Quantity';  
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';

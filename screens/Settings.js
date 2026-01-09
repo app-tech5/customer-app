@@ -1,8 +1,7 @@
 import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { addUser, auth, updateUser } from '../firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { updateUser } from '../api'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"
 import { useDispatch, useSelector } from 'react-redux'

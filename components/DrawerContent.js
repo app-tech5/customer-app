@@ -6,8 +6,7 @@ import {
     DrawerItemList,
     DrawerItem
 } from '@react-navigation/drawer'
-import {signOut } from 'firebase/auth'
-import { auth } from '../firebase'
+import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons'
@@ -22,14 +21,10 @@ export default function DrawerContent(props) {
     const signOutUser = () => {
         AsyncStorage.getAllKeys().then(k => AsyncStorage.multiRemove(k))
         .then(()=>{
-        signOut(auth)
-        .then(()=>{
-            navigation.navigate('SignIn')
-
-        })
+        api.logout();
+        navigation.navigate('SignIn');
     })
-        .catch((err)=>console.log(err.code))
-         
+        .catch((err)=>console.log(err))
     }
   return (
     <View style={styles.container}>

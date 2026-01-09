@@ -1,8 +1,7 @@
 import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Entypo, MaterialIcons } from '@expo/vector-icons'
-import { addUser, auth } from '../firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { api } from '../api'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"
 import { useDispatch } from 'react-redux'
@@ -29,15 +28,26 @@ export default function SignUp({ navigation }) {
   async function signUp() {
 
     try {
-      const userCredentials = await createUserWithEmailAndPassword(auth, email, password)
+      const userData = {
+        email,
+        password,
+        name,
+        phone,
+        address: address.description || address,
+        lat: address.location?.lat || 0,
+        lng: address.location?.lng || 0
+      };
 
-      addUser(userCredentials, name, phone, address)
-        .then(() => navigation.navigate("SignIn"))
+      const result = await api.register(userData);
 
-      console.log("USER ACCOUNT CREATED")
+      // Sauvegarder le token
+      await AsyncStorage.setItem('userToken', result.token);
+
+      console.log("USER ACCOUNT CREATED");
+      navigation.navigate("SignIn");
     } catch (error) {
-      console.log(error.code)
-
+      console.log(error);
+      Alert.alert("Erreur", "Impossible de créer le compte");
     }
   }
 

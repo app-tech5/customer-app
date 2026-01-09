@@ -1,7 +1,7 @@
 import { View, Text, Image, ScrollView, TouchableOpacity, Platform } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { FlatList } from 'react-native-gesture-handler';
-import { getCategories, getCategoriesRestaurants } from '../../firebase';
+import { getCategories, getCategoriesRestaurants } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 
 export default function Categories({navigation}) {

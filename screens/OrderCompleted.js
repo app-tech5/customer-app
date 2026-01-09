@@ -5,8 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LottieView from 'lottie-react-native';
 import MenuItems from '../components/restaurantDetail/MenuItems';
 
-import { collection, getFirestore, orderBy, limit, onSnapshot, query } from 'firebase/firestore'
-import firebaseApp from '../firebase';
+import { api } from '../api'
 
 
 export default function OrderCompleted() {

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, useWindowDimensions, Image, Animated} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
-import {getDriverInfos} from '../firebase'
+import { getDriverInfos } from '../api'
 import BottomSheet from '@gorhom/bottom-sheet'
 import { Icon} from 'react-native-elements'
 import LottieView from 'lottie-react-native';

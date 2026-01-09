@@ -1,13 +1,12 @@
 import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
-import { auth, userInfos } from '../firebase'
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import { api, userInfos } from '../api'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"
 import { useDispatch } from 'react-redux'
 import { location } from '../global'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import Loader from './Loader'
 
 
@@ -22,36 +21,33 @@ export default function SignIn({ navigation }) {
 
   const SignInUser = async () => {
 
-    console.log(auth)
-
     setLoginState(true)
 
     try {
-      const re = await signInWithEmailAndPassword(auth, email, password)
+      const result = await api.login(email, password)
 
+      // Sauvegarder le token
+      await AsyncStorage.setItem('userToken', result.token)
 
-      userInfos(re.user.uid).then(snapshot => {
+      // Récupérer les infos utilisateur
+      const userInfo = await api.getUserInfo(result.user.id)
 
-        dispatch({
-          type: 'ADD_USER',
-          payload: {
-            ...snapshot.docs[0].data(),
-            userId: snapshot.docs[0].id
+      dispatch({
+        type: 'ADD_USER',
+        payload: {
+          ...userInfo,
+          userId: result.user.id
+        }
+      });
 
-          }
-        });
+      // Sauvegarder les données utilisateur localement
+      await AsyncStorage.setItem('userData', JSON.stringify(userInfo))
 
-
-
-        AsyncStorage.setItem('userData', JSON.stringify(snapshot.docs[0].data()))
-
-
-      }).then(() => navigation.navigate('DrawerNavigator'))
+      navigation.navigate('DrawerNavigator')
 
     } catch (e) {
       console.log(e)
       setLoginState(false)
-
     }
 
   }

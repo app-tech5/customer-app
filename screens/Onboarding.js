@@ -1,17 +1,8 @@
 import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Onboarding from 'react-native-onboarding-swiper'
 import * as Animatable from "react-native-animatable"
 export default function OnboardingScreen({navigation}) {
-  const [splash, setSplash]= useState(true)
-  setTimeout(()=>{
-    setSplash(false)
-  }, 4000)
-  if(splash)
-  return <View style={styles.splash}>
-      <Text style={styles.splashText}>Good{'\n'}
-      <Text style={styles.splashText1}>Foods</Text></Text>
-  </View>
   return (
     <ImageBackground style={{ width: "100%", height: "100%" }}
       source={require("../assets/images/onboarding.jpg")}>
@@ -30,20 +21,6 @@ export default function OnboardingScreen({navigation}) {
   )
 }
 const styles = StyleSheet.create({
-  splash: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#006600"
-  },
-  splashText: {
-     fontSize: 50,
-     fontFamily: "Roboto_500Medium"
-  },
-  splashText1: {
-    fontWeight: "bold",
-    fontSize: 50,
-  },
   title: {
     color: "white",
     fontSize: 50,
@@ -51,6 +28,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 40,
     marginTop: 40,
     flex: 1
+  },
+  footer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 50
   },
   box: {
     backgroundColor: "white",

@@ -2,8 +2,7 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet} from 'react-native'
 import React, {useState} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import OrderItem from './OrderItem';
-import {addDoc, serverTimestamp} from 'firebase/firestore'
-import {ordersCol, userInfos, auth} from '../../firebase';
+import { api } from '../../api';
 import { LogBox } from 'react-native';
 import "intl"
 import "intl/locale-data/jsonp/en"
