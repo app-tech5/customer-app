@@ -8,7 +8,7 @@ import MenuItems from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import HeaderTabs from '../components/home/HeaderTabs'
 import DisplayMapview from '../components/DisplayMapview'
-import { apikey } from '../global'
+import { apikey, colors } from '../global'
 
 const { width, height } = Dimensions.get('window')
 
@@ -81,7 +81,7 @@ export default function RestaurantDetail({ route, navigation }) {
             
             <View style={styles.ratingRow}>
               <View style={styles.ratingBadge}>
-                <Icon name="star" type="material-community" color="#FFD700" size={16} />
+                <Icon name="star" type="material-community" color={colors.accent} size={16} />
                 <Text style={styles.ratingText}>{formattedRating}</Text>
               </View>
               <Text style={styles.infoText}>{reviewCount}+ ratings</Text>
@@ -92,12 +92,12 @@ export default function RestaurantDetail({ route, navigation }) {
             </View>
 
             <View style={styles.statusRow}>
-              <Icon name="clock-outline" type="material-community" color="#4CAF50" size={16} />
+              <Icon name="clock-outline" type="material-community" color={colors.success} size={16} />
               <Text style={styles.statusText}>Open until 2:00 AM</Text>
             </View>
           </View>
 
-          <Divider width={1} color="#F0F0F0" style={{ marginHorizontal: 20 }} />
+          <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20 }} />
 
           {/* Service Mode Tabs */}
           <View style={styles.tabsWrapper}>
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   restaurantTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#111',
+    color: colors.text.primary,
     marginBottom: 10,
   },
   ratingRow: {
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF9E6',
+    backgroundColor: colors.highlight,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -222,16 +222,16 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FFA000',
+    color: colors.rating,
     marginLeft: 4,
   },
   infoText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.text.secondary,
   },
   dot: {
     marginHorizontal: 8,
-    color: '#DDD',
+    color: colors.border.medium,
     fontSize: 16,
   },
   statusRow: {
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 14,
-    color: '#4CAF50',
+    color: colors.success,
     fontWeight: '500',
     marginLeft: 6,
   },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: colors.divider,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

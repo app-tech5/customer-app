@@ -9,6 +9,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { restaurants } from '../../data';
 import { AntDesign } from '@expo/vector-icons';
 import { getFoods, getCategoriesFromRestaurant } from '../../api';
+import { colors } from '../../global';
 import Loader from '../../screens/Loader';
 import AddToCartButton from '../AddToCartButton';  
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -56,23 +57,38 @@ opacity, setCategoriesFood, hideHeader}) {
       console.error('Error fetching categories:', error);
     });
 
-    getFoods(restaurantId).then((foods) => {
+        getFoods(restaurantId).then((foods) => {
       console.log('Foods fetched from API:', foods);
       console.log('Categories from context:', categories);
 
       if (foods && foods.length > 0) {
-        setFoods(foods.map(food => ({...food, price: Number(food.price)}) ))
+        // Filtrer et valider les aliments avec IDs
+        const validFoods = foods
+          .filter(food => food && (food.id || food._id))
+          .map(food => ({
+            ...food,
+            id: food.id || food._id,
+            price: Number(food.price)
+          }));
+
+        console.log('Valid foods after filtering:', validFoods.length);
+        setFoods(validFoods);
       } else {
         // Fallback to static data from restaurant.dishes
         console.log('Using fallback dishes from restaurant data');
         const fallbackFoods = restaurantData.dishes || [];
-        setFoods(fallbackFoods.map(food => ({
-          ...food,
-          name: food.name || food.title,
-          price: Number(food.price),
-          id: food.id || food.title,
-          category: food.category || { name: "Menu", _id: "menu" } // Default category
-        })))
+        const validFallbackFoods = fallbackFoods
+          .filter(food => food && (food.id || food.title))
+          .map(food => ({
+            ...food,
+            name: food.name || food.title,
+            price: Number(food.price),
+            id: food.id || food.title || `fallback-${Math.random()}`,
+            category: food.category || { name: "Menu", _id: "menu" }
+          }));
+
+        console.log('Valid fallback foods:', validFallbackFoods.length);
+        setFoods(validFallbackFoods);
       }
       setLoader(false)
     }).catch(error => {
@@ -80,13 +96,18 @@ opacity, setCategoriesFood, hideHeader}) {
       // Fallback to static data on error
       console.log('Using fallback dishes from restaurant data due to error');
       const fallbackFoods = restaurantData.dishes || [];
-      setFoods(fallbackFoods.map(food => ({
-        ...food,
-        name: food.name || food.title,
-        price: Number(food.price),
-        id: food.id || food.title,
-        category: food.category || { name: "Menu", _id: "menu" } // Default category
-      })))
+      const validFallbackFoods = fallbackFoods
+        .filter(food => food && (food.id || food.title))
+        .map(food => ({
+          ...food,
+          name: food.name || food.title,
+          price: Number(food.price),
+          id: food.id || food.title || `error-fallback-${Math.random()}`,
+          category: food.category || { name: "Menu", _id: "menu" }
+        }));
+
+      console.log('Valid error fallback foods:', validFallbackFoods.length);
+      setFoods(validFallbackFoods);
       setLoader(false)
     })
 
@@ -102,7 +123,7 @@ opacity, setCategoriesFood, hideHeader}) {
   if (foods.length === 0) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 16, color: '#666'}}>Aucun produit disponible</Text>
+        <Text style={{fontSize: 16, color: colors.text.secondary}}>Aucun produit disponible</Text>
       </View>
     )
   }
@@ -122,8 +143,8 @@ opacity, setCategoriesFood, hideHeader}) {
               <View >
                {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
                 <FlatList
-                  data={data}
-                   keyExtractor={(item, index)=>index}
+                  data={data.filter(food => food && food.id)} // Filtrer les aliments sans ID
+                   keyExtractor={(item, index)=>`food-${item.id}`}
                    renderItem={({item, index})=>{
                     return (
                       <View key={index} >
@@ -142,7 +163,17 @@ opacity, setCategoriesFood, hideHeader}) {
                   <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
                 </View>
                 <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
-                  <AddToCartButton food={item} restaurant={restaurantData} />
+                  {item && item.id ? (
+                    <AddToCartButton
+                      key={`cart-btn-${item.id}`}
+                      food={item}
+                      restaurant={restaurantData}
+                    />
+                  ) : (
+                    <Text style={{ color: colors.error, fontSize: 12 }}>
+                      Produit non disponible
+                    </Text>
+                  )}
                 </View>
                </View>
                    <Divider width={0.5} orientation="vertical" style={{
@@ -192,7 +223,17 @@ opacity, setCategoriesFood, hideHeader}) {
                   <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
                 </View>
                 <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
-                  <AddToCartButton food={item} restaurant={restaurantData} />
+                  {item && item.id ? (
+                    <AddToCartButton
+                      key={`cart-btn-${item.id}`}
+                      food={item}
+                      restaurant={restaurantData}
+                    />
+                  ) : (
+                    <Text style={{ color: colors.error, fontSize: 12 }}>
+                      Produit non disponible
+                    </Text>
+                  )}
                 </View>
                </View>
                   <Divider width={0.5} orientation="vertical" style={{
