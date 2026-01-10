@@ -193,9 +193,8 @@ class ApiClient {
 
   // Foods/Menu items
   async getFoods(restaurantId) {
-    // Dans le nouveau système, les plats peuvent être dans une collection séparée
-    // ou associés aux restaurants via une relation
-    return await this.apiCall(`/resource/products?restaurantId=${restaurantId}`);
+    // Utilisation de la nouvelle route dédiée aux produits avec filtrage d'images
+    return await this.apiCall(`/products?type=${restaurantId}`);
   }
 
   // Méthodes utilitaires

@@ -1,12 +1,9 @@
-import { View, Text, StyleSheet,Image, ScrollView, TouchableOpacity} from 'react-native'
-import React, {useState, useEffect, useRef, createRef, useContext} from 'react'
-import { Divider } from 'react-native-elements';
+import React, {useState, useEffect, useRef, createRef, useContext, useMemo, useCallback} from 'react'
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native'
+import { Divider } from 'react-native-elements'
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import {language, currency}  from '../../global'
-import {} from 'react-native-tab-view'
-import { NavigationContainer } from '@react-navigation/native';
-import { restaurants } from '../../data';
 import { AntDesign } from '@expo/vector-icons';
 import { getFoods, getCategoriesFromRestaurant } from '../../api';
 import { colors } from '../../global';
@@ -43,7 +40,18 @@ opacity, setCategoriesFood, hideHeader}) {
   const [loader, setLoader] = useState(true)
 
   useEffect(()=>{
-    if (!restaurantData) return;
+    if (!restaurantData) {
+      console.log('❌ No restaurant data available');
+      return;
+    }
+
+    console.log('🏪 Loading foods for restaurant:', {
+      id: restaurantData.id,
+      restaurantId: restaurantData.restaurantId,
+      name: restaurantData.name,
+      hasDishes: !!restaurantData.dishes,
+      dishesCount: restaurantData.dishes?.length || 0
+    });
 
     setLoader(true)
     const restaurantId = restaurantData.restaurantId || restaurantData.id;
@@ -58,57 +66,63 @@ opacity, setCategoriesFood, hideHeader}) {
     });
 
         getFoods(restaurantId).then((foods) => {
-      console.log('Foods fetched from API:', foods);
-      console.log('Categories from context:', categories);
+      console.log('=== API RESPONSE ===');
+      console.log('Foods fetched from API:', foods?.length || 0);
 
-      if (foods && foods.length > 0) {
-        // Filtrer et valider les aliments avec IDs
-        const validFoods = foods
-          .filter(food => food && (food.id || food._id))
-          .map(food => ({
-            ...food,
-            id: food.id || food._id,
-            price: Number(food.price)
-          }));
-
-        console.log('Valid foods after filtering:', validFoods.length);
-        setFoods(validFoods);
-      } else {
-        // Fallback to static data from restaurant.dishes
-        console.log('Using fallback dishes from restaurant data');
-        const fallbackFoods = restaurantData.dishes || [];
-        const validFallbackFoods = fallbackFoods
-          .filter(food => food && (food.id || food.title))
-          .map(food => ({
-            ...food,
-            name: food.name || food.title,
-            price: Number(food.price),
-            id: food.id || food.title || `fallback-${Math.random()}`,
-            category: food.category || { name: "Menu", _id: "menu" }
-          }));
-
-        console.log('Valid fallback foods:', validFallbackFoods.length);
-        setFoods(validFallbackFoods);
+      // Debug: Afficher les premières données reçues
+      if (foods && Array.isArray(foods) && foods.length > 0) {
+        console.log('🔍 Sample food data:', JSON.stringify(foods[0], null, 2));
+        console.log('🔍 Image field check:', foods.slice(0, 3).map(f => ({ id: f.id || f._id, image: f.image, hasImage: !!f.image })));
       }
-      setLoader(false)
-    }).catch(error => {
-      console.error('Error fetching foods:', error);
-      // Fallback to static data on error
-      console.log('Using fallback dishes from restaurant data due to error');
-      const fallbackFoods = restaurantData.dishes || [];
-      const validFallbackFoods = fallbackFoods
-        .filter(food => food && (food.id || food.title))
-        .map(food => ({
+
+      if (foods && Array.isArray(foods) && foods.length > 0) {
+        // Filtrer côté frontend : ignorer les produits sans image valide
+        const foodsWithValidImages = foods.filter(food => {
+          const hasValidImage = food &&
+                               food.image &&
+                               typeof food.image === 'string' &&
+                               food.image.trim() !== '' &&
+                               food.image !== 'null' &&
+                               food.image !== 'undefined';
+
+          // Debug: Log pourquoi chaque produit est filtré ou gardé
+          if (!hasValidImage) {
+            console.log('❌ Filtered out food:', { id: food.id || food._id, image: food.image, reason: !food.image ? 'no image field' : 'invalid image' });
+          }
+
+          return hasValidImage;
+        });
+
+        console.log(`📦 Received ${foods.length} foods from backend`);
+        console.log(`✅ ${foodsWithValidImages.length} foods with valid images (filtered ${foods.length - foodsWithValidImages.length} without images)`);
+
+        if (foodsWithValidImages.length === 0) {
+          console.log('❌ No foods with valid images available');
+          setFoods([]);
+          setLoader(false);
+          return;
+        }
+
+        const processedFoods = foodsWithValidImages.map(food => ({
           ...food,
-          name: food.name || food.title,
-          price: Number(food.price),
-          id: food.id || food.title || `error-fallback-${Math.random()}`,
-          category: food.category || { name: "Menu", _id: "menu" }
+          id: food.id || food._id,
+          price: Number(food.price)
         }));
 
-      console.log('Valid error fallback foods:', validFallbackFoods.length);
-      setFoods(validFallbackFoods);
+        console.log('🍽️ Final processed foods with images:', processedFoods.length);
+        setFoods(processedFoods);
+        setLoader(false);
+        return;
+      }
+
+      // Si pas de données de l'API
+      console.log('❌ No foods available from backend');
+      setFoods([]);
       setLoader(false)
+    }).catch(error => {
+      console.error('❌ Error fetching foods from database:', error);
+      setFoods([]);
+      setLoader(false);
     })
 
   },[activeTab, restaurantData])
@@ -143,7 +157,7 @@ opacity, setCategoriesFood, hideHeader}) {
               <View >
                {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
                 <FlatList
-                  data={data.filter(food => food && food.id)} // Filtrer les aliments sans ID
+                  data={data} // Le backend a déjà filtré les produits valides
                    keyExtractor={(item, index)=>`food-${item.id}`}
                    renderItem={({item, index})=>{
                     return (
@@ -157,8 +171,10 @@ opacity, setCategoriesFood, hideHeader}) {
                          alignItems: "center",
                          marginBottom: 10
                        }}>
-                          <FoodImage food={item} marginLeft={marginLeft ? marginLeft:0}
-                           />
+                          <FoodImage
+                            food={item}
+                            marginLeft={marginLeft ? marginLeft:0}
+                          />
                        </View>
                   <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
                 </View>
@@ -186,7 +202,7 @@ opacity, setCategoriesFood, hideHeader}) {
               </View>
             )
           }}
-          ListFooterComponent={()=><View style={{ height: 250}} />}
+          ListFooterComponent={()=><View style={{ height: 20}} />}
           onScrollBeginDrag={(e)=>{
           }}
            scrollEnabled={scrollEnabled}
@@ -205,8 +221,8 @@ opacity, setCategoriesFood, hideHeader}) {
           <Text style={styles.groupTitle}>Menu</Text>
           <FlatList
             ref={foodsRef}
-            data={foods}
-            keyExtractor={(item, index)=>index}
+            data={foods} // Le backend a déjà filtré les produits valides
+            keyExtractor={(item, index)=>`food-${item.id || index}`}
             renderItem={({item, index})=>{
               return (
                 <View key={index} >
@@ -218,7 +234,10 @@ opacity, setCategoriesFood, hideHeader}) {
                         alignItems: "center",
                         marginBottom: 10
                       }}>
-                        <FoodImage food={item} marginLeft={marginLeft ? marginLeft:0} />
+                        <FoodImage
+                          food={item}
+                          marginLeft={marginLeft ? marginLeft:0}
+                        />
                       </View>
                   <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
                 </View>
@@ -242,7 +261,7 @@ opacity, setCategoriesFood, hideHeader}) {
                 </View>
               )
             }}
-            ListFooterComponent={()=><View style={{ height: 250}} />}
+            ListFooterComponent={()=><View style={{ height: 20}} />}
             scrollEnabled={scrollEnabled}
             onScrollBeginDrag={(e)=>{
 
@@ -277,20 +296,32 @@ const FoodInfo = (props)=>{
       })}</Text>
     </TouchableOpacity>
 )}
-const FoodImage = ({marginLeft,...props})=>(
-  <View style={{
-    flex: 1,
-    justifyContent: "center",
-    padding: 10
-  }}>
-    <Image source={{ uri: props.food.image }}
-      style={{
-        width: 100,
-        height: 100,
-        borderRadius: 8,
-      }}  />
-  </View>
-)
+const FoodImage = ({marginLeft,...props})=> {
+  const [currentImage, setCurrentImage] = useState(
+    props.food?.image || null
+  );
+
+  return (
+    <View style={{
+      flex: 1,
+      justifyContent: "center",
+      padding: 10
+    }}>
+      <Image
+        source={currentImage ? { uri: currentImage } : require('../../assets/images/default-food.jpg')}
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: 8,
+        }}
+        resizeMode="cover"
+        onError={() => {
+          setCurrentImage(null);
+        }}
+      />
+    </View>
+  )
+}
 export const Quantity = ({id, food, restaurant, screen}) => {
   const dispatch = useDispatch();
   const styleMds={
