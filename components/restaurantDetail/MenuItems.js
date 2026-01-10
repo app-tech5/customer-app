@@ -8,9 +8,9 @@ import {} from 'react-native-tab-view'
 import { NavigationContainer } from '@react-navigation/native';
 import { restaurants } from '../../data';
 import { AntDesign } from '@expo/vector-icons';
-import { getFoods } from '../../api';
+import { getFoods, getCategoriesFromRestaurant } from '../../api';
 import Loader from '../../screens/Loader';
-import QuantityAnimate from '../Quantity';  
+import AddToCartButton from '../AddToCartButton';  
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import About from './About';
 import HeaderTabs from '../home/HeaderTabs';
@@ -32,97 +32,191 @@ import { CategoriesContext } from '../../contexts/CategoriesContext';
      marginVertical: 10
     }
 }) 
-export default function MenuItems({route, activeTab, marginLeft, navigation, foodsRef,
+export default function MenuItems({route, restaurant, activeTab, marginLeft, navigation, foodsRef,
 pickup, delivery, setActiveTab, userLocation, mapRef, apikey, scrollEnabled, setScrollEnabled,
-opacity, setCategoriesFood}) {
-  const {restaurant} = route.params
+opacity, setCategoriesFood, hideHeader}) {
+  // Get restaurant from props or route.params
+  const restaurantData = restaurant || route?.params?.restaurant
   const {categories, setCategories} = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
-   const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(true)
 
   useEffect(()=>{
-      //  setLoader(true)
-        getFoods(restaurant.restaurantId).then((foods) => {
-          // const wait = new Promise(resolve => setTimeout(resolve, 2000));
-          // wait.then(()=>{
-            setFoods(foods.map(food => ({...food, price: Number(food.price)}) ))
-              // setLoader(false)
-          // })
-        })
-          // .then(() => {
-          //   setLoader(false)
-          // })
-      
-  },[activeTab])
+    if (!restaurantData) return;
+
+    setLoader(true)
+    const restaurantId = restaurantData.restaurantId || restaurantData.id;
+
+    // Fetch categories for this restaurant
+    getCategoriesFromRestaurant(restaurantId).then((restaurantCategories) => {
+      console.log('Categories for restaurant:', restaurantCategories);
+      // For now, just use all categories since the API returns all categories
+      // In a real implementation, this should return categories specific to the restaurant
+    }).catch(error => {
+      console.error('Error fetching categories:', error);
+    });
+
+    getFoods(restaurantId).then((foods) => {
+      console.log('Foods fetched from API:', foods);
+      console.log('Categories from context:', categories);
+
+      if (foods && foods.length > 0) {
+        setFoods(foods.map(food => ({...food, price: Number(food.price)}) ))
+      } else {
+        // Fallback to static data from restaurant.dishes
+        console.log('Using fallback dishes from restaurant data');
+        const fallbackFoods = restaurantData.dishes || [];
+        setFoods(fallbackFoods.map(food => ({
+          ...food,
+          name: food.name || food.title,
+          price: Number(food.price),
+          id: food.id || food.title,
+          category: food.category || { name: "Menu", _id: "menu" } // Default category
+        })))
+      }
+      setLoader(false)
+    }).catch(error => {
+      console.error('Error fetching foods:', error);
+      // Fallback to static data on error
+      console.log('Using fallback dishes from restaurant data due to error');
+      const fallbackFoods = restaurantData.dishes || [];
+      setFoods(fallbackFoods.map(food => ({
+        ...food,
+        name: food.name || food.title,
+        price: Number(food.price),
+        id: food.id || food.title,
+        category: food.category || { name: "Menu", _id: "menu" } // Default category
+      })))
+      setLoader(false)
+    })
+
+  },[activeTab, restaurantData])
   if(loader)
-  return <View>
-  <About route={route} navigation={navigation} userLocation={userLocation} mapRef={mapRef} apikey={apikey} categories={categories} setCategories={setCategories}/>
-  <HeaderTabs pickup={pickup} delivery={delivery} activeTab={activeTab} setActiveTab={setActiveTab}/>
-  <View style={{marginBottom: 100}}></View>
-  <Loader />
-  </View>
+    return <View>
+      <View style={{marginBottom: 100}}></View>
+      <Loader />
+    </View>
+
+  // If no foods loaded yet, show empty state
+  console.log('Total foods loaded:', foods.length)
+  if (foods.length === 0) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text style={{fontSize: 16, color: '#666'}}>Aucun produit disponible</Text>
+      </View>
+    )
+  }
+
   return (
     <View style={{flex: 1, }} >
-      <FlatList
-      ref={foodsRef}
-      //  data={groupFoods}
-      data={categories.filter(category => category.type === "food")}
-      keyExtractor={(item, index)=>index}
-      renderItem={({item, index})=> {
-        let data = foods.filter((food)=>food.category === item.name)
-        return (
-          <View >
-           {data.length? <Text style={styles.groupTitle}>{item.name}</Text>:<></>} 
-            <FlatList 
-              //  data={foods.filter((food)=>food.group === item.id)}
-              data={data}
-               keyExtractor={(item, index)=>index}
-               renderItem={({item, index})=>{
-                return (
-                  <View key={index} >
-               <View style={styles.menuItemStyle}>
-                   <View style={{
-                     flexDirection: "row",
-                      
-                   }}>
-                   <View style={{
-                     alignItems: "center",
-                     marginBottom: 10
-                   }}>
-                      <FoodImage food={item} marginLeft={marginLeft ? marginLeft:0}
-                       />
-                       <QuantityAnimate id={item.id} food={item} restaurant={restaurant}/>
-                   </View>
-                  <FoodInfo food={item} navigation={navigation} restaurant={restaurant}/>
-                   </View>
+      {/* If categories exist and have foods, group by categories */}
+      {categories && categories.length > 0 ? (
+        <FlatList
+          ref={foodsRef}
+          data={categories}
+          keyExtractor={(item, index)=>index}
+          renderItem={({item, index})=> {
+            let data = foods.filter((food)=>food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
+            console.log(`Category ${item.name}: ${data.length} items`)
+            return (
+              <View >
+               {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
+                <FlatList
+                  data={data}
+                   keyExtractor={(item, index)=>index}
+                   renderItem={({item, index})=>{
+                    return (
+                      <View key={index} >
+                   <View style={styles.menuItemStyle}>
+                       <View style={{
+                         flexDirection: "row",
+
+                       }}>
+                       <View style={{
+                         alignItems: "center",
+                         marginBottom: 10
+                       }}>
+                          <FoodImage food={item} marginLeft={marginLeft ? marginLeft:0}
+                           />
+                       </View>
+                  <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
+                </View>
+                <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
+                  <AddToCartButton food={item} restaurant={restaurantData} />
+                </View>
                </View>
-               <Divider width={0.5} orientation="vertical" style={{
-                 marginHorizontal: 20
-               }}/>
-                 </View>
-                )
-              }}
-            />
-          </View>
-        )
-      }}
-      ListHeaderComponent={()=> <View>
-        <About route={route} navigation={navigation} userLocation={userLocation} mapRef={mapRef} apikey={apikey}/>
-        <HeaderTabs pickup={pickup} delivery={delivery} activeTab={activeTab} setActiveTab={setActiveTab}/>
-        </View>}
-      ListFooterComponent={()=><View style={{ height: 250}} />}
-      onScrollBeginDrag={(e)=>{
-      }}
-       scrollEnabled={scrollEnabled}
-       onScrollEndDrag={(e)=>{
-        if(e.nativeEvent.contentOffset.y === 0){
-        setCategoriesFood(false)
-        opacity(0).then(()=>{
-          setScrollEnabled(false)
-       })
-      }
-       }}
-       />
+                   <Divider width={0.5} orientation="vertical" style={{
+                     marginHorizontal: 20
+                   }}/>
+                     </View>
+                    )
+                  }}
+                />
+              </View>
+            )
+          }}
+          ListFooterComponent={()=><View style={{ height: 250}} />}
+          onScrollBeginDrag={(e)=>{
+          }}
+           scrollEnabled={scrollEnabled}
+           onScrollEndDrag={(e)=>{
+            if(e.nativeEvent.contentOffset.y === 0){
+            setCategoriesFood(false)
+            opacity(0).then(()=>{
+              setScrollEnabled(false)
+           })
+          }
+           }}
+        />
+      ) : (
+        /* If no categories, show all foods in one list */
+        <View>
+          <Text style={styles.groupTitle}>Menu</Text>
+          <FlatList
+            ref={foodsRef}
+            data={foods}
+            keyExtractor={(item, index)=>index}
+            renderItem={({item, index})=>{
+              return (
+                <View key={index} >
+                  <View style={styles.menuItemStyle}>
+                    <View style={{
+                      flexDirection: "row",
+                    }}>
+                      <View style={{
+                        alignItems: "center",
+                        marginBottom: 10
+                      }}>
+                        <FoodImage food={item} marginLeft={marginLeft ? marginLeft:0} />
+                      </View>
+                  <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
+                </View>
+                <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
+                  <AddToCartButton food={item} restaurant={restaurantData} />
+                </View>
+               </View>
+                  <Divider width={0.5} orientation="vertical" style={{
+                    marginHorizontal: 20
+                  }}/>
+                </View>
+              )
+            }}
+            ListFooterComponent={()=><View style={{ height: 250}} />}
+            scrollEnabled={scrollEnabled}
+            onScrollBeginDrag={(e)=>{
+
+            }}
+            onScrollEndDrag={(e)=>{
+              if(e.nativeEvent.contentOffset.y === 0){
+                setCategoriesFood(false)
+                opacity(0).then(()=>{
+                  setScrollEnabled(false)
+                })
+              }
+            }}
+          />
+        </View>
+      )}
     </View>
   )
 }

@@ -11,6 +11,9 @@ Application mobile React Native pour la commande de nourriture en ligne, migrée
 - [🔄 Migration Firebase → API](#-migration-firebase--api)
 - [🗄️ Structure du Projet](#️-structure-du-projet)
 - [🌐 API Endpoints](#-api-endpoints)
+- [🎭 Mode Démo](#-mode-démo)
+- [🌍 Internationalisation](#-internationalisation)
+- [📚 Documentation Détaillée](#-documentation-détaillée)
 - [📱 Utilisation](#-utilisation)
 - [🐛 Dépannage](#-dépannage)
 
@@ -25,13 +28,15 @@ Application mobile React Native pour la commande de nourriture en ligne, migrée
 - ✅ Géolocalisation et cartes
 - ✅ Paiement et portefeuille
 - ✅ Interface multilingue (FR/EN)
+- ✅ **Mode démonstration** (connexion automatique)
 
 ## 🛠️ Technologies
 
 ### Frontend (React Native)
 - **React Native** 0.81.5
 - **Expo** ~54.0.0
-- **React Navigation** v6 (Stack, Tab, Drawer)
+- **React Navigation** v6+ (Stack, Tab, Drawer)
+- **React Native Reanimated** ~4.1.1 (v3+)
 - **Redux** (gestion d'état)
 - **AsyncStorage** (persistance locale)
 
@@ -248,6 +253,90 @@ GET    /api/drivers/:id      // Infos driver
 }
 ```
 
+## 🎭 Mode Démo
+
+### Configuration
+Le mode démonstration permet de préremplir automatiquement les identifiants de connexion pour faciliter les démonstrations.
+
+**Activation** : Dans `config.js`, mettez `DEMO_MODE: true`
+
+**Identifiants de démo** :
+- **Email** : `demo@customer.com`
+- **Mot de passe** : `demo123`
+
+### Fonctionnement
+- ✅ Champs de connexion préremplis automatiquement
+- ✅ Indicateur visuel "Mode Démo - Identifiants préremplis"
+- ✅ Connexion en un clic
+- ✅ Utilisateur de démo créé automatiquement dans la base de données
+
+### Création de l'utilisateur de démo
+```bash
+# Dans le backend
+npm run migrate:up -- 20250303223322-add-user.js
+# ou
+./run-migrations-ordered.sh
+```
+
+## 🌍 Internationalisation
+
+L'application supporte plusieurs langues avec un système d'internationalisation complet.
+
+### Configuration
+- **Langue par défaut :** Anglais 🇬🇧
+- **Détection automatique :** Langue du device
+- **Support :** Français 🇫🇷, Anglais 🇬🇧
+
+### Structure
+```
+lang/
+├── en.json    # Traductions anglaises
+└── fr.json    # Traductions françaises
+```
+
+### Utilisation dans le code
+```javascript
+import i18n from '../i18n';
+
+// Texte simple
+<Text>{i18n.t('auth.welcome')}</Text>
+
+// Avec paramètres
+<Text>{i18n.t('order.estimatedTime', { minutes: 25 })}</Text>
+```
+
+### Changement de langue
+```javascript
+import { changeLanguage } from '../i18n';
+changeLanguage('en'); // Anglais
+changeLanguage('fr'); // Français
+```
+
+### Écrans internationalisés
+- ✅ **SignIn** - Connexion avec mode démo
+- 🔄 **SignUp** - Inscription (à faire)
+- 🔄 **Home** - Accueil (à faire)
+- 🔄 **RestaurantDetail** - Détails (à faire)
+- 🔄 **Cart** - Panier (à faire)
+- 🔄 **Profile** - Profil (à faire)
+- 🔄 **Settings** - Paramètres (à faire)
+
+## 📚 Documentation Détaillée
+
+Pour consulter l'historique complet des mises à jour et les guides détaillés :
+
+📁 **[`/doc`](./doc/)** - Documentation organized by date
+
+### Available files:
+- **[2025-01-updates.md](./doc/2025-01-updates.md)** - All January 2025 updates
+- **[migration-api-firebase.md](./doc/migration-api-firebase.md)** - Firebase → REST API migration
+
+Chaque fichier contient :
+- ✅ Modifications détaillées
+- 🐛 Problèmes résolus
+- 📋 Instructions complètes
+- 🔍 Vérifications post-déploiement
+
 ## 📱 Utilisation
 
 ### Démarrage de l'application
@@ -291,6 +380,54 @@ npm run web
 **Cause** : Imports multiples
 **Solution** : Supprimer les imports dupliqués dans SignIn.js
 
+### Erreur "useLegacyImplementation" prop
+**Cause** : Conflit entre React Navigation v6 et Reanimated v3+
+**Solution** :
+```bash
+# Option 1 : Upgrade React Navigation (recommandé)
+npm uninstall @react-navigation/native @react-navigation/stack @react-navigation/bottom-tabs @react-navigation/drawer
+npm install @react-navigation/native@^7.0.0 @react-navigation/stack@^7.0.0 @react-navigation/bottom-tabs@^7.0.0 @react-navigation/drawer@^7.0.0
+
+# Option 2 : Downgrade Reanimated (temporaire)
+npm install react-native-reanimated@~2.14.0
+
+# Nettoyer le cache
+npx expo start --clear
+```
+
+### Erreur 404 sur /users/:id
+**Cause** : Route utilisateur manquante dans l'API
+**Solution** : Ajouter la route dans `src/routes/userRoutes.js` :
+```javascript
+router.get('/:id', async (req, res) => {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+});
+```
+
+### Mode démo non fonctionnel
+**Cause** : Utilisateur de démo non créé ou identifiants incorrects
+**Solution** :
+1. Vérifier que les migrations ont été exécutées
+2. Vérifier `config.js` : `DEMO_MODE: true`
+3. Vérifier les identifiants dans `config.js`
+4. Redémarrer l'app avec `npx expo start --clear`
+
+### Erreur "cannot read property split of undefined"
+**Cause** : `Localization.locale` undefined dans i18n.js
+**Solution** : Gestion d'erreur ajoutée dans `i18n.js` :
+```javascript
+let deviceLanguage = 'fr'; // Défaut français
+try {
+  if (Localization && Localization.locale) {
+    deviceLanguage = Localization.locale.split('-')[0];
+  }
+} catch (error) {
+  console.warn('Erreur lors de la détection de langue:', error.message);
+}
+```
+
 ## 📝 Scripts Disponibles
 
 ```bash
@@ -316,13 +453,27 @@ Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
 
 ## 🔄 Historique des Changements
 
-### v2.0.0 (Migration API)
-- ✅ Suppression complète de Firebase
-- ✅ Migration vers API REST personnalisée
-- ✅ Ajout système d'authentification JWT
-- ✅ Persistance locale avec AsyncStorage
-- ✅ Correction bugs navigation Onboarding
-- ✅ Nettoyage imports Firebase
+📁 **Documentation détaillée disponible dans** [`/doc`](./doc/)
+
+### v2.2.0 (2025-01-10) - Internationalisation + Corrections
+- ✅ **Système d'internationalisation complet** (i18n-js + expo-localization)
+- ✅ **Support multilingue** Français 🇫🇷 et Anglais 🇬🇧
+- ✅ **Détection automatique** de la langue du device
+- ✅ **Écran SignIn internationalisé** (premier écran terminé)
+- ✅ **Langue par défaut** changée à Anglais 🇬🇧
+- ✅ **Correction erreur** `cannot read property split of undefined`
+- ✅ **Gestion robuste** de la détection de langue avec fallback
+- ✅ **Structure de traductions** organisée et extensible
+
+### v2.1.0 (2025-01-09) - Mode Démo + Corrections
+- ✅ Mode démonstration avec connexion automatique
+- ✅ Résolution conflits React Navigation / Reanimated
+- ✅ Utilisateur de démo et route API ajoutés
+
+### v2.0.0 - Migration Firebase → API
+- ✅ Migration complète vers API REST personnalisée
+- ✅ Suppression dépendances Firebase
+- ✅ Authentification JWT + MongoDB
 
 ### v1.0.0 (Original)
 - Application avec Firebase (Auth + Firestore)

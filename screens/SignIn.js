@@ -2,6 +2,8 @@ import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, Touc
 import React, { useState, useEffect } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
 import { api, userInfos } from '../api'
+import { config } from '../config'
+import i18n from '../i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"
@@ -13,8 +15,8 @@ import Loader from './Loader'
 
 export default function SignIn({ navigation }) {
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState(config.DEMO_MODE ? config.DEMO_EMAIL : '')
+  const [password, setPassword] = useState(config.DEMO_MODE ? config.DEMO_PASSWORD : '')
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
 
@@ -63,7 +65,10 @@ export default function SignIn({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome !</Text>
+        <Text style={styles.title}>{i18n.t('auth.welcome')}</Text>
+        {config.DEMO_MODE && (
+          <Text style={styles.demoText}>{i18n.t('auth.demoMode')}</Text>
+        )}
       </View>
 
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
@@ -73,7 +78,7 @@ export default function SignIn({ navigation }) {
             marginLeft: 6,
           }} />
           <TextInput
-            placeholder='Email'
+            placeholder={i18n.t('auth.email')}
             value={email}
             onChangeText={(text) => setEmail(text)}
             style={styles.textInput} />
@@ -85,7 +90,7 @@ export default function SignIn({ navigation }) {
             marginLeft: 6,
           }} />
           <TextInput
-            placeholder='Password'
+            placeholder={i18n.t('auth.password')}
             value={password}
             onChangeText={(text) => setPassword(text)}
             style={styles.textInput}
@@ -98,7 +103,7 @@ export default function SignIn({ navigation }) {
           <LinearGradient
             colors={['#948E99', '#2E1437']}
             style={styles.signInButton} >
-            <Text style={{ ...styles.signInText, color: 'white' }}>Sign In</Text>
+            <Text style={{ ...styles.signInText, color: 'white' }}>{i18n.t('auth.signIn')}</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -107,7 +112,7 @@ export default function SignIn({ navigation }) {
           <LinearGradient
             colors={['#ada996', '#f2f2f2', '#dbdbdb', '#eaeaea']}
             style={styles.signInButton} >
-            <Text style={styles.signInText}>Sign Up</Text>
+            <Text style={styles.signInText}>{i18n.t('auth.signUp')}</Text>
           </LinearGradient>
 
         </TouchableOpacity>
@@ -138,6 +143,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25, fontWeight: "bold", color: "#3d5c5c",
     letterSpacing: 5
+  },
+  demoText: {
+    fontSize: 12,
+    color: "#ff6b35",
+    fontWeight: "600",
+    marginTop: 5,
+    textAlign: "center"
   },
   footer: {
     flex: 3,

@@ -1,235 +1,281 @@
-import { View, Text, Modal, ImageBackground, StyleSheet, Animated, TouchableOpacity, ScrollView, StatusBar, Platform } from 'react-native'
+import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Platform, Dimensions } from 'react-native'
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import About from '../components/restaurantDetail/About'
-import { Divider } from 'react-native-elements'
+import { Icon, Divider } from 'react-native-elements'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { LoaderContext } from "../contexts/LoaderContext"
+import Loader from './Loader'
 import MenuItems from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import grey1 from '../global'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Icon } from 'react-native-elements';
-import { ArrowBack } from '../components/restaurantDetail/About'
-import MapView, { Marker, PROVIDER_GOOGLE, } from 'react-native-maps'
-import MapViewDirections from 'react-native-maps-directions';
-import Loader from './Loader'
-import { CustomMarker, DisplayMapviewDirections } from './OrderRequest'
-import { apikey } from '../global'
-import DisplayMapview from '../components/DisplayMapview'
 import HeaderTabs from '../components/home/HeaderTabs'
-import GroupFoodHeader from '../components/GroupFoodHeader'
-import RestaurantDetailHeader from '../components/restaurantDetail/RestaurantDetailHeader'
-import { LoaderContext } from "../contexts/LoaderContext"
+import DisplayMapview from '../components/DisplayMapview'
+import { apikey } from '../global'
 
-
-
+const { width, height } = Dimensions.get('window')
 
 export default function RestaurantDetail({ route, navigation }) {
-
   const { restaurant } = route.params
+  const { image } = restaurant
 
-  const { image } = restaurant;
-
-  const bottomSheet = useRef(null)
+  const scrollViewRef = useRef(null)
   const mapRef = useRef(null)
 
   const [userLocation, setUserLocation] = useState(null)
-
-  const { loading, setLoading } = useContext(LoaderContext)
-
-  const value = useState(new Animated.ValueXY({ x: 0, y: 0 }))[0]
-
-  const value1 = useState(new Animated.ValueXY({ x: 0, y: 0 }))[0]
-
   const [activeTab, setActiveTab] = useState("Delivery")
-
   const [categoriesFood, setCategoriesFood] = useState(false)
-
-  const _scrollView = useRef(null)
-  const view = useRef(null)
-
+  const [scrollEnabled, setScrollEnabled] = useState(true)
 
   const foodsRef = useRef(null)
-
-  const [scrollEnabled, setScrollEnabled] = useState(false)
-
-  const value3 = useState(new Animated.Value(0))[0]
-
-
-  const opacity = async (val) => {
-
-    console.log("sdg")
-    Animated.timing(value3, {
-      toValue: val,
-      duration: 1000,
-      useNativeDriver: false
-    }).start()
-  }
-
-
-  function pickup() {
-
-
-    Animated.timing(value, {
-      toValue: { x: 0, y: 205 },
-      duration: 1000,
-      useNativeDriver: true
-    }).start()
-
-    Animated.timing(value1, {
-      toValue: { x: 0, y: -205 },
-      duration: 1000,
-      useNativeDriver: true
-    }).start()
-
-  }
-
-  function delivery() {
-    Animated.timing(value, {
-      toValue: { x: 0, y: 0 },
-      duration: 1000,
-      useNativeDriver: true
-    }).start()
-
-
-    Animated.timing(value1, {
-      toValue: { x: 0, y: 0 },
-      duration: 1000,
-      useNativeDriver: true
-    }).start()
-  }
-
-
-  const scrollTo = (n) => {
-
-    foodsRef.current[n].measure((fx, fy, w, h, px, py) => {
-      console.log(py, h)
-
-      _scrollView.current?.scrollTo({
-        y: py,
-        animated: true
-      })
-    })
-
-  }
+  const { loading, setLoading } = useContext(LoaderContext)
 
   useEffect(() => {
-
-
     AsyncStorage.getItem("userData").then(value => {
-      let user = JSON.parse(value)
-      setUserLocation({
-        latitude: user.lat,
-        longitude: user.lng
-      })
+      if (value) {
+        let user = JSON.parse(value)
+        setUserLocation({
+          latitude: user.lat,
+          longitude: user.lng
+        })
+      }
     })
-
   }, [])
 
+  if (!userLocation) return <Loader />
 
-  if (!userLocation)
-    return <Loader />
-
-
-
+  // Nettoyage des données pour l'affichage
+  const formattedRating = restaurant.rating ? parseFloat(restaurant.rating).toFixed(1) : "4.5";
+  const reviewCount = restaurant.review_count || "150";
+  const price = restaurant.price || "$$";
+  
+  // Extraire le nom de la catégorie (Pizza, Burger, etc.)
+  const categoryName = restaurant.categories?.[0]?.title || restaurant.categories?.[0]?.name || "Restaurant";
 
   return (
-    <>
-      <View style={{ flex: 1 }}>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-
-
-
-        <View style={{ position: "absolute", top: Platform.OS === "android" ? StatusBar.currentHeight : 0, zIndex: 1 }}>
-          <ArrowBack navigation={navigation} />
-        </View>
-
-
-
-        <Animated.View style={value.getTranslateTransform()}>
-          <RestaurantImage image={image} navigation={navigation} />
-        </Animated.View>
-
-        <Divider width={5} color="white" style={{}} />
-
-        <Animated.View style={value1.getTranslateTransform()}>
-          < DisplayMapview userLocation={userLocation} mapRef={mapRef} apikey={apikey} restaurant={restaurant} />
-        </Animated.View>
-
-
-
-
-        <BottomSheet ref={bottomSheet} index={1} snapPoints={["47%", "75%", "100%"]}
-          handleIndicatorStyle={{ backgroundColor: "#d9d9d9", width: 100 }}
-          onChange={(index) => {
-            if (index === 2) {
-              setCategoriesFood(true)
-
-              opacity(1).then(() => {
-                setScrollEnabled(true)
-              })
-
-            }
-            if (index === 0) {
-            }
-
-          }}
-
-        >
-
-
-          <MenuItems foodsRef={foodsRef} route={route} navigation={navigation} userLocation={userLocation}
-            mapRef={mapRef} apikey={apikey} activeTab={activeTab}
-            pickup={pickup} delivery={delivery} setActiveTab={setActiveTab}
-            scrollEnabled={scrollEnabled} setScrollEnabled={setScrollEnabled}
-            opacity={opacity} setCategoriesFood={setCategoriesFood}
-          />
-
-        </BottomSheet>
-        <ViewCart navigation={navigation} route={route} />
-
-
-      </View>
-      {loading && <Modal
-        animationType='slide'
-        visible={loading}
-        transparent={true}
-        onRequestClose={() => setLoading(false)}
+      {/* 1. Header Image Section */}
+      <ImageBackground
+        source={{ uri: image }}
+        style={styles.headerImage}
       >
-        <Loader />
-      </Modal>}
-    </>
+        <View style={styles.headerOverlay}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="arrow-left" type="material-community" color="white" size={26} />
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+
+      {/* 2. Main Content Card */}
+      <View style={styles.contentCard}>
+        <ScrollView
+          ref={scrollViewRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
+          {/* Restaurant Basic Info */}
+          <View style={styles.infoSection}>
+            <Text style={styles.restaurantTitle}>{restaurant.name}</Text>
+            
+            <View style={styles.ratingRow}>
+              <View style={styles.ratingBadge}>
+                <Icon name="star" type="material-community" color="#FFD700" size={16} />
+                <Text style={styles.ratingText}>{formattedRating}</Text>
+              </View>
+              <Text style={styles.infoText}>{reviewCount}+ ratings</Text>
+              <Text style={styles.dot}>•</Text>
+              <Text style={styles.infoText}>{categoryName}</Text>
+              <Text style={styles.dot}>•</Text>
+              <Text style={styles.infoText}>{price}</Text>
+            </View>
+
+            <View style={styles.statusRow}>
+              <Icon name="clock-outline" type="material-community" color="#4CAF50" size={16} />
+              <Text style={styles.statusText}>Open until 2:00 AM</Text>
+            </View>
+          </View>
+
+          <Divider width={1} color="#F0F0F0" style={{ marginHorizontal: 20 }} />
+
+          {/* Service Mode Tabs */}
+          <View style={styles.tabsWrapper}>
+            <HeaderTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              navigation={null} 
+              restaurantData={[restaurant]}
+              setCity={() => {}}
+              searchbar={null}
+              pickup={() => setActiveTab("Pickup")}
+              delivery={() => setActiveTab("Delivery")}
+            />
+          </View>
+
+          {/* Map Integration */}
+          <View style={styles.mapWrapper}>
+            <DisplayMapview
+              userLocation={userLocation}
+              mapRef={mapRef}
+              apikey={apikey}
+              restaurant={restaurant}
+              height={150}
+            />
+          </View>
+
+          {/* Menu Items List */}
+          <View style={styles.menuList}>
+            <MenuItems
+              foodsRef={foodsRef}
+              route={route}
+              restaurant={restaurant}
+              navigation={navigation}
+              userLocation={userLocation}
+              mapRef={mapRef}
+              apikey={apikey}
+              activeTab={activeTab}
+              pickup={() => setActiveTab("Pickup")}
+              delivery={() => setActiveTab("Delivery")}
+              setActiveTab={setActiveTab}
+              scrollEnabled={false}
+              setScrollEnabled={setScrollEnabled}
+              opacity={async () => {}}
+              setCategoriesFood={setCategoriesFood}
+              hideHeader={true}
+            />
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* 3. Sticky Bottom Cart Button */}
+      <View style={styles.cartContainer}>
+        <ViewCart navigation={navigation} route={route} />
+      </View>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <View style={styles.loaderOverlay}>
+          <Loader />
+        </View>
+      )}
+    </View>
   )
 }
 
-
-
-const RestaurantImage = (props) => (
-
-  <ImageBackground
-
-    style={styles.container}
-    source={{ uri: props.image }}
-  >
-    <View style={{ paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0, }}>
-    </View>
-
-
-
-  </ImageBackground>
-
-
-);
-
-const DisplayPolylines = () => {
-
-}
-
-
 const styles = StyleSheet.create({
-
   container: {
-    width: "100%",
-    height: 200,
+    flex: 1,
+    backgroundColor: '#000', // Pour que l'image soit bien détourée
   },
-
+  headerImage: {
+    width: '100%',
+    height: height * 0.3,
+  },
+  headerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight + 10,
+    paddingLeft: 20,
+  },
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    marginTop: -30,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
+  },
+  infoSection: {
+    paddingHorizontal: 20,
+    paddingTop: 25,
+    paddingBottom: 20,
+  },
+  restaurantTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#111',
+    marginBottom: 10,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFA000',
+    marginLeft: 4,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  dot: {
+    marginHorizontal: 8,
+    color: '#DDD',
+    fontSize: 16,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '500',
+    marginLeft: 6,
+  },
+  tabsWrapper: {
+    paddingVertical: 15,
+    backgroundColor: '#fff',
+  },
+  mapWrapper: {
+    marginHorizontal: 20,
+    height: 150,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+  },
+  menuList: {
+    flex: 1,
+  },
+  cartContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    zIndex: 100,
+  },
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
 })

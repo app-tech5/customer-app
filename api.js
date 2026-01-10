@@ -80,7 +80,7 @@ class ApiClient {
   }
 
   async register(userData) {
-    const response = await this.apiCall('/auth/register', {
+    const response = await this.apiCall('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
@@ -139,54 +139,63 @@ class ApiClient {
 
   // Restaurants
   async getRestaurants() {
-    const response = await this.apiCall('/restaurants');
+    const response = await this.apiCall('/resource/restaurants');
     return response.map(restaurant => ({
-      restaurantId: restaurant._id,
+      restaurantId: restaurant._id || restaurant.id,
       ...restaurant,
     }));
   }
 
   async getRestaurantById(id) {
-    return await this.apiCall(`/restaurants/${id}`);
+    return await this.apiCall(`/resource/restaurants/${id}`);
   }
 
   // Catégories
   async getCategories() {
-    const response = await this.apiCall('/categories');
+    const response = await this.apiCall('/resource/categories');
     return response.map(category => ({
-      id: category._id,
+      id: category._id || category.id,
       ...category,
     }));
   }
 
+  async getCategoriesFromRestaurant(restaurantId) {
+    // Récupérer les catégories associées à un restaurant spécifique
+    // Pour l'instant, on retourne toutes les catégories
+    // TODO: Implémenter une route API qui retourne les catégories par restaurant
+    return await this.getCategories();
+  }
+
   // Commandes
   async createOrder(orderData) {
-    return await this.apiCall('/orders', {
+    return await this.apiCall('/resource/orders', {
       method: 'POST',
       body: JSON.stringify(orderData),
     });
   }
 
   async getOrders() {
-    const response = await this.apiCall('/orders');
+    const response = await this.apiCall('/resource/orders');
     return response.map(order => ({
-      id: order._id,
+      id: order._id || order.id,
       ...order,
     }));
   }
 
   async getOrderById(orderId) {
-    return await this.apiCall(`/orders/${orderId}`);
+    return await this.apiCall(`/resource/orders/${orderId}`);
   }
 
   // Drivers
   async getDriverInfo(driverId) {
-    return await this.apiCall(`/drivers/${driverId}`);
+    return await this.apiCall(`/resource/drivers/${driverId}`);
   }
 
   // Foods/Menu items
   async getFoods(restaurantId) {
-    return await this.apiCall(`/restaurants/${restaurantId}/foods`);
+    // Dans le nouveau système, les plats peuvent être dans une collection séparée
+    // ou associés aux restaurants via une relation
+    return await this.apiCall(`/resource/products?restaurantId=${restaurantId}`);
   }
 
   // Méthodes utilitaires
@@ -237,6 +246,7 @@ export const onAuthStateChanged = (auth, callback) => {
 // Fonctions pour les données (remplacement Firestore)
 export const getRestaurantsFromFirebase = () => api.getRestaurants();
 export const getCategories = () => api.getCategories();
+export const getCategoriesFromRestaurant = (restaurantId) => api.getCategoriesFromRestaurant(restaurantId);
 export const getOrders = () => api.getOrders();
 export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const userInfos = (userId) => api.getUserInfo(userId);

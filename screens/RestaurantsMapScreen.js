@@ -49,8 +49,6 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     })])
   }
 
-  
-
   return (
     <View style={{
     }}>
