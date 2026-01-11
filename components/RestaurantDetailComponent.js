@@ -1,4 +1,4 @@
-import { View, Text, Modal, StyleSheet} from 'react-native'
+import { View, Text, Modal, StyleSheet, ScrollView} from 'react-native'
 import React from 'react'
 import { CloseModal } from './FilterModal'
 import { Divider, Icon } from 'react-native-elements'
@@ -32,30 +32,32 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
       <Modal animationType='slide' visible={visible} transparent={true}>
           <View style={styles.modalOverlay} onTouchEnd={() => setVisible(false)}>
               <View style={styles.container} onTouchEnd={() => {}}>
-                  <View style={styles.header}>
-                      <CloseModal setVisible={setVisible} />
-                      <RestaurantName name={name} />
-                  </View>
-                  <View style={styles.header1}>
-                      <RestaurantDescription
-                          description={restaurantDescription}
-                          style={styles.description}
-                      />
-                  </View>
-                  <Divider />
-                  <RestaurantInfo iconName="location-pin" iconType="Entypo"
-                      iconSize={35}
-                      text={address}
-                      />
+                  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                      <View style={styles.header}>
+                          <CloseModal setVisible={setVisible} />
+                          <RestaurantName name={name} />
+                      </View>
+                      <View style={styles.header1}>
+                          <RestaurantDescription
+                              description={restaurantDescription}
+                              style={styles.description}
+                          />
+                      </View>
+                      <Divider />
+                      <RestaurantInfo iconName="location-pin" iconType="Entypo"
+                          iconSize={35}
+                          text={address}
+                          />
 
-                  <RestaurantInfo iconName="time" iconType="Ionicons"
-                      iconSize={35} text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`} />
+                      <RestaurantInfo iconName="time" iconType="Ionicons"
+                          iconSize={35} text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`} />
 
-                  <RestaurantInfo iconName="star" iconType="FontAwesome"
-                      iconSize={35} text={`⭐${rating} (${review_count}+ ratings)`} />
+                      <RestaurantInfo iconName="star" iconType="FontAwesome"
+                          iconSize={35} text={`⭐${rating} (${review_count}+ ratings)`} />
 
-                  <RestaurantInfo iconName="timer" iconType="Ionicons"
-                      iconSize={35} text={"Preparation time: "+ collectTime+" min"}/>
+                      <RestaurantInfo iconName="timer" iconType="Ionicons"
+                          iconSize={35} text={"Preparation time: "+ collectTime+" min"}/>
+                  </ScrollView>
               </View>
           </View>
       </Modal>
@@ -88,6 +90,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+        maxHeight: '80%',
+    },
+    scrollContent: {
         paddingBottom: 20,
     },
     header: {
