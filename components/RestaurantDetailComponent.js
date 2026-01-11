@@ -49,13 +49,13 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
                           text={address}
                           />
 
-                      <RestaurantInfo iconName="time" iconType="Ionicons"
+                      <RestaurantInfo iconName="clock-outline" iconType="material-community"
                           iconSize={35} text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`} />
 
                       <RestaurantInfo iconName="star" iconType="FontAwesome"
                           iconSize={35} text={`⭐${rating} (${review_count}+ ratings)`} />
 
-                      <RestaurantInfo iconName="timer" iconType="Ionicons"
+                      <RestaurantInfo iconName="timer-outline" iconType="material-community"
                           iconSize={35} text={"Preparation time: "+ collectTime+" min"}/>
                   </ScrollView>
               </View>
