@@ -8,6 +8,7 @@ import MenuItems from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import HeaderTabs from '../components/home/HeaderTabs'
 import ReviewCard from '../components/restaurantDetail/ReviewCard'
+import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
 import { colors, currency, language } from '../global'
 import { getDistanceFromLatLonInKm } from '../utils'
 import { getRestaurantReviews, getDeliverySettings } from '../api'
@@ -27,6 +28,7 @@ export default function RestaurantDetail({ route, navigation }) {
   const [reviews, setReviews] = useState([])
   const [loadingReviews, setLoadingReviews] = useState(false)
   const [deliverySettings, setDeliverySettings] = useState(null)
+  const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
@@ -213,7 +215,7 @@ export default function RestaurantDetail({ route, navigation }) {
           contentContainerStyle={{ paddingBottom: 120 }}
         >
           {/* Restaurant Basic Info */}
-          <View style={styles.infoSection}>
+          <TouchableOpacity style={styles.infoSection} onPress={() => setRestaurantDetailVisible(true)} activeOpacity={0.7}>
             <Text style={styles.restaurantTitle}>{restaurant.name}</Text>
             
             <View style={styles.ratingRow}>
@@ -289,7 +291,7 @@ export default function RestaurantDetail({ route, navigation }) {
                 )}
               </View>
             )}
-          </View>
+          </TouchableOpacity>
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20 }} />
 
@@ -360,6 +362,14 @@ export default function RestaurantDetail({ route, navigation }) {
           <Loader />
         </View>
       )}
+
+      {/* Restaurant Detail Modal */}
+      <RestaurantDetailComponent
+        restaurant={restaurant}
+        visible={restaurantDetailVisible}
+        setVisible={setRestaurantDetailVisible}
+        userLocation={userLocation}
+      />
     </View>
   )
 }
