@@ -1,5 +1,5 @@
-import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Platform, Dimensions } from 'react-native'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Platform, Dimensions, Linking } from 'react-native'
+import React, { useContext, useEffect, useRef, useState, useMemo } from 'react'
 import { Icon, Divider } from 'react-native-elements'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LoaderContext } from "../contexts/LoaderContext"
@@ -7,7 +7,10 @@ import Loader from './Loader'
 import MenuItems from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import HeaderTabs from '../components/home/HeaderTabs'
-import { colors } from '../global'
+import ReviewCard from '../components/restaurantDetail/ReviewCard'
+import { colors, currency, language } from '../global'
+import { getDistanceFromLatLonInKm } from '../utils'
+import { getRestaurantReviews, getDeliverySettings } from '../api'
 
 const { width, height } = Dimensions.get('window')
 
@@ -21,6 +24,9 @@ export default function RestaurantDetail({ route, navigation }) {
   const [activeTab, setActiveTab] = useState("Delivery")
   const [categoriesFood, setCategoriesFood] = useState(false)
   const [scrollEnabled, setScrollEnabled] = useState(true)
+  const [reviews, setReviews] = useState([])
+  const [loadingReviews, setLoadingReviews] = useState(false)
+  const [deliverySettings, setDeliverySettings] = useState(null)
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
@@ -35,7 +41,121 @@ export default function RestaurantDetail({ route, navigation }) {
         })
       }
     })
+
+    // Charger les paramètres de livraison
+    getDeliverySettings().then(settings => {
+      setDeliverySettings(settings);
+    }).catch(error => {
+      console.error('Error loading delivery settings:', error);
+      // Valeurs par défaut en cas d'erreur
+      setDeliverySettings({
+        fixedDeliveryFee: 2.5,
+        dynamicDeliveryFee: { baseFee: 1.5, perKmFee: 0.5, minFee: 1.5, maxFee: 10 },
+        freeDeliveryThreshold: 25,
+        deliveryFeeType: 'FIXED'
+      });
+    });
   }, [])
+
+  // Charger les avis du restaurant
+  useEffect(() => {
+    const loadReviews = async () => {
+      const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+      if (!restaurantId) return;
+
+      setLoadingReviews(true);
+      try {
+        const reviewsData = await getRestaurantReviews(restaurantId);
+        // Limiter à 3 avis récents pour l'affichage
+        setReviews(reviewsData.slice(0, 3) || []);
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+        setReviews([]);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+
+    loadReviews();
+  }, [restaurant])
+
+  // Calcul de la distance
+  const distance = useMemo(() => {
+    if (!userLocation || !restaurant.latitude || !restaurant.longitude) return null;
+    const lat1 = parseFloat(userLocation.latitude);
+    const lon1 = parseFloat(userLocation.longitude);
+    const lat2 = parseFloat(restaurant.latitude);
+    const lon2 = parseFloat(restaurant.longitude);
+
+    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
+
+    return getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2);
+  }, [userLocation, restaurant.latitude, restaurant.longitude]);
+
+  // Calcul du temps de livraison estimé
+  const estimatedDeliveryTime = useMemo(() => {
+    const prepTime = restaurant.collectTime || 25; // Temps de préparation par défaut
+    const transportTime = distance ? Math.ceil(distance * 2) : 10; // ~2 min par km
+    return prepTime + transportTime;
+  }, [restaurant.collectTime, distance]);
+
+  // Calcul des frais de livraison basé sur les paramètres DB
+  const deliveryFee = useMemo(() => {
+    if (!deliverySettings) return '2.50'; // Valeur par défaut pendant le chargement
+
+    if (deliverySettings.deliveryFeeType === 'FIXED') {
+      return deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
+    }
+
+    if (deliverySettings.deliveryFeeType === 'DYNAMIC' && distance) {
+      const { baseFee, perKmFee, minFee, maxFee } = deliverySettings.dynamicDeliveryFee || {};
+      const calculatedFee = (baseFee || 1.5) + (distance * (perKmFee || 0.5));
+      const fee = Math.min(Math.max(calculatedFee, minFee || 1.5), maxFee || 10);
+      return fee.toFixed(2);
+    }
+
+    if (deliverySettings.deliveryFeeType === 'FREE') {
+      return '0.00';
+    }
+
+    // Valeur par défaut
+    return deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
+  }, [distance, deliverySettings]);
+
+  // Fonction pour vérifier si le restaurant est ouvert
+  const getRestaurantStatus = useMemo(() => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute; // Minutes depuis minuit
+
+    const openingTime = restaurant.openingTime || "09:00";
+    const closingTime = restaurant.closingTime || "21:00";
+
+    const [openHour, openMin] = openingTime.split(':').map(Number);
+    const [closeHour, closeMin] = closingTime.split(':').map(Number);
+
+    const openTimeMinutes = openHour * 60 + openMin;
+    const closeTimeMinutes = closeHour * 60 + closeMin;
+
+    const isOpen = currentTime >= openTimeMinutes && currentTime < closeTimeMinutes;
+
+    // Formater l'heure de fermeture
+    const formatTime = (hour, min) => {
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+      return `${displayHour}:${min.toString().padStart(2, '0')} ${period}`;
+    };
+
+    return {
+      isOpen,
+      statusText: isOpen
+        ? `Open until ${formatTime(closeHour, closeMin)}`
+        : `Closed • Opens at ${formatTime(openHour, openMin)}`,
+      statusColor: isOpen ? colors.success : colors.error,
+      statusIcon: isOpen ? 'check-circle' : 'close-circle'
+    };
+  }, [restaurant.openingTime, restaurant.closingTime]);
 
   if (!userLocation) return <Loader />
 
@@ -46,6 +166,25 @@ export default function RestaurantDetail({ route, navigation }) {
   
   // Extraire le nom de la catégorie (Pizza, Burger, etc.)
   const categoryName = restaurant.categories?.[0]?.title || restaurant.categories?.[0]?.name || "Restaurant";
+
+  // Fonction pour ouvrir les directions
+  const openDirections = () => {
+    const lat = restaurant.latitude;
+    const lng = restaurant.longitude;
+    const url = Platform.select({
+      ios: `maps://app?daddr=${lat},${lng}`,
+      android: `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(restaurant.name)})`,
+    });
+    Linking.openURL(url).catch(err => console.error('Error opening directions:', err));
+  };
+
+  // Fonction pour appeler le restaurant
+  const callRestaurant = () => {
+    const phoneNumber = restaurant.phone || restaurant.display_phone;
+    if (phoneNumber) {
+      Linking.openURL(`tel:${phoneNumber}`).catch(err => console.error('Error calling:', err));
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -90,12 +229,88 @@ export default function RestaurantDetail({ route, navigation }) {
             </View>
 
             <View style={styles.statusRow}>
-              <Icon name="clock-outline" type="material-community" color={colors.success} size={16} />
-              <Text style={styles.statusText}>Open until 2:00 AM</Text>
+              <Icon 
+                name={getRestaurantStatus.statusIcon} 
+                type="material-community" 
+                color={getRestaurantStatus.statusColor} 
+                size={16} 
+              />
+              <Text style={[styles.statusText, { color: getRestaurantStatus.statusColor }]}>
+                {getRestaurantStatus.statusText}
+              </Text>
             </View>
+
+            {/* Informations de livraison */}
+            {activeTab === "Delivery" && distance !== null && (
+              <View style={styles.deliveryInfoRow}>
+                <View style={styles.deliveryInfoItem}>
+                  <Icon name="map-marker-distance" type="material-community" color={colors.info} size={18} />
+                  <Text style={styles.deliveryInfoText}>{distance.toFixed(1)} km</Text>
+                </View>
+                <View style={styles.deliveryInfoItem}>
+                  <Icon name="clock-outline" type="material-community" color={colors.info} size={18} />
+                  <Text style={styles.deliveryInfoText}>{estimatedDeliveryTime} min</Text>
+                </View>
+                <View style={styles.deliveryInfoItem}>
+                  <Icon name="currency-usd" type="material-community" color={colors.info} size={18} />
+                  <Text style={styles.deliveryInfoText}>
+                    {Number(deliveryFee).toLocaleString(language, {
+                      style: "currency",
+                      currency: currency
+                    })}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Informations restaurant (adresse et téléphone) */}
+            {(restaurant.address || restaurant.phone) && (
+              <View style={styles.restaurantInfoRow}>
+                {restaurant.address && (
+                  <TouchableOpacity 
+                    style={styles.infoButton}
+                    onPress={openDirections}
+                  >
+                    <Icon name="map-marker" type="material-community" color={colors.primary} size={18} />
+                    <Text style={styles.infoButtonText} numberOfLines={1}>
+                      {restaurant.address}
+                    </Text>
+                    <Icon name="chevron-right" type="material-community" color={colors.text.secondary} size={18} />
+                  </TouchableOpacity>
+                )}
+                {restaurant.phone && (
+                  <TouchableOpacity 
+                    style={styles.infoButton}
+                    onPress={callRestaurant}
+                  >
+                    <Icon name="phone" type="material-community" color={colors.primary} size={18} />
+                    <Text style={styles.infoButtonText}>{restaurant.display_phone || restaurant.phone}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
           </View>
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20 }} />
+
+          {/* Section Avis */}
+          {reviews.length > 0 && (
+            <View style={styles.reviewsSection}>
+              <View style={styles.reviewsHeader}>
+                <Text style={styles.reviewsTitle}>Recent Reviews</Text>
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('ReviewsScreen', { restaurant })}
+                >
+                  <Text style={styles.seeAllText}>See all</Text>
+                </TouchableOpacity>
+              </View>
+              {reviews.map((review, index) => (
+                <ReviewCard key={review._id || review.id || index} review={review} />
+              ))}
+            </View>
+          )}
+
+          <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: reviews.length > 0 ? 10 : 0 }} />
 
           {/* Service Mode Tabs */}
           <View style={styles.tabsWrapper}>
@@ -226,9 +441,67 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 14,
-    color: colors.success,
     fontWeight: '500',
     marginLeft: 6,
+  },
+  deliveryInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    marginTop: 12,
+    paddingVertical: 12,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+    marginHorizontal: 0,
+  },
+  deliveryInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  deliveryInfoText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  restaurantInfoRow: {
+    marginTop: 12,
+    gap: 8,
+  },
+  infoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 8,
+    gap: 8,
+  },
+  infoButtonText: {
+    flex: 1,
+    fontSize: 13,
+    color: colors.text.primary,
+    marginLeft: 4,
+  },
+  reviewsSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  reviewsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  reviewsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
   },
   tabsWrapper: {
     paddingVertical: 15,

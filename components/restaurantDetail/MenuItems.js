@@ -1,10 +1,11 @@
 import React, {useState, useEffect, useRef, createRef, useContext, useMemo, useCallback} from 'react'
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput } from 'react-native'
 import { Divider } from 'react-native-elements'
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import {language, currency}  from '../../global'
 import { AntDesign } from '@expo/vector-icons';
+import { Icon } from 'react-native-elements';
 import { getFoods, getCategoriesFromRestaurant } from '../../api';
 import { colors } from '../../global';
 import Loader from '../../screens/Loader';
@@ -28,7 +29,74 @@ import { CategoriesContext } from '../../contexts/CategoriesContext';
      marginLeft: 20,
      fontWeight: "bold",
      marginVertical: 10
-    }
+    },
+    searchContainer: {
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      backgroundColor: colors.background.primary,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background.secondary,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      gap: 10,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+    filtersContainer: {
+      maxHeight: 50,
+      marginBottom: 10,
+    },
+    filtersContent: {
+      paddingHorizontal: 20,
+      gap: 8,
+    },
+    filterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: colors.background.secondary,
+      borderWidth: 1,
+      borderColor: colors.border.medium,
+      gap: 6,
+    },
+    filterChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    filterChipText: {
+      fontSize: 13,
+      color: colors.text.secondary,
+      fontWeight: '500',
+    },
+    filterChipTextActive: {
+      color: colors.white,
+    },
+    noResultsContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 60,
+    },
+    noResultsText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text.primary,
+      marginTop: 16,
+    },
+    noResultsSubtext: {
+      fontSize: 14,
+      color: colors.text.secondary,
+      marginTop: 8,
+    },
 }) 
 export default function MenuItems({route, restaurant, activeTab, marginLeft, navigation, foodsRef,
 pickup, delivery, setActiveTab, userLocation, mapRef, apikey, scrollEnabled, setScrollEnabled,
@@ -38,6 +106,8 @@ opacity, setCategoriesFood, hideHeader}) {
   const {categories, setCategories} = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
   const [loader, setLoader] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeFilters, setActiveFilters] = useState([])
 
   useEffect(()=>{
     if (!restaurantData) {
@@ -126,6 +196,50 @@ opacity, setCategoriesFood, hideHeader}) {
     })
 
   },[activeTab, restaurantData])
+
+  // Filtres disponibles (peut être étendu avec des données du backend)
+  const availableFilters = [
+    { id: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
+    { id: 'vegan', label: 'Vegan', icon: 'leaf-circle' },
+    { id: 'spicy', label: 'Spicy', icon: 'fire' },
+    { id: 'popular', label: 'Popular', icon: 'star' },
+  ]
+
+  // Filtrer les produits selon la recherche et les filtres
+  const filteredFoods = useMemo(() => {
+    let result = foods;
+
+    // Filtre par recherche
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(food =>
+        food.name?.toLowerCase().includes(query) ||
+        food.description?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filtres basés sur les tags du produit (stockés dans la DB)
+    if (activeFilters.length > 0) {
+      result = result.filter(food => {
+        if (activeFilters.includes('vegetarian') && !food.tags?.includes('végétarien')) return false;
+        if (activeFilters.includes('vegan') && !food.tags?.includes('vegan')) return false;
+        if (activeFilters.includes('spicy') && !food.tags?.includes('épicé')) return false;
+        if (activeFilters.includes('popular') && (!food.rating?.average || food.rating.average < 4)) return false;
+        return true;
+      });
+    }
+
+    return result;
+  }, [foods, searchQuery, activeFilters]);
+
+  const toggleFilter = useCallback((filterId) => {
+    setActiveFilters(prev =>
+      prev.includes(filterId)
+        ? prev.filter(id => id !== filterId)
+        : [...prev, filterId]
+    );
+  }, []);
+
   if(loader)
     return <View>
       <View style={{marginBottom: 100}}></View>
@@ -144,14 +258,74 @@ opacity, setCategoriesFood, hideHeader}) {
 
   return (
     <View style={{flex: 1, }} >
+      {/* Barre de recherche */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Icon name="magnify" type="material-community" color={colors.text.secondary} size={20} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search menu items..."
+            placeholderTextColor={colors.text.secondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Icon name="close-circle" type="material-community" color={colors.text.secondary} size={20} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Filtres */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.filtersContainer}
+        contentContainerStyle={styles.filtersContent}
+      >
+        {availableFilters.map(filter => (
+          <TouchableOpacity
+            key={filter.id}
+            style={[
+              styles.filterChip,
+              activeFilters.includes(filter.id) && styles.filterChipActive
+            ]}
+            onPress={() => toggleFilter(filter.id)}
+          >
+            <Icon 
+              name={filter.icon} 
+              type="material-community" 
+              size={16} 
+              color={activeFilters.includes(filter.id) ? colors.white : colors.text.secondary}
+            />
+            <Text style={[
+              styles.filterChipText,
+              activeFilters.includes(filter.id) && styles.filterChipTextActive
+            ]}>
+              {filter.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Message si aucun résultat */}
+      {filteredFoods.length === 0 && foods.length > 0 && (
+        <View style={styles.noResultsContainer}>
+          <Icon name="magnify" type="material-community" color={colors.text.secondary} size={48} />
+          <Text style={styles.noResultsText}>No items found</Text>
+          <Text style={styles.noResultsSubtext}>Try adjusting your search or filters</Text>
+        </View>
+      )}
+
       {/* If categories exist and have foods, group by categories */}
-      {categories && categories.length > 0 ? (
+      {filteredFoods.length > 0 && categories && categories.length > 0 ? (
         <FlatList
           ref={foodsRef}
           data={categories}
           keyExtractor={(item, index)=>index}
           renderItem={({item, index})=> {
-            let data = foods.filter((food)=>food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
+            let data = filteredFoods.filter((food)=>food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
             console.log(`Category ${item.name}: ${data.length} items`)
             return (
               <View >
@@ -221,7 +395,7 @@ opacity, setCategoriesFood, hideHeader}) {
           <Text style={styles.groupTitle}>Menu</Text>
           <FlatList
             ref={foodsRef}
-            data={foods} // Le backend a déjà filtré les produits valides
+            data={filteredFoods} // Produits filtrés selon recherche et filtres
             keyExtractor={(item, index)=>`food-${item.id || index}`}
             renderItem={({item, index})=>{
               return (

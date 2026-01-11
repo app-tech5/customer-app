@@ -197,6 +197,37 @@ class ApiClient {
     return await this.apiCall(`/products?type=${restaurantId}`);
   }
 
+  // Reviews
+  async getRestaurantReviews(restaurantId) {
+    try {
+      const reviews = await this.apiCall(`/resource/reviews`);
+      // Filtrer côté frontend les avis approuvés pour ce restaurant
+      return reviews.filter(review =>
+        review.restaurant === restaurantId &&
+        review.status === 'approved'
+      ).sort((a, b) => new Date(b.date) - new Date(a.date)); // Plus récents d'abord
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      return []; // Retourner un tableau vide en cas d'erreur
+    }
+  }
+
+  // Delivery Settings
+  async getDeliverySettings() {
+    try {
+      return await this.apiCall('/resource/deliverysettings');
+    } catch (error) {
+      console.error('Error fetching delivery settings:', error);
+      // Retourner des valeurs par défaut en cas d'erreur
+      return {
+        fixedDeliveryFee: 2.5,
+        dynamicDeliveryFee: { baseFee: 1.5, perKmFee: 0.5, minFee: 1.5, maxFee: 10 },
+        freeDeliveryThreshold: 25,
+        deliveryFeeType: 'FIXED'
+      };
+    }
+  }
+
   // Méthodes utilitaires
   setToken(token) {
     this.token = token;
@@ -251,6 +282,8 @@ export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const userInfos = (userId) => api.getUserInfo(userId);
 export const updateUser = (userData, userId) => api.updateUser(userId, userData);
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
+export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
+export const getDeliverySettings = () => api.getDeliverySettings();
 
 // Collections (placeholders)
 export const restaurantsCol = 'restaurants';
