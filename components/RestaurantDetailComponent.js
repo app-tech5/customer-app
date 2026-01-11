@@ -1,9 +1,10 @@
-import { View, Text, Modal, StyleSheet, ScrollView} from 'react-native'
+import { View, Text, Modal, StyleSheet, ScrollView, TouchableOpacity} from 'react-native'
 import React from 'react'
 import { CloseModal } from './FilterModal'
 import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
+import { colors } from '../global'
 
 export default function RestaurantDetailComponent({restaurant, visible, setVisible}) {
 
@@ -33,10 +34,16 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
           <View style={styles.modalOverlay} onTouchEnd={() => setVisible(false)}>
               <View style={styles.container} onTouchEnd={() => {}}>
                   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                      <View style={styles.header}>
-                          <CloseModal setVisible={setVisible} />
-                          <RestaurantName name={name} />
-                      </View>
+              <View style={styles.header}>
+                  <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setVisible(false)}
+                      activeOpacity={0.7}
+                  >
+                      <Icon name="close" type="material-community" color={colors.text.primary} size={24} />
+                  </TouchableOpacity>
+                  <RestaurantName name={name} />
+              </View>
                       <View style={styles.header1}>
                           <RestaurantDescription
                               description={restaurantDescription}
@@ -45,18 +52,18 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
                       </View>
                       <Divider />
                       <RestaurantInfo iconName="location-pin" iconType="Entypo"
-                          iconSize={35}
+                          iconSize={24}
                           text={address}
                           />
 
                       <RestaurantInfo iconName="clock-outline" iconType="material-community"
-                          iconSize={35} text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`} />
+                          iconSize={24} text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`} />
 
                       <RestaurantInfo iconName="star" iconType="FontAwesome"
-                          iconSize={35} text={`⭐${rating} (${review_count}+ ratings)`} />
+                          iconSize={24} text={`⭐${rating} (${review_count}+ ratings)`} />
 
                       <RestaurantInfo iconName="timer-outline" iconType="material-community"
-                          iconSize={35} text={"Preparation time: "+ collectTime+" min"}/>
+                          iconSize={24} text={"Preparation time: "+ collectTime+" min"}/>
                   </ScrollView>
               </View>
           </View>
@@ -96,15 +103,30 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     header: {
-        marginTop: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 10,
+    },
+    closeButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
     },
     header1: {
         marginTop: 10,
-        marginBottom: 25
+        marginBottom: 25,
+        paddingHorizontal: 20
     },
     description: {
         color: "grey",
         fontSize: 15.5,
+        paddingHorizontal: 20
     },
     restaurantInfo: {
         flexDirection: "row",
@@ -113,7 +135,8 @@ const styles = StyleSheet.create({
         marginVertical: 20
     },
     restaurantInfoText: {
-        marginLeft: 10,
-        fontSize: 20
+        marginLeft: 12,
+        fontSize: 16,
+        color: colors.text.primary
     }
 })
