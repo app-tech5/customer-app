@@ -7,8 +7,7 @@ import Loader from './Loader'
 import MenuItems from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import HeaderTabs from '../components/home/HeaderTabs'
-import DisplayMapview from '../components/DisplayMapview'
-import { apikey, colors } from '../global'
+import { colors } from '../global'
 
 const { width, height } = Dimensions.get('window')
 
@@ -17,7 +16,6 @@ export default function RestaurantDetail({ route, navigation }) {
   const { image } = restaurant
 
   const scrollViewRef = useRef(null)
-  const mapRef = useRef(null)
 
   const [userLocation, setUserLocation] = useState(null)
   const [activeTab, setActiveTab] = useState("Delivery")
@@ -113,16 +111,6 @@ export default function RestaurantDetail({ route, navigation }) {
             />
           </View>
 
-          {/* Map Integration */}
-          <View style={styles.mapWrapper}>
-            <DisplayMapview
-              userLocation={userLocation}
-              mapRef={mapRef}
-              apikey={apikey}
-              restaurant={restaurant}
-              height={150}
-            />
-          </View>
 
           {/* Menu Items List */}
           <View style={styles.menuList}>
@@ -132,8 +120,6 @@ export default function RestaurantDetail({ route, navigation }) {
               restaurant={restaurant}
               navigation={navigation}
               userLocation={userLocation}
-              mapRef={mapRef}
-              apikey={apikey}
               activeTab={activeTab}
               pickup={() => setActiveTab("Pickup")}
               delivery={() => setActiveTab("Delivery")}
