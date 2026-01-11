@@ -20,22 +20,16 @@ export default function Home({navigation}) {
   const flatlist = useRef(null)
   const searchbar = useRef(null)
   useEffect(()=>{
-    AsyncStorage.getItem("restaurants").then(value => {
-      if (!value) {
-        getRestaurantsFromFirebase()
-        .then((restaurants)=>{
-          setRestaurantData(restaurants)
-          AsyncStorage.setItem('restaurants', JSON.stringify(restaurants))
-        })
-      }else{
-        AsyncStorage.getItem("restaurants").then(value=>{
-          let restaurants = JSON.parse(value)
-          setRestaurantData(restaurants)
-        }).then(() => {
-        })
-      }
-    }) 
-        },[])
+    // Charger les restaurants directement depuis l'API (pas de cache)
+    getRestaurantsFromFirebase()
+      .then((restaurants)=>{
+        setRestaurantData(restaurants)
+      })
+      .catch(error => {
+        console.error('Error loading restaurants:', error);
+        setRestaurantData([]); // Liste vide par défaut
+      });
+  },[])
   if(!restaurantData)
   return <Loader />
   return (

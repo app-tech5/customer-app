@@ -11,7 +11,7 @@ import ReviewCard from '../components/restaurantDetail/ReviewCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
 import { colors, currency, language } from '../global'
 import { getDistanceFromLatLonInKm } from '../utils'
-import { getRestaurantReviews, getDeliverySettings } from '../api'
+import { getRestaurantReviews, getDeliverySettings, getFavorites, addToFavorites, removeFromFavorites } from '../api'
 
 const { width, height } = Dimensions.get('window')
 
@@ -28,23 +28,34 @@ export default function RestaurantDetail({ route, navigation }) {
   const [reviews, setReviews] = useState([])
   const [loadingReviews, setLoadingReviews] = useState(false)
   const [deliverySettings, setDeliverySettings] = useState(null)
+  const [userFavorites, setUserFavorites] = useState([])
   const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
 
   useEffect(() => {
-    AsyncStorage.getItem("userData").then(value => {
-      if (value) {
-        let user = JSON.parse(value)
-        setUserLocation({
-          latitude: user.lat,
-          longitude: user.lng
-        })
+    // Charger les données utilisateur depuis l'API (pas de cache)
+    const loadUserData = async () => {
+      try {
+        // Pour l'instant on garde AsyncStorage pour userData car c'est pour la session
+        // TODO: Remplacer par un vrai système de session/token
+        const userData = await AsyncStorage.getItem("userData");
+        if (userData) {
+          const user = JSON.parse(userData);
+          setUserLocation({
+            latitude: user.lat,
+            longitude: user.lng
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
       }
-    })
+    };
 
-    // Charger les paramètres de livraison
+    loadUserData();
+
+    // Charger les paramètres de livraison directement depuis l'API
     getDeliverySettings().then(settings => {
       setDeliverySettings(settings);
     }).catch(error => {
@@ -56,6 +67,17 @@ export default function RestaurantDetail({ route, navigation }) {
         freeDeliveryThreshold: 25,
         deliveryFeeType: 'FIXED'
       });
+    });
+
+    // Charger les favoris de l'utilisateur directement depuis l'API
+    getFavorites().then(response => {
+      if (response.success && response.favorites) {
+        const favoriteIds = response.favorites.map(fav => fav._id || fav.id);
+        setUserFavorites(favoriteIds);
+      }
+    }).catch(error => {
+      console.error('Error loading favorites:', error);
+      setUserFavorites([]); // Favoris vides par défaut
     });
   }, [])
 
@@ -163,11 +185,30 @@ export default function RestaurantDetail({ route, navigation }) {
 
   // Nettoyage des données pour l'affichage
   const formattedRating = restaurant.rating ? parseFloat(restaurant.rating).toFixed(1) : "4.5";
-  const reviewCount = restaurant.review_count || "150";
-  const price = restaurant.price || "$$";
-  
-  // Extraire le nom de la catégorie (Pizza, Burger, etc.)
-  const categoryName = restaurant.categories?.[0]?.title || restaurant.categories?.[0]?.name || "Restaurant";
+
+  // Extraire les catégories du restaurant
+  const categoriesText = restaurant.categories && restaurant.categories.length > 0
+    ? restaurant.categories.map(cat => cat.title || cat.name).join(' • ')
+    : 'Restaurant';
+
+  // Logique des favoris
+  const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+  const isFavorite = userFavorites.includes(restaurantId);
+
+  // Fonction pour basculer les favoris
+  const toggleFavorite = async () => {
+    try {
+      if (isFavorite) {
+        await removeFromFavorites(restaurantId);
+        setUserFavorites(prev => prev.filter(id => id !== restaurantId));
+      } else {
+        await addToFavorites(restaurantId);
+        setUserFavorites(prev => [...prev, restaurantId]);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
   // Fonction pour ouvrir les directions
   const openDirections = () => {
@@ -223,23 +264,31 @@ export default function RestaurantDetail({ route, navigation }) {
                 <Icon name="star" type="material-community" color={colors.accent} size={16} />
                 <Text style={styles.ratingText}>{formattedRating}</Text>
               </View>
-              <Text style={styles.infoText}>{reviewCount}+ ratings</Text>
-              <Text style={styles.dot}>•</Text>
-              <Text style={styles.infoText}>{categoryName}</Text>
-              <Text style={styles.dot}>•</Text>
-              <Text style={styles.infoText}>{price}</Text>
+              <Text style={styles.categoriesText}>{categoriesText}</Text>
             </View>
 
             <View style={styles.statusRow}>
-              <Icon 
-                name={getRestaurantStatus.statusIcon} 
-                type="material-community" 
-                color={getRestaurantStatus.statusColor} 
-                size={16} 
+              <Icon
+                name={getRestaurantStatus.statusIcon}
+                type="material-community"
+                color={getRestaurantStatus.statusColor}
+                size={16}
               />
               <Text style={[styles.statusText, { color: getRestaurantStatus.statusColor }]}>
                 {getRestaurantStatus.statusText}
               </Text>
+              <TouchableOpacity
+                style={styles.favoriteButton}
+                onPress={toggleFavorite}
+                activeOpacity={0.7}
+              >
+                <Icon
+                  name={isFavorite ? "heart" : "heart-outline"}
+                  type="material-community"
+                  color={isFavorite ? "#FF6B6B" : colors.text.secondary}
+                  size={24}
+                />
+              </TouchableOpacity>
             </View>
 
             {/* Informations de livraison */}
@@ -435,15 +484,6 @@ const styles = StyleSheet.create({
     color: colors.rating,
     marginLeft: 4,
   },
-  infoText: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
-  dot: {
-    marginHorizontal: 8,
-    color: colors.border.medium,
-    fontSize: 16,
-  },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -452,6 +492,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginLeft: 6,
+    flex: 1,
+  },
+  favoriteButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  categoriesText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginLeft: 12,
+    flex: 1,
   },
   deliveryInfoRow: {
     flexDirection: 'row',
