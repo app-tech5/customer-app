@@ -31,8 +31,16 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
   return (
 
       <Modal animationType='slide' visible={visible} transparent={true}>
-          <View style={styles.modalOverlay} onTouchEnd={() => setVisible(false)}>
-              <View style={styles.container} onTouchEnd={() => {}}>
+          <View
+              style={styles.modalOverlay}
+              onStartShouldSetResponder={() => true}
+              onResponderRelease={() => setVisible(false)}
+          >
+              <View
+                  style={styles.container}
+                  onStartShouldSetResponder={() => true}
+                  onResponderRelease={() => {}}
+              >
                   <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
               <View style={styles.header}>
                   <TouchableOpacity
