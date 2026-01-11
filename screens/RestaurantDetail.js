@@ -368,7 +368,6 @@ export default function RestaurantDetail({ route, navigation }) {
         restaurant={restaurant}
         visible={restaurantDetailVisible}
         setVisible={setRestaurantDetailVisible}
-        userLocation={userLocation}
       />
     </View>
   )
