@@ -137,6 +137,27 @@ class ApiClient {
     });
   }
 
+  // GESTION DES FAVORIS
+
+  // Récupérer les favoris de l'utilisateur
+  async getFavorites() {
+    return await this.apiCall('/users/favorites');
+  }
+
+  // Ajouter un restaurant aux favoris
+  async addToFavorites(restaurantId) {
+    return await this.apiCall(`/users/favorites/${restaurantId}`, {
+      method: 'POST',
+    });
+  }
+
+  // Retirer un restaurant des favoris
+  async removeFromFavorites(restaurantId) {
+    return await this.apiCall(`/users/favorites/${restaurantId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Restaurants
   async getRestaurants() {
     const response = await this.apiCall('/resource/restaurants');
@@ -289,6 +310,11 @@ export const updateUser = (userData, userId) => api.updateUser(userId, userData)
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
 export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
 export const getDeliverySettings = () => api.getDeliverySettings();
+
+// GESTION DES FAVORIS
+export const getFavorites = () => api.getFavorites();
+export const addToFavorites = (restaurantId) => api.addToFavorites(restaurantId);
+export const removeFromFavorites = (restaurantId) => api.removeFromFavorites(restaurantId);
 
 // Collections (placeholders)
 export const restaurantsCol = 'restaurants';

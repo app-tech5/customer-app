@@ -185,6 +185,7 @@ export default function RestaurantDetail({ route, navigation }) {
 
   // Nettoyage des données pour l'affichage
   const formattedRating = restaurant.rating ? parseFloat(restaurant.rating).toFixed(1) : "4.5";
+  const price = restaurant.price || "$$";
 
   // Extraire les catégories du restaurant
   const categoriesText = restaurant.categories && restaurant.categories.length > 0
@@ -265,6 +266,7 @@ export default function RestaurantDetail({ route, navigation }) {
                 <Text style={styles.ratingText}>{formattedRating}</Text>
               </View>
               <Text style={styles.categoriesText}>{categoriesText}</Text>
+              <Text style={styles.priceText}>{price}</Text>
             </View>
 
             <View style={styles.statusRow}>
@@ -503,6 +505,11 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginLeft: 12,
     flex: 1,
+  },
+  priceText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginRight: 16,
   },
   deliveryInfoRow: {
     flexDirection: 'row',
