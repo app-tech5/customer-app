@@ -218,10 +218,15 @@ class ApiClient {
       return await this.apiCall('/resource/deliverysettings');
     } catch (error) {
       console.error('Error fetching delivery settings:', error);
-      // Retourner des valeurs par défaut en cas d'erreur
+      // Fallback aux valeurs par défaut en cas d'erreur
       return {
         fixedDeliveryFee: 2.5,
-        dynamicDeliveryFee: { baseFee: 1.5, perKmFee: 0.5, minFee: 1.5, maxFee: 10 },
+        dynamicDeliveryFee: {
+          baseFee: 1.5,
+          perKmFee: 0.5,
+          minFee: 1.5,
+          maxFee: 10
+        },
         freeDeliveryThreshold: 25,
         deliveryFeeType: 'FIXED'
       };
