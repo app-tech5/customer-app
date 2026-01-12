@@ -5,20 +5,22 @@ import {
   Modal,
   StyleSheet,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  Dimensions
 } from 'react-native'
 import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
 import { colors } from '../global'
 
+const { height } = Dimensions.get('window')
+
 export default function RestaurantDetailComponent({
   restaurant,
   visible,
   setVisible,
   deliveryTime,
-  deliveryFee,
-  distance
+  deliveryFee
 }) {
   const {
     name,
@@ -26,12 +28,10 @@ export default function RestaurantDetailComponent({
     review_count,
     rating,
     collectTime,
-    address,
     openingTime,
     closingTime
   } = restaurant
 
-  // Formatage des horaires
   const formatTime = (timeString) => {
     if (!timeString) return 'N/A'
     const [hours, minutes] = timeString.split(':')
@@ -51,82 +51,82 @@ export default function RestaurantDetailComponent({
       : 'Restaurant description not available'
 
   return (
-    <Modal animationType="slide" visible={visible} transparent>
-      <View style={styles.modalOverlay}>
+    <Modal
+      animationType="slide"
+      visible={visible}
+      transparent
+      statusBarTranslucent
+    >
+      <View style={styles.modalRoot}>
 
-        {/* Backdrop */}
+        {/* Backdrop FULL HEIGHT */}
         <TouchableOpacity
-          style={StyleSheet.absoluteFill}
           activeOpacity={1}
           onPress={() => setVisible(false)}
+          style={styles.backdrop}
         />
 
-        {/* Bottom sheet */}
+        {/* Bottom Sheet */}
         <View style={styles.container}>
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
           >
-            {/* Header */}
             <View style={styles.header}>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setVisible(false)}
-                activeOpacity={0.7}
               >
                 <Icon
                   name="close"
                   type="material-community"
                   color={colors.text.primary}
-                  size={24}
+                  size={22}
                 />
               </TouchableOpacity>
               <RestaurantName name={name} />
             </View>
 
-            {/* Description */}
-            <View style={styles.header1}>
+            <View style={styles.descriptionWrapper}>
               <RestaurantDescription
                 description={restaurantDescription}
-                style={styles.description}
               />
             </View>
 
-            <Divider />
+            <Divider style={styles.divider} />
 
-            {/* Infos */}
             <RestaurantInfo
               iconName="clock-outline"
               iconType="material-community"
-              iconSize={24}
+              iconSize={22}
               text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`}
             />
 
             <RestaurantInfo
               iconName="star"
               iconType="FontAwesome"
-              iconSize={24}
-              text={`⭐${Number(rating).toFixed(1)} (${review_count}+ ratings)`}
+              iconSize={20}
+              text={`⭐ ${Number(rating).toFixed(1)} (${review_count}+ ratings)`}
             />
 
             <RestaurantInfo
               iconName="timer-outline"
               iconType="material-community"
-              iconSize={24}
+              iconSize={22}
               text={`Preparation time: ${collectTime} min`}
             />
 
             <RestaurantInfo
               iconName="clock-outline"
               iconType="material-community"
-              iconSize={24}
+              iconSize={22}
               text={`Delivery time: ${deliveryTime.min}-${deliveryTime.max} min`}
             />
 
             <RestaurantInfo
               iconName="currency-usd"
               iconType="material-community"
-              iconSize={24}
+              iconSize={22}
               text={`Delivery fee: ${Number(deliveryFee).toLocaleString(
                 'en',
                 { style: 'currency', currency: 'USD' }
@@ -145,60 +145,72 @@ const RestaurantInfo = ({ iconName, iconType, iconSize, text }) => (
       <Icon name={iconName} type={iconType} size={iconSize} />
       <Text style={styles.restaurantInfoText}>{text}</Text>
     </View>
-    <Divider />
+    <Divider style={styles.divider} />
   </>
 )
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end'
+  modalRoot: {
+    flex: 1
   },
+
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height,
+    backgroundColor: 'rgba(0,0,0,0.6)'
+  },
+
   container: {
-    marginHorizontal: 10,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%'
+    marginTop: 'auto',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '85%'
   },
+
   scrollContent: {
-    paddingBottom: 30
+    paddingBottom: 40
   },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10
+    paddingVertical: 18
   },
+
   closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.08)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15
+    marginRight: 14
   },
-  header1: {
-    marginTop: 10,
-    marginBottom: 25,
-    paddingHorizontal: 20
+
+  descriptionWrapper: {
+    paddingHorizontal: 20,
+    paddingBottom: 24
   },
-  description: {
-    color: 'grey',
-    fontSize: 15.5
-  },
+
   restaurantInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 15,
-    marginVertical: 20
+    paddingHorizontal: 20,
+    paddingVertical: 18
   },
+
   restaurantInfoText: {
-    marginLeft: 12,
+    marginLeft: 14,
     fontSize: 16,
     color: colors.text.primary
+  },
+
+  divider: {
+    marginHorizontal: 20
   }
 })
