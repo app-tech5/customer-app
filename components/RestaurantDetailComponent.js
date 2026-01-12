@@ -6,7 +6,7 @@ import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
 import { colors } from '../global'
 
-export default function RestaurantDetailComponent({restaurant, visible, setVisible}) {
+export default function RestaurantDetailComponent({restaurant, visible, setVisible, deliveryTime, deliveryFee, distance}) {
 
     const {name, description, review_count, rating, collectTime, address, openingTime, closingTime} = restaurant;
 
@@ -72,6 +72,13 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
 
                       <RestaurantInfo iconName="timer-outline" iconType="material-community"
                           iconSize={24} text={"Preparation time: "+ collectTime+" min"}/>
+
+                      {/* Informations de livraison */}
+                      <RestaurantInfo iconName="clock-outline" iconType="material-community"
+                          iconSize={24} text={`Delivery time: ${deliveryTime.min}-${deliveryTime.max} min${deliveryTime.distance > 0 ? ` (${deliveryTime.distance} km)` : ''}`}/>
+
+                      <RestaurantInfo iconName="currency-usd" iconType="material-community"
+                          iconSize={24} text={`Delivery fee: ${Number(deliveryFee).toLocaleString('en', { style: 'currency', currency: 'USD' })}`}/>
                   </ScrollView>
               </View>
           </View>

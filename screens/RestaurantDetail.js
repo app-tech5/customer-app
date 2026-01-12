@@ -62,11 +62,14 @@ export default function RestaurantDetail({ route, navigation }) {
     loadUserData();
 
     // Charger les paramètres de livraison directement depuis l'API
+    console.log('🔥 LOADING DELIVERY SETTINGS from API...')
     getDeliverySettings().then(settings => {
+      console.log('🔥 DELIVERY SETTINGS LOADED:', settings)
       setDeliverySettings(settings);
     }).catch(error => {
       console.error('Error loading delivery settings:', error);
       // Valeurs par défaut en cas d'erreur
+      console.log('🔥 USING FALLBACK DELIVERY SETTINGS')
       setDeliverySettings({
         fixedDeliveryFee: 2.5,
         dynamicDeliveryFee: { baseFee: 1.5, perKmFee: 0.5, minFee: 1.5, maxFee: 10 },
@@ -178,25 +181,37 @@ export default function RestaurantDetail({ route, navigation }) {
 
   // Calcul des frais de livraison basé sur les paramètres DB
   const deliveryFee = useMemo(() => {
-    if (!deliverySettings) return '2.50'; // Valeur par défaut pendant le chargement
+    console.log('🔥 CALCULATING DELIVERY FEE:', { deliverySettings, distance })
+
+    if (!deliverySettings) {
+      console.log('🔥 NO DELIVERY SETTINGS - USING DEFAULT: 2.50')
+      return '2.50'; // Valeur par défaut pendant le chargement
+    }
 
     if (deliverySettings.deliveryFeeType === 'FIXED') {
-      return deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
+      const fee = deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
+      console.log('🔥 FIXED DELIVERY FEE:', fee)
+      return fee;
     }
 
     if (deliverySettings.deliveryFeeType === 'DYNAMIC' && distance) {
       const { baseFee, perKmFee, minFee, maxFee } = deliverySettings.dynamicDeliveryFee || {};
       const calculatedFee = (baseFee || 1.5) + (distance * (perKmFee || 0.5));
       const fee = Math.min(Math.max(calculatedFee, minFee || 1.5), maxFee || 10);
-      return fee.toFixed(2);
+      const result = fee.toFixed(2);
+      console.log('🔥 DYNAMIC DELIVERY FEE:', { calculatedFee, minFee, maxFee, result })
+      return result;
     }
 
     if (deliverySettings.deliveryFeeType === 'FREE') {
+      console.log('🔥 FREE DELIVERY')
       return '0.00';
     }
 
     // Valeur par défaut
-    return deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
+    const fee = deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
+    console.log('🔥 DEFAULT DELIVERY FEE:', fee)
+    return fee;
   }, [distance, deliverySettings]);
 
   // Fonction pour vérifier si le restaurant est ouvert
@@ -347,37 +362,6 @@ export default function RestaurantDetail({ route, navigation }) {
               </Text>
             </View>
 
-            {/* Informations de livraison */}
-            {activeTab === "Delivery" && (config.DEMO_MODE || (restaurant.latitude && restaurant.longitude)) && (
-              <View style={styles.deliveryInfoRow}>
-                {!config.DEMO_MODE && distance !== null && (
-                  <View style={styles.deliveryInfoItem}>
-                    <Icon name="map-marker-distance" type="material-community" color={colors.info} size={18} />
-                    <Text style={styles.deliveryInfoText}>{distance.toFixed(1)} km</Text>
-                  </View>
-                )}
-                <View style={styles.deliveryInfoItem}>
-                  <Icon name="clock-outline" type="material-community" color={colors.info} size={18} />
-                  <Text style={styles.deliveryInfoText}>
-                    {(() => {
-                      console.log('🔥 DISPLAY - deliveryTime:', deliveryTime)
-                      const displayText = `${deliveryTime.min}-${deliveryTime.max} min${!config.DEMO_MODE && deliveryTime.distance > 0 ? ` (${deliveryTime.distance} km)` : ''}`
-                      console.log('🔥 DISPLAY - TEXT:', displayText)
-                      return displayText
-                    })()}
-                  </Text>
-                </View>
-                <View style={styles.deliveryInfoItem}>
-                  <Icon name="currency-usd" type="material-community" color={colors.info} size={18} />
-                  <Text style={styles.deliveryInfoText}>
-                    {Number(deliveryFee).toLocaleString(language, {
-                      style: "currency",
-                      currency: currency
-                    })}
-                  </Text>
-                </View>
-              </View>
-            )}
 
             {/* Informations restaurant (adresse et téléphone) */}
             {(restaurant.address || restaurant.phone) && (
@@ -482,6 +466,9 @@ export default function RestaurantDetail({ route, navigation }) {
         restaurant={restaurant}
         visible={restaurantDetailVisible}
         setVisible={setRestaurantDetailVisible}
+        deliveryTime={deliveryTime}
+        deliveryFee={deliveryFee}
+        distance={distance}
       />
     </View>
   )
