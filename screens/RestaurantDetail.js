@@ -403,11 +403,7 @@ export default function RestaurantDetail({ route, navigation }) {
             <View style={styles.reviewsSection}>
               <View style={styles.reviewsHeader}>
                 <Text style={styles.reviewsTitle}>Recent Reviews</Text>
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate('ReviewsScreen', { restaurant })}
-                >
-                  <Text style={styles.seeAllText}>See all</Text>
-                </TouchableOpacity>
+                {/* TODO: Implement ReviewsScreen - See all button disabled */}
               </View>
               {reviews.map((review, index) => (
                 <ReviewCard key={review._id || review.id || index} review={review} />
