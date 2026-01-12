@@ -21,6 +21,10 @@ export default function RestaurantDetail({ route, navigation }) {
   const { restaurant } = route.params
   const { image } = restaurant
 
+  // console.log('🔍 DEBUG RestaurantDetail - CONFIG:', config)
+  // console.log('🔍 DEBUG RestaurantDetail - DEMO_MODE:', config?.DEMO_MODE)
+  // console.log('🔍 DEBUG RestaurantDetail - restaurant:', restaurant)
+
   const scrollViewRef = useRef(null)
 
   const [userLocation, setUserLocation] = useState(null)
@@ -32,7 +36,6 @@ export default function RestaurantDetail({ route, navigation }) {
   const [deliverySettings, setDeliverySettings] = useState(null)
   const [userFavorites, setUserFavorites] = useState([])
   const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
-  const [deliveryTime, setDeliveryTime] = useState({ min: 25, max: 35, distance: 0 })
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
@@ -149,25 +152,28 @@ export default function RestaurantDetail({ route, navigation }) {
   }, [userLocation, restaurant.latitude, restaurant.longitude]);
 
   // Calcul du temps de livraison estimé basé sur la distance
-  const estimatedDeliveryTime = useMemo(() => {
+  const deliveryTime = useMemo(() => {
+    console.log('🔥 DELIVERY TIME - DEMO_MODE:', config.DEMO_MODE)
+    console.log('🔥 DELIVERY TIME - userLocation:', !!userLocation)
+
     // MODE DÉMO : valeurs statiques réalistes
     if (config.DEMO_MODE) {
-      const demoTime = { min: 25, max: 35, distance: 2.5 };
-      setDeliveryTime(demoTime);
-      return demoTime;
+      const result = { min: 25, max: 35, distance: 2.5 };
+      console.log('🔥 DELIVERY TIME - RESULT (DEMO):', result)
+      return result;
     }
 
     // MODE NORMAL : calcul basé sur la distance GPS
     if (userLocation) {
-      const deliveryCalc = getRestaurantDeliveryTime(restaurant, userLocation);
-      setDeliveryTime(deliveryCalc);
-      return deliveryCalc;
+      const result = getRestaurantDeliveryTime(restaurant, userLocation);
+      console.log('🔥 DELIVERY TIME - RESULT (GPS):', result)
+      return result;
     }
 
     // Valeur par défaut si pas de position utilisateur
-    const defaultTime = { min: 25, max: 35, distance: 0 };
-    setDeliveryTime(defaultTime);
-    return defaultTime;
+    const result = { min: 25, max: 35, distance: 0 };
+    console.log('🔥 DELIVERY TIME - RESULT (DEFAULT):', result)
+    return result;
   }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
 
   // Calcul des frais de livraison basé sur les paramètres DB
@@ -342,16 +348,23 @@ export default function RestaurantDetail({ route, navigation }) {
             </View>
 
             {/* Informations de livraison */}
-            {activeTab === "Delivery" && distance !== null && (
+            {activeTab === "Delivery" && (config.DEMO_MODE || (restaurant.latitude && restaurant.longitude)) && (
               <View style={styles.deliveryInfoRow}>
-                <View style={styles.deliveryInfoItem}>
-                  <Icon name="map-marker-distance" type="material-community" color={colors.info} size={18} />
-                  <Text style={styles.deliveryInfoText}>{distance.toFixed(1)} km</Text>
-                </View>
+                {!config.DEMO_MODE && distance !== null && (
+                  <View style={styles.deliveryInfoItem}>
+                    <Icon name="map-marker-distance" type="material-community" color={colors.info} size={18} />
+                    <Text style={styles.deliveryInfoText}>{distance.toFixed(1)} km</Text>
+                  </View>
+                )}
                 <View style={styles.deliveryInfoItem}>
                   <Icon name="clock-outline" type="material-community" color={colors.info} size={18} />
                   <Text style={styles.deliveryInfoText}>
-                    {deliveryTime.min}-{deliveryTime.max} min{!config.DEMO_MODE && deliveryTime.distance > 0 ? ` (${deliveryTime.distance} km)` : ''}
+                    {(() => {
+                      console.log('🔥 DISPLAY - deliveryTime:', deliveryTime)
+                      const displayText = `${deliveryTime.min}-${deliveryTime.max} min${!config.DEMO_MODE && deliveryTime.distance > 0 ? ` (${deliveryTime.distance} km)` : ''}`
+                      console.log('🔥 DISPLAY - TEXT:', displayText)
+                      return displayText
+                    })()}
                   </Text>
                 </View>
                 <View style={styles.deliveryInfoItem}>

@@ -87,7 +87,10 @@ export function calculateDeliveryTime(distanceKm, prepTime = 25) {
  * @returns {object} - {min: number, max: number, distance: number}
  */
 export function getRestaurantDeliveryTime(restaurant, userLocation) {
+  // console.log('🔍 DEBUG getRestaurantDeliveryTime - INPUT:', { restaurant, userLocation })
+
   if (!restaurant || !userLocation) {
+    // console.log('🔍 DEBUG getRestaurantDeliveryTime - MISSING DATA')
     return { min: 25, max: 35, distance: 0 };
   }
 
@@ -98,19 +101,28 @@ export function getRestaurantDeliveryTime(restaurant, userLocation) {
     const userLat = parseFloat(userLocation.latitude);
     const userLon = parseFloat(userLocation.longitude);
 
+    // console.log('🔍 DEBUG getRestaurantDeliveryTime - PARSED COORDS:', {
+    //   restLat, restLon, userLat, userLon
+    // })
+
     // Vérification des coordonnées valides
     if (isNaN(restLat) || isNaN(restLon) || isNaN(userLat) || isNaN(userLon)) {
+      // console.log('🔍 DEBUG getRestaurantDeliveryTime - INVALID COORDS')
       return { min: 25, max: 35, distance: 0 };
     }
 
     // Calcul de la distance
     const distance = getDistanceFromLatLonInKm(userLat, userLon, restLat, restLon);
+    // console.log('🔍 DEBUG getRestaurantDeliveryTime - DISTANCE:', distance)
 
     // Temps de préparation du restaurant (ou défaut 25min)
     const prepTime = parseInt(restaurant.collectTime) || 25;
+    // console.log('🔍 DEBUG getRestaurantDeliveryTime - PREP TIME:', prepTime)
 
     // Calcul du temps de livraison
-    return calculateDeliveryTime(distance, prepTime);
+    const result = calculateDeliveryTime(distance, prepTime);
+    // console.log('🔍 DEBUG getRestaurantDeliveryTime - FINAL RESULT:', result)
+    return result;
 
   } catch (error) {
     console.warn('Erreur calcul temps livraison:', error);
