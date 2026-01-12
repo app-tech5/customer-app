@@ -10,7 +10,9 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import ReviewCard from '../components/restaurantDetail/ReviewCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
 import { colors, currency, language } from '../global'
-import { getDistanceFromLatLonInKm } from '../utils'
+import { config } from '../config'
+import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime, location } from '../utils'
+import * as Location from 'expo-location'
 import { getRestaurantReviews, getDeliverySettings, getFavorites, addToFavorites, removeFromFavorites } from '../api'
 
 const { width, height } = Dimensions.get('window')
@@ -30,6 +32,7 @@ export default function RestaurantDetail({ route, navigation }) {
   const [deliverySettings, setDeliverySettings] = useState(null)
   const [userFavorites, setUserFavorites] = useState([])
   const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
+  const [deliveryTime, setDeliveryTime] = useState({ min: 25, max: 35, distance: 0 })
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
@@ -103,6 +106,35 @@ export default function RestaurantDetail({ route, navigation }) {
     loadReviews();
   }, [restaurant])
 
+  // Obtenir la position GPS de l'utilisateur (uniquement en mode normal)
+  useEffect(() => {
+    // En mode démo, pas besoin de GPS - utiliser les valeurs statiques
+    if (config.DEMO_MODE) {
+      return;
+    }
+
+    const getUserLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.log('Permission de localisation refusée');
+          return;
+        }
+
+        let locationResult = await Location.getCurrentPositionAsync({});
+        setUserLocation({
+          latitude: locationResult.coords.latitude,
+          longitude: locationResult.coords.longitude,
+        });
+      } catch (error) {
+        console.warn('Erreur obtention position GPS:', error);
+        // Garder la valeur par défaut
+      }
+    };
+
+    getUserLocation();
+  }, [])
+
   // Calcul de la distance
   const distance = useMemo(() => {
     if (!userLocation || !restaurant.latitude || !restaurant.longitude) return null;
@@ -116,12 +148,27 @@ export default function RestaurantDetail({ route, navigation }) {
     return getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2);
   }, [userLocation, restaurant.latitude, restaurant.longitude]);
 
-  // Calcul du temps de livraison estimé
+  // Calcul du temps de livraison estimé basé sur la distance
   const estimatedDeliveryTime = useMemo(() => {
-    const prepTime = restaurant.collectTime || 25; // Temps de préparation par défaut
-    const transportTime = distance ? Math.ceil(distance * 2) : 10; // ~2 min par km
-    return prepTime + transportTime;
-  }, [restaurant.collectTime, distance]);
+    // MODE DÉMO : valeurs statiques réalistes
+    if (config.DEMO_MODE) {
+      const demoTime = { min: 25, max: 35, distance: 2.5 };
+      setDeliveryTime(demoTime);
+      return demoTime;
+    }
+
+    // MODE NORMAL : calcul basé sur la distance GPS
+    if (userLocation) {
+      const deliveryCalc = getRestaurantDeliveryTime(restaurant, userLocation);
+      setDeliveryTime(deliveryCalc);
+      return deliveryCalc;
+    }
+
+    // Valeur par défaut si pas de position utilisateur
+    const defaultTime = { min: 25, max: 35, distance: 0 };
+    setDeliveryTime(defaultTime);
+    return defaultTime;
+  }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
 
   // Calcul des frais de livraison basé sur les paramètres DB
   const deliveryFee = useMemo(() => {
@@ -303,7 +350,9 @@ export default function RestaurantDetail({ route, navigation }) {
                 </View>
                 <View style={styles.deliveryInfoItem}>
                   <Icon name="clock-outline" type="material-community" color={colors.info} size={18} />
-                  <Text style={styles.deliveryInfoText}>{estimatedDeliveryTime} min</Text>
+                  <Text style={styles.deliveryInfoText}>
+                    {deliveryTime.min}-{deliveryTime.max} min{!config.DEMO_MODE && deliveryTime.distance > 0 ? ` (${deliveryTime.distance} km)` : ''}
+                  </Text>
                 </View>
                 <View style={styles.deliveryInfoItem}>
                   <Icon name="currency-usd" type="material-community" color={colors.info} size={18} />
