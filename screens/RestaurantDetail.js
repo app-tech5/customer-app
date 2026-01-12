@@ -159,9 +159,14 @@ export default function RestaurantDetail({ route, navigation }) {
     console.log('🔥 DELIVERY TIME - DEMO_MODE:', config.DEMO_MODE)
     console.log('🔥 DELIVERY TIME - userLocation:', !!userLocation)
 
-    // MODE DÉMO : valeurs statiques réalistes
+    // MODE DÉMO : valeurs basées sur le temps de préparation du restaurant
     if (config.DEMO_MODE) {
-      const result = { min: 25, max: 35, distance: 2.5 };
+      const prepTime = parseInt(restaurant.collectTime) || 25;
+      const result = {
+        min: prepTime + 10,  // 10 min supplémentaires pour la livraison
+        max: prepTime + 20,  // 20 min max pour la livraison
+        distance: 0  // Pas de distance en mode démo
+      };
       console.log('🔥 DELIVERY TIME - RESULT (DEMO):', result)
       return result;
     }

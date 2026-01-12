@@ -71,7 +71,7 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
 
                       {/* Informations de livraison */}
                       <RestaurantInfo iconName="clock-outline" iconType="material-community"
-                          iconSize={24} text={`Delivery time: ${deliveryTime.min}-${deliveryTime.max} min${deliveryTime.distance > 0 ? ` (${deliveryTime.distance} km)` : ''}`}/>
+                          iconSize={24} text={`Delivery time: ${deliveryTime.min}-${deliveryTime.max} min`}/>
 
                       <RestaurantInfo iconName="currency-usd" iconType="material-community"
                           iconSize={24} text={`Delivery fee: ${Number(deliveryFee).toLocaleString('en', { style: 'currency', currency: 'USD' })}`}/>
