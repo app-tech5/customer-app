@@ -221,12 +221,31 @@ class ApiClient {
   // Reviews
   async getRestaurantReviews(restaurantId) {
     try {
+      console.log('🔍 FETCHING REVIEWS for restaurantId:', restaurantId);
       const reviews = await this.apiCall(`/resource/reviews`);
+      console.log('🔍 RAW REVIEWS from API:', reviews.length, 'reviews');
+
       // Filtrer côté frontend les avis approuvés pour ce restaurant
-      return reviews.filter(review =>
-        review.restaurant === restaurantId &&
-        review.status === 'approved'
-      ).sort((a, b) => new Date(b.date) - new Date(a.date)); // Plus récents d'abord
+      const filtered = reviews.filter(review => {
+        const reviewRestaurantId = review.restaurant?._id || review.restaurant;
+        const matchesRestaurant = String(reviewRestaurantId) === String(restaurantId);
+        const matchesStatus = review.status === 'approved';
+
+        console.log('🔍 REVIEW FILTER:', {
+          reviewId: review._id,
+          reviewRestaurant: reviewRestaurantId,
+          restaurantId: restaurantId,
+          matchesRestaurant,
+          status: review.status,
+          matchesStatus
+        });
+
+        return matchesRestaurant && matchesStatus;
+      });
+
+      console.log('🔍 FILTERED REVIEWS:', filtered.length, 'reviews');
+
+      return filtered.sort((a, b) => new Date(b.date) - new Date(a.date)); // Plus récents d'abord
     } catch (error) {
       console.error('Error fetching reviews:', error);
       return []; // Retourner un tableau vide en cas d'erreur
