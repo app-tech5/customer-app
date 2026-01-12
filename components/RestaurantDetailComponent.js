@@ -59,16 +59,12 @@ export default function RestaurantDetailComponent({restaurant, visible, setVisib
                           />
                       </View>
                       <Divider />
-                      <RestaurantInfo iconName="location-pin" iconType="Entypo"
-                          iconSize={24}
-                          text={address}
-                          />
 
                       <RestaurantInfo iconName="clock-outline" iconType="material-community"
                           iconSize={24} text={`Open ${openingTimeFormatted} - ${closingTimeFormatted}`} />
 
                       <RestaurantInfo iconName="star" iconType="FontAwesome"
-                          iconSize={24} text={`⭐${rating} (${review_count}+ ratings)`} />
+                          iconSize={24} text={`⭐${Number(rating).toFixed(1)} (${review_count}+ ratings)`} />
 
                       <RestaurantInfo iconName="timer-outline" iconType="material-community"
                           iconSize={24} text={"Preparation time: "+ collectTime+" min"}/>
