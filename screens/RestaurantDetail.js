@@ -246,6 +246,19 @@ export default function RestaurantDetail({ route, navigation }) {
           >
             <Icon name="arrow-left" type="material-community" color="white" size={26} />
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={toggleFavorite}
+            activeOpacity={0.7}
+          >
+            <Icon
+              name={isFavorite ? "heart" : "heart-outline"}
+              type="material-community"
+              color={isFavorite ? "#FF6B6B" : "white"}
+              size={24}
+            />
+          </TouchableOpacity>
         </View>
       </ImageBackground>
 
@@ -279,18 +292,6 @@ export default function RestaurantDetail({ route, navigation }) {
               <Text style={[styles.statusText, { color: getRestaurantStatus.statusColor }]}>
                 {getRestaurantStatus.statusText}
               </Text>
-              <TouchableOpacity
-                style={styles.favoriteButton}
-                onPress={toggleFavorite}
-                activeOpacity={0.7}
-              >
-                <Icon
-                  name={isFavorite ? "heart" : "heart-outline"}
-                  type="material-community"
-                  color={isFavorite ? "#FF6B6B" : colors.text.secondary}
-                  size={24}
-                />
-              </TouchableOpacity>
             </View>
 
             {/* Informations de livraison */}
@@ -447,6 +448,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  favoriteButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  favoriteHeaderButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  favoriteHeaderButtonActive: {
+    borderWidth: 2,
+    borderColor: '#FF6B6B',
+    backgroundColor: 'rgba(255, 107, 107, 0.2)',
+  },
   contentCard: {
     flex: 1,
     backgroundColor: '#fff',
@@ -495,10 +523,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: 6,
     flex: 1,
-  },
-  favoriteButton: {
-    padding: 8,
-    marginLeft: 8,
   },
   categoriesText: {
     fontSize: 14,
