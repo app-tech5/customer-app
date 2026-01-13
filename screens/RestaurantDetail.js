@@ -65,14 +65,14 @@ export default function RestaurantDetail({ route, navigation }) {
     loadUserData();
 
     // Charger les paramètres de livraison directement depuis l'API
-    console.log('🔥 LOADING DELIVERY SETTINGS from API...')
+    // console.log('🔥 LOADING DELIVERY SETTINGS from API...')
     getDeliverySettings().then(settings => {
-      console.log('🔥 DELIVERY SETTINGS LOADED:', settings)
+      // console.log('🔥 DELIVERY SETTINGS LOADED:', settings)
       setDeliverySettings(settings);
     }).catch(error => {
       console.error('Error loading delivery settings:', error);
       // Valeurs par défaut en cas d'erreur
-      console.log('🔥 USING FALLBACK DELIVERY SETTINGS')
+      // console.log('🔥 USING FALLBACK DELIVERY SETTINGS')
       setDeliverySettings({
         fixedDeliveryFee: 2.5,
         dynamicDeliveryFee: { baseFee: 1.5, perKmFee: 0.5, minFee: 1.5, maxFee: 10 },
@@ -148,7 +148,7 @@ export default function RestaurantDetail({ route, navigation }) {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          console.log('Permission de localisation refusée');
+          // console.log('Permission de localisation refusée');
           return;
         }
 
@@ -181,8 +181,8 @@ export default function RestaurantDetail({ route, navigation }) {
 
   // Calcul du temps de livraison estimé basé sur la distance
   const deliveryTime = useMemo(() => {
-    console.log('🔥 DELIVERY TIME - DEMO_MODE:', config.DEMO_MODE)
-    console.log('🔥 DELIVERY TIME - userLocation:', !!userLocation)
+    // console.log('🔥 DELIVERY TIME - DEMO_MODE:', config.DEMO_MODE)
+    // console.log('🔥 DELIVERY TIME - userLocation:', !!userLocation)
 
     // MODE DÉMO : valeurs basées sur le temps de préparation du restaurant
     if (config.DEMO_MODE) {
@@ -192,35 +192,35 @@ export default function RestaurantDetail({ route, navigation }) {
         max: prepTime + 20,  // 20 min max pour la livraison
         distance: 0  // Pas de distance en mode démo
       };
-      console.log('🔥 DELIVERY TIME - RESULT (DEMO):', result)
+      // console.log('🔥 DELIVERY TIME - RESULT (DEMO):', result)
       return result;
     }
 
     // MODE NORMAL : calcul basé sur la distance GPS
     if (userLocation) {
       const result = getRestaurantDeliveryTime(restaurant, userLocation);
-      console.log('🔥 DELIVERY TIME - RESULT (GPS):', result)
+      // console.log('🔥 DELIVERY TIME - RESULT (GPS):', result)
       return result;
     }
 
     // Valeur par défaut si pas de position utilisateur
     const result = { min: 25, max: 35, distance: 0 };
-    console.log('🔥 DELIVERY TIME - RESULT (DEFAULT):', result)
+    // console.log('🔥 DELIVERY TIME - RESULT (DEFAULT):', result)
     return result;
   }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
 
   // Calcul des frais de livraison basé sur les paramètres DB
   const deliveryFee = useMemo(() => {
-    console.log('🔥 CALCULATING DELIVERY FEE:', { deliverySettings, distance })
+    // console.log('🔥 CALCULATING DELIVERY FEE:', { deliverySettings, distance })
 
     if (!deliverySettings) {
-      console.log('🔥 NO DELIVERY SETTINGS - USING DEFAULT: 2.50')
+      // console.log('🔥 NO DELIVERY SETTINGS - USING DEFAULT: 2.50')
       return '2.50'; // Valeur par défaut pendant le chargement
     }
 
     if (deliverySettings.deliveryFeeType === 'FIXED') {
       const fee = deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
-      console.log('🔥 FIXED DELIVERY FEE:', fee)
+      // console.log('🔥 FIXED DELIVERY FEE:', fee)
       return fee;
     }
 
@@ -229,18 +229,18 @@ export default function RestaurantDetail({ route, navigation }) {
       const calculatedFee = (baseFee || 1.5) + (distance * (perKmFee || 0.5));
       const fee = Math.min(Math.max(calculatedFee, minFee || 1.5), maxFee || 10);
       const result = fee.toFixed(2);
-      console.log('🔥 DYNAMIC DELIVERY FEE:', { calculatedFee, minFee, maxFee, result })
+      // console.log('🔥 DYNAMIC DELIVERY FEE:', { calculatedFee, minFee, maxFee, result })
       return result;
     }
 
     if (deliverySettings.deliveryFeeType === 'FREE') {
-      console.log('🔥 FREE DELIVERY')
+      // console.log('🔥 FREE DELIVERY')
       return '0.00';
     }
 
     // Valeur par défaut
     const fee = deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
-    console.log('🔥 DEFAULT DELIVERY FEE:', fee)
+    // console.log('🔥 DEFAULT DELIVERY FEE:', fee)
     return fee;
   }, [distance, deliverySettings]);
 

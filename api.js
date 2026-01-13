@@ -283,6 +283,7 @@ class ApiClient {
 
       console.log('🔥 ALL PROMOTIONS:', allPromotions.length, 'promotions found');
 
+
       // Filtrer les promotions applicables à ce restaurant
       const restaurantPromotions = allPromotions.filter(promotion => {
         // Vérifier si la promotion est active
@@ -291,30 +292,35 @@ class ApiClient {
                         now >= new Date(promotion.startDate) &&
                         now <= new Date(promotion.endDate);
 
+
         if (!isActive) return false;
 
-        // Vérifier si la promotion s'applique à ce restaurant
+        // UNIQUEMENT les promotions avec scope 'restaurant' ET qui incluent ce restaurant
         const scopeMatch = (() => {
-          switch (promotion.scope) {
-            case 'restaurant':
-              return promotion.applicableRestaurants &&
-                     promotion.applicableRestaurants.includes(restaurantId);
-            case 'platform':
-              return true; // S'applique à tous les restaurants
-            default:
-              return false;
+          if (promotion.scope !== 'restaurant') {
+            return false; // Exclure tout ce qui n'est pas scope 'restaurant'
           }
+
+          // Vérifier si applicableRestaurants existe et contient l'ID du restaurant
+          const hasApplicableRestaurants = promotion.applicableRestaurants &&
+                                         Array.isArray(promotion.applicableRestaurants);
+          const includesRestaurantId = hasApplicableRestaurants &&
+                                     promotion.applicableRestaurants.includes(restaurantId);
+
+
+          return includesRestaurantId;
         })();
 
-        console.log('🔥 PROMOTION', promotion.name, '- Active:', isActive, '- Scope match:', scopeMatch);
 
         return scopeMatch;
       });
 
-      console.log('🔥 FILTERED PROMOTIONS for restaurant', restaurantId, ':', restaurantPromotions.length, 'promotions');
 
-      // Trier par priorité (plus haute en premier)
-      return restaurantPromotions.sort((a, b) => (b.priority || 1) - (a.priority || 1));
+
+      // Trier par priorité (plus haute en premier) et limiter à 3 max
+      return restaurantPromotions
+        .sort((a, b) => (b.priority || 1) - (a.priority || 1))
+        .slice(0, 3);
 
     } catch (error) {
       console.error('Error fetching restaurant promotions:', error);
