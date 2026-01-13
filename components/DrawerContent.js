@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background.primary,
+        paddingBottom: 20, // Espace pour éviter les boutons Android
     },
     scrollContainer: {
         flexGrow: 1,
@@ -128,6 +129,8 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: colors.border.light,
         backgroundColor: colors.background.primary,
+        paddingBottom: 30, // Espace supplémentaire pour le bouton logout
+        paddingTop: 10,
     },
     logoutItem: {
         backgroundColor: 'transparent',
