@@ -9,6 +9,21 @@
     "search": "Search",
     "settings": "Settings"
   },
+  "drawer": {
+    "home": "🏠 Home",
+    "search": "🔍 Search",
+    "map": "🗺️ Restaurant Map",
+    "offers": "🎯 Offers & Discounts",
+    "myOrders": "📦 My Orders",
+    "orderHistory": "📋 Order History",
+    "account": "👤 My Account",
+    "wallet": "💰 Wallet",
+    "favorites": "❤️ Favorites",
+    "notifications": "🔔 Notifications",
+    "settings": "⚙️ Settings",
+    "business": "🏢 Business Console",
+    "logout": "Logout"
+  },
   "auth": {
     "welcome": "Welcome!",
     "email": "Email",

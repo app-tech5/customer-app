@@ -1,18 +1,17 @@
 import React from 'react'
 import {createDrawerNavigator} from '@react-navigation/drawer'
 import BottomTabs from './BottomTabs'
-import { Icon } from 'react-native-elements';
 import BusinessConsoleScreen from '../screens/BusinessConsoleScreen';
 import DrawerContent from '../components/DrawerContent';
 import { SearchNavigator } from './Stacks';
 import RestaurantsMapScreen from '../screens/RestaurantsMapScreen';
-import { Ionicons, MaterialIcons, FontAwesome, Entypo, AntDesign, Feather } from '@expo/vector-icons'
 import Offers from '../screens/Offers'
 import Settings from '../screens/Settings';
 import AccountScreen from '../screens/AccountScreen';
 import Wallet from '../screens/Wallet';
 import OrdersScreen from '../screens/OrdersScreen';
 import MyOrdersScreen from '../screens/MyOrdersScreen';
+import i18n from '../i18n';
 
 
 const Drawer = createDrawerNavigator();
@@ -20,7 +19,21 @@ const Drawer = createDrawerNavigator();
 export default function DrawerNavigator() {
   return (
     <Drawer.Navigator
-    screenOptions={{headerShown: false }}
+    screenOptions={{
+        headerShown: false,
+        drawerStyle: {
+            backgroundColor: '#ffffff',
+            width: 280,
+        },
+        drawerLabelStyle: {
+            fontSize: 16,
+            fontWeight: '500',
+            marginLeft: -16,
+        },
+        drawerActiveTintColor: '#FF6B35', // Couleur primaire
+        drawerInactiveTintColor: '#43484d', // Texte secondaire
+        drawerActiveBackgroundColor: 'rgba(255, 107, 53, 0.1)', // Fond actif subtil
+    }}
     drawerContent= {props => <DrawerContent {...props}/>}
     >
         {/* 🍽️ ACCUEIL & NAVIGATION */}
@@ -28,15 +41,7 @@ export default function DrawerNavigator() {
             name = "BottomTabs"
             component={BottomTabs}
             options={{
-                title: "🏠 Accueil",
-                drawerIcon: ({focused, size}) =>(
-                  <Icon
-                    type="material-community"
-                    name="home"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.home')
             }}
         />
 
@@ -44,15 +49,7 @@ export default function DrawerNavigator() {
             name = "Search"
             component={SearchNavigator}
             options={{
-                title: "🔍 Recherche",
-                drawerIcon: ({focused, size}) =>(
-                  <Icon
-                    type="material"
-                    name="search"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.search')
             }}
         />
 
@@ -60,14 +57,7 @@ export default function DrawerNavigator() {
             name = "Map"
             component={RestaurantsMapScreen}
             options={{
-                title: "🗺️ Carte des restaurants",
-                drawerIcon: ({focused, size}) =>(
-                  <FontAwesome
-                    name="map-marker"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.map')
             }}
         />
 
@@ -76,14 +66,7 @@ export default function DrawerNavigator() {
             name = "Offers"
             component={Offers}
             options={{
-                title: "🎯 Offres & Réductions",
-                drawerIcon: ({focused, size}) =>(
-                  <MaterialIcons
-                    name="local-offer"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.offers')
             }}
         />
 
@@ -92,14 +75,7 @@ export default function DrawerNavigator() {
             name = "MyOrders"
             component={MyOrdersScreen}
             options={{
-                title: "📦 Mes commandes",
-                drawerIcon: ({focused, size}) =>(
-                  <Ionicons
-                    name="receipt"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.myOrders')
             }}
         />
 
@@ -107,14 +83,7 @@ export default function DrawerNavigator() {
             name = "Orders"
             component={OrdersScreen}
             options={{
-                title: "📋 Historique des commandes",
-                drawerIcon: ({focused, size}) =>(
-                  <Feather
-                    name="clock"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.orderHistory')
             }}
         />
 
@@ -123,14 +92,7 @@ export default function DrawerNavigator() {
             name = "Account"
             component={AccountScreen}
             options={{
-                title: "👤 Mon compte",
-                drawerIcon: ({focused, size}) =>(
-                  <Ionicons
-                    name="person-circle-outline"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.account')
             }}
         />
 
@@ -139,14 +101,7 @@ export default function DrawerNavigator() {
             name = "Wallet"
             component={Wallet}
             options={{
-                title: "💰 Portefeuille",
-                drawerIcon: ({focused, size}) =>(
-                  <Entypo
-                    name="wallet"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.wallet')
             }}
         />
 
@@ -155,14 +110,7 @@ export default function DrawerNavigator() {
             name = "Favorites"
             component={AccountScreen} // Temporaire - à remplacer par écran favoris dédié
             options={{
-                title: "❤️ Favoris",
-                drawerIcon: ({focused, size}) =>(
-                  <AntDesign
-                    name="heart"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.favorites')
             }}
         />
 
@@ -171,14 +119,7 @@ export default function DrawerNavigator() {
             name = "Notifications"
             component={AccountScreen} // Temporaire - à remplacer par écran notifications
             options={{
-                title: "🔔 Notifications",
-                drawerIcon: ({focused, size}) =>(
-                  <Ionicons
-                    name="notifications-outline"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.notifications')
             }}
         />
 
@@ -187,14 +128,7 @@ export default function DrawerNavigator() {
             name = "Settings"
             component={Settings}
             options={{
-                title: "⚙️ Paramètres",
-                drawerIcon: ({focused, size}) =>(
-                  <Ionicons
-                    name="settings-outline"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.settings')
             }}
         />
 
@@ -203,14 +137,7 @@ export default function DrawerNavigator() {
             name = "BusinessConsole"
             component={BusinessConsoleScreen}
             options={{
-                title: "🏢 Business Console",
-                drawerIcon: ({focused, size}) =>(
-                  <MaterialIcons
-                    name="business-center"
-                    color={focused ? "black":"grey"}
-                    size={size}
-                  />
-                )
+                title: i18n.t('drawer.business')
             }}
         />
     </Drawer.Navigator>

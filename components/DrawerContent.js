@@ -1,15 +1,17 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native'
 import React, { useState } from 'react'
-import {Avatar, Icon} from 'react-native-elements'
+import {Avatar, Icon, Divider} from 'react-native-elements'
 import {
-    DrawerContentScrollView, 
+    DrawerContentScrollView,
     DrawerItemList,
     DrawerItem
 } from '@react-navigation/drawer'
 import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { colors, grey1 } from '../global'
+import i18n from '../i18n'
 
 
 export default function DrawerContent(props) {
@@ -27,89 +29,111 @@ export default function DrawerContent(props) {
         .catch((err)=>console.log(err))
     }
   return (
-    <View style={styles.container}>
-        <DrawerContentScrollView {...props}>
-            <View style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingLeft: 20,
-            }}>
-                <Avatar
-                    rounded
-                    avatarStyle={styles.avatar}
-                    size={75}
-                    source={{uri: "https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png"}}/>
-                <View style={{marginLeft: 10}}>
-                    <Text style={{
-                        fontWeight: "bold",
-                        fontSize: 18,
-                    }}>Paul Son</Text>
-
-                    <Text style={{
-                        fontSize: 14,
-                    }}>paul@appfood.com</Text>
+    <SafeAreaView style={styles.container}>
+        <DrawerContentScrollView {...props} contentContainerStyle={styles.scrollContainer}>
+            {/* Header avec profil utilisateur */}
+            <View style={styles.header}>
+                <View style={styles.profileContainer}>
+                    <Avatar
+                        rounded
+                        avatarStyle={styles.avatar}
+                        size={60}
+                        source={{uri: "https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png"}}/>
+                    <View style={styles.userInfo}>
+                        <Text style={styles.userName}>Paul Son</Text>
+                        <Text style={styles.userEmail}>paul@appfood.com</Text>
+                    </View>
                 </View>
+                <Divider style={styles.divider} />
             </View>
-             
-            <DrawerItemList {...props} />
 
-            {/* Section Support & Aide */}
-            <DrawerItem
-                label= "❓ Aide & Support"
-                icon = {({color,size})=>(
-                    <Ionicons
-                        name="help-circle-outline"
-                        color={color}
-                        size={size}
-                    />
-                )}
-                onPress={()=>{
-                    // Navigation vers écran d'aide à créer
-                    console.log("Aide & Support");
-                }}
-            />
-
-            <DrawerItem
-                label= "📞 Contact"
-                icon = {({color,size})=>(
-                    <Ionicons
-                        name="call-outline"
-                        color={color}
-                        size={size}
-                    />
-                )}
-                onPress={()=>{
-                    // Navigation vers écran contact
-                    console.log("Contact");
-                }}
-            />
+            {/* Menu items */}
+            <View style={styles.menuContainer}>
+                <DrawerItemList {...props} />
+            </View>
         </DrawerContentScrollView>
-       <DrawerItem 
-                label= "Sign out"
-                icon = {({color,size})=>(
-                    <Icon 
-                        type="material-community"
-                        name="logout-variant"
-                        color={color}
+
+        {/* Bouton de déconnexion en bas */}
+        <View style={styles.footer}>
+            <Divider style={styles.divider} />
+            <DrawerItem
+                label={i18n.t('drawer.logout')}
+                labelStyle={styles.logoutLabel}
+                icon={({color, size}) => (
+                    <MaterialIcons
+                        name="logout"
+                        color={colors.error}
                         size={size}
-                        
-                        
                     />
-                    
                 )}
-                onPress={()=>signOutUser()}
-                
+                onPress={() => signOutUser()}
+                style={styles.logoutItem}
             />
-    </View>
+        </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-    container:{
-      flex: 1  
+    container: {
+        flex: 1,
+        backgroundColor: colors.background.primary,
+    },
+    scrollContainer: {
+        flexGrow: 1,
+    },
+    header: {
+        paddingVertical: 20,
+        paddingHorizontal: 16,
+        backgroundColor: colors.background.primary,
+    },
+    profileContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16,
     },
     avatar: {
-        borderWidth: 4,
-        borderColor: "white",
-    }
+        borderWidth: 3,
+        borderColor: colors.primary,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    userInfo: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    userName: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: colors.text.primary,
+        marginBottom: 2,
+    },
+    userEmail: {
+        fontSize: 14,
+        color: colors.text.secondary,
+    },
+    divider: {
+        backgroundColor: colors.border.light,
+        height: 1,
+        marginVertical: 8,
+    },
+    menuContainer: {
+        flex: 1,
+        paddingTop: 8,
+    },
+    footer: {
+        borderTopWidth: 1,
+        borderTopColor: colors.border.light,
+        backgroundColor: colors.background.primary,
+    },
+    logoutItem: {
+        backgroundColor: 'transparent',
+    },
+    logoutLabel: {
+        color: colors.error,
+        fontWeight: '500',
+    },
 })
