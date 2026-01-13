@@ -4,65 +4,33 @@ import { Icon } from 'react-native-elements'
 import { colors } from '../../global'
 
 export default function PromotionCard({ promotion }) {
-  // Formater le type de promotion pour l'affichage
+  // Utiliser UNIQUEMENT les données de la base de données
+  // Le titre et description viennent directement du champ 'name' et 'description'
   const getPromotionDisplay = () => {
+    const baseConfig = {
+      title: promotion.name, // VIENT DE LA DB
+      subtitle: promotion.description, // VIENT DE LA DB
+      color: colors.accent
+    }
+
+    // L'icône est déterminée par le type, mais le texte vient de la DB
     switch (promotion.promotionType) {
       case 'percentage_discount':
-        return {
-          title: `${promotion.discountValue}% OFF`,
-          subtitle: promotion.description || `Réduction de ${promotion.discountValue}%`,
-          icon: 'percent',
-          color: colors.accent
-        }
+        return { ...baseConfig, icon: 'percent' }
       case 'fixed_discount':
-        return {
-          title: `€${promotion.discountValue} OFF`,
-          subtitle: promotion.description || `Réduction de €${promotion.discountValue}`,
-          icon: 'cash',
-          color: colors.success
-        }
+        return { ...baseConfig, icon: 'cash', color: colors.success }
       case 'free_delivery':
-        return {
-          title: 'LIVRAISON GRATUITE',
-          subtitle: promotion.description || 'Profitez de la livraison gratuite',
-          icon: 'truck-delivery',
-          color: colors.primary
-        }
+        return { ...baseConfig, icon: 'truck-delivery', color: colors.primary }
       case 'buy_x_get_y':
-        return {
-          title: `BUY ${promotion.buyQuantity} GET ${promotion.getQuantity}`,
-          subtitle: promotion.description || `Achetez ${promotion.buyQuantity}, recevez ${promotion.getQuantity} gratuit(s)`,
-          icon: 'gift',
-          color: colors.secondary
-        }
+        return { ...baseConfig, icon: 'gift', color: colors.secondary }
       case 'combo_deal':
-        return {
-          title: 'COMBO',
-          subtitle: promotion.description || 'Offre spéciale combo',
-          icon: 'food',
-          color: colors.warning
-        }
+        return { ...baseConfig, icon: 'food', color: colors.warning }
       case 'flash_sale':
-        return {
-          title: 'VENTE FLASH',
-          subtitle: promotion.description || 'Offre limitée dans le temps',
-          icon: 'clock-time-eight',
-          color: colors.error
-        }
+        return { ...baseConfig, icon: 'clock-time-eight', color: colors.error }
       case 'happy_hour':
-        return {
-          title: 'HAPPY HOUR',
-          subtitle: promotion.description || 'Réduction heure creuse',
-          icon: 'clock',
-          color: colors.info
-        }
+        return { ...baseConfig, icon: 'clock', color: colors.info }
       default:
-        return {
-          title: 'PROMOTION',
-          subtitle: promotion.description || 'Offre spéciale',
-          icon: 'tag',
-          color: colors.accent
-        }
+        return { ...baseConfig, icon: 'tag' }
     }
   }
 
@@ -76,10 +44,10 @@ export default function PromotionCard({ promotion }) {
     const diffTime = date - now
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-    if (diffDays <= 0) return 'Expiré'
-    if (diffDays === 1) return 'Expire aujourd\'hui'
-    if (diffDays <= 7) return `Expire dans ${diffDays} jours`
-    return `Jusqu'au ${date.toLocaleDateString()}`
+    if (diffDays <= 0) return 'Expired'
+    if (diffDays === 1) return 'Expires today'
+    if (diffDays <= 7) return `Expires in ${diffDays} days`
+    return `Until ${date.toLocaleDateString()}`
   }
 
   return (
@@ -97,10 +65,10 @@ export default function PromotionCard({ promotion }) {
         <Text style={[styles.title, { color: display.color }]}>{display.title}</Text>
         <Text style={styles.subtitle}>{display.subtitle}</Text>
 
-        {/* Conditions si elles existent */}
+        {/* Conditions supplémentaires si elles existent */}
         {promotion.minOrderAmount && (
           <Text style={styles.condition}>
-            Minimum: €{promotion.minOrderAmount}
+            Min. order: €{promotion.minOrderAmount}
           </Text>
         )}
 

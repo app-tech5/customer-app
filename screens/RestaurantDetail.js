@@ -427,7 +427,7 @@ export default function RestaurantDetail({ route, navigation }) {
           {promotions.length > 0 && (
             <View style={styles.promotionsSection}>
               <View style={styles.promotionsHeader}>
-                <Text style={styles.promotionsTitle}>Special Offers</Text>
+                <Text style={styles.promotionsTitle}>Available Offers</Text>
                 <Icon name="local-offer" type="material" color={colors.primary} size={20} />
               </View>
               {promotions.map((promotion, index) => (
