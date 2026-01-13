@@ -1,9 +1,22 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Icon } from 'react-native-elements'
-import { colors } from '../../global'
+import { colors, currency } from '../../global'
 
 export default function PromotionCard({ promotion }) {
+  // Fonction pour formater les prix selon la monnaie
+  const formatPrice = (amount) => {
+    if (!amount) return '';
+    const numAmount = parseFloat(amount);
+    if (currency === 'EUR') {
+      return `€${numAmount.toFixed(2)}`;
+    } else if (currency === 'USD') {
+      return `$${numAmount.toFixed(2)}`;
+    } else {
+      return `${numAmount.toFixed(2)} ${currency}`;
+    }
+  };
+
   // Utiliser UNIQUEMENT les données de la base de données
   // Le titre et description viennent directement du champ 'name' et 'description'
   const getPromotionDisplay = () => {
@@ -13,22 +26,22 @@ export default function PromotionCard({ promotion }) {
       color: colors.accent
     }
 
-    // L'icône est déterminée par le type, mais le texte vient de la DB
+    // Icônes raffinées selon la charte Material Design
     switch (promotion.promotionType) {
       case 'percentage_discount':
-        return { ...baseConfig, icon: 'percent', color: colors.accent }
+        return { ...baseConfig, icon: 'percent-outline', color: colors.accent }
       case 'fixed_discount':
-        return { ...baseConfig, icon: 'cash-multiple', color: colors.success } // 'cash-multiple' au lieu de 'cash'
+        return { ...baseConfig, icon: 'cash-multiple', color: colors.success }
       case 'free_delivery':
-        return { ...baseConfig, icon: 'truck-delivery', color: colors.primary }
+        return { ...baseConfig, icon: 'truck-delivery-outline', color: colors.primary }
       case 'buy_x_get_y':
         return { ...baseConfig, icon: 'gift-outline', color: colors.secondary }
       case 'combo_deal':
-        return { ...baseConfig, icon: 'food-variant', color: colors.warning }
+        return { ...baseConfig, icon: 'food-variant-outline', color: colors.warning }
       case 'flash_sale':
-        return { ...baseConfig, icon: 'clock-fast', color: colors.error }
+        return { ...baseConfig, icon: 'lightning-bolt-outline', color: colors.error }
       case 'happy_hour':
-        return { ...baseConfig, icon: 'clock-outline', color: colors.info }
+        return { ...baseConfig, icon: 'clock-time-eight-outline', color: colors.info }
       default:
         return { ...baseConfig, icon: 'tag-outline', color: colors.accent }
     }
@@ -68,7 +81,7 @@ export default function PromotionCard({ promotion }) {
         {/* Conditions supplémentaires si elles existent */}
         {promotion.minOrderAmount && (
           <Text style={styles.condition}>
-            Min. order: €{promotion.minOrderAmount}
+            Min. order: {formatPrice(promotion.minOrderAmount)}
           </Text>
         )}
 
@@ -92,54 +105,77 @@ export default function PromotionCard({ promotion }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 12,
+    backgroundColor: colors.background.card,
+    borderRadius: 16,
     padding: 16,
-    marginVertical: 4,
+    marginVertical: 6,
     marginHorizontal: 20,
     borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
+    elevation: 3,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.background.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    elevation: 1,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
   },
   content: {
     flex: 1,
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: colors.text.primary,
     marginBottom: 4,
+    letterSpacing: 0.2,
   },
   subtitle: {
     fontSize: 14,
-    color: colors.text.primary,
-    marginBottom: 4,
+    color: colors.text.secondary,
+    marginBottom: 6,
+    lineHeight: 18,
   },
   condition: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: colors.text.muted,
     fontStyle: 'italic',
-    marginBottom: 2,
+    marginBottom: 4,
+    backgroundColor: colors.background.secondary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   expiry: {
     fontSize: 12,
-    color: colors.error,
+    color: colors.warning,
     fontWeight: '500',
+    backgroundColor: colors.highlight,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   arrow: {
-    marginLeft: 8,
+    marginLeft: 12,
   },
 })
