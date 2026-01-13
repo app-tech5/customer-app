@@ -8,12 +8,13 @@ import MenuItems from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import HeaderTabs from '../components/home/HeaderTabs'
 import ReviewCard from '../components/restaurantDetail/ReviewCard'
+import PromotionCard from '../components/restaurantDetail/PromotionCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
 import { colors, currency, language } from '../global'
 import { config } from '../config'
 import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime, location } from '../utils'
 import * as Location from 'expo-location'
-import { getRestaurantReviews, getDeliverySettings, getFavorites, addToFavorites, removeFromFavorites } from '../api'
+import { getRestaurantReviews, getDeliverySettings, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
 
 const { width, height } = Dimensions.get('window')
 
@@ -36,6 +37,8 @@ export default function RestaurantDetail({ route, navigation }) {
   const [deliverySettings, setDeliverySettings] = useState(null)
   const [userFavorites, setUserFavorites] = useState([])
   const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
+  const [promotions, setPromotions] = useState([])
+  const [loadingPromotions, setLoadingPromotions] = useState(false)
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
@@ -110,6 +113,28 @@ export default function RestaurantDetail({ route, navigation }) {
     };
 
     loadReviews();
+  }, [restaurant])
+
+  // Charger les promotions du restaurant
+  useEffect(() => {
+    const loadPromotions = async () => {
+      const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+      if (!restaurantId) return;
+
+      setLoadingPromotions(true);
+      try {
+        const promotionsData = await getRestaurantPromotions(restaurantId);
+        console.log('🔥 PROMOTIONS LOADED for restaurant', restaurantId, ':', promotionsData.length);
+        setPromotions(promotionsData);
+      } catch (error) {
+        console.error('Error loading promotions:', error);
+        setPromotions([]);
+      } finally {
+        setLoadingPromotions(false);
+      }
+    };
+
+    loadPromotions();
   }, [restaurant])
 
   // Obtenir la position GPS de l'utilisateur (uniquement en mode normal)
@@ -398,6 +423,21 @@ export default function RestaurantDetail({ route, navigation }) {
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20 }} />
 
+          {/* Section Promotions */}
+          {promotions.length > 0 && (
+            <View style={styles.promotionsSection}>
+              <View style={styles.promotionsHeader}>
+                <Text style={styles.promotionsTitle}>Special Offers</Text>
+                <Icon name="local-offer" type="material" color={colors.primary} size={20} />
+              </View>
+              {promotions.map((promotion, index) => (
+                <PromotionCard key={promotion._id || promotion.id || index} promotion={promotion} />
+              ))}
+            </View>
+          )}
+
+          <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: promotions.length > 0 ? 10 : 0 }} />
+
           {/* Section Avis */}
           {reviews.length > 0 && (
             <View style={styles.reviewsSection}>
@@ -623,6 +663,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.text.primary,
     marginLeft: 4,
+  },
+  promotionsSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  promotionsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  promotionsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text.primary,
   },
   reviewsSection: {
     paddingHorizontal: 20,

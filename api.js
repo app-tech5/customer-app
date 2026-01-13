@@ -273,6 +273,55 @@ class ApiClient {
     }
   }
 
+  // Promotions
+  async getRestaurantPromotions(restaurantId) {
+    try {
+      console.log('🔥 FETCHING PROMOTIONS for restaurant:', restaurantId);
+
+      // Récupérer toutes les promotions actives
+      const allPromotions = await this.apiCall('/resource/promotions');
+
+      console.log('🔥 ALL PROMOTIONS:', allPromotions.length, 'promotions found');
+
+      // Filtrer les promotions applicables à ce restaurant
+      const restaurantPromotions = allPromotions.filter(promotion => {
+        // Vérifier si la promotion est active
+        const now = new Date();
+        const isActive = promotion.isActive &&
+                        now >= new Date(promotion.startDate) &&
+                        now <= new Date(promotion.endDate);
+
+        if (!isActive) return false;
+
+        // Vérifier si la promotion s'applique à ce restaurant
+        const scopeMatch = (() => {
+          switch (promotion.scope) {
+            case 'restaurant':
+              return promotion.applicableRestaurants &&
+                     promotion.applicableRestaurants.includes(restaurantId);
+            case 'platform':
+              return true; // S'applique à tous les restaurants
+            default:
+              return false;
+          }
+        })();
+
+        console.log('🔥 PROMOTION', promotion.name, '- Active:', isActive, '- Scope match:', scopeMatch);
+
+        return scopeMatch;
+      });
+
+      console.log('🔥 FILTERED PROMOTIONS for restaurant', restaurantId, ':', restaurantPromotions.length, 'promotions');
+
+      // Trier par priorité (plus haute en premier)
+      return restaurantPromotions.sort((a, b) => (b.priority || 1) - (a.priority || 1));
+
+    } catch (error) {
+      console.error('Error fetching restaurant promotions:', error);
+      return []; // Retourner un tableau vide en cas d'erreur
+    }
+  }
+
   // Méthodes utilitaires
   setToken(token) {
     this.token = token;
@@ -329,6 +378,7 @@ export const updateUser = (userData, userId) => api.updateUser(userId, userData)
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
 export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
 export const getDeliverySettings = () => api.getDeliverySettings();
+export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromotions(restaurantId);
 
 // GESTION DES FAVORIS
 export const getFavorites = () => api.getFavorites();
