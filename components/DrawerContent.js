@@ -12,11 +12,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { colors, grey1 } from '../global'
 import i18n from '../i18n'
+import { useSelector } from 'react-redux'
 
 
 export default function DrawerContent(props) {
 
     const [isSignedIn, setIsSignedIn] = useState(true)
+    const { name, email, image } = useSelector((state) => state.userReducer)
 
     const navigation = useNavigation()
 
@@ -38,10 +40,10 @@ export default function DrawerContent(props) {
                         rounded
                         avatarStyle={styles.avatar}
                         size={60}
-                        source={{uri: "https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png"}}/>
+                        source={image ? {uri: image} : {uri: "https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png"}}/>
                     <View style={styles.userInfo}>
-                        <Text style={styles.userName}>Paul Son</Text>
-                        <Text style={styles.userEmail}>paul@appfood.com</Text>
+                        <Text style={styles.userName}>{name || 'Utilisateur'}</Text>
+                        <Text style={styles.userEmail}>{email || 'email@example.com'}</Text>
                     </View>
                 </View>
                 <Divider style={styles.divider} />
