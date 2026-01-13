@@ -53,44 +53,34 @@ export default function DrawerContent(props) {
              
             <DrawerItemList {...props} />
 
-            <DrawerItem 
-                label= "Delivery"
+            {/* Section Support & Aide */}
+            <DrawerItem
+                label= "❓ Aide & Support"
                 icon = {({color,size})=>(
-                    <MaterialIcons 
-                        name="delivery-dining"
+                    <Ionicons
+                        name="help-circle-outline"
                         color={color}
                         size={size}
                     />
                 )}
                 onPress={()=>{
-                    navigation.navigate("Home")
+                    // Navigation vers écran d'aide à créer
+                    console.log("Aide & Support");
                 }}
             />
-            <DrawerItem 
-                label= "Wallet"
-                icon = {({color,size})=>(
-                    <Entypo 
-                        name="wallet"
-                        color={color}
-                        size={size}
-                    />
-                )}
-                onPress={()=>{
-                    navigation.navigate("Wallet")
-                }}
-            />
-            <DrawerItem 
-                label= "Settings"
-                icon = {({color,size})=>(
-                    <Ionicons 
-                    name="settings"
-                    color="black"
-                    size={size}
 
-                  />  
+            <DrawerItem
+                label= "📞 Contact"
+                icon = {({color,size})=>(
+                    <Ionicons
+                        name="call-outline"
+                        color={color}
+                        size={size}
+                    />
                 )}
                 onPress={()=>{
-                    navigation.navigate("Settings")
+                    // Navigation vers écran contact
+                    console.log("Contact");
                 }}
             />
         </DrawerContentScrollView>
