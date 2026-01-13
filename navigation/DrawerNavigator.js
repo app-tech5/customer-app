@@ -11,6 +11,7 @@ import AccountScreen from '../screens/AccountScreen';
 import Wallet from '../screens/Wallet';
 import OrdersScreen from '../screens/OrdersScreen';
 import MyOrdersScreen from '../screens/MyOrdersScreen';
+import { Ionicons, MaterialIcons, FontAwesome, Entypo, AntDesign, Feather } from '@expo/vector-icons'
 import i18n from '../i18n';
 
 
@@ -28,7 +29,12 @@ export default function DrawerNavigator() {
         drawerLabelStyle: {
             fontSize: 16,
             fontWeight: '500',
-            marginLeft: -16,
+            marginLeft: 8,
+        },
+        drawerItemStyle: {
+            marginVertical: 2,
+            marginHorizontal: 8,
+            borderRadius: 8,
         },
         drawerActiveTintColor: '#FF6B35', // Couleur primaire
         drawerInactiveTintColor: '#43484d', // Texte secondaire
@@ -41,7 +47,14 @@ export default function DrawerNavigator() {
             name = "BottomTabs"
             component={BottomTabs}
             options={{
-                title: i18n.t('drawer.home')
+                title: i18n.t('drawer.home'),
+                drawerIcon: ({focused, size}) => (
+                    <Ionicons
+                        name="home-outline"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -49,7 +62,14 @@ export default function DrawerNavigator() {
             name = "Search"
             component={SearchNavigator}
             options={{
-                title: i18n.t('drawer.search')
+                title: i18n.t('drawer.search'),
+                drawerIcon: ({focused, size}) => (
+                    <Ionicons
+                        name="search"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -57,7 +77,14 @@ export default function DrawerNavigator() {
             name = "Map"
             component={RestaurantsMapScreen}
             options={{
-                title: i18n.t('drawer.map')
+                title: i18n.t('drawer.map'),
+                drawerIcon: ({focused, size}) => (
+                    <FontAwesome
+                        name="map-marker"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -66,7 +93,14 @@ export default function DrawerNavigator() {
             name = "Offers"
             component={Offers}
             options={{
-                title: i18n.t('drawer.offers')
+                title: i18n.t('drawer.offers'),
+                drawerIcon: ({focused, size}) => (
+                    <MaterialIcons
+                        name="local-offer"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -75,7 +109,14 @@ export default function DrawerNavigator() {
             name = "MyOrders"
             component={MyOrdersScreen}
             options={{
-                title: i18n.t('drawer.myOrders')
+                title: i18n.t('drawer.myOrders'),
+                drawerIcon: ({focused, size}) => (
+                    <Ionicons
+                        name="receipt"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -83,7 +124,14 @@ export default function DrawerNavigator() {
             name = "Orders"
             component={OrdersScreen}
             options={{
-                title: i18n.t('drawer.orderHistory')
+                title: i18n.t('drawer.orderHistory'),
+                drawerIcon: ({focused, size}) => (
+                    <Feather
+                        name="clock"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -92,7 +140,14 @@ export default function DrawerNavigator() {
             name = "Account"
             component={AccountScreen}
             options={{
-                title: i18n.t('drawer.account')
+                title: i18n.t('drawer.account'),
+                drawerIcon: ({focused, size}) => (
+                    <Ionicons
+                        name="person-circle-outline"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -101,7 +156,14 @@ export default function DrawerNavigator() {
             name = "Wallet"
             component={Wallet}
             options={{
-                title: i18n.t('drawer.wallet')
+                title: i18n.t('drawer.wallet'),
+                drawerIcon: ({focused, size}) => (
+                    <Entypo
+                        name="wallet"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -110,7 +172,14 @@ export default function DrawerNavigator() {
             name = "Favorites"
             component={AccountScreen} // Temporaire - à remplacer par écran favoris dédié
             options={{
-                title: i18n.t('drawer.favorites')
+                title: i18n.t('drawer.favorites'),
+                drawerIcon: ({focused, size}) => (
+                    <AntDesign
+                        name="heart"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -119,7 +188,14 @@ export default function DrawerNavigator() {
             name = "Notifications"
             component={AccountScreen} // Temporaire - à remplacer par écran notifications
             options={{
-                title: i18n.t('drawer.notifications')
+                title: i18n.t('drawer.notifications'),
+                drawerIcon: ({focused, size}) => (
+                    <Ionicons
+                        name="notifications-outline"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -128,7 +204,14 @@ export default function DrawerNavigator() {
             name = "Settings"
             component={Settings}
             options={{
-                title: i18n.t('drawer.settings')
+                title: i18n.t('drawer.settings'),
+                drawerIcon: ({focused, size}) => (
+                    <Ionicons
+                        name="settings-outline"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
 
@@ -137,7 +220,14 @@ export default function DrawerNavigator() {
             name = "BusinessConsole"
             component={BusinessConsoleScreen}
             options={{
-                title: i18n.t('drawer.business')
+                title: i18n.t('drawer.business'),
+                drawerIcon: ({focused, size}) => (
+                    <MaterialIcons
+                        name="business-center"
+                        color={focused ? "#FF6B35" : "#43484d"}
+                        size={size}
+                    />
+                )
             }}
         />
     </Drawer.Navigator>
