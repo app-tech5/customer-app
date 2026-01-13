@@ -16,21 +16,21 @@ export default function PromotionCard({ promotion }) {
     // L'icône est déterminée par le type, mais le texte vient de la DB
     switch (promotion.promotionType) {
       case 'percentage_discount':
-        return { ...baseConfig, icon: 'percent' }
+        return { ...baseConfig, icon: 'percent', color: colors.accent }
       case 'fixed_discount':
-        return { ...baseConfig, icon: 'cash', color: colors.success }
+        return { ...baseConfig, icon: 'cash-multiple', color: colors.success } // 'cash-multiple' au lieu de 'cash'
       case 'free_delivery':
         return { ...baseConfig, icon: 'truck-delivery', color: colors.primary }
       case 'buy_x_get_y':
-        return { ...baseConfig, icon: 'gift', color: colors.secondary }
+        return { ...baseConfig, icon: 'gift-outline', color: colors.secondary }
       case 'combo_deal':
-        return { ...baseConfig, icon: 'food', color: colors.warning }
+        return { ...baseConfig, icon: 'food-variant', color: colors.warning }
       case 'flash_sale':
-        return { ...baseConfig, icon: 'clock-time-eight', color: colors.error }
+        return { ...baseConfig, icon: 'clock-fast', color: colors.error }
       case 'happy_hour':
-        return { ...baseConfig, icon: 'clock', color: colors.info }
+        return { ...baseConfig, icon: 'clock-outline', color: colors.info }
       default:
-        return { ...baseConfig, icon: 'tag' }
+        return { ...baseConfig, icon: 'tag-outline', color: colors.accent }
     }
   }
 
