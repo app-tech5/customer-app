@@ -202,30 +202,48 @@ export default function Offers({ navigation }) {
       // Un seul restaurant spécifique : aller directement au restaurant
       navigation.navigate('RestaurantDetail', { restaurant: promotion.applicableRestaurants[0] });
     } else if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length > 1) {
-      // Plusieurs restaurants spécifiques : aller vers les résultats filtrés par ces restaurants
-      // Pour l'instant, on cherche par nom de promotion
-      navigation.navigate('SearchResults', {
-        name: promotion.name,
-        type: 'restaurant'
+      // Plusieurs restaurants spécifiques : aller vers la recherche avec le nom de la promotion
+      navigation.navigate('Search', {
+        screen: 'SearchResults',
+        params: {
+          name: promotion.name,
+          type: 'restaurant'
+        }
       });
     } else if (promotion.scope === 'platform') {
-      // Promotion pour tous les restaurants : aller vers la liste complète des restaurants
-      navigation.navigate('SearchResults', {
-        name: '', // Tous les restaurants
-        type: 'restaurant'
+      // Promotion pour tous les restaurants : aller vers la recherche générale
+      navigation.navigate('Search', {
+        screen: 'SearchResults',
+        params: {
+          name: '',
+          type: 'restaurant'
+        }
       });
     } else if (promotion.scope === 'category') {
       // Promotion par catégorie : aller vers les restaurants de ces catégories
-      // Pour l'instant, on prend la première catégorie pour la recherche
       const firstCategory = promotion.applicableCategories?.[0];
       if (firstCategory) {
-        navigation.navigate('SearchResults', {
-          name: firstCategory,
-          type: 'category'
+        navigation.navigate('Search', {
+          screen: 'SearchResults',
+          params: {
+            name: firstCategory,
+            type: 'category'
+          }
         });
       }
+    } else if (promotion.scope === 'item') {
+      // Promotion sur des items spécifiques : aller vers la recherche par nom de promotion
+      navigation.navigate('Search', {
+        screen: 'SearchResults',
+        params: {
+          name: promotion.name,
+          type: 'restaurant' // Ou 'product' si on a un écran produit
+        }
+      });
     } else {
-      console.log('❓ Unknown scope or no applicable items for promotion:', promotion.name);
+      console.log('❓ Unknown scope for promotion:', promotion.name, promotion.scope);
+      // Fallback : aller vers la recherche générale
+      navigation.navigate('Search');
     }
   }
 

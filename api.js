@@ -389,14 +389,21 @@ class ApiClient {
           availabilityText = 'all restaurants';
           availabilityCount = allRestaurants.length;
         } else if (promotion.scope === 'category') {
-          availabilityText = `${promotion.applicableCategories?.length || 0} categories`;
-          availabilityCount = promotion.applicableCategories?.length || 0;
+          const catCount = promotion.applicableCategories?.length || 0;
+          availabilityText = `${catCount} categor${catCount > 1 ? 'ies' : 'y'}`;
+          availabilityCount = catCount;
         } else if (promotion.scope === 'restaurant') {
           availabilityText = `${applicableRestaurantsCount} restaurant${applicableRestaurantsCount > 1 ? 's' : ''}`;
           availabilityCount = applicableRestaurantsCount;
+        } else if (promotion.scope === 'item') {
+          // Promotion qui s'applique à des items/produits spécifiques
+          const itemCount = promotion.applicableItems?.length || 0;
+          availabilityText = `${itemCount} item${itemCount > 1 ? 's' : ''}`;
+          availabilityCount = itemCount;
         } else {
-          availabilityText = 'available';
-          availabilityCount = applicableRestaurantsCount;
+          // Scope vraiment inconnu
+          availabilityText = 'selected items';
+          availabilityCount = 1;
         }
 
         return {
@@ -416,6 +423,7 @@ class ApiClient {
           availabilityCount,
           applicableRestaurants: applicableRestaurants.slice(0, 3), // Montrer max 3 restaurants pour preview
           applicableCategories: promotion.applicableCategories,
+          applicableItems: promotion.applicableItems,
           // Propriétés de tri
           priority: promotion.priority || 1,
           endDate: promotion.endDate
