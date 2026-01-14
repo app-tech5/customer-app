@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { StyleSheet, TextInput, View, Keyboard, Animated, TouchableOpacity, Dimensions } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import { StyleSheet, TextInput, View, Keyboard, Animated, TouchableOpacity, Dimensions, Text } from "react-native";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { colors } from '../global';
 import i18n from '../i18n';
@@ -8,24 +8,55 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, onSubmit}) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const borderAnim = useRef(new Animated.Value(0)).current;
+  const suggestionsOpacity = useRef(new Animated.Value(0)).current;
+  const suggestionsTranslateY = useRef(new Animated.Value(-10)).current;
+
+  // Masquer les suggestions quand du texte est saisi
+  useEffect(() => {
+    if (searchPhrase.trim() && showSuggestions) {
+      animateSuggestions(false);
+    } else if (!searchPhrase.trim() && isFocused && !showSuggestions) {
+      animateSuggestions(true);
+    }
+  }, [searchPhrase, isFocused]);
+
+  const animateSuggestions = (show) => {
+    const toValue = show ? 1 : 0;
+    const translateValue = show ? 0 : -10;
+
+    Animated.parallel([
+      Animated.timing(suggestionsOpacity, {
+        toValue,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(suggestionsTranslateY, {
+        toValue: translateValue,
+        duration: 200,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      setShowSuggestions(show);
+    });
+  };
 
   const handleFocus = () => {
     setIsFocused(true);
     setCLicked(true);
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1.02,
-        useNativeDriver: true,
-        friction: 8,
-      }),
-      Animated.timing(borderAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: false,
-      })
-    ]).start();
+    Animated.spring(scaleAnim, {
+      toValue: 1.02,
+      useNativeDriver: true,
+      friction: 8,
+    }).start();
+
+    // Montrer les suggestions après un court délai
+    setTimeout(() => {
+      if (!searchPhrase.trim()) {
+        animateSuggestions(true);
+      }
+    }, 100);
   };
 
   const handleBlur = () => {
@@ -33,18 +64,14 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
     if (!searchPhrase.trim()) {
       setCLicked(false);
     }
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        friction: 8,
-      }),
-      Animated.timing(borderAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      })
-    ]).start();
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 8,
+    }).start();
+
+    // Cacher les suggestions
+    animateSuggestions(false);
   };
 
   const handleClear = () => {
@@ -59,22 +86,19 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
     if (searchPhrase.trim() && onSubmit) {
       onSubmit(searchPhrase.trim());
       Keyboard.dismiss();
+    } else if (searchPhrase.trim()) {
+      Keyboard.dismiss();
     }
   };
-
-  const borderColor = borderAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [colors.border.medium, colors.primary],
-  });
 
   return (
     <View style={styles.container}>
       <Animated.View
         style={[
           styles.searchContainer,
+          isFocused && styles.searchContainerFocused,
           {
             transform: [{ scale: scaleAnim }],
-            borderColor: borderColor,
           }
         ]}
       >
@@ -129,19 +153,35 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
       </Animated.View>
 
       {/* Suggestions rapides (quand vide et focus) */}
-      {isFocused && !searchPhrase.trim() && (
+      {showSuggestions && (
         <Animated.View
-          style={styles.quickSuggestions}
-          entering={Animated.fadeInDown.duration(200)}
-          exiting={Animated.fadeOutUp.duration(150)}
+          style={[
+            styles.quickSuggestions,
+            {
+              opacity: suggestionsOpacity,
+              transform: [{ translateY: suggestionsTranslateY }],
+            }
+          ]}
         >
-          <TouchableOpacity style={styles.suggestionItem}>
+          <TouchableOpacity
+            style={styles.suggestionItem}
+            onPress={() => {
+              animateSuggestions(false);
+              onSubmit?.('near me');
+            }}
+          >
             <Ionicons name="location" size={16} color={colors.primary} />
-            <Text style={styles.suggestionText}>Near me</Text>
+            <Text style={styles.suggestionText}>{i18n.t('drawer.map') || 'Near me'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.suggestionItem}>
+          <TouchableOpacity
+            style={styles.suggestionItem}
+            onPress={() => {
+              animateSuggestions(false);
+              onSubmit?.('top rated');
+            }}
+          >
             <Ionicons name="star" size={16} color={colors.primary} />
-            <Text style={styles.suggestionText}>Top rated</Text>
+            <Text style={styles.suggestionText}>{i18n.t('drawer.offers') || 'Top rated'}</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -171,6 +211,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  searchContainerFocused: {
+    borderColor: colors.primary,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
   iconContainer: {
     marginRight: 12,
