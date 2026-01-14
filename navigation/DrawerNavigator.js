@@ -13,6 +13,7 @@ import OrdersScreen from '../screens/OrdersScreen';
 import MyOrdersScreen from '../screens/MyOrdersScreen';
 import { Ionicons, MaterialIcons, FontAwesome, Entypo, AntDesign, Feather } from '@expo/vector-icons'
 import i18n from '../i18n';
+import { colors } from '../global';
 
 
 const Drawer = createDrawerNavigator();
@@ -36,9 +37,10 @@ export default function DrawerNavigator() {
             marginHorizontal: 8,
             borderRadius: 8,
         },
-        drawerActiveTintColor: '#FF6B35', // Couleur primaire
-        drawerInactiveTintColor: '#43484d', // Texte secondaire
-        drawerActiveBackgroundColor: 'rgba(255, 107, 53, 0.1)', // Fond actif subtil
+        drawerActiveTintColor: colors.primary, // Couleur primaire originale
+        drawerInactiveTintColor: colors.grey[700], // Gris cohérent
+        drawerActiveBackgroundColor: 'rgba(0, 0, 0, 0.08)', // Fond actif noir subtil
+        drawerInactiveBackgroundColor: 'transparent', // Fond inactif transparent
     }}
     drawerContent= {props => <DrawerContent {...props}/>}
     >
@@ -51,7 +53,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="home-outline"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -66,7 +68,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="search"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -81,7 +83,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <FontAwesome
                         name="map-marker"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -97,7 +99,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <MaterialIcons
                         name="local-offer"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -113,7 +115,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="receipt"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -128,7 +130,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Feather
                         name="clock"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -144,7 +146,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="person-circle-outline"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -160,7 +162,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Entypo
                         name="wallet"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -176,7 +178,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <AntDesign
                         name="heart"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -192,7 +194,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="notifications-outline"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -208,7 +210,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="settings-outline"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
@@ -224,7 +226,7 @@ export default function DrawerNavigator() {
                 drawerIcon: ({focused, size}) => (
                     <MaterialIcons
                         name="business-center"
-                        color={focused ? "#FF6B35" : "#43484d"}
+                        color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
                 )
