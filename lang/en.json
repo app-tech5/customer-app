@@ -40,7 +40,9 @@
     "nearby": "nearby",
     "result": "result",
     "results": "results",
-    "loading": "Loading results..."
+    "loading": "Loading results...",
+    "searching": "Searching",
+    "typeToSearch": "Type to search..."
   },
   "auth": {
     "welcome": "Welcome!",

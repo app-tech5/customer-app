@@ -107,15 +107,16 @@ export default function SearchScreen({ navigation }) {
         />
       </View>
 
-      {/* Résultats de recherche si actif */}
-      {clicked && searchPhrase ? (
-        <List
-          searchPhrase={searchPhrase}
-          data={data}
-          setCLicked={setCLicked}
-        />
-      ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Contenu principal - toujours visible */}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Pendant la saisie, on peut afficher une indication */}
+        {clicked && (
+          <View style={styles.searchingIndicator}>
+            <Text style={styles.searchingText}>
+              {searchPhrase ? `${i18n.t('search.searching')} "${searchPhrase}"...` : i18n.t('search.typeToSearch')}
+            </Text>
+          </View>
+        )}
 
           {/* Onglets de recherche */}
           <View style={styles.tabContainer}>
@@ -246,7 +247,6 @@ export default function SearchScreen({ navigation }) {
           </View>
 
         </ScrollView>
-      )}
     </SafeAreaView>
   )
 }
@@ -254,6 +254,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
+  },
+  searchingIndicator: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  searchingText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   header: {
     flexDirection: "row",

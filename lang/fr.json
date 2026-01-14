@@ -40,7 +40,9 @@
     "nearby": "à proximité",
     "result": "résultat",
     "results": "résultats",
-    "loading": "Chargement des résultats..."
+    "loading": "Chargement des résultats...",
+    "searching": "Recherche",
+    "typeToSearch": "Tapez pour rechercher..."
   },
   "auth": {
     "welcome": "Bienvenue !",
