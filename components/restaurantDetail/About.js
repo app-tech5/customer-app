@@ -49,12 +49,13 @@ const RestaurantImage = (props)=>(
 export const ArrowBack = (props)=>{
   return (
     <View style={styles.view2}>
-    <Icon 
+    <Icon
       name="arrow-left"
       type="material-community"
       color="black"
       size={25}
-      onPress={()=>props.navigation.goBack()}
+      onPress={()=>props.navigation.navigate('Search')}
+
     />
 </View>
   )
