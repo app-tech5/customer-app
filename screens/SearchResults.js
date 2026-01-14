@@ -272,7 +272,18 @@ export default function SearchResults({route, navigation}) {
           keyExtractor={(item, index) => String(index)}
           renderItem={({item}) => (
             <TouchableOpacity
-              onPress={() => navigation.navigate("RestaurantDetail", { restaurant: item })}
+              onPress={() => {
+                // Navigation vers RestaurantDetail via HomeNavigator
+                // Ajouter un paramètre pour indiquer qu'on vient d'une promotion
+                navigation.navigate('Home', {
+                  screen: 'RestaurantDetail',
+                  params: {
+                    restaurant: item,
+                    fromPromotion: true,
+                    promotionName: name
+                  }
+                });
+              }}
               style={styles.itemContainer}
               activeOpacity={0.7}
             >

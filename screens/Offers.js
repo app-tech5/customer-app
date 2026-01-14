@@ -198,11 +198,8 @@ export default function Offers({ navigation }) {
   const handlePromotionPress = (promotion) => {
     console.log('🎯 Promotion pressed:', promotion.name, 'Scope:', promotion.scope);
 
-    if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length === 1) {
-      // Un seul restaurant spécifique : aller directement au restaurant
-      navigation.navigate('RestaurantDetail', { restaurant: promotion.applicableRestaurants[0] });
-    } else if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length > 1) {
-      // Plusieurs restaurants spécifiques : aller vers les restaurants de cette promotion
+    if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length >= 1) {
+      // Tous les restaurants spécifiques : aller vers les restaurants de cette promotion
       const restaurantIds = promotion.applicableRestaurants.map(rest => rest._id || rest.restaurantId || rest.id)
       navigation.navigate('Search', {
         screen: 'SearchResults',
