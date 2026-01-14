@@ -24,6 +24,10 @@
     "business": "Business Console",
     "logout": "Logout"
   },
+  "search": {
+    "nearMe": "Near me",
+    "topRated": "Top rated"
+  },
   "auth": {
     "welcome": "Welcome!",
     "email": "Email",

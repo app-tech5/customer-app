@@ -167,21 +167,21 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             style={styles.suggestionItem}
             onPress={() => {
               animateSuggestions(false);
-              onSubmit?.('near me');
+              onSubmit?.(i18n.t('search.nearMe'));
             }}
           >
             <Ionicons name="location" size={16} color={colors.primary} />
-            <Text style={styles.suggestionText}>Near me</Text>
+            <Text style={styles.suggestionText}>{i18n.t('search.nearMe')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.suggestionItem}
             onPress={() => {
               animateSuggestions(false);
-              onSubmit?.('top rated');
+              onSubmit?.(i18n.t('search.topRated'));
             }}
           >
             <Ionicons name="star" size={16} color={colors.primary} />
-            <Text style={styles.suggestionText}>Top rated</Text>
+            <Text style={styles.suggestionText}>{i18n.t('search.topRated')}</Text>
           </TouchableOpacity>
         </Animated.View>
       )}

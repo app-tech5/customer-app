@@ -24,6 +24,10 @@
     "business": "Console Business",
     "logout": "Se déconnecter"
   },
+  "search": {
+    "nearMe": "À proximité",
+    "topRated": "Mieux notés"
+  },
   "auth": {
     "welcome": "Bienvenue !",
     "email": "Email",
