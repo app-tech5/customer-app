@@ -73,6 +73,10 @@ export default function SearchResults({route, navigation}) {
             .filter(restaurant => restaurant.distance <= 10) // Rayon de 10km
             .sort((a, b) => a.distance - b.distance) // Tri par distance croissante
         }
+        // Cas spécial pour afficher tous les restaurants (promotions platform)
+        else if (name === 'ALL_RESTAURANTS') {
+          restaurantsResult = await getRestaurantsFromFirebase()
+        }
         // Sinon c'est une recherche textuelle normale
         else if (name) {
           const allRestaurants = await getRestaurantsFromFirebase()
@@ -83,6 +87,11 @@ export default function SearchResults({route, navigation}) {
             restaurant.city?.toLowerCase().includes(name.toLowerCase())
           )
           restaurantsResult = filtered.length > 0 ? filtered : allRestaurants
+        }
+        // Si aucun name fourni, on pourrait afficher tous les restaurants ou rien
+        else {
+          // Pour l'instant, afficher tous les restaurants par défaut
+          restaurantsResult = await getRestaurantsFromFirebase()
         }
 
         setRestaurantData(restaurantsResult || [])

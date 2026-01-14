@@ -211,11 +211,11 @@ export default function Offers({ navigation }) {
         }
       });
     } else if (promotion.scope === 'platform') {
-      // Promotion pour tous les restaurants : aller vers la recherche générale
+      // Promotion pour tous les restaurants : aller vers tous les restaurants
       navigation.navigate('Search', {
         screen: 'SearchResults',
         params: {
-          name: '',
+          name: 'ALL_RESTAURANTS',
           type: 'restaurant'
         }
       });
