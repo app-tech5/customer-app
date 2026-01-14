@@ -86,14 +86,23 @@ export default function CategoryResults({route, navigation}) {
 
     // Définir le titre
     const title = promotionName ? `Categories for ${promotionName}` : (name || 'Categories')
+
+    console.log('🎯 CategoryResults - Navigation setup:', { cameFromOffers, promotionName, name })
+
     navigation.setOptions({
       title,
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
+            console.log('🔙 Back button pressed, cameFromOffers:', cameFromOffers)
             if (cameFromOffers) {
-              navigation.navigate('Offers')
+              console.log('📍 Navigating to Offers screen')
+              // Navigation absolue vers Offers
+              navigation.navigate('DrawerNavigator', {
+                screen: 'Offers'
+              })
             } else {
+              console.log('📍 Going back normally')
               navigation.goBack()
             }
           }}
