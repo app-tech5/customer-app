@@ -202,13 +202,16 @@ export default function Offers({ navigation }) {
       // Un seul restaurant spécifique : aller directement au restaurant
       navigation.navigate('RestaurantDetail', { restaurant: promotion.applicableRestaurants[0] });
     } else if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length > 1) {
-      // Plusieurs restaurants spécifiques : aller vers la recherche avec le nom de la promotion
+      // Plusieurs restaurants spécifiques : aller vers les restaurants de cette promotion
+      const restaurantIds = promotion.applicableRestaurants.map(rest => rest._id || rest.restaurantId || rest.id)
       navigation.navigate('Search', {
         screen: 'SearchResults',
         params: {
+          applicableRestaurants: restaurantIds, // ← Seulement les IDs
           name: promotion.name,
           type: 'restaurant',
-          fromOffers: true
+          fromOffers: true,
+          promotionScope: 'restaurant'
         }
       });
     } else if (promotion.scope === 'platform') {

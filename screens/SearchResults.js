@@ -16,9 +16,10 @@ export default function SearchResults({route, navigation}) {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [cameFromOffers, setCameFromOffers] = useState(false)
+  const [displayMode, setDisplayMode] = useState('restaurants')
 
   useEffect(()=>{
-    const { categoryId, name, type, fromOffers } = route.params
+    const { categoryId, name, type, fromOffers, applicableRestaurants, promotionScope } = route.params
 
     // Vérifier si on vient de l'écran Offers
     setCameFromOffers(fromOffers === true)
@@ -33,6 +34,35 @@ export default function SearchResults({route, navigation}) {
       try {
         let restaurantsResult = []
 
+        // Cas spécial : promotion restaurant avec restaurants spécifiques
+        if (promotionScope === 'restaurant' && applicableRestaurants && applicableRestaurants.length > 0) {
+          console.log('🏪 Loading specific restaurants for promotion - IDs reçus:', applicableRestaurants)
+
+          // Récupérer tous les restaurants
+          const allRestaurants = await getRestaurantsFromFirebase()
+
+          // Log pour comparer les IDs
+          console.log('📋 IDs de tous les restaurants en DB:', allRestaurants.map(r => r._id || r.restaurantId))
+          console.log('🔍 IDs recherchés dans applicableRestaurants:', applicableRestaurants)
+
+          // Filtrer seulement les restaurants applicables à la promotion
+          restaurantsResult = allRestaurants.filter(restaurant => {
+            const restaurantId = restaurant._id || restaurant.restaurantId
+            return applicableRestaurants.some(promoRestId => {
+              const promoId = typeof promoRestId === 'object' ? promoRestId.toString() : promoRestId
+              const restIdStr = restaurantId ? restaurantId.toString() : ''
+              return promoId === restIdStr
+            })
+          })
+
+          console.log('✅ Found', restaurantsResult.length, 'restaurants for promotion')
+          console.log('🏪 Restaurants filtrés:', restaurantsResult.map(r => ({ id: r._id, name: r.name })))
+
+          console.log('📱 Setting restaurant data - Count:', restaurantsResult.length, 'Mode: restaurants')
+          setRestaurantData(restaurantsResult)
+          setDisplayMode('restaurants')
+          return // ← SORTIR DE LA FONCTION APRÈS LE FILTRAGE
+        }
         // Si on a un categoryId, c'est une recherche par catégorie
         if (categoryId) {
           restaurantsResult = await searchRestaurantsByCategory(categoryId)
@@ -98,6 +128,7 @@ export default function SearchResults({route, navigation}) {
           restaurantsResult = await getRestaurantsFromFirebase()
         }
 
+        console.log('📱 Setting restaurant data - Count:', restaurantsResult?.length || 0, 'Mode: restaurants')
         setRestaurantData(restaurantsResult || [])
       } catch (err) {
         console.error('Error loading search results:', err)
@@ -107,11 +138,13 @@ export default function SearchResults({route, navigation}) {
           setError(i18n.t('search.locationPermissionDenied'))
           // Charger quand même tous les restaurants
           const allRestaurants = await getRestaurantsFromFirebase()
+          console.log('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else if (name === 'NEAR_ME_SPECIAL') {
           setError(i18n.t('search.locationError'))
           // Charger quand même tous les restaurants
           const allRestaurants = await getRestaurantsFromFirebase()
+          console.log('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else {
           setError(i18n.t('search.errorSubtitle'))
