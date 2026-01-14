@@ -122,14 +122,23 @@ export default function SearchResults({route, navigation}) {
 
     // Définir le titre selon le type de recherche
     let title = i18n.t ? i18n.t('search.results') : 'Search Results'
+    let displayQuery = ''
+
     if (name === 'TOP_RATED_SPECIAL') {
       title = i18n.t ? i18n.t('search.topRated') : 'Top Rated'
+      displayQuery = title
     } else if (name === 'NEAR_ME_SPECIAL') {
       title = i18n.t ? i18n.t('search.nearMe') : 'Near Me'
+      displayQuery = title
+    } else if (name === 'ALL_RESTAURANTS') {
+      title = i18n.t ? i18n.t('search.allRestaurants') : 'All Restaurants'
+      displayQuery = title
     } else if (name) {
       title = name
-      setSearchQuery(name)
+      displayQuery = name
     }
+
+    setSearchQuery(displayQuery)
     navigation.setOptions({title})
 
   }, [route.params])

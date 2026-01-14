@@ -27,6 +27,7 @@
   "search": {
     "nearMe": "À proximité",
     "topRated": "Mieux notés",
+    "allRestaurants": "Tous les restaurants",
     "results": "Résultats de recherche",
     "noResults": "Aucun résultat trouvé",
     "noResultsTitle": "Aucun restaurant trouvé",
