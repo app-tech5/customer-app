@@ -47,7 +47,7 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="DrawerNavigator" component={DrawerNavigator}/>
               <Stack.Screen name="OrderRequest" component={OrderRequest}/>
               <Stack.Screen name="OrderCompleted" component={OrderCompleted}/>
-              <Stack.Screen name="CategoryResults" component={CategoryResults}/>
+              <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
               <Stack.Screen name="Offers" component={Offers}/>
               <Stack.Screen name="Wallet" component={Wallet}/>
               <Stack.Screen name="AddCard" component={AddCard}/>

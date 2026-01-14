@@ -5,6 +5,7 @@ import { colors } from '../global'
 import i18n from '../i18n'
 import { getCategories } from '../api'
 
+
 export default function CategoryResults({route, navigation}) {
   const [categoryData, setCategoryData] = useState([])
   const [loader, setLoader] = useState(true)
@@ -89,28 +90,15 @@ export default function CategoryResults({route, navigation}) {
 
     console.log('🎯 CategoryResults - Navigation setup:', { cameFromOffers, promotionName, name })
 
+    // Ajouter arrow back standard au header
     navigation.setOptions({
       title,
       headerLeft: () => (
         <TouchableOpacity
-          onPress={() => {
-            console.log('🔙 Back button pressed - going to Offers')
-            // Reset navigation pour revenir à Offers
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: 'DrawerNavigator',
-                  params: {
-                    screen: 'Offers'
-                  }
-                }
-              ]
-            });
-          }}
+          onPress={() => navigation.goBack()}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Go back to Offers"
+          accessibilityLabel="Go back"
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
