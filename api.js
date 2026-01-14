@@ -290,6 +290,114 @@ class ApiClient {
   }
 
   // Promotions
+  async getAllActiveOffers() {
+    try {
+      console.log('🔥 FETCHING ALL ACTIVE OFFERS');
+
+      // Récupérer toutes les promotions et tous les restaurants en parallèle
+      const [allPromotions, allRestaurants] = await Promise.all([
+        this.apiCall('/resource/promotions'),
+        this.getRestaurants()
+      ]);
+
+      console.log('🔥 ALL PROMOTIONS:', allPromotions.length, 'promotions found');
+      console.log('🍽️ ALL RESTAURANTS:', allRestaurants.length, 'restaurants found');
+
+      // Filtrer seulement les promotions actives
+      const activePromotions = allPromotions.filter(promotion => {
+        const now = new Date();
+        const isActive = promotion.isActive &&
+                        now >= new Date(promotion.startDate) &&
+                        now <= new Date(promotion.endDate);
+
+        // Vérifier les happy hours si elles existent
+        if (promotion.happyHours && promotion.happyHours.length > 0) {
+          const currentHour = now.getHours();
+          const currentMinutes = now.getMinutes();
+          const currentDay = now.getDay();
+
+          const isHappyHour = promotion.happyHours.some(slot => {
+            const [startH, startM] = slot.start.split(':').map(Number);
+            const [endH, endM] = slot.end.split(':').map(Number);
+
+            const isDayMatch = slot.days.includes(currentDay);
+            const isTimeMatch = (
+              (currentHour > startH || (currentHour === startH && currentMinutes >= startM)) &&
+              (currentHour < endH || (currentHour === endH && currentMinutes <= endM))
+            );
+
+            return isDayMatch && isTimeMatch;
+          });
+
+          return isActive && isHappyHour;
+        }
+
+        return isActive;
+      });
+
+      console.log('✅ ACTIVE PROMOTIONS:', activePromotions.length, 'promotions active');
+
+      // Créer une liste d'offres avec les informations des restaurants
+      const offersWithRestaurants = [];
+
+      activePromotions.forEach(promotion => {
+        // Pour chaque promotion active, trouver les restaurants applicables
+        let applicableRestaurants = [];
+
+        if (promotion.scope === 'restaurant' && promotion.applicableRestaurants) {
+          // Promotions spécifiques à certains restaurants
+          applicableRestaurants = allRestaurants.filter(restaurant =>
+            promotion.applicableRestaurants.some(restId =>
+              restId === restaurant.restaurantId ||
+              restId === restaurant._id ||
+              restId === restaurant.id
+            )
+          );
+        } else if (promotion.scope === 'platform') {
+          // Promotions pour tous les restaurants
+          applicableRestaurants = allRestaurants;
+        } else if (promotion.scope === 'category' && promotion.applicableCategories) {
+          // Promotions par catégorie
+          applicableRestaurants = allRestaurants.filter(restaurant =>
+            restaurant.categories && restaurant.categories.some(cat =>
+              promotion.applicableCategories.includes(cat)
+            )
+          );
+        }
+
+        // Pour chaque restaurant applicable, créer une entrée d'offre
+        applicableRestaurants.forEach(restaurant => {
+          offersWithRestaurants.push({
+            id: `${promotion._id}-${restaurant.restaurantId}`,
+            promotion: promotion,
+            restaurant: restaurant,
+            // Propriétés pour compatibilité avec l'ancien format
+            discount_percentage: promotion.promotionType === 'percentage_discount' ? promotion.discountValue : 0,
+            free_delivery: promotion.promotionType === 'free_delivery',
+            bogo_offer: promotion.promotionType === 'buy_x_get_y',
+            flash_deal: promotion.promotionType === 'flash_sale',
+            // Informations du restaurant
+            name: restaurant.name,
+            image_url: restaurant.image,
+            rating: restaurant.rating,
+            review_count: restaurant.reviewCount || 0,
+            location: restaurant.location || { city: 'Paris' },
+            delivery_time: restaurant.deliveryTime || Math.floor(Math.random() * 30) + 15,
+            distance: restaurant.distance || Math.floor(Math.random() * 10) + 1
+          });
+        });
+      });
+
+      console.log('🎯 FINAL OFFERS LIST:', offersWithRestaurants.length, 'offers created');
+
+      return offersWithRestaurants;
+
+    } catch (error) {
+      console.error('Error fetching all active offers:', error);
+      return []; // Retourner un tableau vide en cas d'erreur
+    }
+  }
+
   async getRestaurantPromotions(restaurantId) {
     try {
       console.log('🔥 FETCHING PROMOTIONS for restaurant:', restaurantId);
@@ -401,6 +509,7 @@ export const updateUser = (userData, userId) => api.updateUser(userId, userData)
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
 export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
 export const getDeliverySettings = () => api.getDeliverySettings();
+export const getAllActiveOffers = () => api.getAllActiveOffers();
 export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromotions(restaurantId);
 
 // GESTION DES FAVORIS

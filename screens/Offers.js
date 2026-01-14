@@ -11,6 +11,7 @@ import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantIt
 import Reward from '../components/Reward'
 import { colors } from '../global'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { getAllActiveOffers } from '../api'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -19,6 +20,7 @@ export default function Offers({ navigation }) {
   const [sortBy, setSortBy] = useState('popularity')
   const [isLoading, setIsLoading] = useState(false)
   const [filteredOffers, setFilteredOffers] = useState([])
+  const [allRestaurantsWithOffers, setAllRestaurantsWithOffers] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
@@ -65,36 +67,24 @@ export default function Offers({ navigation }) {
   const loadOffers = async () => {
     setIsLoading(true)
     try {
-      // Simulation d'un appel API - à remplacer par l'appel réel
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      console.log('🔥 LOADING OFFERS FROM BACKEND...')
 
-      // Ajouter des données d'offres simulées aux restaurants
-      const restaurantsWithOffers = restaurants.map((restaurant, index) => ({
-        ...restaurant,
-        // Simuler des offres pour certains restaurants
-        discount_percentage: index % 3 === 0 ? Math.floor(Math.random() * 30) + 10 : 0,
-        free_delivery: index % 4 === 0,
-        bogo_offer: index % 5 === 0,
-        flash_deal: index % 6 === 0,
-        delivery_time: Math.floor(Math.random() * 30) + 15,
-        distance: Math.floor(Math.random() * 10) + 1,
-        review_count: Math.floor(Math.random() * 500) + 50,
-        // Ajouter des propriétés manquantes pour certains restaurants
-        rating: restaurant.rating || (Math.random() * 2 + 3).toFixed(1),
-        location: restaurant.location || { city: 'Paris' }
-      }))
+      // Récupérer toutes les offres actives depuis le backend
+      const offersFromBackend = await getAllActiveOffers()
 
-      // Filtrer les restaurants ayant des offres
-      const offersWithDeals = restaurantsWithOffers.filter(restaurant =>
-        restaurant.discount_percentage > 0 ||
-        restaurant.free_delivery ||
-        restaurant.bogo_offer ||
-        restaurant.flash_deal
-      )
+      console.log('✅ OFFERS RECEIVED:', offersFromBackend.length, 'offers from backend')
 
-      setFilteredOffers(offersWithDeals)
+      // Stocker toutes les données avec offres pour les filtres
+      setAllRestaurantsWithOffers(offersFromBackend)
+      setFilteredOffers(offersFromBackend)
+
+      console.log('🎯 OFFERS LOADED SUCCESSFULLY:', offersFromBackend.length, 'offers ready for display')
+
     } catch (error) {
-      console.error('Error loading offers:', error)
+      console.error('❌ Error loading offers from backend:', error)
+      // En cas d'erreur, afficher un état vide au lieu de planter
+      setAllRestaurantsWithOffers([])
+      setFilteredOffers([])
     } finally {
       setIsLoading(false)
     }
@@ -104,12 +94,7 @@ export default function Offers({ navigation }) {
     setActiveCategory(category)
 
     // Commencer avec tous les restaurants qui ont des offres
-    let filtered = restaurants.filter(restaurant =>
-      restaurant.discount_percentage > 0 ||
-      restaurant.free_delivery ||
-      restaurant.bogo_offer ||
-      restaurant.flash_deal
-    )
+    let filtered = [...allRestaurantsWithOffers]
 
     if (category !== 'all') {
       filtered = filtered.filter(restaurant => {
