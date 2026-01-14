@@ -94,21 +94,23 @@ export default function CategoryResults({route, navigation}) {
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
-            console.log('🔙 Back button pressed, cameFromOffers:', cameFromOffers)
-            if (cameFromOffers) {
-              console.log('📍 Navigating to Offers screen')
-              // Navigation absolue vers Offers
-              navigation.navigate('DrawerNavigator', {
-                screen: 'Offers'
-              })
-            } else {
-              console.log('📍 Going back normally')
-              navigation.goBack()
-            }
+            console.log('🔙 Back button pressed - going to Offers')
+            // Reset navigation pour revenir à Offers
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'DrawerNavigator',
+                  params: {
+                    screen: 'Offers'
+                  }
+                }
+              ]
+            });
           }}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel="Go back to Offers"
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
