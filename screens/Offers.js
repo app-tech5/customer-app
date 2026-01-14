@@ -23,6 +23,7 @@ export default function Offers({ navigation }) {
   const [allPromotions, setAllPromotions] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [selectedPromotion, setSelectedPromotion] = useState(null)
 
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -97,16 +98,16 @@ export default function Offers({ navigation }) {
     let filtered = [...allPromotions]
 
     if (category !== 'all') {
-      filtered = filtered.filter(offer => {
+      filtered = filtered.filter(promotion => {
         switch (category) {
           case 'discount':
-            return offer.discount_percentage > 0
+            return promotion.discount_percentage > 0
           case 'free_delivery':
-            return offer.free_delivery
+            return promotion.free_delivery
           case 'buy_one_get_one':
-            return offer.bogo_offer
+            return promotion.bogo_offer
           case 'flash':
-            return offer.flash_deal
+            return promotion.flash_deal
           default:
             return true
         }
@@ -140,8 +141,8 @@ export default function Offers({ navigation }) {
           return new Date(a.endDate) - new Date(b.endDate)
         case 'popularity':
         default:
-          // Trier par nombre de restaurants applicables
-          return (b.applicableRestaurantsCount || 0) - (a.applicableRestaurantsCount || 0)
+          // Trier par nombre d'éléments applicables (restaurants/catégories)
+          return (b.availabilityCount || 0) - (a.availabilityCount || 0)
       }
     })
   }
@@ -168,16 +169,16 @@ export default function Offers({ navigation }) {
 
     // Appliquer les filtres actifs
     if (activeCategory !== 'all') {
-      filtered = filtered.filter(offer => {
+      filtered = filtered.filter(promotion => {
         switch (activeCategory) {
           case 'discount':
-            return offer.discount_percentage > 0
+            return promotion.discount_percentage > 0
           case 'free_delivery':
-            return offer.free_delivery
+            return promotion.free_delivery
           case 'buy_one_get_one':
-            return offer.bogo_offer
+            return promotion.bogo_offer
           case 'flash':
-            return offer.flash_deal
+            return promotion.flash_deal
           default:
             return true
         }
@@ -192,6 +193,40 @@ export default function Offers({ navigation }) {
   const toggleFilters = () => {
     setShowFilters(!showFilters)
     // Ici on pourrait afficher une modal de filtres avancés
+  }
+
+  const handlePromotionPress = (promotion) => {
+    console.log('🎯 Promotion pressed:', promotion.name, 'Scope:', promotion.scope);
+
+    if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length === 1) {
+      // Un seul restaurant spécifique : aller directement au restaurant
+      navigation.navigate('RestaurantDetail', { restaurant: promotion.applicableRestaurants[0] });
+    } else if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length > 1) {
+      // Plusieurs restaurants spécifiques : aller vers les résultats filtrés par ces restaurants
+      // Pour l'instant, on cherche par nom de promotion
+      navigation.navigate('SearchResults', {
+        name: promotion.name,
+        type: 'restaurant'
+      });
+    } else if (promotion.scope === 'platform') {
+      // Promotion pour tous les restaurants : aller vers la liste complète des restaurants
+      navigation.navigate('SearchResults', {
+        name: '', // Tous les restaurants
+        type: 'restaurant'
+      });
+    } else if (promotion.scope === 'category') {
+      // Promotion par catégorie : aller vers les restaurants de ces catégories
+      // Pour l'instant, on prend la première catégorie pour la recherche
+      const firstCategory = promotion.applicableCategories?.[0];
+      if (firstCategory) {
+        navigation.navigate('SearchResults', {
+          name: firstCategory,
+          type: 'category'
+        });
+      }
+    } else {
+      console.log('❓ Unknown scope or no applicable items for promotion:', promotion.name);
+    }
   }
 
   const renderCategoryButton = ({ item }) => (
@@ -236,19 +271,7 @@ export default function Offers({ navigation }) {
       >
         <TouchableOpacity
           style={styles.offerCard}
-          onPress={() => {
-            // Si la promotion s'applique à un seul restaurant, aller directement à ce restaurant
-            if (item.applicableRestaurantsCount === 1) {
-              navigation.navigate('RestaurantDetail', { restaurant: item.applicableRestaurants[0] });
-            } else {
-              // Sinon, naviguer vers les résultats de recherche filtrés par cette promotion
-              navigation.navigate('SearchResults', {
-                name: promotion.name,
-                type: 'promotion',
-                promotionId: item.id
-              });
-            }
-          }}
+          onPress={() => handlePromotionPress(item)}
           activeOpacity={0.8}
           accessibilityRole="button"
           accessibilityLabel={`${promotion.name}. ${promotion.description}. Available at ${item.applicableRestaurantsCount} restaurant${item.applicableRestaurantsCount > 1 ? 's' : ''}`}
@@ -273,7 +296,7 @@ export default function Offers({ navigation }) {
             <View style={styles.restaurantsCount}>
               <Ionicons name="restaurant-outline" size={14} color={colors.grey[500]} />
               <Text style={styles.restaurantsCountText}>
-                Available at {item.applicableRestaurantsCount} restaurant{item.applicableRestaurantsCount > 1 ? 's' : ''}
+                Available at {item.availabilityText}
               </Text>
             </View>
 

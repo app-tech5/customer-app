@@ -337,34 +337,66 @@ class ApiClient {
 
       console.log('✅ ACTIVE PROMOTIONS:', activePromotions.length, 'promotions active');
 
-      // Créer une liste des promotions avec le nombre de restaurants applicables
+      // Créer une liste des promotions avec les informations d'applicabilité
       const promotionsList = activePromotions.map(promotion => {
-        // Compter les restaurants applicables
+        // Compter les restaurants applicables selon le scope
         let applicableRestaurantsCount = 0;
         let applicableRestaurants = [];
 
-        if (promotion.scope === 'restaurant' && promotion.applicableRestaurants) {
-          // Promotions spécifiques à certains restaurants
-          applicableRestaurants = allRestaurants.filter(restaurant =>
-            promotion.applicableRestaurants.some(restId =>
-              restId === restaurant.restaurantId ||
-              restId === restaurant._id ||
-              restId === restaurant.id
-            )
-          );
-          applicableRestaurantsCount = applicableRestaurants.length;
+        if (promotion.scope === 'restaurant') {
+          if (promotion.applicableRestaurants && Array.isArray(promotion.applicableRestaurants)) {
+            applicableRestaurants = allRestaurants.filter(restaurant => {
+              const restaurantId = restaurant._id || restaurant.restaurantId;
+              return promotion.applicableRestaurants.some(restId => {
+                const promoRestId = typeof restId === 'object' ? restId.toString() : restId;
+                const restIdStr = restaurantId ? restaurantId.toString() : '';
+                return promoRestId === restIdStr;
+              });
+            });
+            applicableRestaurantsCount = applicableRestaurants.length;
+          }
         } else if (promotion.scope === 'platform') {
-          // Promotions pour tous les restaurants
           applicableRestaurantsCount = allRestaurants.length;
-          applicableRestaurants = allRestaurants.slice(0, 3); // Montrer les 3 premiers
-        } else if (promotion.scope === 'category' && promotion.applicableCategories) {
-          // Promotions par catégorie
-          applicableRestaurants = allRestaurants.filter(restaurant =>
-            restaurant.categories && restaurant.categories.some(cat =>
-              promotion.applicableCategories.includes(cat)
-            )
-          );
-          applicableRestaurantsCount = applicableRestaurants.length;
+          applicableRestaurants = allRestaurants.slice(0, 3);
+        } else if (promotion.scope === 'category') {
+          if (promotion.applicableCategories && Array.isArray(promotion.applicableCategories)) {
+            applicableRestaurants = allRestaurants.filter(restaurant => {
+              if (!restaurant.categories) return false;
+
+              return restaurant.categories.some(cat => {
+                return promotion.applicableCategories.some(promoCat =>
+                  cat === promoCat ||
+                  cat.name === promoCat ||
+                  cat._id === promoCat ||
+                  (typeof cat === 'string' && cat === promoCat) ||
+                  (cat && cat.toString() === promoCat)
+                );
+              });
+            });
+            applicableRestaurantsCount = applicableRestaurants.length;
+          }
+        } else {
+          // Scope inconnu ou item : considérer tous les restaurants
+          applicableRestaurantsCount = allRestaurants.length;
+          applicableRestaurants = allRestaurants.slice(0, 3);
+        }
+
+        // Déterminer le texte d'affichage selon le scope
+        let availabilityText = '';
+        let availabilityCount = 0;
+
+        if (promotion.scope === 'platform') {
+          availabilityText = 'all restaurants';
+          availabilityCount = allRestaurants.length;
+        } else if (promotion.scope === 'category') {
+          availabilityText = `${promotion.applicableCategories?.length || 0} categories`;
+          availabilityCount = promotion.applicableCategories?.length || 0;
+        } else if (promotion.scope === 'restaurant') {
+          availabilityText = `${applicableRestaurantsCount} restaurant${applicableRestaurantsCount > 1 ? 's' : ''}`;
+          availabilityCount = applicableRestaurantsCount;
+        } else {
+          availabilityText = 'available';
+          availabilityCount = applicableRestaurantsCount;
         }
 
         return {
@@ -379,8 +411,11 @@ class ApiClient {
           name: promotion.name,
           description: promotion.description,
           image_url: promotion.image,
-          applicableRestaurantsCount,
-          applicableRestaurants: applicableRestaurants.slice(0, 3), // Montrer max 3 restaurants
+          scope: promotion.scope,
+          availabilityText,
+          availabilityCount,
+          applicableRestaurants: applicableRestaurants.slice(0, 3), // Montrer max 3 restaurants pour preview
+          applicableCategories: promotion.applicableCategories,
           // Propriétés de tri
           priority: promotion.priority || 1,
           endDate: promotion.endDate
