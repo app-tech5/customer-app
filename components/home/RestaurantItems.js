@@ -99,13 +99,18 @@ export const RestaurantInfo = (props)=>(
         </View>
         <View style={{
                 backgroundColor: "#eee",
-                height: 30,
-                width: 30,
+                height: 32,
+                width: 40,
                 alignItems: "center",
                 justifyContent: "center",
-                borderRadius: 15,
+                borderRadius: 16,
             }}>
-            <Text>{props.rating}</Text>
+            <Text style={{
+                fontSize: 12,
+                fontWeight: "bold",
+            }}>
+                {props.rating ? parseFloat(props.rating).toFixed(1) : 'N/A'}
+            </Text>
         </View>
     </View>
 )
