@@ -177,7 +177,8 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             style={styles.suggestionItem}
             onPress={() => {
               animateSuggestions(false);
-              onSubmit?.(i18n.t('search.topRated'));
+              // "Top rated" → Recherche spéciale pour les mieux notés
+              onSubmit?.('TOP_RATED_SPECIAL');
             }}
           >
             <Ionicons name="star" size={16} color={colors.primary} />
