@@ -26,7 +26,21 @@
   },
   "search": {
     "nearMe": "Near me",
-    "topRated": "Top rated"
+    "topRated": "Top rated",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "noResultsTitle": "No restaurants found",
+    "noResultsSubtitle": "Try modifying your search criteria",
+    "errorTitle": "Loading error",
+    "errorSubtitle": "Check your internet connection and try again",
+    "locationPermissionDenied": "Location permission denied. Enable location to see nearby restaurants.",
+    "locationError": "Error accessing your location. Here are all available restaurants.",
+    "modifySearch": "Modify search",
+    "resultsFor": "for",
+    "nearby": "nearby",
+    "result": "result",
+    "results": "results",
+    "loading": "Loading results..."
   },
   "auth": {
     "welcome": "Welcome!",

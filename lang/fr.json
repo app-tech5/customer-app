@@ -26,7 +26,21 @@
   },
   "search": {
     "nearMe": "À proximité",
-    "topRated": "Mieux notés"
+    "topRated": "Mieux notés",
+    "results": "Résultats de recherche",
+    "noResults": "Aucun résultat trouvé",
+    "noResultsTitle": "Aucun restaurant trouvé",
+    "noResultsSubtitle": "Essayez de modifier vos critères de recherche",
+    "errorTitle": "Erreur de chargement",
+    "errorSubtitle": "Vérifiez votre connexion internet et réessayez",
+    "locationPermissionDenied": "Permission de géolocalisation refusée. Activez la localisation pour voir les restaurants proches.",
+    "locationError": "Erreur d'accès à votre position. Voici tous les restaurants disponibles.",
+    "modifySearch": "Modifier la recherche",
+    "resultsFor": "pour",
+    "nearby": "à proximité",
+    "result": "résultat",
+    "results": "résultats",
+    "loading": "Chargement des résultats..."
   },
   "auth": {
     "welcome": "Bienvenue !",

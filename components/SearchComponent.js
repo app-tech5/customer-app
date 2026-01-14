@@ -167,7 +167,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             style={styles.suggestionItem}
             onPress={() => {
               animateSuggestions(false);
-              onSubmit?.(i18n.t('search.nearMe'));
+              onSubmit?.('NEAR_ME_SPECIAL');
             }}
           >
             <Ionicons name="location" size={16} color={colors.primary} />
