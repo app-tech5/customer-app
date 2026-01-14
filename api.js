@@ -187,6 +187,22 @@ class ApiClient {
     return await this.getCategories();
   }
 
+  async searchRestaurantsByCategory(categoryId) {
+    // Rechercher les restaurants par catégorie
+    // Pour l'instant, on retourne tous les restaurants
+    // TODO: Implémenter une route API qui filtre par catégorie
+    const restaurants = await this.getRestaurants();
+    // Filtrage temporaire côté client - à remplacer par filtrage côté serveur
+    if (categoryId && restaurants) {
+      return restaurants.filter(restaurant =>
+        restaurant.categories && restaurant.categories.some(cat =>
+          cat._id === categoryId || cat.id === categoryId || cat === categoryId
+        )
+      );
+    }
+    return restaurants || [];
+  }
+
   // Commandes
   async createOrder(orderData) {
     return await this.apiCall('/resource/orders', {
@@ -377,6 +393,7 @@ export const onAuthStateChanged = (auth, callback) => {
 export const getRestaurantsFromFirebase = () => api.getRestaurants();
 export const getCategories = () => api.getCategories();
 export const getCategoriesFromRestaurant = (restaurantId) => api.getCategoriesFromRestaurant(restaurantId);
+export const searchRestaurantsByCategory = (categoryId) => api.searchRestaurantsByCategory(categoryId);
 export const getOrders = () => api.getOrders();
 export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const userInfos = (userId) => api.getUserInfo(userId);

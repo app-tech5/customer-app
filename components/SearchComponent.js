@@ -171,7 +171,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             }}
           >
             <Ionicons name="location" size={16} color={colors.primary} />
-            <Text style={styles.suggestionText}>{i18n.t('drawer.map') || 'Near me'}</Text>
+            <Text style={styles.suggestionText}>Near me</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.suggestionItem}
@@ -181,7 +181,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             }}
           >
             <Ionicons name="star" size={16} color={colors.primary} />
-            <Text style={styles.suggestionText}>{i18n.t('drawer.offers') || 'Top rated'}</Text>
+            <Text style={styles.suggestionText}>Top rated</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
