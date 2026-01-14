@@ -117,8 +117,8 @@ export default function Offers({ navigation }) {
     if (searchQuery.trim()) {
       filtered = filtered.filter(offer =>
         offer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        offer.location?.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        offer.promotion?.name.toLowerCase().includes(searchQuery.toLowerCase())
+        offer.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        offer.applicableRestaurants.some(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     }
 
@@ -133,12 +133,15 @@ export default function Offers({ navigation }) {
         case 'discount':
           return (b.discount_percentage || 0) - (a.discount_percentage || 0)
         case 'rating':
-          return (b.rating || 0) - (a.rating || 0)
+          // Trier par priorité des promotions
+          return (b.priority || 1) - (a.priority || 1)
         case 'distance':
-          return (a.distance || 0) - (b.distance || 0)
+          // Trier par date d'expiration (plus proche en premier)
+          return new Date(a.endDate) - new Date(b.endDate)
         case 'popularity':
         default:
-          return (b.review_count || 0) - (a.review_count || 0)
+          // Trier par nombre de restaurants applicables
+          return (b.applicableRestaurantsCount || 0) - (a.applicableRestaurantsCount || 0)
       }
     })
   }
@@ -158,8 +161,8 @@ export default function Offers({ navigation }) {
     if (query.trim()) {
       filtered = filtered.filter(offer =>
         offer.name.toLowerCase().includes(query.toLowerCase()) ||
-        offer.location?.city.toLowerCase().includes(query.toLowerCase()) ||
-        offer.promotion?.name.toLowerCase().includes(query.toLowerCase())
+        offer.description.toLowerCase().includes(query.toLowerCase()) ||
+        offer.applicableRestaurants.some(r => r.name.toLowerCase().includes(query.toLowerCase()))
       )
     }
 
@@ -223,7 +226,6 @@ export default function Offers({ navigation }) {
 
   const renderOfferCard = ({ item, index }) => {
     const promotion = item.promotion || {};
-    const restaurant = item.restaurant || {};
 
     return (
       <Animated.View
@@ -234,11 +236,23 @@ export default function Offers({ navigation }) {
       >
         <TouchableOpacity
           style={styles.offerCard}
-          onPress={() => navigation.navigate('RestaurantDetail', { restaurant })}
+          onPress={() => {
+            // Si la promotion s'applique à un seul restaurant, aller directement à ce restaurant
+            if (item.applicableRestaurantsCount === 1) {
+              navigation.navigate('RestaurantDetail', { restaurant: item.applicableRestaurants[0] });
+            } else {
+              // Sinon, naviguer vers les résultats de recherche filtrés par cette promotion
+              navigation.navigate('SearchResults', {
+                name: promotion.name,
+                type: 'promotion',
+                promotionId: item.id
+              });
+            }
+          }}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel={`${promotion.name} offer at ${restaurant.name}. ${promotion.description}`}
-          accessibilityHint="Double tap to view restaurant details and menu"
+          accessibilityLabel={`${promotion.name}. ${promotion.description}. Available at ${item.applicableRestaurantsCount} restaurant${item.applicableRestaurantsCount > 1 ? 's' : ''}`}
+          accessibilityHint="Double tap to see restaurants offering this promotion"
         >
           <View style={styles.offerBadge}>
             <MaterialIcons name="local-offer" size={16} color="white" />
@@ -249,28 +263,37 @@ export default function Offers({ navigation }) {
             </Text>
           </View>
 
-          <Image source={{ uri: promotion.image || restaurant.image }} style={styles.restaurantImage} />
+          <Image source={{ uri: item.image_url }} style={styles.restaurantImage} />
           <View style={styles.restaurantInfo}>
             <Text style={styles.promotionName}>{promotion.name}</Text>
             <Text style={styles.promotionDescription} numberOfLines={2}>
               {promotion.description}
             </Text>
-            <Text style={styles.restaurantName}>{restaurant.name}</Text>
-            <View style={styles.ratingContainer}>
-              <FontAwesome name="star" size={14} color={colors.warning} />
-              <Text style={styles.rating}>{restaurant.rating}</Text>
-              <Text style={styles.reviews}>({restaurant.reviewCount || 0} reviews)</Text>
+
+            <View style={styles.restaurantsCount}>
+              <Ionicons name="restaurant-outline" size={14} color={colors.grey[500]} />
+              <Text style={styles.restaurantsCountText}>
+                Available at {item.applicableRestaurantsCount} restaurant{item.applicableRestaurantsCount > 1 ? 's' : ''}
+              </Text>
             </View>
-            <Text style={styles.location}>{restaurant.location?.city}</Text>
-            <View style={styles.deliveryInfo}>
-              <Ionicons name="time-outline" size={14} color={colors.grey[500]} />
-              <Text style={styles.deliveryTime}>{restaurant.deliveryTime || item.delivery_time} min</Text>
-              {item.free_delivery && (
-                <View style={styles.freeDeliveryBadge}>
-                  <Text style={styles.freeDeliveryText}>Free</Text>
-                </View>
-              )}
-            </View>
+
+            {item.applicableRestaurants && item.applicableRestaurants.length > 0 && (
+              <View style={styles.restaurantPreview}>
+                <Text style={styles.restaurantPreviewText}>
+                  {item.applicableRestaurants.slice(0, 2).map(r => r.name).join(', ')}
+                  {item.applicableRestaurantsCount > 2 && ` +${item.applicableRestaurantsCount - 2} more`}
+                </Text>
+              </View>
+            )}
+
+            {promotion.endDate && (
+              <View style={styles.validityInfo}>
+                <Ionicons name="time-outline" size={14} color={colors.grey[500]} />
+                <Text style={styles.validityText}>
+                  Valid until {new Date(promotion.endDate).toLocaleDateString()}
+                </Text>
+              </View>
+            )}
           </View>
         </TouchableOpacity>
       </Animated.View>
@@ -679,5 +702,36 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '600',
+  },
+
+  // Restaurants count and preview
+  restaurantsCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  restaurantsCountText: {
+    fontSize: 14,
+    color: colors.grey[600],
+    marginLeft: 4,
+  },
+  restaurantPreview: {
+    marginBottom: 8,
+  },
+  restaurantPreviewText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    fontStyle: 'italic',
+  },
+
+  // Validity info
+  validityInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  validityText: {
+    fontSize: 12,
+    color: colors.grey[500],
+    marginLeft: 4,
   },
 })

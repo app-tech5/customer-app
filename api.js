@@ -337,11 +337,10 @@ class ApiClient {
 
       console.log('✅ ACTIVE PROMOTIONS:', activePromotions.length, 'promotions active');
 
-      // Créer une liste d'offres avec les informations des restaurants
-      const offersWithRestaurants = [];
-
-      activePromotions.forEach(promotion => {
-        // Pour chaque promotion active, trouver les restaurants applicables
+      // Créer une liste des promotions avec le nombre de restaurants applicables
+      const promotionsList = activePromotions.map(promotion => {
+        // Compter les restaurants applicables
+        let applicableRestaurantsCount = 0;
         let applicableRestaurants = [];
 
         if (promotion.scope === 'restaurant' && promotion.applicableRestaurants) {
@@ -353,9 +352,11 @@ class ApiClient {
               restId === restaurant.id
             )
           );
+          applicableRestaurantsCount = applicableRestaurants.length;
         } else if (promotion.scope === 'platform') {
           // Promotions pour tous les restaurants
-          applicableRestaurants = allRestaurants;
+          applicableRestaurantsCount = allRestaurants.length;
+          applicableRestaurants = allRestaurants.slice(0, 3); // Montrer les 3 premiers
         } else if (promotion.scope === 'category' && promotion.applicableCategories) {
           // Promotions par catégorie
           applicableRestaurants = allRestaurants.filter(restaurant =>
@@ -363,34 +364,32 @@ class ApiClient {
               promotion.applicableCategories.includes(cat)
             )
           );
+          applicableRestaurantsCount = applicableRestaurants.length;
         }
 
-        // Pour chaque restaurant applicable, créer une entrée d'offre
-        applicableRestaurants.forEach(restaurant => {
-          offersWithRestaurants.push({
-            id: `${promotion._id}-${restaurant.restaurantId}`,
-            promotion: promotion,
-            restaurant: restaurant,
-            // Propriétés pour compatibilité avec l'ancien format
-            discount_percentage: promotion.promotionType === 'percentage_discount' ? promotion.discountValue : 0,
-            free_delivery: promotion.promotionType === 'free_delivery',
-            bogo_offer: promotion.promotionType === 'buy_x_get_y',
-            flash_deal: promotion.promotionType === 'flash_sale',
-            // Informations du restaurant
-            name: restaurant.name,
-            image_url: restaurant.image,
-            rating: restaurant.rating,
-            review_count: restaurant.reviewCount || 0,
-            location: restaurant.location || { city: 'Paris' },
-            delivery_time: restaurant.deliveryTime || Math.floor(Math.random() * 30) + 15,
-            distance: restaurant.distance || Math.floor(Math.random() * 10) + 1
-          });
-        });
+        return {
+          id: promotion._id,
+          promotion: promotion,
+          // Propriétés pour compatibilité avec l'ancien format
+          discount_percentage: promotion.promotionType === 'percentage_discount' ? promotion.discountValue : 0,
+          free_delivery: promotion.promotionType === 'free_delivery',
+          bogo_offer: promotion.promotionType === 'buy_x_get_y',
+          flash_deal: promotion.promotionType === 'flash_sale',
+          // Informations générales
+          name: promotion.name,
+          description: promotion.description,
+          image_url: promotion.image,
+          applicableRestaurantsCount,
+          applicableRestaurants: applicableRestaurants.slice(0, 3), // Montrer max 3 restaurants
+          // Propriétés de tri
+          priority: promotion.priority || 1,
+          endDate: promotion.endDate
+        };
       });
 
-      console.log('🎯 FINAL OFFERS LIST:', offersWithRestaurants.length, 'offers created');
+      console.log('🎯 FINAL PROMOTIONS LIST:', promotionsList.length, 'promotions created');
 
-      return offersWithRestaurants;
+      return promotionsList;
 
     } catch (error) {
       console.error('Error fetching all active offers:', error);
