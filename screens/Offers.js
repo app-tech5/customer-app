@@ -222,14 +222,11 @@ export default function Offers({ navigation }) {
       });
     } else if (promotion.scope === 'category') {
       // Promotion par catégorie : afficher les catégories filtrées dans CategoryResults
-      navigation.navigate('Search', {
-        screen: 'CategoryResults',
-        params: {
-          applicableCategories: promotion.applicableCategories,
-          name: promotion.name,
-          promotionName: promotion.name,
-          fromOffers: true
-        }
+      navigation.navigate('CategoryResults', {
+        applicableCategories: promotion.applicableCategories,
+        name: promotion.name,
+        promotionName: promotion.name,
+        fromOffers: true
       });
     } else if (promotion.scope === 'item') {
       // Promotion sur des items spécifiques : aller vers la recherche par nom de promotion

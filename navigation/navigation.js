@@ -24,6 +24,7 @@ import { LoaderContext } from '../contexts/LoaderContext'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import Settings from '../screens/Settings'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
+import CategoryResults from '../screens/CategoryResults'
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
     const Stack = createStackNavigator();
@@ -46,6 +47,7 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="DrawerNavigator" component={DrawerNavigator}/>
               <Stack.Screen name="OrderRequest" component={OrderRequest}/>
               <Stack.Screen name="OrderCompleted" component={OrderCompleted}/>
+              <Stack.Screen name="CategoryResults" component={CategoryResults}/>
               <Stack.Screen name="Offers" component={Offers}/>
               <Stack.Screen name="Wallet" component={Wallet}/>
               <Stack.Screen name="AddCard" component={AddCard}/>

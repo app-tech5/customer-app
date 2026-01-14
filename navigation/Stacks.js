@@ -108,10 +108,10 @@ export function SearchNavigator() {
           component={SearchResults}
           options={{}}/>
 
-       <SearchStack.Screen
+       {/* <SearchStack.Screen
           name="CategoryResults"
           component={CategoryResults}
-          options={{}}/>
+          options={{}}/> */}
 
     </SearchStack.Navigator>
   )
