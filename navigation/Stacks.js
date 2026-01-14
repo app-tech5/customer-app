@@ -8,6 +8,7 @@ import MyOrdersScreen from '../screens/MyOrdersScreen'
 import OrderDetails from '../screens/OrderDetails'
 import PreferenceScreen from '../components/PreferenceScreen'
 import SearchResults from '../screens/SearchResults'
+import CategoryResults from '../screens/CategoryResults'
 import SearchScreen from '../screens/SearchScreen'
 import OrdersScreen from '../screens/OrdersScreen'
 import OrderRequest from '../screens/OrderRequest'
@@ -102,9 +103,14 @@ export function SearchNavigator() {
           component={SearchScreen}
           options={{headerShown: false}}/>
 
-       <SearchStack.Screen 
+       <SearchStack.Screen
           name="SearchResults"
           component={SearchResults}
+          options={{}}/>
+
+       <SearchStack.Screen
+          name="CategoryResults"
+          component={CategoryResults}
           options={{}}/>
 
     </SearchStack.Navigator>

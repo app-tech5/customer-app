@@ -222,18 +222,16 @@ export default function Offers({ navigation }) {
         }
       });
     } else if (promotion.scope === 'category') {
-      // Promotion par catégorie : aller vers les restaurants de ces catégories
-      const firstCategory = promotion.applicableCategories?.[0];
-      if (firstCategory) {
-        navigation.navigate('Search', {
-          screen: 'SearchResults',
-          params: {
-            name: firstCategory,
-            type: 'category',
-            fromOffers: true
-          }
-        });
-      }
+      // Promotion par catégorie : afficher les catégories filtrées dans CategoryResults
+      navigation.navigate('Search', {
+        screen: 'CategoryResults',
+        params: {
+          applicableCategories: promotion.applicableCategories,
+          name: promotion.name,
+          promotionName: promotion.name,
+          fromOffers: true
+        }
+      });
     } else if (promotion.scope === 'item') {
       // Promotion sur des items spécifiques : aller vers la recherche par nom de promotion
       navigation.navigate('Search', {
