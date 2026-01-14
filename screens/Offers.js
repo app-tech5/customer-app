@@ -207,7 +207,8 @@ export default function Offers({ navigation }) {
         screen: 'SearchResults',
         params: {
           name: promotion.name,
-          type: 'restaurant'
+          type: 'restaurant',
+          fromOffers: true
         }
       });
     } else if (promotion.scope === 'platform') {
@@ -216,7 +217,8 @@ export default function Offers({ navigation }) {
         screen: 'SearchResults',
         params: {
           name: 'ALL_RESTAURANTS',
-          type: 'restaurant'
+          type: 'restaurant',
+          fromOffers: true
         }
       });
     } else if (promotion.scope === 'category') {
@@ -227,7 +229,8 @@ export default function Offers({ navigation }) {
           screen: 'SearchResults',
           params: {
             name: firstCategory,
-            type: 'category'
+            type: 'category',
+            fromOffers: true
           }
         });
       }
@@ -237,7 +240,8 @@ export default function Offers({ navigation }) {
         screen: 'SearchResults',
         params: {
           name: promotion.name,
-          type: 'restaurant' // Ou 'product' si on a un écran produit
+          type: 'restaurant', // Ou 'product' si on a un écran produit
+          fromOffers: true
         }
       });
     } else {

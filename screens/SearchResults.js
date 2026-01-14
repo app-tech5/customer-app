@@ -15,9 +15,13 @@ export default function SearchResults({route, navigation}) {
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [cameFromOffers, setCameFromOffers] = useState(false)
 
   useEffect(()=>{
-    const { categoryId, name, type } = route.params
+    const { categoryId, name, type, fromOffers } = route.params
+
+    // Vérifier si on vient de l'écran Offers
+    setCameFromOffers(fromOffers === true)
 
     // Réinitialiser les états
     setLoader(true)
@@ -139,9 +143,30 @@ export default function SearchResults({route, navigation}) {
     }
 
     setSearchQuery(displayQuery)
-    navigation.setOptions({title})
+    // Configurer le header avec bouton back personnalisé
+    navigation.setOptions({
+      title,
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            if (cameFromOffers) {
+              // Si on vient de Offers, retourner à Offers
+              navigation.navigate('Offers')
+            } else {
+              // Sinon, comportement normal
+              navigation.goBack()
+            }
+          }}
+          style={{ padding: 10, marginLeft: 5 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+      )
+    })
 
-  }, [route.params])
+  }, [route.params, cameFromOffers])
 
   // Composant pour l'état vide
   const EmptyState = ({ query, isError }) => (

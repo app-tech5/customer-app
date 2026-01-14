@@ -54,7 +54,7 @@ export const ArrowBack = (props)=>{
       type="material-community"
       color="black"
       size={25}
-      onPress={()=>props.navigation.navigate('Search')}
+      onPress={()=>props.navigation.navigate('Search', { screen: 'SearchScreen' })}
 
     />
 </View>
