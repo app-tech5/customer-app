@@ -15,10 +15,10 @@ export const colors = {
   // === ÉCHELLE DE GRIS ===
   grey: {
     50: '#f8f9fa',    // Très clair
-    100: '#e9ecef',   // Clair
-    200: '#dee2e6',   // Moyen-clair
+    100: '#eee',      // Très clair - vraie valeur originale
+    200: '#d9d9d9',   // Clair - vraie valeur originale
     300: '#ced4da',   // Moyen
-    400: '#adb5bd',   // Moyen-foncé
+    400: '#ccc',      // Moyen-clair - vraie valeur originale
     500: '#6c757d',   // Standard
     600: '#5e6977',   // Fonçé
     700: '#43484d',   // Très foncé
@@ -27,14 +27,14 @@ export const colors = {
   },
 
   // === COULEURS D'ACCENT ===
-  primary: '#FF6B35',     // Orange principal (brand)
-  secondary: '#4CAF50',   // Vert secondaire
-  accent: '#FFD700',      // Doré pour les ratings
+  primary: '#000000',     // Noir - vraie couleur principale originale
+  secondary: '#ffffff',   // Blanc - vraie couleur secondaire originale
+  accent: '#FFD700',      // Doré - conservé pour les ratings
 
   // === PALETTE FONCTIONNELLE ===
-  success: '#4CAF50',     // Succès/ouvert
+  success: '#3d5c5c',     // Vert - couleur cohérente avec auth
   warning: '#FF9800',     // Avertissement
-  error: '#F44336',       // Erreur
+  error: '#800000',       // Rouge foncé - couleur cohérente avec ads
   info: '#2196F3',        // Information
 
   // === COULEURS SPÉCIFIQUES UI ===
@@ -47,7 +47,7 @@ export const colors = {
 
   text: {
     primary: '#111111',   // Texte principal
-    secondary: '#666666', // Texte secondaire
+    secondary: '#666',    // Gris foncé - vraie couleur secondaire originale
     muted: '#6c757d',     // Texte atténué
     white: '#ffffff',     // Texte blanc
   },
