@@ -20,7 +20,7 @@ export default function Offers({ navigation }) {
   const [sortBy, setSortBy] = useState('popularity')
   const [isLoading, setIsLoading] = useState(false)
   const [filteredOffers, setFilteredOffers] = useState([])
-  const [allRestaurantsWithOffers, setAllRestaurantsWithOffers] = useState([])
+  const [allPromotions, setAllPromotions] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
@@ -67,23 +67,23 @@ export default function Offers({ navigation }) {
   const loadOffers = async () => {
     setIsLoading(true)
     try {
-      console.log('🔥 LOADING OFFERS FROM BACKEND...')
+      console.log('🔥 LOADING PROMOTIONS FROM BACKEND...')
 
-      // Récupérer toutes les offres actives depuis le backend
-      const offersFromBackend = await getAllActiveOffers()
+      // Récupérer toutes les promotions actives depuis le backend
+      const promotionsFromBackend = await getAllActiveOffers()
 
-      console.log('✅ OFFERS RECEIVED:', offersFromBackend.length, 'offers from backend')
+      console.log('✅ PROMOTIONS RECEIVED:', promotionsFromBackend.length, 'promotions from backend')
 
-      // Stocker toutes les données avec offres pour les filtres
-      setAllRestaurantsWithOffers(offersFromBackend)
-      setFilteredOffers(offersFromBackend)
+      // Stocker toutes les promotions pour les filtres
+      setAllPromotions(promotionsFromBackend)
+      setFilteredOffers(promotionsFromBackend)
 
-      console.log('🎯 OFFERS LOADED SUCCESSFULLY:', offersFromBackend.length, 'offers ready for display')
+      console.log('🎯 PROMOTIONS LOADED SUCCESSFULLY:', promotionsFromBackend.length, 'promotions ready for display')
 
     } catch (error) {
-      console.error('❌ Error loading offers from backend:', error)
+      console.error('❌ Error loading promotions from backend:', error)
       // En cas d'erreur, afficher un état vide au lieu de planter
-      setAllRestaurantsWithOffers([])
+      setAllPromotions([])
       setFilteredOffers([])
     } finally {
       setIsLoading(false)
@@ -93,24 +93,33 @@ export default function Offers({ navigation }) {
   const filterOffers = (category) => {
     setActiveCategory(category)
 
-    // Commencer avec tous les restaurants qui ont des offres
-    let filtered = [...allRestaurantsWithOffers]
+    // Commencer avec toutes les promotions
+    let filtered = [...allPromotions]
 
     if (category !== 'all') {
-      filtered = filtered.filter(restaurant => {
+      filtered = filtered.filter(offer => {
         switch (category) {
           case 'discount':
-            return restaurant.discount_percentage > 0
+            return offer.discount_percentage > 0
           case 'free_delivery':
-            return restaurant.free_delivery === true
+            return offer.free_delivery
           case 'buy_one_get_one':
-            return restaurant.bogo_offer === true
+            return offer.bogo_offer
           case 'flash':
-            return restaurant.flash_deal === true
+            return offer.flash_deal
           default:
             return true
         }
       })
+    }
+
+    // Appliquer la recherche si elle existe
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(offer =>
+        offer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        offer.location?.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        offer.promotion?.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     }
 
     // Appliquer le tri
@@ -142,32 +151,30 @@ export default function Offers({ navigation }) {
 
   const handleSearch = (query) => {
     setSearchQuery(query)
-    let filtered = restaurants.filter(restaurant =>
-      restaurant.discount_percentage > 0 ||
-      restaurant.free_delivery ||
-      restaurant.bogo_offer ||
-      restaurant.flash_deal
-    )
+
+    // Commencer avec toutes les promotions
+    let filtered = [...allPromotions]
 
     if (query.trim()) {
-      filtered = filtered.filter(restaurant =>
-        restaurant.name.toLowerCase().includes(query.toLowerCase()) ||
-        restaurant.location?.city.toLowerCase().includes(query.toLowerCase())
+      filtered = filtered.filter(offer =>
+        offer.name.toLowerCase().includes(query.toLowerCase()) ||
+        offer.location?.city.toLowerCase().includes(query.toLowerCase()) ||
+        offer.promotion?.name.toLowerCase().includes(query.toLowerCase())
       )
     }
 
     // Appliquer les filtres actifs
     if (activeCategory !== 'all') {
-      filtered = filtered.filter(restaurant => {
+      filtered = filtered.filter(offer => {
         switch (activeCategory) {
           case 'discount':
-            return restaurant.discount_percentage > 0
+            return offer.discount_percentage > 0
           case 'free_delivery':
-            return restaurant.free_delivery === true
+            return offer.free_delivery
           case 'buy_one_get_one':
-            return restaurant.bogo_offer === true
+            return offer.bogo_offer
           case 'flash':
-            return restaurant.flash_deal === true
+            return offer.flash_deal
           default:
             return true
         }
@@ -214,52 +221,61 @@ export default function Offers({ navigation }) {
     </TouchableOpacity>
   )
 
-  const renderOfferCard = ({ item, index }) => (
-    <Animated.View
-      style={{
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }]
-      }}
-    >
-      <TouchableOpacity
-        style={styles.offerCard}
-        onPress={() => navigation.navigate('RestaurantDetail', { restaurant: item })}
-        activeOpacity={0.8}
-        accessibilityRole="button"
-        accessibilityLabel={`${item.name} restaurant with ${item.discount_percentage ? item.discount_percentage + '% discount' : item.free_delivery ? 'free delivery' : 'special offer'}. Rating ${item.rating} out of 5 stars. Delivery in ${item.delivery_time} minutes.`}
-        accessibilityHint="Double tap to view restaurant details and menu"
-      >
-        <View style={styles.offerBadge}>
-          <MaterialIcons name="local-offer" size={16} color="white" />
-          <Text style={styles.offerBadgeText}>
-            {item.discount_percentage ? `${item.discount_percentage}% OFF` :
-             item.free_delivery ? 'FREE DELIVERY' :
-             item.bogo_offer ? 'BUY 1 GET 1' : 'SPECIAL OFFER'}
-          </Text>
-        </View>
+  const renderOfferCard = ({ item, index }) => {
+    const promotion = item.promotion || {};
+    const restaurant = item.restaurant || {};
 
-        <Image source={{ uri: item.image_url }} style={styles.restaurantImage} />
-        <View style={styles.restaurantInfo}>
-          <Text style={styles.restaurantName}>{item.name}</Text>
-          <View style={styles.ratingContainer}>
-            <FontAwesome name="star" size={14} color={colors.warning} />
-            <Text style={styles.rating}>{item.rating}</Text>
-            <Text style={styles.reviews}>({item.review_count} reviews)</Text>
+    return (
+      <Animated.View
+        style={{
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }]
+        }}
+      >
+        <TouchableOpacity
+          style={styles.offerCard}
+          onPress={() => navigation.navigate('RestaurantDetail', { restaurant })}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={`${promotion.name} offer at ${restaurant.name}. ${promotion.description}`}
+          accessibilityHint="Double tap to view restaurant details and menu"
+        >
+          <View style={styles.offerBadge}>
+            <MaterialIcons name="local-offer" size={16} color="white" />
+            <Text style={styles.offerBadgeText}>
+              {item.discount_percentage ? `${item.discount_percentage}% OFF` :
+               item.free_delivery ? 'FREE DELIVERY' :
+               item.bogo_offer ? 'BUY 1 GET 1' : 'SPECIAL OFFER'}
+            </Text>
           </View>
-          <Text style={styles.location}>{item.location?.city}</Text>
-          <View style={styles.deliveryInfo}>
-            <Ionicons name="time-outline" size={14} color={colors.grey[500]} />
-            <Text style={styles.deliveryTime}>{item.delivery_time} min</Text>
-            {item.free_delivery && (
-              <View style={styles.freeDeliveryBadge}>
-                <Text style={styles.freeDeliveryText}>Free</Text>
-              </View>
-            )}
+
+          <Image source={{ uri: promotion.image || restaurant.image }} style={styles.restaurantImage} />
+          <View style={styles.restaurantInfo}>
+            <Text style={styles.promotionName}>{promotion.name}</Text>
+            <Text style={styles.promotionDescription} numberOfLines={2}>
+              {promotion.description}
+            </Text>
+            <Text style={styles.restaurantName}>{restaurant.name}</Text>
+            <View style={styles.ratingContainer}>
+              <FontAwesome name="star" size={14} color={colors.warning} />
+              <Text style={styles.rating}>{restaurant.rating}</Text>
+              <Text style={styles.reviews}>({restaurant.reviewCount || 0} reviews)</Text>
+            </View>
+            <Text style={styles.location}>{restaurant.location?.city}</Text>
+            <View style={styles.deliveryInfo}>
+              <Ionicons name="time-outline" size={14} color={colors.grey[500]} />
+              <Text style={styles.deliveryTime}>{restaurant.deliveryTime || item.delivery_time} min</Text>
+              {item.free_delivery && (
+                <View style={styles.freeDeliveryBadge}>
+                  <Text style={styles.freeDeliveryText}>Free</Text>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
-      </TouchableOpacity>
-    </Animated.View>
-  )
+        </TouchableOpacity>
+      </Animated.View>
+    )
+  }
 
   const renderSortButton = ({ item }) => (
     <TouchableOpacity
@@ -375,12 +391,12 @@ export default function Offers({ navigation }) {
         <View style={styles.emptyState}>
           <MaterialIcons name="local-offer" size={64} color={colors.grey[300]} />
           <Text style={styles.emptyStateTitle}>
-            {searchQuery ? 'No matching offers' : 'No deals found'}
+            {searchQuery ? 'No matching offers' : 'No promotions found'}
           </Text>
           <Text style={styles.emptyStateText}>
             {searchQuery
-              ? `No offers found for "${searchQuery}". Try different search terms or browse all categories.`
-              : 'Check back later for amazing offers from your favorite restaurants!'
+              ? `No promotions found for "${searchQuery}". Try different search terms or browse all categories.`
+              : 'Check back later for amazing promotions from your favorite restaurants!'
             }
           </Text>
           {searchQuery && (
@@ -388,7 +404,7 @@ export default function Offers({ navigation }) {
               style={styles.clearSearchButton}
               onPress={() => handleSearch('')}
               accessibilityRole="button"
-              accessibilityLabel="Clear search and show all offers"
+              accessibilityLabel="Clear search and show all promotions"
             >
               <Text style={styles.clearSearchText}>Clear Search</Text>
             </TouchableOpacity>
@@ -568,10 +584,22 @@ const styles = StyleSheet.create({
   restaurantInfo: {
     flex: 1,
   },
-  restaurantName: {
+  promotionName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.text.primary,
+    marginBottom: 4,
+  },
+  promotionDescription: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  restaurantName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
     marginBottom: 4,
   },
   ratingContainer: {
