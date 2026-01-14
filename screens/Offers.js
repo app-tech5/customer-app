@@ -384,7 +384,7 @@ export default function Offers({ navigation }) {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.navigate('SearchScreen')}
+            onPress={() => navigation.navigate('Search', { screen: 'SearchScreen' })}
             accessibilityRole="button"
             accessibilityLabel="Search offers"
             accessibilityHint="Navigate to search screen"
