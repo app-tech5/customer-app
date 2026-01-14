@@ -5,7 +5,6 @@ import {
 } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { AntDesign, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
-import { ArrowBack } from '../components/restaurantDetail/About'
 import { restaurants } from '../data'
 import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantItems'
 import Reward from '../components/Reward'
@@ -378,7 +377,14 @@ export default function Offers({ navigation }) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <ArrowBack navigation={navigation} />
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => navigation.openDrawer()}
+          accessibilityRole="button"
+          accessibilityLabel="Open menu"
+        >
+          <Ionicons name="menu" size={24} color={colors.grey[600]} />
+        </TouchableOpacity>
         <Text style={styles.title}>Special Offers</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity
