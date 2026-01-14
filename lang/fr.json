@@ -32,6 +32,8 @@
     "noResults": "Aucun résultat trouvé",
     "noResultsTitle": "Aucun restaurant trouvé",
     "noResultsSubtitle": "Essayez de modifier vos critères de recherche",
+    "noItemsTitle": "Aucun article trouvé",
+    "noItemsSubtitle": "Essayez d'autres termes de recherche ou revenez plus tard",
     "errorTitle": "Erreur de chargement",
     "errorSubtitle": "Vérifiez votre connexion internet et réessayez",
     "locationPermissionDenied": "Permission de géolocalisation refusée. Activez la localisation pour voir les restaurants proches.",

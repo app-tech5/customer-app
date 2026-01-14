@@ -1,5 +1,6 @@
 // API Client pour remplacer Firebase
 import { config } from './config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const API_BASE_URL = config.API_BASE_URL;
 
 class ApiClient {
@@ -549,6 +550,30 @@ export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const userInfos = (userId) => api.getUserInfo(userId);
 export const updateUser = (userData, userId) => api.updateUser(userId, userData);
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
+
+// Récupérer tous les menus depuis la collection menus
+export const getAllMenus = async () => {
+  try {
+    // Récupérer tous les menus via l'API backend
+    const response = await fetch(`${API_BASE_URL}/resource/menus`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const menus = await response.json();
+    console.log('🍽️ Retrieved', menus.length, 'menus from backend');
+    return menus;
+  } catch (error) {
+    console.error('Error fetching all menus:', error);
+    return [];
+  }
+};
 export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
 export const getDeliverySettings = () => api.getDeliverySettings();
 export const getAllActiveOffers = () => api.getAllActiveOffers();
@@ -556,6 +581,32 @@ export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromot
 
 // GESTION DES FAVORIS
 export const getFavorites = () => api.getFavorites();
+
+// Récupérer tous les items/plats de tous les restaurants
+export const getAllMenuItems = async () => {
+  try {
+    console.log('🍽️ Fetching all menus from backend...');
+
+    // Récupérer directement tous les menus depuis la collection menus
+    const allMenus = await getAllMenus();
+
+    console.log('✅ Retrieved', allMenus.length, 'menus from backend');
+
+    // Transformer les menus pour le format attendu par ItemResults
+    const allItems = allMenus.map(menu => ({
+      ...menu,
+      restaurantId: menu.restaurant || menu.restaurants?.value,
+      restaurantName: menu.restaurants?.label,
+      // Conserver la référence complète du menu
+    }));
+
+    console.log('🍽️ Processed', allItems.length, 'menu items');
+    return allItems;
+  } catch (error) {
+    console.error('Error fetching all menu items:', error);
+    return [];
+  }
+};
 export const addToFavorites = (restaurantId) => api.addToFavorites(restaurantId);
 export const removeFromFavorites = (restaurantId) => api.removeFromFavorites(restaurantId);
 

@@ -32,6 +32,8 @@
     "noResults": "No results found",
     "noResultsTitle": "No restaurants found",
     "noResultsSubtitle": "Try modifying your search criteria",
+    "noItemsTitle": "No items found",
+    "noItemsSubtitle": "Try different search terms or check back later",
     "errorTitle": "Loading error",
     "errorSubtitle": "Check your internet connection and try again",
     "locationPermissionDenied": "Location permission denied. Enable location to see nearby restaurants.",

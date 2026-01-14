@@ -25,6 +25,7 @@ import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import Settings from '../screens/Settings'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 import CategoryResults from '../screens/CategoryResults'
+import ItemResults from '../screens/ItemResults'
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
     const Stack = createStackNavigator();
@@ -48,6 +49,7 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="OrderRequest" component={OrderRequest}/>
               <Stack.Screen name="OrderCompleted" component={OrderCompleted}/>
               <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
+              <Stack.Screen name="ItemResults" component={ItemResults} options={{ headerShown: true }} />
               <Stack.Screen name="Offers" component={Offers}/>
               <Stack.Screen name="Wallet" component={Wallet}/>
               <Stack.Screen name="AddCard" component={AddCard}/>

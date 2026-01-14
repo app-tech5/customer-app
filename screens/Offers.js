@@ -229,14 +229,12 @@ export default function Offers({ navigation }) {
         fromOffers: true
       });
     } else if (promotion.scope === 'item') {
-      // Promotion sur des items spécifiques : aller vers la recherche par nom de promotion
-      navigation.navigate('Search', {
-        screen: 'SearchResults',
-        params: {
-          name: promotion.name,
-          type: 'restaurant', // Ou 'product' si on a un écran produit
-          fromOffers: true
-        }
+      // Promotion sur des items spécifiques : afficher les items filtrés dans ItemResults
+      navigation.navigate('ItemResults', {
+        applicableItems: promotion.applicableItems,
+        name: promotion.name,
+        promotionName: promotion.name,
+        fromOffers: true
       });
     } else {
       console.log('❓ Unknown scope for promotion:', promotion.name, promotion.scope);
