@@ -156,12 +156,12 @@ export default function SearchScreen({ navigation }) {
               <QuickActionButton
                 icon={<Ionicons name="location" size={24} color="white" />}
                 title="Near Me"
-                onPress={() => navigation.navigate('RestaurantsMapScreen')}
+                onPress={() => performSearch('NEAR_ME_SPECIAL')}
               />
               <QuickActionButton
                 icon={<FontAwesome name="star" size={24} color="white" />}
                 title="Top Rated"
-                onPress={() => performSearch('top rated')}
+                onPress={() => performSearch('TOP_RATED_SPECIAL')}
               />
               <QuickActionButton
                 icon={<MaterialIcons name="local-offer" size={24} color="white" />}
