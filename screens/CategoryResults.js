@@ -172,10 +172,19 @@ export default function CategoryResults({route, navigation}) {
           keyExtractor={(item, index) => String(index)}
           renderItem={({item}) => (
             <TouchableOpacity
-              onPress={() => navigation.navigate('SearchResults', {
-                categoryId: item._id || item.id,
-                name: item.name,
-                type: 'restaurant'
+              onPress={() => navigation.navigate('DrawerNavigator', {
+                screen: 'BottomTabs',
+                params: {
+                  screen: 'Search',
+                  params: {
+                    screen: 'SearchResults',
+                    params: {
+                      categoryId: item._id || item.id,
+                      name: item.name,
+                      type: 'restaurant'
+                    }
+                  }
+                }
               })}
               style={styles.categoryItem}
               activeOpacity={0.7}
