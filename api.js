@@ -188,16 +188,19 @@ class ApiClient {
     return await this.getCategories();
   }
 
-  async searchRestaurantsByCategory(categoryId) {
-    // Rechercher les restaurants par catégorie
+  async searchRestaurantsByCategory(categoryIdentifier) {
+    // Rechercher les restaurants par catégorie (ID ou alias)
     // Pour l'instant, on retourne tous les restaurants
     // TODO: Implémenter une route API qui filtre par catégorie
     const restaurants = await this.getRestaurants();
     // Filtrage temporaire côté client - à remplacer par filtrage côté serveur
-    if (categoryId && restaurants) {
+    if (categoryIdentifier && restaurants) {
       return restaurants.filter(restaurant =>
         restaurant.categories && restaurant.categories.some(cat =>
-          cat._id === categoryId || cat.id === categoryId || cat === categoryId
+          cat._id === categoryIdentifier ||
+          cat.id === categoryIdentifier ||
+          cat.alias === categoryIdentifier ||
+          cat === categoryIdentifier
         )
       );
     }

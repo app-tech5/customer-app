@@ -19,7 +19,7 @@ export default function SearchResults({route, navigation}) {
   const [displayMode, setDisplayMode] = useState('restaurants')
 
   useEffect(()=>{
-    const { categoryId, name, type, fromOffers, applicableRestaurants, promotionScope } = route.params
+    const { categoryId, categoryAlias, name, type, fromOffers, applicableRestaurants, promotionScope } = route.params
 
     // Vérifier si on vient de l'écran Offers
     setCameFromOffers(fromOffers === true)
@@ -63,9 +63,11 @@ export default function SearchResults({route, navigation}) {
           setDisplayMode('restaurants')
           return // ← SORTIR DE LA FONCTION APRÈS LE FILTRAGE
         }
-        // Si on a un categoryId, c'est une recherche par catégorie
+        // Si on a un categoryId (legacy) ou categoryAlias, c'est une recherche par catégorie
         if (categoryId) {
           restaurantsResult = await searchRestaurantsByCategory(categoryId)
+        } else if (categoryAlias) {
+          restaurantsResult = await searchRestaurantsByCategory(categoryAlias)
         }
         // Si c'est une recherche "Top rated" spéciale
         else if (name === 'TOP_RATED_SPECIAL') {
