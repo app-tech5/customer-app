@@ -273,14 +273,16 @@ export default function SearchResults({route, navigation}) {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={() => {
-                // Navigation vers RestaurantDetail via HomeNavigator
-                // Ajouter un paramètre pour indiquer qu'on vient d'une promotion
-                navigation.navigate('Home', {
-                  screen: 'RestaurantDetail',
+                // Navigation vers RestaurantDetail via BottomTabs -> Home -> RestaurantDetail
+                navigation.navigate('BottomTabs', {
+                  screen: 'Home',
                   params: {
-                    restaurant: item,
-                    fromPromotion: true,
-                    promotionName: name
+                    screen: 'RestaurantDetail',
+                    params: {
+                      restaurant: item,
+                      fromPromotion: cameFromOffers,
+                      promotionName: route.params?.name || undefined
+                    }
                   }
                 });
               }}
