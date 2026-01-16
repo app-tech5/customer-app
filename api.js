@@ -159,18 +159,38 @@ class ApiClient {
     });
   }
 
+  // // Restaurants
+  // async getRestaurants() {
+  //   const response = await this.apiCall('/resource/restaurants');
+  //   return response.map(restaurant => ({
+  //     restaurantId: restaurant._id || restaurant.id,
+  //     ...restaurant,
+  //   }));
+  // }
+
+  // async getRestaurantById(id) {
+  //   return await this.apiCall(`/resource/restaurants/${id}`);
+  // }
+
   // Restaurants
   async getRestaurants() {
     const response = await this.apiCall('/resource/restaurants');
-    return response.map(restaurant => ({
-      restaurantId: restaurant._id || restaurant.id,
-      ...restaurant,
-    }));
+    return response.map(restaurant => this.normalizeRestaurant(restaurant));
   }
 
   async getRestaurantById(id) {
-    return await this.apiCall(`/resource/restaurants/${id}`);
+    const restaurant = await this.apiCall(`/resource/restaurants/${id}`);
+    return this.normalizeRestaurant(restaurant);
   }
+
+  // Normalisation centrale
+  normalizeRestaurant(restaurant) {
+    return {
+      restaurantId: restaurant._id || restaurant.id,
+      ...restaurant,
+    };
+  }
+
 
   // Catégories
   async getCategories() {
@@ -311,8 +331,8 @@ class ApiClient {
       const activePromotions = allPromotions.filter(promotion => {
         const now = new Date();
         const isActive = promotion.isActive &&
-                        now >= new Date(promotion.startDate) &&
-                        now <= new Date(promotion.endDate);
+          now >= new Date(promotion.startDate) &&
+          now <= new Date(promotion.endDate);
 
         // Vérifier les happy hours si elles existent
         if (promotion.happyHours && promotion.happyHours.length > 0) {
@@ -459,8 +479,8 @@ class ApiClient {
         // Vérifier si la promotion est active
         const now = new Date();
         const isActive = promotion.isActive &&
-                        now >= new Date(promotion.startDate) &&
-                        now <= new Date(promotion.endDate);
+          now >= new Date(promotion.startDate) &&
+          now <= new Date(promotion.endDate);
 
 
         if (!isActive) return false;
@@ -473,9 +493,9 @@ class ApiClient {
 
           // Vérifier si applicableRestaurants existe et contient l'ID du restaurant
           const hasApplicableRestaurants = promotion.applicableRestaurants &&
-                                         Array.isArray(promotion.applicableRestaurants);
+            Array.isArray(promotion.applicableRestaurants);
           const includesRestaurantId = hasApplicableRestaurants &&
-                                     promotion.applicableRestaurants.includes(restaurantId);
+            promotion.applicableRestaurants.includes(restaurantId);
 
 
           return includesRestaurantId;
