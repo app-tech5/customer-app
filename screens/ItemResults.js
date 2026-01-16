@@ -189,29 +189,46 @@ export default function ItemResults({route, navigation}) {
           keyExtractor={(item, index) => String(item._id || item.id || index)}
           renderItem={({item}) => (
             <TouchableOpacity
-              onPress={() => {
+              onPress={async () => {
                 // Navigation vers le restaurant qui contient cet item
                 if (item.restaurantId) {
-                  // navigation.navigate('RestaurantDetail', {
-                  //   restaurant: { _id: item.restaurantId },
-                  //   fromPromotion: true,
-                  //   //promotionName: name
-                  // })
+                  try {
+                    console.log('🏪 Item data:---->', item);
+                    console.log('🏪 Fetching restaurant data for ID:', item.restaurantId);
+                    // Récupérer les données complètes du restaurant
+                    const restaurantData = await getRestaurantById(item.restaurantId);
+                    console.log('🏪 Restaurant data fetched:', restaurantData?.name);
 
-                  navigation.navigate('DrawerNavigator', {
-                    screen: 'BottomTabs',
-                    params: {
-                      screen: 'Home',
+                    navigation.navigate('DrawerNavigator', {
+                      screen: 'BottomTabs',
                       params: {
-                        screen: 'RestaurantDetail',
+                        screen: 'Home',
                         params: {
-                          restaurant: { _id: item.restaurantId /* ou item.restaurantId._id selon vos données */ },
-                          fromPromotion: true,
+                          screen: 'RestaurantDetail',
+                          params: {
+                            restaurant: restaurantData,
+                            fromPromotion: true,
+                          }
                         }
                       }
-                    }
-                  });
-
+                    });
+                  } catch (error) {
+                    console.error('❌ Error fetching restaurant:', error);
+                    // Fallback avec données minimales
+                    navigation.navigate('DrawerNavigator', {
+                      screen: 'BottomTabs',
+                      params: {
+                        screen: 'Home',
+                        params: {
+                          screen: 'RestaurantDetail',
+                          params: {
+                            restaurant: { _id: item.restaurantId, name: 'Restaurant' },
+                            fromPromotion: true,
+                          }
+                        }
+                      }
+                    });
+                  }
                 }
               }}
               style={styles.itemCard}
