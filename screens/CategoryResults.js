@@ -179,7 +179,7 @@ export default function CategoryResults({route, navigation}) {
                   params: {
                     screen: 'SearchResults',
                     params: {
-                      categoryAlias: item.alias,
+                      categoryName: item.name,
                       name: item.name,
                       type: 'restaurant'
                     }

@@ -199,7 +199,7 @@ class ApiClient {
         restaurant.categories && restaurant.categories.some(cat =>
           cat._id === categoryIdentifier ||
           cat.id === categoryIdentifier ||
-          cat.alias === categoryIdentifier ||
+          cat.title === categoryIdentifier ||
           cat === categoryIdentifier
         )
       );
