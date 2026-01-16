@@ -90,12 +90,20 @@ export default function CategoryResults({route, navigation}) {
 
     console.log('🎯 CategoryResults - Navigation setup:', { cameFromOffers, promotionName, name })
 
-    // Ajouter arrow back standard au header
+    // Ajouter arrow back qui revient toujours à Offers pour les promotions
     navigation.setOptions({
       title,
       headerLeft: () => (
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            // Pour les promotions, revenir toujours à Offers
+            if (cameFromOffers || promotionName) {
+              navigation.navigate('Offers')
+            } else {
+              // Sinon, comportement normal
+              navigation.goBack()
+            }
+          }}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
           accessibilityLabel="Go back"
