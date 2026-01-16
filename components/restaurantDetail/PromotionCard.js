@@ -37,7 +37,7 @@ export default function PromotionCard({ promotion }) {
       case 'buy_x_get_y':
         return { ...baseConfig, icon: 'gift-outline', color: '#FF69B4' }
       case 'combo_deal':
-        return { ...baseConfig, icon: 'food-variant-outline', color: colors.warning }
+        return { ...baseConfig, icon: 'food-outline', color: colors.warning }
       case 'flash_sale':
         return { ...baseConfig, icon: 'lightning-bolt-outline', color: colors.error }
       case 'happy_hour':
