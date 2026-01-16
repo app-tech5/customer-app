@@ -192,11 +192,26 @@ export default function ItemResults({route, navigation}) {
               onPress={() => {
                 // Navigation vers le restaurant qui contient cet item
                 if (item.restaurantId) {
-                  navigation.navigate('RestaurantDetail', {
-                    restaurant: { _id: item.restaurantId },
-                    fromPromotion: true,
-                    //promotionName: name
-                  })
+                  // navigation.navigate('RestaurantDetail', {
+                  //   restaurant: { _id: item.restaurantId },
+                  //   fromPromotion: true,
+                  //   //promotionName: name
+                  // })
+
+                  navigation.navigate('DrawerNavigator', {
+                    screen: 'BottomTabs',
+                    params: {
+                      screen: 'Home',
+                      params: {
+                        screen: 'RestaurantDetail',
+                        params: {
+                          restaurant: { _id: item.restaurantId /* ou item.restaurantId._id selon vos données */ },
+                          fromPromotion: true,
+                        }
+                      }
+                    }
+                  });
+
                 }
               }}
               style={styles.itemCard}
