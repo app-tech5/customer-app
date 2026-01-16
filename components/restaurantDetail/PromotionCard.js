@@ -25,7 +25,7 @@ export default function PromotionCard({ promotion }) {
       subtitle: promotion.description, // VIENT DE LA DB
       color: colors.accent
     }
-
+    console.log("promotion.promotionType", promotion.promotionType);
     // Icônes raffinées selon la charte Material Design
     switch (promotion.promotionType) {
       case 'percentage_discount':
@@ -35,7 +35,7 @@ export default function PromotionCard({ promotion }) {
       case 'free_delivery':
         return { ...baseConfig, icon: 'truck-delivery-outline', color: colors.primary }
       case 'buy_x_get_y':
-        return { ...baseConfig, icon: 'gift-outline', color: colors.secondary }
+        return { ...baseConfig, icon: 'gift-outline', color: '#FF69B4' }
       case 'combo_deal':
         return { ...baseConfig, icon: 'food-variant-outline', color: colors.warning }
       case 'flash_sale':
