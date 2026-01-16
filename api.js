@@ -610,6 +610,7 @@ export const getAllMenuItems = async () => {
     return [];
   }
 };
+export const getRestaurantById = (id) => api.getRestaurantById(id);
 export const addToFavorites = (restaurantId) => api.addToFavorites(restaurantId);
 export const removeFromFavorites = (restaurantId) => api.removeFromFavorites(restaurantId);
 
