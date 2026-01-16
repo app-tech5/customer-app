@@ -195,7 +195,7 @@ export default function ItemResults({route, navigation}) {
                   navigation.navigate('RestaurantDetail', {
                     restaurant: { _id: item.restaurantId },
                     fromPromotion: true,
-                    promotionName: name
+                    //promotionName: name
                   })
                 }
               }}
