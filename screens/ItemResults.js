@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
 import i18n from '../i18n'
-import { getAllMenuItems } from '../api'
+import { getAllMenuItems, getRestaurantById } from '../api'
 
 export default function ItemResults({route, navigation}) {
   const [itemData, setItemData] = useState([])
@@ -194,9 +194,9 @@ export default function ItemResults({route, navigation}) {
                 if (item.restaurantId) {
                   try {
                     console.log('🏪 Item data:---->', item);
-                    console.log('🏪 Fetching restaurant data for ID:', item.restaurantId);
+                    console.log('🏪 Fetching restaurant data for ID:', item.restaurantId._id);
                     // Récupérer les données complètes du restaurant
-                    const restaurantData = await getRestaurantById(item.restaurantId);
+                    const restaurantData = await getRestaurantById(item.restaurantId._id);
                     console.log('🏪 Restaurant data fetched:', restaurantData?.name);
 
                     navigation.navigate('DrawerNavigator', {
