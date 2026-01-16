@@ -55,10 +55,10 @@ export function HomeNavigator() {
           options={{headerShown: false}}/>
 
 
-<HomeStack.Screen 
+{/* <HomeStack.Screen 
           name="SearchResults"
           component={SearchResults}
-          options={{headerShown: true}}/>
+          options={{headerShown: true}}/> */}
 
       </HomeStack.Navigator>
       // </CategoriesContextProvider>

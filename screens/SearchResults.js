@@ -19,7 +19,7 @@ export default function SearchResults({route, navigation}) {
   const [displayMode, setDisplayMode] = useState('restaurants')
 
   useEffect(()=>{
-    const { categoryId, categoryName, name, type, fromOffers, applicableRestaurants, promotionScope } = route.params
+    const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope } = route.params
 
     // Vérifier si on vient de l'écran Offers
     setCameFromOffers(fromOffers === true)
@@ -187,6 +187,9 @@ export default function SearchResults({route, navigation}) {
             if (cameFromOffers) {
               // Si on vient de Offers, retourner à Offers
               navigation.navigate('Offers')
+            } else if (fromCategoryResults) {
+              // Si on vient de CategoryResults, retourner à CategoryResults
+              navigation.navigate('CategoryResults', route.params?.categoryResultsParams || {})
             } else {
               // Sinon, comportement normal
               navigation.goBack()

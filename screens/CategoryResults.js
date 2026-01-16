@@ -181,7 +181,9 @@ export default function CategoryResults({route, navigation}) {
                     params: {
                       categoryName: item.name,
                       name: item.name,
-                      type: 'restaurant'
+                      type: 'restaurant',
+                      fromCategoryResults: true,
+                      categoryResultsParams: route.params // Passer les params pour pouvoir revenir
                     }
                   }
                 }
