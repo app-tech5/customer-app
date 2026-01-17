@@ -74,7 +74,7 @@ export default function SearchBar({searchbar, cityHandler, style, setAddress, na
             }}
             onPress={handleSearch}
           >
-            <AntDesign name='clockcircle' size={11} style={{marginRight: 6}}/>
+            <Ionicons name='search' size={11} style={{marginRight: 6}}/>
             <Text>Rechercher</Text>
           </TouchableOpacity>
         )}
