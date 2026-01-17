@@ -63,21 +63,7 @@ export default function PromotionBadge({restaurant}) {
       return promotion;
     }
 
-    // Nouveau format depuis l'API
-    if (promotion.promotionType === 'percentage_discount' && promotion.discountValue) {
-      return `${promotion.discountValue}% OFF`;
-    }
-    if (promotion.promotionType === 'free_delivery') {
-      return 'FREE DELIVERY';
-    }
-    if (promotion.promotionType === 'buy_x_get_y') {
-      return 'BUY 1 GET 1';
-    }
-    if (promotion.promotionType === 'flash_sale') {
-      return 'FLASH DEAL';
-    }
-
-    // Fallback au nom de la promotion
+    // Utiliser directement le nom de la promotion depuis la base de données
     return promotion.name || 'SPECIAL OFFER';
   };
 
