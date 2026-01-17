@@ -46,8 +46,8 @@ export default function Reward({restaurant}) {
 const styles = StyleSheet.create({
     rewardContainer: {
         position: "absolute",
-        top: 12,
-        left: 12,
+        top: 10,
+        left: 11,
         zIndex: 10,
     },
     reward: {
