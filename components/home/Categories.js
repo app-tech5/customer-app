@@ -5,7 +5,7 @@ import { getCategories, getCategoriesRestaurants } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 
 // Image par défaut locale
-const defaultImage = require('../../assets/images/default-food.jpg');
+const defaultImage = require('../../assets/images/category-placeholder.jpg');
 
 export default function Categories({navigation}) {
   // const [categories, setCategories] = useState([])
