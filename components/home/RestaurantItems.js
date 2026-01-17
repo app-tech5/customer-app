@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { AntDesign } from '@expo/vector-icons';
 import Categories from './Categories';
-import Reward from '../Reward';
+import PromotionBadge from '../PromotionBadge';
 
 export default function RestaurantItems({navigation,...props}) {
     const { width, height } = useWindowDimensions();
@@ -33,7 +33,7 @@ export default function RestaurantItems({navigation,...props}) {
                                     backgroundColor: "white",
                                    width: props.size?width:width*0.8
                                 }}>
-                                {props.reward || item.reward ?<Reward restaurant={item}/>:<></>}
+                                {props.reward || item.reward ?<PromotionBadge restaurant={item}/>:<></>}
                                 <View >
                                     <RestaurantImage image={item.image} />
                                     {props.ads && <Affiche ads={item.ads} adsColor={item.adsColor}/>}
