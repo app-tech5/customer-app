@@ -1,11 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Animated} from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Animated, Image} from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import OrderItem from './restaurantDetail/OrderItem'
 import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
-import Loader from '../screens/Loader'
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../i18n'
@@ -39,11 +36,24 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible})=>{
         const existingItem = acc.find(i => i.id === item.id)
         if (existingItem) {
             existingItem.quantity += 1
+            existingItem.totalPrice += item.price
         } else {
-            acc.push({ ...item, quantity: 1 })
+            acc.push({
+                ...item,
+                quantity: 1,
+                totalPrice: item.price,
+                unitPrice: item.price
+            })
         }
         return acc
     }, [])
+
+    // Calculs détaillés
+    const subtotal = total
+    const deliveryFee = subtotal > 25 ? 0 : 2.99 // Frais de livraison gratuits au-dessus de 25$
+    const taxRate = 0.08 // 8% de taxes
+    const taxAmount = subtotal * taxRate
+    const finalTotal = subtotal + deliveryFee + taxAmount
 
     const formatPrice = (price) => {
         return Number(price).toLocaleString(language, {
@@ -133,10 +143,30 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible})=>{
                         ) : (
                             groupedItems.map((item, index) => (
                                 <View key={item.id} style={styles.itemContainer}>
+                                    {/* Image du produit si disponible */}
+                                    {item.image && (
+                                        <View style={styles.itemImageContainer}>
+                                            <Image
+                                                source={{ uri: item.image }}
+                                                style={styles.itemImage}
+                                                defaultSource={require('../assets/images/category-placeholder.jpg')}
+                                            />
+                                        </View>
+                                    )}
+
                                     <View style={styles.itemInfo}>
                                         <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
-                                        <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
+                                        <View style={styles.itemPriceInfo}>
+                                            <Text style={styles.unitPrice}>{formatPrice(item.unitPrice)}</Text>
+                                            <Text style={styles.totalPrice}>{formatPrice(item.totalPrice)}</Text>
+                                        </View>
+                                        {item.specialInstructions && (
+                                            <Text style={styles.specialInstructions} numberOfLines={1}>
+                                                📝 {item.specialInstructions}
+                                            </Text>
+                                        )}
                                     </View>
+
                                     <View style={styles.quantityControls}>
                                         <TouchableOpacity
                                             onPress={() => updateItemQuantity(item.id, item.quantity - 1)}
@@ -152,17 +182,48 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible})=>{
                                             <Ionicons name="add" size={16} color={colors.primary} />
                                         </TouchableOpacity>
                                     </View>
+
+                                    {/* Bouton supprimer */}
+                                    <TouchableOpacity
+                                        onPress={() => updateItemQuantity(item.id, 0)}
+                                        style={styles.removeButton}
+                                    >
+                                        <Ionicons name="trash-outline" size={16} color={colors.error} />
+                                    </TouchableOpacity>
                                 </View>
                             ))
                         )}
                     </ScrollView>
 
-                    {/* Total et actions */}
+                    {/* Total détaillé et actions */}
                     {groupedItems.length > 0 && (
                         <View style={styles.footer}>
-                            <View style={styles.totalContainer}>
-                                <Text style={styles.totalLabel}>{i18n.t('cart.total')}</Text>
-                                <Text style={styles.totalAmount}>{formatPrice(total)}</Text>
+                            {/* Détail des coûts */}
+                            <View style={styles.costBreakdown}>
+                                <View style={styles.costRow}>
+                                    <Text style={styles.costLabel}>{i18n.t('cart.subtotal')}</Text>
+                                    <Text style={styles.costValue}>{formatPrice(subtotal)}</Text>
+                                </View>
+
+                                <View style={styles.costRow}>
+                                    <Text style={styles.costLabel}>
+                                        {i18n.t('cart.deliveryFee')}
+                                        {deliveryFee === 0 && <Text style={styles.freeText}> ({i18n.t('cart.free')})</Text>}
+                                    </Text>
+                                    <Text style={[styles.costValue, deliveryFee === 0 && styles.freeValue]}>
+                                        {deliveryFee === 0 ? i18n.t('cart.free') : formatPrice(deliveryFee)}
+                                    </Text>
+                                </View>
+
+                                <View style={styles.costRow}>
+                                    <Text style={styles.costLabel}>{i18n.t('cart.tax')}</Text>
+                                    <Text style={styles.costValue}>{formatPrice(taxAmount)}</Text>
+                                </View>
+
+                                <View style={[styles.costRow, styles.totalRow]}>
+                                    <Text style={styles.totalLabel}>{i18n.t('cart.total')}</Text>
+                                    <Text style={styles.totalAmount}>{formatPrice(finalTotal)}</Text>
+                                </View>
                             </View>
 
                             <View style={styles.actionButtons}>
@@ -260,6 +321,14 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginBottom: 8,
     },
+    itemImageContainer: {
+        marginRight: 12,
+    },
+    itemImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 8,
+    },
     itemInfo: {
         flex: 1,
         marginRight: 12,
@@ -270,10 +339,29 @@ const styles = StyleSheet.create({
         color: colors.text.primary,
         marginBottom: 4,
     },
-    itemPrice: {
+    itemPriceInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    unitPrice: {
         fontSize: 14,
+        color: colors.text.secondary,
+    },
+    totalPrice: {
+        fontSize: 16,
         color: colors.primary,
         fontWeight: '600',
+    },
+    specialInstructions: {
+        fontSize: 12,
+        color: colors.text.secondary,
+        fontStyle: 'italic',
+        marginTop: 4,
+    },
+    removeButton: {
+        padding: 8,
+        marginLeft: 8,
     },
     quantityControls: {
         flexDirection: 'row',
@@ -302,14 +390,39 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
     },
-    totalContainer: {
+    costBreakdown: {
+        backgroundColor: 'white',
+        paddingHorizontal: 20,
+        paddingTop: 16,
+    },
+    costRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 20,
-        backgroundColor: 'white',
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
+        paddingVertical: 8,
+    },
+    costLabel: {
+        fontSize: 16,
+        color: colors.text.secondary,
+    },
+    costValue: {
+        fontSize: 16,
+        color: colors.text.primary,
+        fontWeight: '500',
+    },
+    freeText: {
+        color: colors.success,
+        fontWeight: 'bold',
+    },
+    freeValue: {
+        color: colors.success,
+        fontWeight: 'bold',
+    },
+    totalRow: {
+        borderTopWidth: 1,
+        borderTopColor: colors.grey[100],
+        paddingTop: 16,
+        marginTop: 8,
     },
     totalLabel: {
         fontSize: 18,

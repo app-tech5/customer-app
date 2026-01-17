@@ -120,7 +120,11 @@
     "confirm": "Confirmer",
     "viewCart": "Voir le panier",
     "item": "article",
-    "itemsSuffix": "s"
+    "itemsSuffix": "s",
+    "subtotal": "Sous-total",
+    "deliveryFee": "Frais de livraison",
+    "tax": "TVA",
+    "free": "GRATUIT"
   },
   "order": {
     "placeOrder": "Passer la commande",

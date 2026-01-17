@@ -120,7 +120,11 @@
     "confirm": "Confirm",
     "viewCart": "View Cart",
     "item": "item",
-    "itemsSuffix": "s"
+    "itemsSuffix": "s",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery fee",
+    "tax": "Tax",
+    "free": "FREE"
   },
   "order": {
     "placeOrder": "Place Order",
