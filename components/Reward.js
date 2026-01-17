@@ -46,19 +46,18 @@ export default function Reward({restaurant}) {
 const styles = StyleSheet.create({
     rewardContainer: {
         position: "absolute",
-        top: 20,
-        left: 0,
+        top: 12,
+        left: 12,
         zIndex: 10,
     },
     reward: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: "#4CAF50",
-        borderTopRightRadius: 20,
-        borderBottomRightRadius: 20,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        minHeight: 28,
+        backgroundColor: colors.success,
+        borderRadius: 12,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        minHeight: 24,
         // Ombre pour iOS
         shadowColor: '#000',
         shadowOffset: {
@@ -81,22 +80,5 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
         letterSpacing: 0.3,
-    },
-    rewardPointer: {
-        position: 'absolute',
-        left: 0,
-        top: '50%',
-        width: 0,
-        height: 0,
-        borderLeftWidth: 6,
-        borderRightWidth: 0,
-        borderTopWidth: 6,
-        borderBottomWidth: 6,
-        borderLeftColor: '#4CAF50',
-        borderTopColor: 'transparent',
-        borderBottomColor: 'transparent',
-        borderRightColor: 'transparent',
-        marginTop: -6,
-        marginLeft: -1,
     }
 })

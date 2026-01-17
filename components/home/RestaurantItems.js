@@ -16,9 +16,9 @@ export default function RestaurantItems({navigation,...props}) {
                   keyExtractor={(item, index)=>index}
                   renderItem={({item, index})=> {
                     return (
-                        <TouchableOpacity 
+                        <TouchableOpacity
                         key={index}
-                        activeOpacity={1} 
+                        activeOpacity={1}
                         style={{
                         }}
                         onPress={()=>navigation.navigate("RestaurantDetail",
@@ -26,21 +26,21 @@ export default function RestaurantItems({navigation,...props}) {
                           restaurant: item
                         })}
                         >
-                            <View  
+                            <View
                                 style={{
                                     marginTop: 8,
                                     padding: 15,
                                     backgroundColor: "white",
                                    width: props.size?width:width*0.8
                                 }}>
+                                {props.reward || item.reward ?<Reward restaurant={item}/>:<></>}
                                 <View >
                                     <RestaurantImage image={item.image} />
-                                    {props.reward || item.reward ?<Reward restaurant={item}/>:<></>}
                                     {props.ads && <Affiche ads={item.ads} adsColor={item.adsColor}/>}
                                 </View>
-                                <RestaurantInfo 
+                                <RestaurantInfo
                                     name={item.name.substring(0,20)}
-                                    rating={item.rating} 
+                                    rating={item.rating}
                                     city={item.city}/>
                             </View>
                         </TouchableOpacity>
