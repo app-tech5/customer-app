@@ -26,8 +26,12 @@ export default function Categories({navigation}) {
         renderItem={({ item, index }) => {
           return (
             <TouchableOpacity
-            onPress={()=>navigation.navigate("SearchResults",{
-              categoryId: item.id
+            onPress={()=>navigation.navigate("Search",{
+              screen: "SearchResults",
+              params: {
+                categoryId: item.id,
+                categoryName: item.name
+              }
             })}
             style={{ alignItems: "center", marginRight: 30 }}>
               <Image source={{uri: item.image}} style={{
