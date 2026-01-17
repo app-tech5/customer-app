@@ -64,9 +64,11 @@ export default function SearchResults({route, navigation}) {
           return // ← SORTIR DE LA FONCTION APRÈS LE FILTRAGE
         }
         // Si on a un categoryId (legacy) ou categoryAlias, c'est une recherche par catégorie
-        if (categoryId) {
-          restaurantsResult = await searchRestaurantsByCategory(categoryId)
-        } else if (categoryName) {
+        // if (categoryId) {
+        //   console.log('🔍 Recherche par catégorie:', categoryId)
+        //   restaurantsResult = await searchRestaurantsByCategory(categoryId)
+        // } else 
+        if (categoryName) {
           restaurantsResult = await searchRestaurantsByCategory(categoryName)
         }
         // Si c'est une recherche "Top rated" spéciale

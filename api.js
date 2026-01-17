@@ -213,6 +213,7 @@ class ApiClient {
     // Pour l'instant, on retourne tous les restaurants
     // TODO: Implémenter une route API qui filtre par catégorie
     const restaurants = await this.getRestaurants();
+    console.log('🔍 RESTAURANTS:', restaurants[0].categories, 'restaurants found');
     // Filtrage temporaire côté client - à remplacer par filtrage côté serveur
     if (categoryIdentifier && restaurants) {
       return restaurants.filter(restaurant =>
