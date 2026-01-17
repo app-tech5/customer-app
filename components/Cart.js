@@ -254,14 +254,17 @@ const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
         justifyContent: "flex-end",
-        backgroundColor: "rgba(0,0,0,0.7)"
+        backgroundColor: "rgba(0,0,0,0.7)",
+        paddingBottom: 120, // Plus d'espace pour les bottom tabs et le bouton
     },
     modalCheckoutContainer: {
         backgroundColor: "white",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        maxHeight: '80%',
-        minHeight: 300,
+        maxHeight: '70%', // Encore plus réduit
+        minHeight: 350, // Légèrement augmenté pour le contenu
+        marginHorizontal: 15,
+        marginBottom: 15,
     },
     header: {
         flexDirection: 'row',
