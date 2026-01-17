@@ -17,7 +17,12 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
     const {name, phone, address, id, lat, lng} = useSelector((state)=>state.userReducer)
      const navigation = useNavigation()
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
-    const total = items.reduce((prev, curr)=> prev + curr.price, 0)
+
+    // Calculs détaillés comme dans Cart.js
+    const subtotal = items.reduce((prev, curr)=> prev + curr.price, 0)
+    const deliveryFee = subtotal > 25 ? 0 : 2.99
+    const taxAmount = subtotal * 0.08
+    const total = subtotal + deliveryFee + taxAmount
 
     // Formater le nombre d'articles avec pluriel
     const formatItemCount = (count) => {
