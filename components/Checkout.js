@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native'
 import Loader from '../screens/Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LoaderContext } from '../contexts/LoaderContext'
-export default function Checkout({restaurantName, setLoader, setViewCartButton, setModalVisible}) {
+export default function Checkout({restaurantName, setLoader, setViewCartButton, setModalVisible, closeModal}) {
     const {setLoading} = useContext(LoaderContext)
     const {name, phone, address, id, lat, lng} = useSelector((state)=>state.userReducer)
      const navigation = useNavigation()
@@ -65,7 +65,7 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                   style={styles.checkoutButton}
                   onPress={() => {
                     setLoading(true)
-                    setModalVisible(false);
+                    closeModal ? closeModal() : setModalVisible(false);
 
                     addOrderToFirebase()
 

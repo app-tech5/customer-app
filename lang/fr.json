@@ -117,7 +117,10 @@
     "clearCart": "Vider le panier",
     "confirmClear": "Vider tous les articles du panier ?",
     "cancel": "Annuler",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "viewCart": "Voir le panier",
+    "item": "article",
+    "itemsSuffix": "s"
   },
   "order": {
     "placeOrder": "Passer la commande",

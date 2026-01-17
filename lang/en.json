@@ -103,7 +103,7 @@
     "total": "Total",
     "orderNow": "Order Now"
   },
-  "cart": {
+    "cart": {
     "title": "Your Cart",
     "empty": "Your cart is empty",
     "addItems": "Add items to get started",
@@ -117,7 +117,10 @@
     "clearCart": "Clear Cart",
     "confirmClear": "Clear all items from cart?",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "viewCart": "View Cart",
+    "item": "item",
+    "itemsSuffix": "s"
   },
   "order": {
     "placeOrder": "Place Order",
