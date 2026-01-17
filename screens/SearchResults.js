@@ -286,7 +286,8 @@ export default function SearchResults({route, navigation}) {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={() => {
-                // Navigation vers RestaurantDetail via BottomTabs -> Home -> RestaurantDetail
+                // Navigation vers RestaurantDetail depuis SearchNavigator
+                // On navigue vers BottomTabs d'abord, puis vers HomeNavigator, puis RestaurantDetail
                 navigation.navigate('BottomTabs', {
                   screen: 'Home',
                   params: {

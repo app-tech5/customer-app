@@ -15,11 +15,14 @@ export default function SearchBar({searchbar, cityHandler, style, setAddress, na
       restaurant.city?.toLowerCase().includes(searchText.toLowerCase())
     )
 
-    // Navigation vers les résultats de recherche
-    navigation.navigate('SearchResults', {
-      searchTerm: searchText,
-      restaurantData: filteredRestaurants,
-      totalResults: filteredRestaurants.length
+    // Navigation vers les résultats de recherche dans le SearchNavigator
+    navigation.navigate('Search', {
+      screen: 'SearchResults',
+      params: {
+        searchTerm: searchText,
+        restaurantData: filteredRestaurants,
+        totalResults: filteredRestaurants.length
+      }
     })
   }
 
