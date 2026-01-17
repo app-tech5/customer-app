@@ -179,6 +179,9 @@ export default function SearchResults({route, navigation}) {
     } else if (name === 'ALL_RESTAURANTS') {
       title = i18n.t ? i18n.t('search.allRestaurants') : 'All Restaurants'
       displayQuery = title
+    } else if (categoryName) {
+      title = categoryName
+      displayQuery = categoryName
     } else if (searchTerm) {
       title = `"${searchTerm}"`
       displayQuery = searchTerm
