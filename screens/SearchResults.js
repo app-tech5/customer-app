@@ -19,7 +19,7 @@ export default function SearchResults({route, navigation}) {
   const [displayMode, setDisplayMode] = useState('restaurants')
 
   useEffect(()=>{
-    const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope } = route.params
+    const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope, searchTerm, restaurantData: prefilteredData, totalResults } = route.params
 
     // Vérifier si on vient de l'écran Offers
     setCameFromOffers(fromOffers === true)
@@ -113,6 +113,11 @@ export default function SearchResults({route, navigation}) {
         else if (name === 'ALL_RESTAURANTS') {
           restaurantsResult = await getRestaurantsFromFirebase()
         }
+        // Cas spécial : données préfiltrées depuis SearchBar
+        else if (prefilteredData && Array.isArray(prefilteredData)) {
+          console.log('🔍 Using prefiltered data from SearchBar - Count:', prefilteredData.length)
+          restaurantsResult = prefilteredData
+        }
         // Sinon c'est une recherche textuelle normale
         else if (name) {
           const allRestaurants = await getRestaurantsFromFirebase()
@@ -172,6 +177,9 @@ export default function SearchResults({route, navigation}) {
     } else if (name === 'ALL_RESTAURANTS') {
       title = i18n.t ? i18n.t('search.allRestaurants') : 'All Restaurants'
       displayQuery = title
+    } else if (searchTerm) {
+      title = `"${searchTerm}"`
+      displayQuery = searchTerm
     } else if (name) {
       title = name
       displayQuery = name
