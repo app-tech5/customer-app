@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet} from 'react-native'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
+import { getRestaurantPromotions } from '../api'
 
 const getRewardIcon = (rewardText) => {
   const text = rewardText.toLowerCase();
@@ -22,7 +23,66 @@ const getRewardIcon = (rewardText) => {
 };
 
 export default function Reward({restaurant}) {
-  const iconConfig = getRewardIcon(restaurant.reward);
+  const [promotion, setPromotion] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPromotion = async () => {
+      try {
+        if (!restaurant || !restaurant.restaurantId) {
+          setLoading(false);
+          return;
+        }
+
+        const promotions = await getRestaurantPromotions(restaurant.restaurantId);
+
+        // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
+        const activePromotion = promotions.length > 0 ? promotions[0] : null;
+        setPromotion(activePromotion);
+      } catch (error) {
+        console.error('Error fetching restaurant promotion:', error);
+        // Fallback à la propriété statique si l'API échoue
+        setPromotion(restaurant.reward ? { name: restaurant.reward } : null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPromotion();
+  }, [restaurant]);
+
+  // Si pas de promotion ou chargement en cours, ne rien afficher
+  if (loading || !promotion) {
+    return null;
+  }
+
+  // Déterminer le texte à afficher selon le type de promotion
+  const getPromotionText = () => {
+    if (typeof promotion === 'string') {
+      // Ancien format (propriété statique)
+      return promotion;
+    }
+
+    // Nouveau format depuis l'API
+    if (promotion.promotionType === 'percentage_discount' && promotion.discountValue) {
+      return `${promotion.discountValue}% OFF`;
+    }
+    if (promotion.promotionType === 'free_delivery') {
+      return 'FREE DELIVERY';
+    }
+    if (promotion.promotionType === 'buy_x_get_y') {
+      return 'BUY 1 GET 1';
+    }
+    if (promotion.promotionType === 'flash_sale') {
+      return 'FLASH DEAL';
+    }
+
+    // Fallback au nom de la promotion
+    return promotion.name || 'SPECIAL OFFER';
+  };
+
+  const promotionText = getPromotionText();
+  const iconConfig = getRewardIcon(promotionText);
 
   const IconComponent = iconConfig.type === 'MaterialCommunityIcons' ? MaterialCommunityIcons :
                        iconConfig.type === 'Ionicons' ? Ionicons : FontAwesome;
@@ -36,9 +96,8 @@ export default function Reward({restaurant}) {
           color="white"
           style={styles.rewardIcon}
         />
-        <Text style={styles.rewardText}>{restaurant.reward}</Text>
+        <Text style={styles.rewardText}>{promotionText}</Text>
       </View>
-      <View style={[styles.rewardPointer, { borderLeftColor: colors.success }]} />
     </View>
   )
 }
@@ -80,5 +139,5 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
         letterSpacing: 0.3,
-    }
+    },
 })
