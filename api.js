@@ -551,7 +551,13 @@ class ApiClient {
             return false;
           }
 
-          // Cas 3: Promotion avec scope 'category' - si le restaurant a des catégories applicables
+          // Cas 3: Promotion avec scope 'platform' - s'applique à tous les restaurants (dernière priorité)
+          if (promotion.scope === 'platform') {
+            console.log('✅ Promotion scope platform match:', promotion.name);
+            return true;
+          }
+
+          // Cas 4: Promotion avec scope 'category' - si le restaurant a des catégories applicables
           if (promotion.scope === 'category') {
             // Cette logique serait plus complexe - à implémenter si nécessaire
             console.log('⚠️ Promotion scope category - not implemented yet');
