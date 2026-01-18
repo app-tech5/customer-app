@@ -22,7 +22,7 @@ const getPromotionIcon = (promotionText) => {
   return { name: 'tag', type: 'FontAwesome' };
 };
 
-export default function PromotionBadge({restaurant, allPromotions}) {
+export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
   const [promotion, setPromotion] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export default function PromotionBadge({restaurant, allPromotions}) {
       const restaurantId = restaurant.restaurantId || restaurant.id;
 
       // Utiliser la fonction utilitaire qui applique la même logique que getRestaurantPromotions
-      const restaurantPromotions = filterRestaurantPromotions(allPromotions, restaurantId);
+      const restaurantPromotions = filterRestaurantPromotions(allPromotions, restaurantId, allMenus);
 
       // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
       const activePromotion = restaurantPromotions.length > 0 ? restaurantPromotions[0] : null;
@@ -63,7 +63,7 @@ export default function PromotionBadge({restaurant, allPromotions}) {
 
       fetchPromotion();
     }
-  }, [restaurant, allPromotions]);
+  }, [restaurant, allPromotions, allMenus]);
 
   // Si pas de promotion ou chargement en cours, ne rien afficher
   if (loading || !promotion) {

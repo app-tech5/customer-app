@@ -33,7 +33,7 @@ export default function RestaurantItems({navigation,...props}) {
                                     backgroundColor: "white",
                                    width: props.size?width:width*0.8
                                 }}>
-                                {props.reward || item.reward ?<PromotionBadge restaurant={item} allPromotions={props.promotions}/>:<></>}
+                                {props.reward || item.reward ?<PromotionBadge restaurant={item} allPromotions={props.promotions} allMenus={props.allMenus}/>:<></>}
                                 <View >
                                     <RestaurantImage image={item.image} />
                                     {props.ads && <Affiche ads={item.ads} adsColor={item.adsColor}/>}

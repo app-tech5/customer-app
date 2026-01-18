@@ -500,76 +500,8 @@ class ApiClient {
 
       console.log('🏪 Restaurant has', restaurantMenuIds.size, 'menu items');
 
-      // Filtrer les promotions applicables à ce restaurant
-      const restaurantPromotions = allPromotions.filter(promotion => {
-        // Vérifier si la promotion est active
-        const now = new Date();
-        const isActive = promotion.isActive &&
-          now >= new Date(promotion.startDate) &&
-          now <= new Date(promotion.endDate);
-
-        if (!isActive) return false;
-
-        // Vérifier si la promotion s'applique au restaurant
-        const scopeMatch = (() => {
-          // Cas 1: Promotion avec scope 'restaurant' ET qui inclut ce restaurant
-          if (promotion.scope === 'restaurant') {
-            const hasApplicableRestaurants = promotion.applicableRestaurants &&
-              Array.isArray(promotion.applicableRestaurants);
-
-            if (hasApplicableRestaurants) {
-              const restaurantIdStr = restaurantId.toString();
-              const includesRestaurantId = promotion.applicableRestaurants.some(restId => {
-                const promoRestId = typeof restId === 'object' ? (restId._id || restId.toString()) : restId;
-                return promoRestId.toString() === restaurantIdStr;
-              });
-
-              if (includesRestaurantId) {
-                console.log('✅ Promotion scope restaurant match:', promotion.name);
-                return true;
-              }
-            }
-            return false;
-          }
-
-          // Cas 2: Promotion avec scope 'item' ET qui inclut des items du restaurant
-          if (promotion.scope === 'item') {
-            const hasApplicableItems = promotion.applicableItems &&
-              Array.isArray(promotion.applicableItems);
-
-            if (hasApplicableItems && restaurantMenuIds.size > 0) {
-              const hasMatchingItem = promotion.applicableItems.some(itemId => {
-                const promoItemId = typeof itemId === 'object' ? (itemId._id || itemId.toString()) : itemId;
-                const promoItemIdStr = promoItemId ? promoItemId.toString() : '';
-                return restaurantMenuIds.has(promoItemIdStr);
-              });
-
-              if (hasMatchingItem) {
-                console.log('✅ Promotion scope item match:', promotion.name);
-                return true;
-              }
-            }
-            return false;
-          }
-
-          // Cas 3: Promotion avec scope 'platform' - s'applique à tous les restaurants (dernière priorité)
-          if (promotion.scope === 'platform') {
-            console.log('✅ Promotion scope platform match:', promotion.name);
-            return true;
-          }
-
-          // Cas 4: Promotion avec scope 'category' - si le restaurant a des catégories applicables
-          if (promotion.scope === 'category') {
-            // Cette logique serait plus complexe - à implémenter si nécessaire
-            console.log('⚠️ Promotion scope category - not implemented yet');
-            return false;
-          }
-
-          return false;
-        })();
-
-        return scopeMatch;
-      });
+      // Utiliser la fonction de filtrage commune
+      const restaurantPromotions = filterPromotionsByRestaurant(allPromotions, restaurantId, restaurantMenuIds);
 
       console.log('🎯 FILTERED PROMOTIONS:', restaurantPromotions.length, 'promotions match restaurant');
 
@@ -669,14 +601,30 @@ export const getAllActiveOffers = () => api.getAllActiveOffers();
 // Récupérer toutes les promotions (sans filtrage par restaurant)
 export const getAllPromotions = () => api.apiCall('/resource/promotions');
 
-// Fonction utilitaire pour filtrer les promotions côté client (sans appel API)
-export const filterRestaurantPromotions = (allPromotions, restaurantId) => {
-  if (!allPromotions || !Array.isArray(allPromotions) || !restaurantId) {
-    return [];
-  }
+// Fonction utilitaire pour calculer les IDs des menus d'un restaurant
+const calculateRestaurantMenuIds = (allMenus, restaurantId) => {
+  return new Set(
+    allMenus
+      .filter(menu => {
+        const menuRestaurantId = menu.restaurant || menu.restaurants?.value;
+        const restaurantIdStr = restaurantId.toString();
+        const menuRestaurantIdStr = typeof menuRestaurantId === 'object'
+          ? (menuRestaurantId?._id || menuRestaurantId?.toString())
+          : menuRestaurantId?.toString();
 
-  // Appliquer la même logique de filtrage que getRestaurantPromotions
-  const restaurantPromotions = allPromotions.filter(promotion => {
+        return menuRestaurantIdStr === restaurantIdStr;
+      })
+      .map(menu => {
+        const menuId = menu._id || menu.id;
+        return menuId ? menuId.toString() : null;
+      })
+      .filter(Boolean)
+  );
+};
+
+// Fonction utilitaire pour filtrer les promotions (logique extraite de getRestaurantPromotions)
+const filterPromotionsByRestaurant = (allPromotions, restaurantId, restaurantMenuIds) => {
+  return allPromotions.filter(promotion => {
     // Vérifier si la promotion est active
     const now = new Date();
     const isActive = promotion.isActive &&
@@ -699,21 +647,45 @@ export const filterRestaurantPromotions = (allPromotions, restaurantId) => {
             return promoRestId.toString() === restaurantIdStr;
           });
 
-          if (includesRestaurantId) return true;
+          if (includesRestaurantId) {
+            console.log('✅ Promotion scope restaurant match:', promotion.name);
+            return true;
+          }
         }
         return false;
       }
 
-      // Cas 2: Promotion globale (tous les restaurants)
-      if (promotion.scope === 'global' || promotion.scope === 'all') {
+      // Cas 2: Promotion avec scope 'item' ET qui inclut des items du restaurant
+      if (promotion.scope === 'item') {
+        const hasApplicableItems = promotion.applicableItems &&
+          Array.isArray(promotion.applicableItems);
+
+        if (hasApplicableItems && restaurantMenuIds.size > 0) {
+          const hasMatchingItem = promotion.applicableItems.some(itemId => {
+            const promoItemId = typeof itemId === 'object' ? (itemId._id || itemId.toString()) : itemId;
+            const promoItemIdStr = promoItemId ? promoItemId.toString() : '';
+            return restaurantMenuIds.has(promoItemIdStr);
+          });
+
+          if (hasMatchingItem) {
+            console.log('✅ Promotion scope item match:', promotion.name);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Cas 3: Promotion avec scope 'platform' - s'applique à tous les restaurants (dernière priorité)
+      if (promotion.scope === 'platform') {
+        console.log('✅ Promotion scope platform match:', promotion.name);
         return true;
       }
 
-      // Cas 3: Promotion avec scope 'menu' - vérifier si elle s'applique aux menus du restaurant
-      if (promotion.scope === 'menu') {
-        // Pour simplifier, on considère que les promotions menu s'appliquent
-        // (la logique complète nécessiterait de vérifier les menus du restaurant)
-        return true;
+      // Cas 4: Promotion avec scope 'category' - si le restaurant a des catégories applicables
+      if (promotion.scope === 'category') {
+        // Cette logique serait plus complexe - à implémenter si nécessaire
+        console.log('⚠️ Promotion scope category - not implemented yet');
+        return false;
       }
 
       return false;
@@ -721,8 +693,24 @@ export const filterRestaurantPromotions = (allPromotions, restaurantId) => {
 
     return scopeMatch;
   });
+};
 
-  return restaurantPromotions;
+// Fonction utilitaire pour filtrer les promotions côté client (même logique que getRestaurantPromotions)
+export const filterRestaurantPromotions = (allPromotions, restaurantId, allMenus = null) => {
+  if (!allPromotions || !Array.isArray(allPromotions) || !restaurantId) {
+    return [];
+  }
+
+  // Calculer les IDs des menus du restaurant si allMenus est fourni
+  const restaurantMenuIds = allMenus ? calculateRestaurantMenuIds(allMenus, restaurantId) : new Set();
+
+  // Utiliser la même logique complète que getRestaurantPromotions
+  const restaurantPromotions = filterPromotionsByRestaurant(allPromotions, restaurantId, restaurantMenuIds);
+
+  // Trier par priorité et limiter à 3 max (comme getRestaurantPromotions)
+  return restaurantPromotions
+    .sort((a, b) => (b.priority || 1) - (a.priority || 1))
+    .slice(0, 3);
 };
 
 export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromotions(restaurantId);
