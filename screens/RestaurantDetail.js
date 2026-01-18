@@ -213,6 +213,7 @@ export default function RestaurantDetail({ route, navigation }) {
   const deliveryFee = useMemo(() => {
     // console.log('🔥 CALCULATING DELIVERY FEE:', { deliverySettings, distance })
 
+    console.log('🔥 DELIVERY SETTINGS:', deliverySettings)
     if (!deliverySettings) {
       // console.log('🔥 NO DELIVERY SETTINGS - USING DEFAULT: 2.50')
       return '2.50'; // Valeur par défaut pendant le chargement
