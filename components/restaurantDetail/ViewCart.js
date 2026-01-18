@@ -9,8 +9,9 @@ import CartModal from '../CartModal'
 
 const { width } = Dimensions.get('window')
 
-export default function ViewCart({navigation, route, params}) {
+export default function ViewCart({navigation, route, params, deliverySettings, restaurant: restaurantProp}) {
     const {restaurant} = route?route.params:params
+    const finalRestaurant = restaurantProp || restaurant
     const [modalVisible, setModalVisible] = useState(false)
     const [viewCartButton, setViewCartButton] = useState(true)
     const slideAnim = useRef(new Animated.Value(100)).current
@@ -57,8 +58,10 @@ export default function ViewCart({navigation, route, params}) {
             <CartModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
-                restaurantName={restaurant.name}
+                restaurantName={finalRestaurant.name}
                 setViewCartButton={setViewCartButton}
+                deliverySettings={deliverySettings}
+                restaurant={finalRestaurant}
             />
 
             {total && viewCartButton ? (

@@ -492,7 +492,7 @@ export default function RestaurantDetail({ route, navigation }) {
 
       {/* 3. Sticky Bottom Cart Button */}
       <View style={styles.cartContainer}>
-        <ViewCart navigation={navigation} route={route} />
+        <ViewCart navigation={navigation} route={route} deliverySettings={deliverySettings} restaurant={restaurant} />
       </View>
 
       {/* Loading Overlay */}

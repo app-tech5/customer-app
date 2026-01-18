@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../i18n'
 
-const Cart = ({restaurantName, setViewCartButton, setModalVisible})=>{
+const Cart = ({restaurantName, setViewCartButton, setModalVisible, deliverySettings, restaurant})=>{
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const total = items.reduce((prev, curr)=> prev + curr.price, 0)
     const [loader, setLoader] = useState(false)
@@ -241,6 +241,8 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible})=>{
                                     setViewCartButton={setViewCartButton}
                                     setModalVisible={setModalVisible}
                                     closeModal={closeModal}
+                                    deliverySettings={deliverySettings}
+                                    restaurant={restaurant}
                                 />
                             </View>
                         </View>
