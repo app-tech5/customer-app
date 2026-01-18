@@ -60,7 +60,6 @@ export default function ViewCart({navigation, route, params, deliverySettings, r
                 setModalVisible={setModalVisible}
                 restaurantName={finalRestaurant.name}
                 setViewCartButton={setViewCartButton}
-                deliverySettings={deliverySettings}
                 restaurant={finalRestaurant}
             />
 

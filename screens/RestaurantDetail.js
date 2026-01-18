@@ -14,7 +14,7 @@ import { colors, currency, language } from '../global'
 import { config } from '../config'
 import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime, location } from '../utils'
 import * as Location from 'expo-location'
-import { getRestaurantReviews, getDeliverySettings, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
+import { getRestaurantReviews, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
 
 const { width, height } = Dimensions.get('window')
 
@@ -34,7 +34,6 @@ export default function RestaurantDetail({ route, navigation }) {
   const [scrollEnabled, setScrollEnabled] = useState(true)
   const [reviews, setReviews] = useState([])
   const [loadingReviews, setLoadingReviews] = useState(false)
-  const [deliverySettings, setDeliverySettings] = useState(null)
   const [userFavorites, setUserFavorites] = useState([])
   const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
   const [promotions, setPromotions] = useState([])
@@ -66,20 +65,6 @@ export default function RestaurantDetail({ route, navigation }) {
 
     // Charger les paramètres de livraison directement depuis l'API
     // console.log('🔥 LOADING DELIVERY SETTINGS from API...')
-    getDeliverySettings().then(settings => {
-      // console.log('🔥 DELIVERY SETTINGS LOADED:', settings)
-      setDeliverySettings(settings);
-    }).catch(error => {
-      console.error('Error loading delivery settings:', error);
-      // Valeurs par défaut en cas d'erreur
-      // console.log('🔥 USING FALLBACK DELIVERY SETTINGS')
-      setDeliverySettings({
-        fixedDeliveryFee: 2.5,
-        dynamicDeliveryFee: { baseFee: 1.5, perKmFee: 0.5, minFee: 1.5, maxFee: 10 },
-        freeDeliveryThreshold: 25,
-        deliveryFeeType: 'FIXED'
-      });
-    });
 
     // Charger les favoris de l'utilisateur directement depuis l'API
     getFavorites().then(response => {
@@ -209,41 +194,6 @@ export default function RestaurantDetail({ route, navigation }) {
     return result;
   }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
 
-  // Calcul des frais de livraison basé sur les paramètres DB
-  const deliveryFee = useMemo(() => {
-    // console.log('🔥 CALCULATING DELIVERY FEE:', { deliverySettings, distance })
-
-    console.log('🔥 DELIVERY SETTINGS:', deliverySettings)
-    if (!deliverySettings) {
-      // console.log('🔥 NO DELIVERY SETTINGS - USING DEFAULT: 2.50')
-      return '2.50'; // Valeur par défaut pendant le chargement
-    }
-
-    if (deliverySettings.deliveryFeeType === 'FIXED') {
-      const fee = deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
-      // console.log('🔥 FIXED DELIVERY FEE:', fee)
-      return fee;
-    }
-
-    if (deliverySettings.deliveryFeeType === 'DYNAMIC' && distance) {
-      const { baseFee, perKmFee, minFee, maxFee } = deliverySettings.dynamicDeliveryFee || {};
-      const calculatedFee = (baseFee || 1.5) + (distance * (perKmFee || 0.5));
-      const fee = Math.min(Math.max(calculatedFee, minFee || 1.5), maxFee || 10);
-      const result = fee.toFixed(2);
-      // console.log('🔥 DYNAMIC DELIVERY FEE:', { calculatedFee, minFee, maxFee, result })
-      return result;
-    }
-
-    if (deliverySettings.deliveryFeeType === 'FREE') {
-      // console.log('🔥 FREE DELIVERY')
-      return '0.00';
-    }
-
-    // Valeur par défaut
-    const fee = deliverySettings.fixedDeliveryFee?.toFixed(2) || '2.50';
-    // console.log('🔥 DEFAULT DELIVERY FEE:', fee)
-    return fee;
-  }, [distance, deliverySettings]);
 
   // Fonction pour vérifier si le restaurant est ouvert
   const getRestaurantStatus = useMemo(() => {
@@ -493,7 +443,7 @@ export default function RestaurantDetail({ route, navigation }) {
 
       {/* 3. Sticky Bottom Cart Button */}
       <View style={styles.cartContainer}>
-        <ViewCart navigation={navigation} route={route} deliverySettings={deliverySettings} restaurant={restaurant} />
+        <ViewCart navigation={navigation} route={route} restaurant={restaurant} />
       </View>
 
       {/* Loading Overlay */}
@@ -509,7 +459,6 @@ export default function RestaurantDetail({ route, navigation }) {
         visible={restaurantDetailVisible}
         setVisible={setRestaurantDetailVisible}
         deliveryTime={deliveryTime}
-        deliveryFee={deliveryFee}
         distance={distance}
       />
     </View>

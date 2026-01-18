@@ -6,13 +6,15 @@ import Checkout from './Checkout'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../i18n'
+import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
-const Cart = ({restaurantName, setViewCartButton, setModalVisible, deliverySettings, restaurant})=>{
+const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=>{
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const total = items.reduce((prev, curr)=> prev + curr.price, 0)
     const [loader, setLoader] = useState(false)
     const slideAnim = useRef(new Animated.Value(500)).current
     const dispatch = useDispatch()
+    const { deliverySettings, calculateTotal } = useDeliverySettings()
 
     useEffect(() => {
         Animated.spring(slideAnim, {
@@ -48,12 +50,14 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, deliverySetti
         return acc
     }, [])
 
-    // Calculs détaillés
-    const subtotal = total
-    const deliveryFee = subtotal > 25 ? 0 : 2.99 // Frais de livraison gratuits au-dessus de 25$
-    const taxRate = 0.08 // 8% de taxes
-    const taxAmount = subtotal * taxRate
-    const finalTotal = subtotal + deliveryFee + taxAmount
+    // Calculs centralisés via le contexte
+    const totals = calculateTotal(total, restaurant?.taxRate) || {
+      subtotal: total,
+      deliveryFee: 2.99,
+      taxAmount: total * 0.08,
+      total: total + 2.99 + (total * 0.08),
+      isFreeDelivery: false
+    }
 
     const formatPrice = (price) => {
         return Number(price).toLocaleString(language, {
@@ -202,27 +206,27 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, deliverySetti
                             <View style={styles.costBreakdown}>
                                 <View style={styles.costRow}>
                                     <Text style={styles.costLabel}>{i18n.t('cart.subtotal')}</Text>
-                                    <Text style={styles.costValue}>{formatPrice(subtotal)}</Text>
+                                    <Text style={styles.costValue}>{formatPrice(totals.subtotal)}</Text>
                                 </View>
 
                                 <View style={styles.costRow}>
                                     <Text style={styles.costLabel}>
                                         {i18n.t('cart.deliveryFee')}
-                                        {deliveryFee === 0 && <Text style={styles.freeText}> ({i18n.t('cart.free')})</Text>}
+                                        {totals.deliveryFee === 0 && <Text style={styles.freeText}> ({i18n.t('cart.free')})</Text>}
                                     </Text>
-                                    <Text style={[styles.costValue, deliveryFee === 0 && styles.freeValue]}>
-                                        {deliveryFee === 0 ? i18n.t('cart.free') : formatPrice(deliveryFee)}
+                                    <Text style={[styles.costValue, totals.deliveryFee === 0 && styles.freeValue]}>
+                                        {totals.deliveryFee === 0 ? i18n.t('cart.free') : formatPrice(totals.deliveryFee)}
                                     </Text>
                                 </View>
 
                                 <View style={styles.costRow}>
                                     <Text style={styles.costLabel}>{i18n.t('cart.tax')}</Text>
-                                    <Text style={styles.costValue}>{formatPrice(taxAmount)}</Text>
+                                    <Text style={styles.costValue}>{formatPrice(totals.taxAmount)}</Text>
                                 </View>
 
                                 <View style={[styles.costRow, styles.totalRow]}>
                                     <Text style={styles.totalLabel}>{i18n.t('cart.total')}</Text>
-                                    <Text style={styles.totalAmount}>{formatPrice(finalTotal)}</Text>
+                                    <Text style={styles.totalAmount}>{formatPrice(totals.total)}</Text>
                                 </View>
                             </View>
 

@@ -12,6 +12,7 @@ import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
 import { colors } from '../global'
+import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const { height } = Dimensions.get('window')
 
@@ -19,9 +20,10 @@ export default function RestaurantDetailComponent({
   restaurant,
   visible,
   setVisible,
-  deliveryTime,
-  deliveryFee
+  deliveryTime
 }) {
+  const { deliverySettings } = useDeliverySettings()
+
   const {
     name,
     description,
@@ -44,6 +46,9 @@ export default function RestaurantDetailComponent({
 
   const openingTimeFormatted = formatTime(openingTime)
   const closingTimeFormatted = formatTime(closingTime)
+
+  // Calcul des frais de livraison pour ce restaurant
+  const deliveryFee = deliverySettings?.fixedDeliveryFee || 2.99
 
   const restaurantDescription =
     description && description.trim() !== ''

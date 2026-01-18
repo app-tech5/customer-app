@@ -12,18 +12,24 @@ import Loader from '../screens/Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LoaderContext } from '../contexts/LoaderContext'
 import i18n from '../i18n'
-export default function Checkout({restaurantName, setLoader, setViewCartButton, setModalVisible, closeModal, deliverySettings, restaurant}) {
+import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
+export default function Checkout({restaurantName, setLoader, setViewCartButton, setModalVisible, closeModal, restaurant}) {
     const {setLoading} = useContext(LoaderContext)
     const {name, phone, address, id, lat, lng} = useSelector((state)=>state.userReducer)
      const navigation = useNavigation()
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
+    const { calculateTotal } = useDeliverySettings()
 
-    // Calculs détaillés utilisant les données du backend
+    // Calculs centralisés via le contexte
     const subtotal = items.reduce((prev, curr)=> prev + curr.price, 0)
-    const deliveryFee = subtotal > (deliverySettings?.freeDeliveryThreshold || 25) ? 0 : (deliverySettings?.fixedDeliveryFee || 2.99)
-    const taxRate = restaurant?.taxRate || 0.08 // Taxe du restaurant ou valeur par défaut
-    const taxAmount = subtotal * taxRate
-    const total = subtotal + deliveryFee + taxAmount
+    const totals = calculateTotal(subtotal, restaurant?.taxRate) || {
+      subtotal,
+      deliveryFee: 2.99,
+      taxAmount: subtotal * 0.08,
+      total: subtotal + 2.99 + (subtotal * 0.08),
+      isFreeDelivery: false
+    }
+    const { total } = totals
 
     // Formater le nombre d'articles avec pluriel
     const formatItemCount = (count) => {

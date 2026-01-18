@@ -2,7 +2,7 @@ import { View, Text, Modal } from 'react-native'
 import React from 'react'
 import Cart from './Cart'
 
-export default function CartModal({modalVisible, setModalVisible, restaurantName, setViewCartButton, deliverySettings, restaurant}) {
+export default function CartModal({modalVisible, setModalVisible, restaurantName, setViewCartButton, restaurant}) {
   return (
     <Modal
     animationType='slide'
@@ -13,7 +13,6 @@ export default function CartModal({modalVisible, setModalVisible, restaurantName
         restaurantName={restaurantName}
         setViewCartButton={setViewCartButton}
         setModalVisible={setModalVisible}
-        deliverySettings={deliverySettings}
         restaurant={restaurant}
     />
    </Modal>
