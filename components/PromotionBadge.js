@@ -2,7 +2,7 @@ import { View, Text, StyleSheet} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
-import { getRestaurantPromotions } from '../api'
+import { filterRestaurantPromotions, getRestaurantPromotions } from '../api'
 
 const getPromotionIcon = (promotionText) => {
   const text = promotionText.toLowerCase();
@@ -27,57 +27,12 @@ export default function PromotionBadge({restaurant, allPromotions}) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Si allPromotions est disponible, chercher dans le tableau avec la même logique que getRestaurantPromotions
+    // Si allPromotions est disponible, utiliser la fonction utilitaire de filtrage
     if (allPromotions && Array.isArray(allPromotions)) {
-      
       const restaurantId = restaurant.restaurantId || restaurant.id;
 
-      // Appliquer la même logique de filtrage que getRestaurantPromotions
-      const restaurantPromotions = allPromotions.filter(promotion => {
-        // Vérifier si la promotion est active
-        const now = new Date();
-        const isActive = promotion.isActive &&
-          now >= new Date(promotion.startDate) &&
-          now <= new Date(promotion.endDate);
-
-        if (!isActive) return false;
-
-        // Vérifier si la promotion s'applique au restaurant
-        const scopeMatch = (() => {
-          // Cas 1: Promotion avec scope 'restaurant' ET qui inclut ce restaurant
-          if (promotion.scope === 'restaurant') {
-            const hasApplicableRestaurants = promotion.applicableRestaurants &&
-              Array.isArray(promotion.applicableRestaurants);
-
-            if (hasApplicableRestaurants) {
-              const restaurantIdStr = restaurantId.toString();
-              const includesRestaurantId = promotion.applicableRestaurants.some(restId => {
-                const promoRestId = typeof restId === 'object' ? (restId._id || restId.toString()) : restId;
-                return promoRestId.toString() === restaurantIdStr;
-              });
-
-              if (includesRestaurantId) return true;
-            }
-            return false;
-          }
-
-          // Cas 2: Promotion globale (tous les restaurants)
-          if (promotion.scope === 'global' || promotion.scope === 'all') {
-            return true;
-          }
-
-          // Cas 3: Promotion avec scope 'menu' - vérifier si elle s'applique aux menus du restaurant
-          if (promotion.scope === 'menu') {
-            // Pour simplifier, on considère que les promotions menu s'appliquent
-            // (la logique complète nécessiterait de vérifier les menus du restaurant)
-            return true;
-          }
-
-          return false;
-        })();
-
-        return scopeMatch;
-      });
+      // Utiliser la fonction utilitaire qui applique la même logique que getRestaurantPromotions
+      const restaurantPromotions = filterRestaurantPromotions(allPromotions, restaurantId);
 
       // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
       const activePromotion = restaurantPromotions.length > 0 ? restaurantPromotions[0] : null;
