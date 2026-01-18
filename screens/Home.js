@@ -7,7 +7,7 @@ import RestaurantItems, { localRestaurants } from '../components/home/Restaurant
 import { Divider } from 'react-native-elements'
 import { restaurants, themes } from '../data'
 import HomeHeader from '../components/home/HomeHeader'
-import { getRestaurantsFromFirebase } from '../api'
+import { getRestaurantsFromFirebase, getAllPromotions } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AntDesign } from '@expo/vector-icons'
 import Loader from './Loader'
@@ -17,17 +17,29 @@ export default function Home({navigation}) {
   const {restaurantData, setRestaurantData} = useContext(RestaurantsContext)
   const [city, setCity] = useState("Paris");
   const [activeTab, setActiveTab]= useState("Delivery")
+  const [allPromotions, setAllPromotions] = useState([])
   const flatlist = useRef(null)
   const searchbar = useRef(null)
   useEffect(()=>{
     // Charger les restaurants directement depuis l'API (pas de cache)
     getRestaurantsFromFirebase()
-      .then((restaurants)=>{
+      .then(async (restaurants)=>{
         setRestaurantData(restaurants)
+
+        // Charger TOUTES les promotions en un seul appel API
+        try {
+          const promotions = await getAllPromotions();
+          setAllPromotions(promotions || []);
+          console.log('🏷️ All promotions loaded in one call:', promotions?.length || 0);
+        } catch (error) {
+          console.error('Error loading all promotions:', error);
+          setAllPromotions([]);
+        }
       })
       .catch(error => {
         console.error('Error loading restaurants:', error);
         setRestaurantData([]); // Liste vide par défaut
+        setAllPromotions([]);
       });
   },[])
   if(!restaurantData)
@@ -47,12 +59,12 @@ export default function Home({navigation}) {
        {city?
        <>
         <Categories navigation={navigation}/>
-       <RestaurantItems restaurantData={restaurantData} navigation={navigation}  size="100%"/>
+       <RestaurantItems restaurantData={restaurantData} navigation={navigation} promotions={allPromotions} size="100%"/>
        </>
        :
         <ScrollView showsVerticalScrollIndicator={false}>
-          <RestaurantItems restaurantData={restaurantData} reward="$60 until $9 reward" navigation={navigation} size="100%" horizontal={true}/>
-          <RestaurantItems restaurantData={restaurantData}  navigation={navigation} ads={true} size="100%" flatlist={flatlist} horizontal={true}/>
+          <RestaurantItems restaurantData={restaurantData} promotions={allPromotions} reward="$60 until $9 reward" navigation={navigation} size="100%" horizontal={true}/>
+          <RestaurantItems restaurantData={restaurantData} promotions={allPromotions} navigation={navigation} ads={true} size="100%" flatlist={flatlist} horizontal={true}/>
           <RestaurantRowsItems themes={themes} restaurantData={restaurantData} navigation={navigation} />
         </ScrollView>}
       <Divider width={1}/>
@@ -65,7 +77,7 @@ const RestaurantRowsItems = ({themes, restaurantData, navigation}) => {
       return(
         <View key={index}>
           <View style={styles.row}>
-            <RestaurantItems restaurantData={restaurantData} navigation={navigation} horizontal={true} />
+            <RestaurantItems restaurantData={restaurantData} promotions={allPromotions} navigation={navigation} horizontal={true} />
           </View>
         </View>
       )

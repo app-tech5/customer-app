@@ -666,6 +666,9 @@ export const getAllMenus = async () => {
 export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
 export const getDeliverySettings = () => api.getDeliverySettings();
 export const getAllActiveOffers = () => api.getAllActiveOffers();
+// Récupérer toutes les promotions (sans filtrage par restaurant)
+export const getAllPromotions = () => api.apiCall('/resource/promotions');
+
 export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromotions(restaurantId);
 
 // GESTION DES FAVORIS

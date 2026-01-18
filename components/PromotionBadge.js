@@ -22,34 +22,93 @@ const getPromotionIcon = (promotionText) => {
   return { name: 'tag', type: 'FontAwesome' };
 };
 
-export default function PromotionBadge({restaurant}) {
+export default function PromotionBadge({restaurant, allPromotions}) {
   const [promotion, setPromotion] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPromotion = async () => {
-      try {
-        if (!restaurant || !restaurant.restaurantId) {
+    // Si allPromotions est disponible, chercher dans le tableau avec la même logique que getRestaurantPromotions
+    if (allPromotions && Array.isArray(allPromotions)) {
+      
+      const restaurantId = restaurant.restaurantId || restaurant.id;
+
+      // Appliquer la même logique de filtrage que getRestaurantPromotions
+      const restaurantPromotions = allPromotions.filter(promotion => {
+        // Vérifier si la promotion est active
+        const now = new Date();
+        const isActive = promotion.isActive &&
+          now >= new Date(promotion.startDate) &&
+          now <= new Date(promotion.endDate);
+
+        if (!isActive) return false;
+
+        // Vérifier si la promotion s'applique au restaurant
+        const scopeMatch = (() => {
+          // Cas 1: Promotion avec scope 'restaurant' ET qui inclut ce restaurant
+          if (promotion.scope === 'restaurant') {
+            const hasApplicableRestaurants = promotion.applicableRestaurants &&
+              Array.isArray(promotion.applicableRestaurants);
+
+            if (hasApplicableRestaurants) {
+              const restaurantIdStr = restaurantId.toString();
+              const includesRestaurantId = promotion.applicableRestaurants.some(restId => {
+                const promoRestId = typeof restId === 'object' ? (restId._id || restId.toString()) : restId;
+                return promoRestId.toString() === restaurantIdStr;
+              });
+
+              if (includesRestaurantId) return true;
+            }
+            return false;
+          }
+
+          // Cas 2: Promotion globale (tous les restaurants)
+          if (promotion.scope === 'global' || promotion.scope === 'all') {
+            return true;
+          }
+
+          // Cas 3: Promotion avec scope 'menu' - vérifier si elle s'applique aux menus du restaurant
+          if (promotion.scope === 'menu') {
+            // Pour simplifier, on considère que les promotions menu s'appliquent
+            // (la logique complète nécessiterait de vérifier les menus du restaurant)
+            return true;
+          }
+
+          return false;
+        })();
+
+        return scopeMatch;
+      });
+
+      // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
+      const activePromotion = restaurantPromotions.length > 0 ? restaurantPromotions[0] : null;
+      setPromotion(activePromotion || (restaurant.reward ? { name: restaurant.reward } : null));
+      setLoading(false);
+    } else {
+      // Fallback : appel API individuel si allPromotions n'est pas disponible
+      const fetchPromotion = async () => {
+        try {
+          if (!restaurant || !restaurant.restaurantId) {
+            setLoading(false);
+            return;
+          }
+
+          const promotions = await getRestaurantPromotions(restaurant.restaurantId);
+
+          // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
+          const activePromotion = promotions.length > 0 ? promotions[0] : null;
+          setPromotion(activePromotion);
+        } catch (error) {
+          console.error('Error fetching restaurant promotion:', error);
+          // Fallback à la propriété statique si l'API échoue
+          setPromotion(restaurant.reward ? { name: restaurant.reward } : null);
+        } finally {
           setLoading(false);
-          return;
         }
+      };
 
-        const promotions = await getRestaurantPromotions(restaurant.restaurantId);
-
-        // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
-        const activePromotion = promotions.length > 0 ? promotions[0] : null;
-        setPromotion(activePromotion);
-      } catch (error) {
-        console.error('Error fetching restaurant promotion:', error);
-        // Fallback à la propriété statique si l'API échoue
-        setPromotion(restaurant.reward ? { name: restaurant.reward } : null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPromotion();
-  }, [restaurant]);
+      fetchPromotion();
+    }
+  }, [restaurant, allPromotions]);
 
   // Si pas de promotion ou chargement en cours, ne rien afficher
   if (loading || !promotion) {
