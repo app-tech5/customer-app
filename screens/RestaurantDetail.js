@@ -449,7 +449,7 @@ export default function RestaurantDetail({ route, navigation }) {
       {/* Loading Overlay */}
       {loading && (
         <View style={styles.loaderOverlay}>
-          <Loader />
+          <Loader transparent/>
         </View>
       )}
 
