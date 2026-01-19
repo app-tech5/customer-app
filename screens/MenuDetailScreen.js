@@ -5,40 +5,14 @@ import { Quantity } from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 
-// Données statiques pour démontrer le design complet
-const mockMenu = {
-  _id: 'menu123',
-  name: 'Menu Gourmet Complet',
-  description: 'Un menu exquis composé de nos meilleures spécialités, parfait pour une expérience culinaire inoubliable. Inclut entrée, plat principal et dessert avec un accord mets-vin sélectionné par notre sommelier.',
-  price: 45.90,
-  image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
-  discount: { active: true, percentage: 15 },
-  rating: { average: 4.7, count: 128 },
-  preparation_time: 35,
-  availability: true,
-  products: [
-    { value: 'prod1', label: 'Classic Cheeseburger' },
-    { value: 'prod2', label: 'Crispy French Fries' },
-    { value: 'prod3', label: 'Soft Drink - Cola' },
-    { value: 'prod4', label: 'Chocolate Brownie' },
-    { value: 'prod5', label: 'Garlic Breadsticks' },
-    { value: 'prod6', label: 'Caesar Salad' }
-  ]
-}
-
-const mockRestaurant = {
-  _id: 'rest123',
-  name: 'Le Jardin Gourmet'
-}
+// Structure basée sur les vraies données de la DB
+// Plus de mock data - utilisation directe des vraies données
 
 export default function MenuDetailScreen({route}) {
-  // Utiliser les vraies données si elles ont des products, sinon les mock data pour le design
+  // Utiliser directement les vraies données de la DB
   const routeParams = route?.params || {}
-  const realMenu = routeParams.food
-
-  console.log("realMenu", realMenu)
-  const menu = (realMenu && realMenu.products && realMenu.products.length > 0) ? realMenu : mockMenu
-  const restaurant = routeParams.restaurant || mockRestaurant
+  const menu = routeParams.food
+  const restaurant = routeParams.restaurant
 
   // Calculer le prix avec discount si applicable
   const calculatePrice = () => {
@@ -151,72 +125,88 @@ export default function MenuDetailScreen({route}) {
 
         <View style={styles.divider1} />
 
-        {/* Liste des produits du menu */}
-        <View style={styles.section2}>
-          <View style={styles.sectionHeader}>
-          <Text style={styles.title1}>Composition du menu</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>
-              {menu.products?.length || 0} produits
-            </Text>
+        {/* Ingrédients du produit */}
+        {menu.ingredients && menu.ingredients.length > 0 && (
+          <View style={styles.section2}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.title1}>Ingrédients</Text>
+            </View>
+            <View style={styles.ingredientsContainer}>
+              <Text style={styles.ingredientsText}>
+                {menu.ingredients.join(' • ')}
+              </Text>
+            </View>
           </View>
-          </View>
+        )}
 
-          {menu.products && menu.products.length > 0 ? (
-            <View style={styles.productsList}>
-              {menu.products.map((product, index) => (
-                <View key={`product-${index}`} style={styles.productItem}>
-                  <View style={styles.productNumber}>
-                    <Text style={styles.productNumberText}>{index + 1}</Text>
+        {/* Variants/options disponibles */}
+        {menu.variants && menu.variants.length > 0 && (
+          <View style={styles.section2}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.title1}>Options disponibles</Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {menu.variants.length} option{menu.variants.length > 1 ? 's' : ''}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.variantsList}>
+              {menu.variants.map((variant, index) => (
+                <View key={`variant-${index}`} style={styles.variantItem}>
+                  <View style={styles.variantContent}>
+                    <Text style={styles.variantName}>{variant.label}</Text>
+                    <Text style={styles.variantType}>Option personnalisable</Text>
                   </View>
-                  <View style={styles.productContent}>
-                    <Text style={styles.productName}>{product.label}</Text>
-                  </View>
-                  <MaterialIcons name="restaurant-menu" size={20} color={colors.primary} />
+                  <MaterialIcons name="add-circle-outline" size={24} color={colors.primary} />
                 </View>
               ))}
             </View>
-          ) : (
-            <View style={styles.emptyProducts}>
-              <MaterialIcons name="restaurant-menu" size={48} color={colors.text.secondary} />
-              <Text style={styles.emptyText}>
-                Les détails des produits de ce menu ne sont pas disponibles pour le moment.
-              </Text>
-            </View>
-          )}
-        </View>
+          </View>
+        )}
 
-        {/* Résumé et informations */}
+        {/* Informations détaillées */}
         <View style={styles.section3}>
-          <Text style={styles.title1}>Résumé</Text>
+          <Text style={styles.title1}>Détails du produit</Text>
 
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryRow}>
+          <View style={styles.detailsCard}>
+            <View style={styles.detailRow}>
               <MaterialIcons name="restaurant" size={20} color={colors.primary} />
-              <Text style={styles.summaryLabel}>Nombre de produits:</Text>
-              <Text style={styles.summaryValue}>{menu.products?.length || 0}</Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <MaterialIcons name="schedule" size={20} color={colors.primary} />
-              <Text style={styles.summaryLabel}>Temps de préparation:</Text>
-              <Text style={styles.summaryValue}>{menu.preparation_time} min</Text>
-            </View>
-
-            <View style={styles.summaryRow}>
-              <MaterialIcons name="local-offer" size={20} color={colors.primary} />
-              <Text style={styles.summaryLabel}>Économisez:</Text>
-              <Text style={[styles.summaryValue, { color: colors.error }]}>
-                {priceInfo.discountPercentage > 0 ? formatPrice(priceInfo.originalPrice - priceInfo.discountedPrice) : '-'}
+              <Text style={styles.detailLabel}>Catégorie:</Text>
+              <Text style={styles.detailValue}>
+                {menu.category?.name || menu.categories?.label || 'Non catégorisé'}
               </Text>
             </View>
+
+            <View style={styles.detailRow}>
+              <MaterialIcons name="schedule" size={20} color={colors.primary} />
+              <Text style={styles.detailLabel}>Préparation:</Text>
+              <Text style={styles.detailValue}>{menu.preparation_time} min</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <MaterialIcons name="check-circle" size={20} color={colors.primary} />
+              <Text style={styles.detailLabel}>Disponibilité:</Text>
+              <Text style={[styles.detailValue, { color: menu.availability !== false ? colors.success : colors.error }]}>
+                {menu.availability !== false ? 'Disponible' : 'Indisponible'}
+              </Text>
+            </View>
+
+            {menu.variants && menu.variants.length > 0 && (
+              <View style={styles.detailRow}>
+                <MaterialIcons name="tune" size={20} color={colors.primary} />
+                <Text style={styles.detailLabel}>Personnalisation:</Text>
+                <Text style={styles.detailValue}>
+                  {menu.variants.length} option{menu.variants.length > 1 ? 's' : ''} disponible{menu.variants.length > 1 ? 's' : ''}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Call-to-action */}
           <View style={styles.ctaContainer}>
-          <Text style={styles.ctaText}>
-            Ajoutez ce menu complet à votre commande et profitez de tous ces produits !
-          </Text>
+            <Text style={styles.ctaText}>
+              Ajoutez ce produit à votre commande et personnalisez-le selon vos goûts !
+            </Text>
           </View>
         </View>
 
@@ -389,7 +379,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  productsList: {
+  ingredientsContainer: {
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 20,
@@ -399,61 +389,49 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  productItem: {
+  ingredientsText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  variantsList: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  variantItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.background.secondary,
   },
-  productNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  productNumberText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  productContent: {
+  variantContent: {
     flex: 1,
   },
-  productName: {
+  variantName: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
     marginBottom: 4,
   },
-  productType: {
+  variantType: {
     fontSize: 12,
     color: colors.primary,
     fontWeight: '500',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  emptyProducts: {
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: 'white',
-    borderRadius: 16,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 20,
   },
   section3: {
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  summaryCard: {
+  detailsCard: {
     backgroundColor: 'white',
     borderRadius: 16,
     padding: 20,
@@ -464,18 +442,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  summaryRow: {
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  summaryLabel: {
+  detailLabel: {
     fontSize: 16,
     color: colors.text.secondary,
     marginLeft: 12,
     flex: 1,
   },
-  summaryValue: {
+  detailValue: {
     fontSize: 16,
     color: colors.text.primary,
     fontWeight: '600',
