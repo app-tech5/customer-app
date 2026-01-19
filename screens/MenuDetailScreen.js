@@ -16,6 +16,7 @@ export default function MenuDetailScreen({route}) {
   // Utiliser directement les vraies données de la DB
   const routeParams = route?.params || {}
   const menu = routeParams.food
+  console.log("MENU", menu)
   const restaurant = routeParams.restaurant
 
   // État pour gérer l'image actuelle
