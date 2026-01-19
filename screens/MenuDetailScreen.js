@@ -25,6 +25,9 @@ export default function MenuDetailScreen({route}) {
       : require('../assets/images/default-food.jpg')
   )
 
+  // État pour gérer les options sélectionnées
+  const [selectedVariants, setSelectedVariants] = React.useState({})
+
   // Calculer le prix avec discount si applicable
   const calculatePrice = () => {
     const basePrice = Number(menu.price) || 0
@@ -48,6 +51,29 @@ export default function MenuDetailScreen({route}) {
   // Formater le prix
   const formatPrice = (price) => {
     return price.toLocaleString(language, { style: "currency", currency: currency })
+  }
+
+  // Gérer les options sélectionnées
+  const addVariant = (variantId) => {
+    setSelectedVariants(prev => ({
+      ...prev,
+      [variantId]: (prev[variantId] || 0) + 1
+    }))
+  }
+
+  const removeVariant = (variantId) => {
+    setSelectedVariants(prev => {
+      const newQuantity = (prev[variantId] || 0) - 1
+      if (newQuantity <= 0) {
+        const { [variantId]: removed, ...rest } = prev
+        return rest
+      }
+      return { ...prev, [variantId]: newQuantity }
+    })
+  }
+
+  const getVariantQuantity = (variantId) => {
+    return selectedVariants[variantId] || 0
   }
 
   const renderProduct = ({ item, index }) => (
@@ -176,15 +202,41 @@ export default function MenuDetailScreen({route}) {
               </View>
             </View>
             <View style={styles.variantsList}>
-              {menu.variants.map((variant, index) => (
-                <View key={`variant-${index}`} style={styles.variantItem}>
-                  <View style={styles.variantContent}>
-                    <Text style={styles.variantName}>{variant.label}</Text>
-                    <Text style={styles.variantType}>Option personnalisable</Text>
+              {menu.variants.map((variant, index) => {
+                const variantId = variant._id || variant.value || `variant-${index}`
+                const quantity = getVariantQuantity(variantId)
+
+                return (
+                  <View key={`variant-${index}`} style={styles.variantItem}>
+                    <View style={styles.variantContent}>
+                      <Text style={styles.variantName}>{variant.label}</Text>
+                      <Text style={styles.variantType}>Option personnalisable</Text>
+                    </View>
+
+                    <View style={styles.variantControls}>
+                      {quantity > 0 && (
+                        <TouchableOpacity
+                          style={styles.controlButton}
+                          onPress={() => removeVariant(variantId)}
+                        >
+                          <MaterialIcons name="remove-circle" size={24} color={colors.error} />
+                        </TouchableOpacity>
+                      )}
+
+                      {quantity > 0 && (
+                        <Text style={styles.quantityText}>{quantity}</Text>
+                      )}
+
+                      <TouchableOpacity
+                        style={styles.controlButton}
+                        onPress={() => addVariant(variantId)}
+                      >
+                        <MaterialIcons name="add-circle" size={24} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <MaterialIcons name="add-circle-outline" size={24} color={colors.primary} />
-                </View>
-              ))}
+                )
+              })}
             </View>
           </View>
         )}
@@ -451,6 +503,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.primary,
     fontWeight: '500',
+  },
+  variantControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  controlButton: {
+    padding: 4,
+  },
+  quantityText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    minWidth: 24,
+    textAlign: 'center',
   },
   section3: {
     paddingHorizontal: 20,
