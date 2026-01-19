@@ -11,18 +11,18 @@ const mockMenu = {
   name: 'Menu Gourmet Complet',
   description: 'Un menu exquis composé de nos meilleures spécialités, parfait pour une expérience culinaire inoubliable. Inclut entrée, plat principal et dessert avec un accord mets-vin sélectionné par notre sommelier.',
   price: 45.90,
-  image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800',
+  image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
   discount: { active: true, percentage: 15 },
   rating: { average: 4.7, count: 128 },
   preparation_time: 35,
   availability: true,
   products: [
-    { value: 'prod1', label: 'Salade César aux crevettes grillées - Entrée fraîche et croquante' },
-    { value: 'prod2', label: 'Filet de saumon rôti aux herbes - Plat principal raffiné' },
-    { value: 'prod3', label: 'Risotto aux champignons sauvages - Accompagnement crémeux' },
-    { value: 'prod4', label: 'Tarte au citron meringuée - Dessert acidulé et aérien' },
-    { value: 'prod5', label: 'Café espresso et assortiment de petits fours - Finale parfaite' },
-    { value: 'prod6', label: 'Pain artisanal et beurre aux herbes - Accompagnement' }
+    { value: 'prod1', label: 'Classic Cheeseburger' },
+    { value: 'prod2', label: 'Crispy French Fries' },
+    { value: 'prod3', label: 'Soft Drink - Cola' },
+    { value: 'prod4', label: 'Chocolate Brownie' },
+    { value: 'prod5', label: 'Garlic Breadsticks' },
+    { value: 'prod6', label: 'Caesar Salad' }
   ]
 }
 
@@ -35,6 +35,8 @@ export default function MenuDetailScreen({route}) {
   // Utiliser les vraies données si elles ont des products, sinon les mock data pour le design
   const routeParams = route?.params || {}
   const realMenu = routeParams.food
+
+  console.log("realMenu", realMenu)
   const menu = (realMenu && realMenu.products && realMenu.products.length > 0) ? realMenu : mockMenu
   const restaurant = routeParams.restaurant || mockRestaurant
 
@@ -79,7 +81,7 @@ export default function MenuDetailScreen({route}) {
         {/* Image du menu avec overlay dégradé */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: menu.image }}
+            source={menu.image ? { uri: menu.image } : require('../assets/images/default-food.jpg')}
             style={styles.image}
             defaultSource={require('../assets/images/default-food.jpg')}
           />
@@ -152,12 +154,12 @@ export default function MenuDetailScreen({route}) {
         {/* Liste des produits du menu */}
         <View style={styles.section2}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.title1}>Composition du menu</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {menu.products?.length || 0} plats
-              </Text>
-            </View>
+          <Text style={styles.title1}>Composition du menu</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>
+              {menu.products?.length || 0} produits
+            </Text>
+          </View>
           </View>
 
           {menu.products && menu.products.length > 0 ? (
@@ -169,10 +171,6 @@ export default function MenuDetailScreen({route}) {
                   </View>
                   <View style={styles.productContent}>
                     <Text style={styles.productName}>{product.label}</Text>
-                    {index === 0 && <Text style={styles.productType}>Entrée</Text>}
-                    {index === 1 && <Text style={styles.productType}>Plat principal</Text>}
-                    {index === 2 && <Text style={styles.productType}>Accompagnement</Text>}
-                    {index > 2 && <Text style={styles.productType}>Dessert</Text>}
                   </View>
                   <MaterialIcons name="restaurant-menu" size={20} color={colors.primary} />
                 </View>
@@ -195,7 +193,7 @@ export default function MenuDetailScreen({route}) {
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
               <MaterialIcons name="restaurant" size={20} color={colors.primary} />
-              <Text style={styles.summaryLabel}>Nombre de plats:</Text>
+              <Text style={styles.summaryLabel}>Nombre de produits:</Text>
               <Text style={styles.summaryValue}>{menu.products?.length || 0}</Text>
             </View>
 
@@ -216,9 +214,9 @@ export default function MenuDetailScreen({route}) {
 
           {/* Call-to-action */}
           <View style={styles.ctaContainer}>
-            <Text style={styles.ctaText}>
-              Ajoutez ce menu à votre commande et profitez d'une expérience gastronomique complète !
-            </Text>
+          <Text style={styles.ctaText}>
+            Ajoutez ce menu complet à votre commande et profitez de tous ces produits !
+          </Text>
           </View>
         </View>
 
