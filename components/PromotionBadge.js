@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet} from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { MaterialCommunityIcons, FontAwesome, Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
@@ -34,9 +34,9 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
       // Utiliser la fonction utilitaire qui applique la même logique que getRestaurantPromotions
       const restaurantPromotions = filterRestaurantPromotions(allPromotions, restaurantId, allMenus);
 
-      // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
+      // Prendre la première promotion (la plus prioritaire)
       const activePromotion = restaurantPromotions.length > 0 ? restaurantPromotions[0] : null;
-      setPromotion(activePromotion || (restaurant.reward ? { name: restaurant.reward } : null));
+      setPromotion(activePromotion || null);
       setLoading(false);
     } else {
       // Fallback : appel API individuel si allPromotions n'est pas disponible
@@ -49,13 +49,12 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
 
           const promotions = await getRestaurantPromotions(restaurant.restaurantId);
 
-          // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
+          // Prendre la première promotion (la plus prioritaire)
           const activePromotion = promotions.length > 0 ? promotions[0] : null;
           setPromotion(activePromotion);
         } catch (error) {
           console.error('Error fetching restaurant promotion:', error);
-          // Fallback à la propriété statique si l'API échoue
-          setPromotion(restaurant.reward ? { name: restaurant.reward } : null);
+          setPromotion(null);
         } finally {
           setLoading(false);
         }
@@ -66,7 +65,19 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
   }, [restaurant, allPromotions, allMenus]);
 
   // Si pas de promotion ou chargement en cours, ne rien afficher
-  if (loading || !promotion) {
+  // if (loading || !promotion) {
+  //   return null;
+  // }
+
+  if (loading) {
+    return (
+      <View style={styles.promotionContainer}>
+        <ActivityIndicator size="small" color={colors.success} />
+      </View>
+    );
+  }
+
+  if (!promotion) {
     return null;
   }
 
