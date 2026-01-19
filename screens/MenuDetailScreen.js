@@ -17,12 +17,16 @@ export default function MenuDetailScreen({route}) {
   // Calculer le prix avec discount si applicable
   const calculatePrice = () => {
     const basePrice = Number(menu.price) || 0
-    if (menu.discount && menu.discount.active && menu.discount.percentage > 0) {
-      const discountAmount = basePrice * (menu.discount.percentage / 100)
+    // Vérifier isActive (dans la vraie DB) ou active (version alternative)
+    const isDiscountActive = menu.discount && (menu.discount.isActive === true || menu.discount.active === true)
+    const discountPercentage = menu.discount?.percentage || 0
+
+    if (isDiscountActive && discountPercentage > 0) {
+      const discountAmount = basePrice * (discountPercentage / 100)
       return {
         originalPrice: basePrice,
         discountedPrice: basePrice - discountAmount,
-        discountPercentage: menu.discount.percentage
+        discountPercentage: discountPercentage
       }
     }
     return { originalPrice: basePrice, discountedPrice: basePrice, discountPercentage: 0 }
