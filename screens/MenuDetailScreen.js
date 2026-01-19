@@ -14,6 +14,13 @@ export default function MenuDetailScreen({route}) {
   const menu = routeParams.food
   const restaurant = routeParams.restaurant
 
+  // État pour gérer l'image actuelle
+  const [currentImage, setCurrentImage] = React.useState(
+    menu?.image && menu.image.trim()
+      ? { uri: menu.image.trim() }
+      : require('../assets/images/default-food.jpg')
+  )
+
   // Calculer le prix avec discount si applicable
   const calculatePrice = () => {
     const basePrice = Number(menu.price) || 0
@@ -59,9 +66,12 @@ export default function MenuDetailScreen({route}) {
         {/* Image du menu avec overlay dégradé */}
         <View style={styles.imageContainer}>
           <Image
-            source={menu.image ? { uri: menu.image } : require('../assets/images/default-food.jpg')}
+            source={currentImage}
             style={styles.image}
-            defaultSource={require('../assets/images/default-food.jpg')}
+            onError={() => {
+              console.log('Image failed to load, using default:', menu?.image)
+              setCurrentImage(require('../assets/images/default-food.jpg'))
+            }}
           />
           <View style={styles.imageOverlay} />
 
