@@ -1,15 +1,15 @@
-import React, {useState, useEffect, useRef, createRef, useContext, useMemo, useCallback} from 'react'
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput } from 'react-native'
+import React, { useState, useEffect, useRef, createRef, useContext, useMemo, useCallback } from 'react'
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import { Divider } from 'react-native-elements'
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
-import {language, currency}  from '../../global'
+import { language, currency } from '../../global'
 import { AntDesign } from '@expo/vector-icons';
 import { Icon } from 'react-native-elements';
 import { getFoods, getCategoriesFromRestaurant } from '../../api';
 import { colors } from '../../global';
 import Loader from '../../screens/Loader';
-import AddToCartButton from '../AddToCartButton';  
+import AddToCartButton from '../AddToCartButton';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import About from './About';
 import HeaderTabs from '../home/HeaderTabs';
@@ -18,98 +18,98 @@ import { groupFoods } from '../../data';
 import { FlatList } from 'react-native-gesture-handler';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 
-  const styles = StyleSheet.create({
-    menuItemStyle :{flex: 1,},
-    titleStyle: {
-      fontSize: 19,
-      fontFamily: "Roboto_500Medium"
-    },
-    groupTitle: {
-     fontSize: 25,
-     marginLeft: 20,
-     fontWeight: "bold",
-     marginVertical: 10
-    },
-    searchContainer: {
-      paddingHorizontal: 20,
-      paddingVertical: 12,
-      backgroundColor: colors.background.primary,
-    },
-    searchBar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.background.secondary,
-      borderRadius: 12,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-      gap: 10,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 15,
-      color: colors.text.primary,
-    },
-    filtersContainer: {
-      maxHeight: 50,
-      marginBottom: 10,
-    },
-    filtersContent: {
-      paddingHorizontal: 20,
-      gap: 8,
-    },
-    filterChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 14,
-      paddingVertical: 8,
-      borderRadius: 20,
-      backgroundColor: colors.background.secondary,
-      borderWidth: 1,
-      borderColor: colors.border.medium,
-      gap: 6,
-    },
-    filterChipActive: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    filterChipText: {
-      fontSize: 13,
-      color: colors.text.secondary,
-      fontWeight: '500',
-    },
-    filterChipTextActive: {
-      color: colors.white,
-    },
-    noResultsContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: 60,
-    },
-    noResultsText: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: colors.text.primary,
-      marginTop: 16,
-    },
-    noResultsSubtext: {
-      fontSize: 14,
-      color: colors.text.secondary,
-      marginTop: 8,
-    },
-}) 
-export default function MenuItems({route, restaurant, activeTab, marginLeft, navigation, foodsRef,
-pickup, delivery, setActiveTab, userLocation, mapRef, apikey, scrollEnabled, setScrollEnabled,
-opacity, setCategoriesFood, hideHeader}) {
+const styles = StyleSheet.create({
+  menuItemStyle: { flex: 1, },
+  titleStyle: {
+    fontSize: 19,
+    fontFamily: "Roboto_500Medium"
+  },
+  groupTitle: {
+    fontSize: 25,
+    marginLeft: 20,
+    fontWeight: "bold",
+    marginVertical: 10
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: colors.background.primary,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: colors.text.primary,
+  },
+  filtersContainer: {
+    maxHeight: 50,
+    marginBottom: 10,
+  },
+  filtersContent: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.background.secondary,
+    borderWidth: 1,
+    borderColor: colors.border.medium,
+    gap: 6,
+  },
+  filterChipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  filterChipText: {
+    fontSize: 13,
+    color: colors.text.secondary,
+    fontWeight: '500',
+  },
+  filterChipTextActive: {
+    color: colors.white,
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  noResultsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 16,
+  },
+  noResultsSubtext: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginTop: 8,
+  },
+})
+export default function MenuItems({ route, restaurant, activeTab, marginLeft, navigation, foodsRef,
+  pickup, delivery, setActiveTab, userLocation, mapRef, apikey, scrollEnabled, setScrollEnabled,
+  opacity, setCategoriesFood, hideHeader }) {
   // Get restaurant from props or route.params
   const restaurantData = restaurant || route?.params?.restaurant
-  const {categories, setCategories} = useContext(CategoriesContext)
+  const { categories, setCategories } = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
   const [loader, setLoader] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilters, setActiveFilters] = useState([])
 
-  useEffect(()=>{
+  useEffect(() => {
     if (!restaurantData) {
       console.log('❌ No restaurant data available');
       return;
@@ -135,7 +135,7 @@ opacity, setCategoriesFood, hideHeader}) {
       console.error('Error fetching categories:', error);
     });
 
-        getFoods(restaurantId).then((foods) => {
+    getFoods(restaurantId).then((foods) => {
       console.log('=== API RESPONSE ===');
       console.log('Foods fetched from API:', foods?.length || 0);
 
@@ -149,11 +149,11 @@ opacity, setCategoriesFood, hideHeader}) {
         // Filtrer côté frontend : ignorer les produits sans image valide
         const foodsWithValidImages = foods.filter(food => {
           const hasValidImage = food &&
-                               food.image &&
-                               typeof food.image === 'string' &&
-                               food.image.trim() !== '' &&
-                               food.image !== 'null' &&
-                               food.image !== 'undefined';
+            food.image &&
+            typeof food.image === 'string' &&
+            food.image.trim() !== '' &&
+            food.image !== 'null' &&
+            food.image !== 'undefined';
 
           // Debug: Log pourquoi chaque produit est filtré ou gardé
           if (!hasValidImage) {
@@ -195,7 +195,7 @@ opacity, setCategoriesFood, hideHeader}) {
       setLoader(false);
     })
 
-  },[activeTab, restaurantData])
+  }, [activeTab, restaurantData])
 
   // Filtres disponibles (peut être étendu avec des données du backend)
   const availableFilters = [
@@ -240,24 +240,29 @@ opacity, setCategoriesFood, hideHeader}) {
     );
   }, []);
 
-  if(loader)
-    return <View>
-      <View style={{marginBottom: 100}}></View>
-      <Loader />
-    </View>
+  if (loader)
+    return <ActivityIndicator
+      size="small"
+      color={colors.primary}
+      style={styles.indicator}
+    />
+  // return <View>
+  //   <View style={{marginBottom: 100}}></View>
+  //   <Loader />
+  // </View>
 
   // If no foods loaded yet, show empty state
   console.log('Total foods loaded:', foods.length)
   if (foods.length === 0) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 16, color: colors.text.secondary}}>Aucun produit disponible</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 16, color: colors.text.secondary }}>Aucun produit disponible</Text>
       </View>
     )
   }
 
   return (
-    <View style={{flex: 1, }} >
+    <View style={{ flex: 1, }} >
       {/* Barre de recherche */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
@@ -278,8 +283,8 @@ opacity, setCategoriesFood, hideHeader}) {
       </View>
 
       {/* Filtres */}
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filtersContainer}
         contentContainerStyle={styles.filtersContent}
@@ -293,10 +298,10 @@ opacity, setCategoriesFood, hideHeader}) {
             ]}
             onPress={() => toggleFilter(filter.id)}
           >
-            <Icon 
-              name={filter.icon} 
-              type="material-community" 
-              size={16} 
+            <Icon
+              name={filter.icon}
+              type="material-community"
+              size={16}
               color={activeFilters.includes(filter.id) ? colors.white : colors.text.secondary}
             />
             <Text style={[
@@ -323,71 +328,71 @@ opacity, setCategoriesFood, hideHeader}) {
         <FlatList
           ref={foodsRef}
           data={categories}
-          keyExtractor={(item, index)=>index}
-          renderItem={({item, index})=> {
-            let data = filteredFoods.filter((food)=>food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
+          keyExtractor={(item, index) => index}
+          renderItem={({ item, index }) => {
+            let data = filteredFoods.filter((food) => food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
             console.log(`Category ${item.name}: ${data.length} items`)
             return (
               <View >
-               {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
+                {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
                 <FlatList
                   data={data} // Le backend a déjà filtré les produits valides
-                   keyExtractor={(item, index)=>`food-${item.id}`}
-                   renderItem={({item, index})=>{
+                  keyExtractor={(item, index) => `food-${item.id}`}
+                  renderItem={({ item, index }) => {
                     return (
                       <View key={index} >
-                   <View style={styles.menuItemStyle}>
-                       <View style={{
-                         flexDirection: "row",
+                        <View style={styles.menuItemStyle}>
+                          <View style={{
+                            flexDirection: "row",
 
-                       }}>
-                       <View style={{
-                         alignItems: "center",
-                         marginBottom: 10
-                       }}>
-                          <FoodImage
-                            food={item}
-                            marginLeft={marginLeft ? marginLeft:0}
-                          />
-                       </View>
-                  <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
-                </View>
-                <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
-                  {item && item.id ? (
-                    <AddToCartButton
-                      key={`cart-btn-${item.id}`}
-                      food={item}
-                      restaurant={restaurantData}
-                    />
-                  ) : (
-                    <Text style={{ color: colors.error, fontSize: 12 }}>
-                      Produit non disponible
-                    </Text>
-                  )}
-                </View>
-               </View>
-                   <Divider width={0.5} orientation="vertical" style={{
-                     marginHorizontal: 20
-                   }}/>
-                     </View>
+                          }}>
+                            <View style={{
+                              alignItems: "center",
+                              marginBottom: 10
+                            }}>
+                              <FoodImage
+                                food={item}
+                                marginLeft={marginLeft ? marginLeft : 0}
+                              />
+                            </View>
+                            <FoodInfo food={item} navigation={navigation} restaurant={restaurantData} />
+                          </View>
+                          <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
+                            {item && item.id ? (
+                              <AddToCartButton
+                                key={`cart-btn-${item.id}`}
+                                food={item}
+                                restaurant={restaurantData}
+                              />
+                            ) : (
+                              <Text style={{ color: colors.error, fontSize: 12 }}>
+                                Produit non disponible
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                        <Divider width={0.5} orientation="vertical" style={{
+                          marginHorizontal: 20
+                        }} />
+                      </View>
                     )
                   }}
                 />
               </View>
             )
           }}
-          ListFooterComponent={()=><View style={{ height: 20}} />}
-          onScrollBeginDrag={(e)=>{
+          ListFooterComponent={() => <View style={{ height: 20 }} />}
+          onScrollBeginDrag={(e) => {
           }}
-           scrollEnabled={scrollEnabled}
-           onScrollEndDrag={(e)=>{
-            if(e.nativeEvent.contentOffset.y === 0){
-            setCategoriesFood(false)
-            opacity(0).then(()=>{
-              setScrollEnabled(false)
-           })
-          }
-           }}
+          scrollEnabled={scrollEnabled}
+          onScrollEndDrag={(e) => {
+            if (e.nativeEvent.contentOffset.y === 0) {
+              setCategoriesFood(false)
+              opacity(0).then(() => {
+                setScrollEnabled(false)
+              })
+            }
+          }}
         />
       ) : (
         /* If no categories, show all foods in one list */
@@ -396,8 +401,8 @@ opacity, setCategoriesFood, hideHeader}) {
           <FlatList
             ref={foodsRef}
             data={filteredFoods} // Produits filtrés selon recherche et filtres
-            keyExtractor={(item, index)=>`food-${item.id || index}`}
-            renderItem={({item, index})=>{
+            keyExtractor={(item, index) => `food-${item.id || index}`}
+            renderItem={({ item, index }) => {
               return (
                 <View key={index} >
                   <View style={styles.menuItemStyle}>
@@ -410,40 +415,40 @@ opacity, setCategoriesFood, hideHeader}) {
                       }}>
                         <FoodImage
                           food={item}
-                          marginLeft={marginLeft ? marginLeft:0}
+                          marginLeft={marginLeft ? marginLeft : 0}
                         />
                       </View>
-                  <FoodInfo food={item} navigation={navigation} restaurant={restaurantData}/>
-                </View>
-                <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
-                  {item && item.id ? (
-                    <AddToCartButton
-                      key={`cart-btn-${item.id}`}
-                      food={item}
-                      restaurant={restaurantData}
-                    />
-                  ) : (
-                    <Text style={{ color: colors.error, fontSize: 12 }}>
-                      Produit non disponible
-                    </Text>
-                  )}
-                </View>
-               </View>
+                      <FoodInfo food={item} navigation={navigation} restaurant={restaurantData} />
+                    </View>
+                    <View style={{ alignItems: 'center', marginTop: 12, marginBottom: 8 }}>
+                      {item && item.id ? (
+                        <AddToCartButton
+                          key={`cart-btn-${item.id}`}
+                          food={item}
+                          restaurant={restaurantData}
+                        />
+                      ) : (
+                        <Text style={{ color: colors.error, fontSize: 12 }}>
+                          Produit non disponible
+                        </Text>
+                      )}
+                    </View>
+                  </View>
                   <Divider width={0.5} orientation="vertical" style={{
                     marginHorizontal: 20
-                  }}/>
+                  }} />
                 </View>
               )
             }}
-            ListFooterComponent={()=><View style={{ height: 20}} />}
+            ListFooterComponent={() => <View style={{ height: 20 }} />}
             scrollEnabled={scrollEnabled}
-            onScrollBeginDrag={(e)=>{
+            onScrollBeginDrag={(e) => {
 
             }}
-            onScrollEndDrag={(e)=>{
-              if(e.nativeEvent.contentOffset.y === 0){
+            onScrollEndDrag={(e) => {
+              if (e.nativeEvent.contentOffset.y === 0) {
                 setCategoriesFood(false)
-                opacity(0).then(()=>{
+                opacity(0).then(() => {
                   setScrollEnabled(false)
                 })
               }
@@ -454,8 +459,8 @@ opacity, setCategoriesFood, hideHeader}) {
     </View>
   )
 }
-const FoodInfo = (props)=>{
-  
+const FoodInfo = (props) => {
+
   return (
     <TouchableOpacity
       style={{ flex: 3, justifyContent: "center", paddingHorizontal: 10 }}
@@ -469,8 +474,9 @@ const FoodInfo = (props)=>{
         currency: currency
       })}</Text>
     </TouchableOpacity>
-)}
-const FoodImage = ({marginLeft,...props})=> {
+  )
+}
+const FoodImage = ({ marginLeft, ...props }) => {
   const [currentImage, setCurrentImage] = useState(
     props.food?.image || null
   );
@@ -496,20 +502,20 @@ const FoodImage = ({marginLeft,...props})=> {
     </View>
   )
 }
-export const Quantity = ({id, food, restaurant, screen}) => {
+export const Quantity = ({ id, food, restaurant, screen }) => {
   const dispatch = useDispatch();
-  const styleMds={
+  const styleMds = {
     flexDirection: "row",
     justifyContent: "center",
     marginVertical: 10,
     alignItems: "center"
   }
   return (
-    <View style={screen !=="mds"?{
+    <View style={screen !== "mds" ? {
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-around",
-    }:styleMds}>
+    } : styleMds}>
       <TouchableOpacity onPress={() => {
         dispatch({
           type: 'ADD_TO_CART',
@@ -521,14 +527,14 @@ export const Quantity = ({id, food, restaurant, screen}) => {
           }
         });
       }}>
-        <AntDesign name="pluscircle" size={screen === "mds"?40:20} color="black" style={{
+        <AntDesign name="pluscircle" size={screen === "mds" ? 40 : 20} color="black" style={{
           padding: 5,
         }} />
       </TouchableOpacity>
       <View>
         <Text style={{
           padding: 5
-        }}>{useSelector(state => state.cartReducer).filter((food)=>food.id === id).length}</Text>
+        }}>{useSelector(state => state.cartReducer).filter((food) => food.id === id).length}</Text>
       </View>
       <TouchableOpacity onPress={() => {
         dispatch({
@@ -536,11 +542,10 @@ export const Quantity = ({id, food, restaurant, screen}) => {
           payload: id
         });
       }}>
-        <AntDesign name="minuscircle" size={screen === "mds"?40:20} color="black" style={{
-        padding: 5,
+        <AntDesign name="minuscircle" size={screen === "mds" ? 40 : 20} color="black" style={{
+          padding: 5,
         }} />
       </TouchableOpacity>
     </View>
   )
 }
- 
