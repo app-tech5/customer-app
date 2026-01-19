@@ -4,12 +4,15 @@ import { language, currency, colors } from '../global'
 import { Quantity } from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
 
 // Structure basée sur les vraies données de la DB
 // Plus de mock data - utilisation directe des vraies données
 
 export default function MenuDetailScreen({route}) {
+  const navigation = useNavigation()
+
   // Utiliser directement les vraies données de la DB
   const routeParams = route?.params || {}
   const menu = routeParams.food
