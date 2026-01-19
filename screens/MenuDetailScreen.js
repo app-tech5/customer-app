@@ -1,9 +1,10 @@
-import { View, Text, Image, StyleSheet, ScrollView, FlatList} from 'react-native'
+import { View, Text, Image, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { language, currency, colors } from '../global'
 import { Quantity } from '../components/restaurantDetail/MenuItems'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
+import BackButton from '../components/BackButton'
 
 // Structure basée sur les vraies données de la DB
 // Plus de mock data - utilisation directe des vraies données
@@ -62,6 +63,13 @@ export default function MenuDetailScreen({route}) {
 
   return (
     <>
+      {/* Bouton de retour */}
+      <BackButton
+        onPress={() => navigation.goBack()}
+        backgroundColor="rgba(0, 0, 0, 0.6)"
+        iconColor="white"
+      />
+
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Image du menu avec overlay dégradé */}
         <View style={styles.imageContainer}>
