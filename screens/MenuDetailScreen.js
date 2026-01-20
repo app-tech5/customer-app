@@ -269,8 +269,13 @@ export default function MenuDetailScreen({route}) {
                 return (
                   <View key={`variant-${index}`} style={styles.variantItem}>
                     <View style={styles.variantContent}>
-                      <Text style={styles.variantName}>{variant.label}</Text>
-                      <Text style={styles.variantType}>Option personnalisable</Text>
+                      <View style={styles.variantInfo}>
+                        <Text style={styles.variantName}>{variant.label}</Text>
+                        <Text style={styles.variantType}>Option personnalisable</Text>
+                      </View>
+                      {variantDetails[variantId] && variantDetails[variantId].extra > 0 && (
+                        <Text style={styles.variantPrice}>+{formatPrice(variantDetails[variantId].extra)}</Text>
+                      )}
                     </View>
 
                     <View style={styles.variantControls}>
@@ -553,6 +558,12 @@ const styles = StyleSheet.create({
   },
   variantContent: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  variantInfo: {
+    flex: 1,
   },
   variantName: {
     fontSize: 16,
@@ -564,6 +575,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.primary,
     fontWeight: '500',
+  },
+  variantPrice: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primary,
+    marginTop: 4,
   },
   variantControls: {
     flexDirection: 'row',
