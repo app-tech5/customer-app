@@ -6,13 +6,14 @@ import {
 import React, { useState, useEffect } from 'react'
 import SearchComponent from '../components/SearchComponent'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { categories, dataTest, filterData, themes } from '../data'
+import { dataTest, filterData, themes } from '../data'
 import List from '../components/List'
 import { Menu } from '../components/home/HomeHeader'
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
 import { colors } from '../global'
 import i18n from '../i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { getCategories } from '../api'
 
 const SCREEN_WIDTH = Dimensions.get('window').width
 
@@ -24,11 +25,12 @@ export default function SearchScreen({ navigation }) {
   const [trendingSearches, setTrendingSearches] = useState([
     'Pizza', 'Burger', 'Sushi', 'Italian', 'Chinese', 'Fast Food'
   ])
-  const data = categories
+  const [categories, setCategories] = useState([])
 
-  // Charger les recherches récentes au montage
+  // Charger les données au montage
   useEffect(() => {
     loadRecentSearches()
+    loadCategories()
   }, [])
 
   const loadRecentSearches = async () => {
@@ -39,6 +41,17 @@ export default function SearchScreen({ navigation }) {
       }
     } catch (error) {
       console.log('Error loading recent searches:', error)
+    }
+  }
+
+  const loadCategories = async () => {
+    try {
+      const realCategories = await getCategories()
+      setCategories(realCategories)
+    } catch (error) {
+      console.log('Error loading categories:', error)
+      // En cas d'erreur, garder un tableau vide
+      setCategories([])
     }
   }
 
