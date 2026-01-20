@@ -7,6 +7,7 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
 import { getVariants } from '../api'
+import i18n from '../i18n'
 
 /**
  * GESTION DES VARIANTS/OPTIONS DANS MENU DETAIL SCREEN
@@ -216,7 +217,7 @@ export default function MenuDetailScreen({route}) {
   const renderProduct = ({ item, index }) => (
     <View style={styles.productItem}>
       <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.label || `Produit ${index + 1}`}</Text>
+        <Text style={styles.productName}>{item.label || `${i18n.t('menu.product')} ${index + 1}`}</Text>
         {item.description && (
           <Text style={styles.productDescription}>{item.description}</Text>
         )}
@@ -257,7 +258,7 @@ export default function MenuDetailScreen({route}) {
               color="white"
             />
             <Text style={styles.availabilityText}>
-              {menu.availability !== false ? "Disponible" : "Indisponible"}
+              {menu.availability !== false ? i18n.t('common.available') : i18n.t('common.unavailable')}
             </Text>
           </View>
         </View>
@@ -303,7 +304,7 @@ export default function MenuDetailScreen({route}) {
             <View style={styles.timeContainer}>
               <MaterialIcons name="schedule" size={16} color={colors.primary} />
               <Text style={styles.timeText}>
-                {menu.preparation_time} min
+                {menu.preparation_time} {i18n.t('common.minutesAbbrev')}
               </Text>
             </View>
           </View>
@@ -317,7 +318,7 @@ export default function MenuDetailScreen({route}) {
         {menu.ingredients && menu.ingredients.length > 0 && (
           <View style={styles.section2}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.title1}>Ingrédients</Text>
+              <Text style={styles.title1}>{i18n.t('menu.ingredients')}</Text>
             </View>
             <View style={styles.ingredientsContainer}>
               <Text style={styles.ingredientsText}>
@@ -331,10 +332,10 @@ export default function MenuDetailScreen({route}) {
         {menu.variants && menu.variants.length > 0 && (
           <View style={styles.section2}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.title1}>Options disponibles</Text>
+              <Text style={styles.title1}>{i18n.t('menu.availableOptions')}</Text>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
-                  {menu.variants.length} option{menu.variants.length > 1 ? 's' : ''}
+                  {menu.variants.length} {menu.variants.length > 1 ? i18n.t('menu.options') : i18n.t('menu.option')}
                 </Text>
               </View>
             </View>
@@ -353,7 +354,7 @@ export default function MenuDetailScreen({route}) {
                     <View style={styles.variantContent}>
                       <View style={styles.variantInfo}>
                         <Text style={styles.variantName}>{variant.label}</Text>
-                        <Text style={styles.variantType}>Option personnalisable</Text>
+                        <Text style={styles.variantType}>{i18n.t('menu.customizableOption')}</Text>
                       </View>
                       {/* AFFICHAGE DU PRIX SUPPLÉMENTAIRE DE L'OPTION */}
                       {(() => {
@@ -409,37 +410,37 @@ export default function MenuDetailScreen({route}) {
 
         {/* Informations détaillées */}
         <View style={styles.section3}>
-          <Text style={styles.title1}>Détails du produit</Text>
+          <Text style={styles.title1}>{i18n.t('menu.productDetails')}</Text>
 
           <View style={styles.detailsCard}>
             <View style={styles.detailRow}>
               <MaterialIcons name="restaurant" size={20} color={colors.primary} />
-              <Text style={styles.detailLabel}>Catégorie:</Text>
+              <Text style={styles.detailLabel}>{i18n.t('menu.category')}:</Text>
               <Text style={styles.detailValue}>
-                {menu.category?.name || menu.categories?.label || 'Non catégorisé'}
+                {menu.category?.name || menu.categories?.label || i18n.t('menu.uncategorized')}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <MaterialIcons name="schedule" size={20} color={colors.primary} />
-              <Text style={styles.detailLabel}>Préparation:</Text>
-              <Text style={styles.detailValue}>{menu.preparation_time} min</Text>
+              <Text style={styles.detailLabel}>{i18n.t('menu.preparation')}:</Text>
+              <Text style={styles.detailValue}>{menu.preparation_time} {i18n.t('common.minutesAbbrev')}</Text>
             </View>
 
             <View style={styles.detailRow}>
               <MaterialIcons name="check-circle" size={20} color={colors.primary} />
-              <Text style={styles.detailLabel}>Disponibilité:</Text>
+              <Text style={styles.detailLabel}>{i18n.t('menu.availability')}:</Text>
               <Text style={[styles.detailValue, { color: menu.availability !== false ? colors.success : colors.error }]}>
-                {menu.availability !== false ? 'Disponible' : 'Indisponible'}
+                {menu.availability !== false ? i18n.t('common.available') : i18n.t('common.unavailable')}
               </Text>
             </View>
 
             {menu.variants && menu.variants.length > 0 && (
               <View style={styles.detailRow}>
                 <MaterialIcons name="tune" size={20} color={colors.primary} />
-                <Text style={styles.detailLabel}>Personnalisation:</Text>
+                <Text style={styles.detailLabel}>{i18n.t('menu.customization')}:</Text>
                 <Text style={styles.detailValue}>
-                  {menu.variants.length} option{menu.variants.length > 1 ? 's' : ''} disponible{menu.variants.length > 1 ? 's' : ''}
+                  {menu.variants.length} {menu.variants.length > 1 ? i18n.t('menu.options') : i18n.t('menu.option')} {menu.variants.length > 1 ? i18n.t('menu.availablePlural') : i18n.t('menu.availableSingular')}
                 </Text>
               </View>
             )}
@@ -448,7 +449,7 @@ export default function MenuDetailScreen({route}) {
           {/* Call-to-action */}
           <View style={styles.ctaContainer}>
             <Text style={styles.ctaText}>
-              Ajoutez ce produit à votre commande et personnalisez-le selon vos goûts !
+              {i18n.t('menu.ctaText')}
             </Text>
           </View>
         </View>

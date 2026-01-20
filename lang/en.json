@@ -103,6 +103,24 @@
     "total": "Total",
     "orderNow": "Order Now"
   },
+  "menu": {
+    "product": "Product",
+    "customizableOption": "Customizable option",
+    "ingredients": "Ingredients",
+    "availableOptions": "Available options",
+    "option": "option",
+    "options": "options",
+    "productDetails": "Product details",
+    "category": "Category",
+    "preparation": "Preparation",
+    "availability": "Availability",
+    "customization": "Customization",
+    "availableSingular": "available",
+    "availablePlural": "available",
+    "ctaText": "Add this product to your order and customize it to your taste!",
+    "minutesAbbrev": "min",
+    "uncategorized": "Uncategorized"
+  },
     "cart": {
     "title": "Your Cart",
     "empty": "Your cart is empty",
@@ -183,7 +201,10 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "info": "Information"
+    "info": "Information",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "minutesAbbrev": "min"
   },
   "errors": {
     "network": "Network connection error",
