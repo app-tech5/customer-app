@@ -10,7 +10,7 @@ import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=>{
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
-    const total = items.reduce((prev, curr)=> prev + curr.price, 0)
+    const total = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
     const [loader, setLoader] = useState(false)
     const slideAnim = useRef(new Animated.Value(500)).current
     const dispatch = useDispatch()
