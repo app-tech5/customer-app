@@ -60,7 +60,11 @@ export default function SearchScreen({ navigation }) {
   const performSearch = (query, type = activeTab) => {
     if (!query.trim()) return
 
-    saveRecentSearch(query)
+    // Ne pas sauvegarder les requêtes spéciales dans les recherches récentes
+    const specialQueries = ['TOP_RATED_SPECIAL', 'NEAR_ME_SPECIAL', 'FAVORITES_SPECIAL']
+    if (!specialQueries.includes(query)) {
+      saveRecentSearch(query)
+    }
 
     // Navigation vers les résultats selon le type
     if (type === 'restaurants') {
@@ -130,7 +134,7 @@ export default function SearchScreen({ navigation }) {
                 color={activeTab === 'restaurants' ? colors.primary : colors.grey[500]}
               />
               <Text style={[styles.tabText, activeTab === 'restaurants' && styles.activeTabText]}>
-                Restaurants
+                {i18n.t('search.restaurants')}
               </Text>
             </TouchableOpacity>
 
@@ -144,34 +148,34 @@ export default function SearchScreen({ navigation }) {
                 color={activeTab === 'dishes' ? colors.primary : colors.grey[500]}
               />
               <Text style={[styles.tabText, activeTab === 'dishes' && styles.activeTabText]}>
-                Dishes
+                {i18n.t('search.dishes')}
               </Text>
             </TouchableOpacity>
           </View>
 
           {/* Actions rapides */}
           <View style={styles.quickActionsContainer}>
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <Text style={styles.sectionTitle}>{i18n.t('search.quickActions')}</Text>
             <View style={styles.quickActionsGrid}>
               <QuickActionButton
                 icon={<Ionicons name="location" size={24} color="white" />}
-                title="Near Me"
+                title={i18n.t('search.nearMe')}
                 onPress={() => performSearch('NEAR_ME_SPECIAL')}
               />
               <QuickActionButton
                 icon={<FontAwesome name="star" size={24} color="white" />}
-                title="Top Rated"
+                title={i18n.t('search.topRated')}
                 onPress={() => performSearch('TOP_RATED_SPECIAL')}
               />
               <QuickActionButton
                 icon={<MaterialIcons name="local-offer" size={24} color="white" />}
-                title="Offers"
+                title={i18n.t('search.offers')}
                 onPress={() => navigation.navigate('Offers')}
                 color={colors.success}
               />
               <QuickActionButton
                 icon={<Ionicons name="heart" size={24} color="white" />}
-                title="Favorites"
+                title={i18n.t('search.favorites')}
                 onPress={() => performSearch('FAVORITES_SPECIAL')}
                 color={colors.error}
               />
@@ -182,9 +186,9 @@ export default function SearchScreen({ navigation }) {
           {recentSearches.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Recent Searches</Text>
+                <Text style={styles.sectionTitle}>{i18n.t('search.recentSearches')}</Text>
                 <TouchableOpacity onPress={clearRecentSearches}>
-                  <Text style={styles.clearText}>Clear All</Text>
+                  <Text style={styles.clearText}>{i18n.t('common.clearAll')}</Text>
                 </TouchableOpacity>
               </View>
               {recentSearches.map((search, index) => (
@@ -204,7 +208,7 @@ export default function SearchScreen({ navigation }) {
 
           {/* Tendances */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Trending Searches</Text>
+            <Text style={styles.sectionTitle}>{i18n.t('search.trendingSearches')}</Text>
             <View style={styles.trendingContainer}>
               {trendingSearches.map((trend, index) => (
                 <TouchableOpacity
@@ -220,7 +224,7 @@ export default function SearchScreen({ navigation }) {
 
           {/* Catégories populaires */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Browse by Category</Text>
+            <Text style={styles.sectionTitle}>{i18n.t('search.browseByCategory')}</Text>
             <FlatList
               data={categories.slice(0, 6)} // Limiter à 6 catégories
               keyExtractor={(item, index) => String(index)}

@@ -27,8 +27,15 @@
   "search": {
     "nearMe": "À proximité",
     "topRated": "Mieux notés",
-    "favorites": "Mes favoris",
+    "favorites": "Favoris",
+    "offers": "Offres",
     "allRestaurants": "Tous les restaurants",
+    "quickActions": "Actions rapides",
+    "recentSearches": "Recherches récentes",
+    "trendingSearches": "Tendances",
+    "browseByCategory": "Parcourir par catégorie",
+    "restaurants": "Restaurants",
+    "dishes": "Plats",
     "results": "Résultats de recherche",
     "noResults": "Aucun résultat trouvé",
     "noResultsTitle": "Aucun restaurant trouvé",
@@ -205,7 +212,8 @@
     "info": "Information",
     "available": "Disponible",
     "unavailable": "Indisponible",
-    "minutesAbbrev": "min"
+    "minutesAbbrev": "min",
+    "clearAll": "Tout effacer"
   },
   "errors": {
     "network": "Erreur de connexion réseau",
