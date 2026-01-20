@@ -6,6 +6,8 @@ import { Feather } from '@expo/vector-icons'
 import { colors } from '../global'
 
 export default function AddToCartButton({ food, restaurant, style }) {
+
+  console.log("food in AddToCartButton", food)
   // Vérification des props
   if (!food) {
     console.error('AddToCartButton: food prop is missing or undefined')

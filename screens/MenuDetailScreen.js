@@ -120,6 +120,18 @@ export default function MenuDetailScreen({route}) {
     console.log('🧮 CALCULATING PRICE WITH OPTIONS...')
     console.log('Selected variants:', safeSelectedVariants)
 
+    // Calculer le prix de base (avec discount si applicable)
+    const basePrice = menu.price
+    const isDiscountActive = menu.discount?.isActive
+    const discountPercentage = menu.discount?.percentage || 0
+
+    let discountedPrice = basePrice
+    if (isDiscountActive && discountPercentage > 0) {
+      const discountAmount = basePrice * (discountPercentage / 100)
+      discountedPrice = basePrice - discountAmount
+      console.log(`💸 Discount: ${discountPercentage}% off ${basePrice}€ = ${discountedPrice}€`)
+    }
+
     // Calculer le total des suppléments
     let totalExtra = 0
     if (hasVariants) {
@@ -139,8 +151,8 @@ export default function MenuDetailScreen({route}) {
       })
     }
 
-    const finalPrice = menu.price + totalExtra
-    console.log(`💰 Base price: ${menu.price}€ + Extra: ${totalExtra}€ = Total: ${finalPrice}€`)
+    const finalPrice = discountedPrice + totalExtra
+    console.log(`💰 Final price: ${discountedPrice}€ (base) + ${totalExtra}€ (extra) = ${finalPrice}€`)
 
     return {
       ...menu,
@@ -156,11 +168,10 @@ export default function MenuDetailScreen({route}) {
       : require('../assets/images/default-food.jpg')
   )
 
-  // Calculer le prix avec discount si applicable
-  const calculatePrice = () => {
+  // Informations de prix pour l'affichage (prix de base du menu)
+  const priceInfo = React.useMemo(() => {
     const basePrice = Number(menu.price) || 0
-    // Vérifier isActive (dans la vraie DB) ou active (version alternative)
-    const isDiscountActive = menu.discount && (menu.discount.isActive === true || menu.discount.active === true)
+    const isDiscountActive = menu.discount?.isActive
     const discountPercentage = menu.discount?.percentage || 0
 
     if (isDiscountActive && discountPercentage > 0) {
@@ -172,9 +183,7 @@ export default function MenuDetailScreen({route}) {
       }
     }
     return { originalPrice: basePrice, discountedPrice: basePrice, discountPercentage: 0 }
-  }
-
-  const priceInfo = calculatePrice()
+  }, [menu.price, menu.discount])
 
   // Formater le prix
   const formatPrice = (price) => {
