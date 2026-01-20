@@ -22,6 +22,37 @@ export default function MenuDetailScreen({route}) {
   const [selectedVariants, setSelectedVariants] = React.useState({})
   console.log('selectedVariants state:', selectedVariants)
 
+  // État pour stocker les détails des variants
+  const [variantDetails, setVariantDetails] = React.useState({})
+
+  // Récupérer les détails des variants au montage
+  React.useEffect(() => {
+    const fetchVariantDetails = async () => {
+      if (menu?.variants && menu.variants.length > 0) {
+        console.log('Fetching variants for menu:', menu.name)
+        console.log('Menu variants:', menu.variants)
+
+        const allVariants = await getVariants()
+        console.log('All variants from API:', allVariants)
+
+        const variantIds = menu.variants.map(variant => variant.value || variant._id).filter(id => id)
+        console.log('Variant IDs to find:', variantIds)
+
+        const relevantVariants = allVariants.filter(variant => variantIds.includes(variant._id))
+        console.log('Relevant variants found:', relevantVariants)
+
+        const detailsMap = {}
+        relevantVariants.forEach(variant => {
+          detailsMap[variant._id] = variant
+        })
+        setVariantDetails(detailsMap)
+        console.log('Variant details loaded:', detailsMap)
+      }
+    }
+
+    fetchVariantDetails()
+  }, [menu])
+
   // Créer l'objet food pour le panier avec les options sélectionnées
   const foodForCart = React.useMemo(() => {
     const safeSelectedVariants = selectedVariants || {}
@@ -29,13 +60,22 @@ export default function MenuDetailScreen({route}) {
 
     console.log('Creating foodForCart - selectedVariants:', selectedVariants, 'safeSelectedVariants:', safeSelectedVariants, 'hasVariants:', hasVariants)
 
+    // Calculer le prix total avec les vrais suppléments des variants
+    let totalExtra = 0
+    if (hasVariants) {
+      Object.entries(safeSelectedVariants).forEach(([variantId, quantity]) => {
+        const variantDetail = variantDetails[variantId]
+        if (variantDetail && variantDetail.extra) {
+          totalExtra += variantDetail.extra * quantity
+          console.log(`Variant ${variantId}: ${quantity}x ${variantDetail.name} = +${variantDetail.extra * quantity}€`)
+        }
+      })
+    }
+
     const result = {
       ...menu,
       selectedVariants: safeSelectedVariants,
-      // Calculer le prix total avec les options
-      totalPrice: hasVariants
-        ? menu.price + Object.values(safeSelectedVariants).reduce((sum, qty) => sum + qty, 0) * 2 // Exemple: +2€ par option
-        : menu.price
+      totalPrice: menu.price + totalExtra
     }
     console.log('Food for cart result:', result)
     return result
