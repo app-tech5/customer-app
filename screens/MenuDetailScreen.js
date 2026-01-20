@@ -16,8 +16,30 @@ export default function MenuDetailScreen({route}) {
   // Utiliser directement les vraies données de la DB
   const routeParams = route?.params || {}
   const menu = routeParams.food
-  console.log("MENU", menu)
   const restaurant = routeParams.restaurant
+
+  // État pour gérer les options sélectionnées
+  const [selectedVariants, setSelectedVariants] = React.useState({})
+  console.log('selectedVariants state:', selectedVariants)
+
+  // Créer l'objet food pour le panier avec les options sélectionnées
+  const foodForCart = React.useMemo(() => {
+    const safeSelectedVariants = selectedVariants || {}
+    const hasVariants = Object.keys(safeSelectedVariants).length > 0
+
+    console.log('Creating foodForCart - selectedVariants:', selectedVariants, 'safeSelectedVariants:', safeSelectedVariants, 'hasVariants:', hasVariants)
+
+    const result = {
+      ...menu,
+      selectedVariants: safeSelectedVariants,
+      // Calculer le prix total avec les options
+      totalPrice: hasVariants
+        ? menu.price + Object.values(safeSelectedVariants).reduce((sum, qty) => sum + qty, 0) * 2 // Exemple: +2€ par option
+        : menu.price
+    }
+    console.log('Food for cart result:', result)
+    return result
+  }, [menu, selectedVariants])
 
   // État pour gérer l'image actuelle
   const [currentImage, setCurrentImage] = React.useState(
@@ -25,9 +47,6 @@ export default function MenuDetailScreen({route}) {
       ? { uri: menu.image.trim() }
       : require('../assets/images/default-food.jpg')
   )
-
-  // État pour gérer les options sélectionnées
-  const [selectedVariants, setSelectedVariants] = React.useState({})
 
   // Calculer le prix avec discount si applicable
   const calculatePrice = () => {
@@ -289,7 +308,8 @@ export default function MenuDetailScreen({route}) {
         </View>
 
         {/* Quantité et ajout au panier */}
-        <Quantity id={menu.id || menu._id} food={menu} restaurant={restaurant} screen="mds" />
+        {console.log('Passing foodForCart to Quantity:', foodForCart)}
+        <Quantity id={menu.id || menu._id} food={foodForCart} restaurant={restaurant} screen="mds" />
         <View style={{ height: 100 }} />
       </ScrollView>
 

@@ -517,14 +517,18 @@ export const Quantity = ({ id, food, restaurant, screen }) => {
       justifyContent: "space-around",
     } : styleMds}>
       <TouchableOpacity onPress={() => {
+        const cartItem = {
+          ...food,
+          restaurantName: restaurant.name,
+          restaurantImage: restaurant.image,
+          restaurant: restaurant
+        };
+        console.log('Adding to cart:', cartItem);
+        console.log('Cart item price:', cartItem.price, 'totalPrice:', cartItem.totalPrice);
+        console.log('Selected variants:', cartItem.selectedVariants);
         dispatch({
           type: 'ADD_TO_CART',
-          payload: {
-            ...food,
-            restaurantName: restaurant.name,
-            restaurantImage: restaurant.image,
-            restaurant: restaurant
-          }
+          payload: cartItem
         });
       }}>
         <AntDesign name="pluscircle" size={screen === "mds" ? 40 : 20} color="black" style={{
