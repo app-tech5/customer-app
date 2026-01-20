@@ -18,7 +18,7 @@ export default function ViewCart({navigation, route, params, deliverySettings, r
 
     // Récupérer les items du panier pour ce restaurant
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurant.name)
-    const total = items.reduce((prev, curr)=> prev + curr.price, 0)
+    const total = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
     const itemCount = items.length
 
     // Animation d'entrée/sortie

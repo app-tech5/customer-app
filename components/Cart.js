@@ -35,16 +35,19 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
 
     // Grouper les items par ID et calculer les quantités
     const groupedItems = items.reduce((acc, item) => {
+        // Utiliser totalPrice si disponible (avec variants), sinon price
+        const itemPrice = item.totalPrice || item.price
+
         const existingItem = acc.find(i => i.id === item.id)
         if (existingItem) {
             existingItem.quantity += 1
-            existingItem.totalPrice += item.price
+            existingItem.totalPrice += itemPrice
         } else {
             acc.push({
                 ...item,
                 quantity: 1,
-                totalPrice: item.price,
-                unitPrice: item.price
+                totalPrice: itemPrice,
+                unitPrice: itemPrice
             })
         }
         return acc
