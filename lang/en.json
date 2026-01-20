@@ -27,6 +27,7 @@
   "search": {
     "nearMe": "Near me",
     "topRated": "Top rated",
+    "favorites": "My Favorites",
     "allRestaurants": "All Restaurants",
     "results": "Search Results",
     "noResults": "No results found",
