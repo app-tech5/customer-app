@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { language, currency, colors } from '../global'
-import { Quantity } from '../components/restaurantDetail/MenuItems'
+import AddToCartButton from '../components/AddToCartButton'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
@@ -444,9 +444,10 @@ export default function MenuDetailScreen({route}) {
           </View>
         </View>
 
-        {/* Quantité et ajout au panier */}
-        {console.log('Passing foodForCart to Quantity:', foodForCart)}
-        <Quantity id={menu.id || menu._id} food={foodForCart} restaurant={restaurant} screen="mds" />
+        {/* Bouton d'ajout au panier - centré en bas */}
+        <View style={styles.cartButtonContainer}>
+          <AddToCartButton food={foodForCart} restaurant={restaurant} />
+        </View>
         <View style={{ height: 100 }} />
       </ScrollView>
 
@@ -732,5 +733,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     lineHeight: 24,
+  },
+  cartButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
 })
