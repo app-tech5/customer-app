@@ -172,7 +172,7 @@ export default function SearchScreen({ navigation }) {
               <QuickActionButton
                 icon={<Ionicons name="heart" size={24} color="white" />}
                 title="Favorites"
-                onPress={() => navigation.navigate('Account')} // Temporaire
+                onPress={() => performSearch('FAVORITES_SPECIAL')}
                 color={colors.error}
               />
             </View>

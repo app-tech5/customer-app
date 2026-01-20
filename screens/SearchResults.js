@@ -1,6 +1,6 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar} from 'react-native'
 import React, { useEffect, useState } from 'react'
- import { getRestaurantsFromFirebase, searchRestaurantsByCategory } from '../api'
+ import { getRestaurantsFromFirebase, searchRestaurantsByCategory, getFavorites } from '../api'
 import { categories } from '../data'
 import {RestaurantImage, RestaurantInfo} from '../components/home/RestaurantItems'
 import Loader from './Loader'
@@ -78,6 +78,22 @@ export default function SearchResults({route, navigation}) {
           restaurantsResult = allRestaurants
             .filter(restaurant => restaurant.rating) // Uniquement ceux qui ont un rating
             .sort((a, b) => (b.rating || 0) - (a.rating || 0)) // Tri décroissant
+        }
+        // Si c'est une recherche "Favorites" spéciale
+        else if (name === 'FAVORITES_SPECIAL') {
+          const favoritesResponse = await getFavorites()
+          if (favoritesResponse.success && favoritesResponse.favorites) {
+            // Récupérer tous les restaurants pour matcher avec les favoris
+            const allRestaurants = await getRestaurantsFromFirebase()
+            const favoriteIds = favoritesResponse.favorites.map(fav => fav._id || fav.id)
+
+            // Filtrer seulement les restaurants favoris
+            restaurantsResult = allRestaurants.filter(restaurant =>
+              favoriteIds.includes(restaurant._id || restaurant.id)
+            )
+          } else {
+            restaurantsResult = [] // Aucun favori trouvé
+          }
         }
         // Si c'est une recherche "Near me" par géolocalisation
         else if (name === 'NEAR_ME_SPECIAL') {
@@ -172,6 +188,9 @@ export default function SearchResults({route, navigation}) {
 
     if (name === 'TOP_RATED_SPECIAL') {
       title = i18n.t ? i18n.t('search.topRated') : 'Top Rated'
+      displayQuery = title
+    } else if (name === 'FAVORITES_SPECIAL') {
+      title = i18n.t ? i18n.t('search.favorites') : 'My Favorites'
       displayQuery = title
     } else if (name === 'NEAR_ME_SPECIAL') {
       title = i18n.t ? i18n.t('search.nearMe') : 'Near Me'
