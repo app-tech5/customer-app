@@ -6,6 +6,7 @@ import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
+import { getVariants } from '../api'
 
 // Structure basée sur les vraies données de la DB
 // Plus de mock data - utilisation directe des vraies données
