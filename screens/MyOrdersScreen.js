@@ -45,12 +45,14 @@ export default function MyOrdersScreen({ navigation }) {
     try {
       setLoader(true)
       setError(null)
+
       const ordersData = await getOrders()
 
       // Trier par date décroissante (plus récent en premier)
       const sortedOrders = ordersData.sort((a, b) =>
         new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
       )
+
       setOrders(sortedOrders)
     } catch (err) {
       console.error('Error loading orders:', err)
