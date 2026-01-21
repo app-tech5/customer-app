@@ -160,10 +160,19 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       zIndex: 1
     })])
 
-    // SEULE animation de la carte - centrer sur le restaurant sélectionné
+    // Centrer la carte UNIQUEMENT pour les restaurants proches (< 10km)
     const restaurant = restaurantData[index]
-    if (restaurant) {
-      centerMapOnRestaurant(restaurant)
+    if (restaurant && userLocation?.lat && userLocation?.lng) {
+      const distance = getDistanceFromLatLonInKm(
+        userLocation.lat, userLocation.lng,
+        restaurant.latitude || restaurant.lat,
+        restaurant.longitude || restaurant.lng
+      )
+
+      // Ne centrer que si le restaurant est à moins de 10km
+      if (distance < 10) {
+        centerMapOnRestaurant(restaurant)
+      }
     }
   }
 
