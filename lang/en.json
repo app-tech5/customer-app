@@ -54,6 +54,7 @@
     "distance": "Distance",
     "within": "Within",
     "retry": "Retry",
+    "locationActive": "Location active",
     "loading": "Loading results...",
     "searching": "Searching",
     "typeToSearch": "Type to search..."

@@ -139,8 +139,8 @@ export default function NearMeScreen({ route, navigation }) {
       {userLocation && (
         <View style={styles.locationIndicator}>
           <Ionicons name="location" size={16} color={colors.primary} />
-          <Text style={styles.locationCoords}>
-            {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+          <Text style={styles.locationText}>
+            {i18n.t('search.locationActive', 'Location active')}
           </Text>
         </View>
       )}
@@ -302,11 +302,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(76, 175, 80, 0.1)',
     borderRadius: 8,
   },
-  locationCoords: {
-    fontSize: 12,
+  locationText: {
+    fontSize: 14,
     color: colors.primary,
     marginLeft: 6,
-    fontFamily: 'monospace',
+    fontWeight: '500',
   },
   listContainer: {
     padding: 16,
