@@ -77,6 +77,48 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   const { width, height } = useWindowDimensions();
   const _map = useRef(null)
   const restaurantsRef = useRef(null)
+
+  // Calculer automatiquement la région optimale basée sur les restaurants proches
+  useEffect(() => {
+    if (restaurantData && restaurantData.length > 0 && _map.current) {
+      // Filtrer les restaurants proches (moins de 5km)
+      const nearbyRestaurants = restaurantData
+        .filter(restaurant => {
+          if (!restaurant.latitude || !restaurant.longitude) return false
+          const distance = userLocation?.lat && userLocation?.lng ?
+            getDistanceFromLatLonInKm(
+              userLocation.lat, userLocation.lng,
+              restaurant.latitude, restaurant.longitude
+            ) : 0
+          return distance < 5 // Restaurants dans un rayon de 5km
+        })
+
+      if (nearbyRestaurants.length > 0) {
+        // Calculer les limites des restaurants proches
+        const lats = nearbyRestaurants.map(r => r.latitude)
+        const lngs = nearbyRestaurants.map(r => r.longitude)
+
+        const minLat = Math.min(...lats)
+        const maxLat = Math.max(...lats)
+        const minLng = Math.min(...lngs)
+        const maxLng = Math.max(...lngs)
+
+        // Ajouter une marge de 10%
+        const latMargin = (maxLat - minLat) * 0.1
+        const lngMargin = (maxLng - minLng) * 0.1
+
+        const region = {
+          latitude: (minLat + maxLat) / 2,
+          longitude: (minLng + maxLng) / 2,
+          latitudeDelta: Math.max(maxLat - minLat + latMargin * 2, 0.005),
+          longitudeDelta: Math.max(maxLng - minLng + lngMargin * 2, 0.005)
+        }
+
+        console.log('🗺️ Ajustement automatique du zoom:', region)
+        _map.current.animateToRegion(region, 500)
+      }
+    }
+  }, [restaurantData, userLocation])
   const [visible, setVisible] = useState(route.params?.visible ?? false)
   const [scrollEnabled, setScrollEnabled] = useState(false)
   const [offset, setOffset] = useState(0)
@@ -119,8 +161,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         initialRegion={{
           latitude: lat || restaurantData[0]?.lat || 48.8566, // Paris par défaut
           longitude: lng || restaurantData[0]?.lng || 2.3522, // Paris par défaut
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421
+          latitudeDelta: 0.005,  // Zoom très rapproché pour voir les détails
+          longitudeDelta: 0.005   // Zoom très rapproché pour voir les détails
         }}
         style={{
           height: height,
