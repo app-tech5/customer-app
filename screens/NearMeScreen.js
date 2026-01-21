@@ -89,7 +89,6 @@ export default function NearMeScreen({ route, navigation }) {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTop}>
-        <Text style={styles.title}>{i18n.t('search.nearMe')}</Text>
         <TouchableOpacity
           style={styles.viewModeButton}
           disabled={true}
@@ -237,18 +236,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
   viewModeButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: colors.grey[100],
-    opacity: 0.5,
-  },
-  viewModeButtonDisabled: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: colors.grey[100],
