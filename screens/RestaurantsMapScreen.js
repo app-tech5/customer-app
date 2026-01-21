@@ -129,6 +129,22 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     color: "black",
     zIndex: 1,
   }))
+  const centerMapOnRestaurant = (restaurant) => {
+    if (!_map.current) return
+
+    const lat = Number(restaurant.latitude ?? restaurant.lat)
+    const lng = Number(restaurant.longitude ?? restaurant.lng)
+
+    if (!lat || !lng) return
+
+    _map.current.animateToRegion({
+      latitude: lat,
+      longitude: lng,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005
+    }, 300)
+  }
+
   const setFocusFunction = async (index) => {
     setFocus([...Array(index).fill({
       backgroundColor: "white",
@@ -146,13 +162,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
 
     // SEULE animation de la carte - centrer sur le restaurant sélectionné
     const restaurant = restaurantData[index]
-    if (restaurant && restaurant.lat && restaurant.lng && _map.current) {
-      _map.current.animateToRegion({
-        latitude: parseFloat(restaurant.lat),
-        longitude: parseFloat(restaurant.lng),
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005
-      }, 300)
+    if (restaurant) {
+      centerMapOnRestaurant(restaurant)
     }
   }
 
