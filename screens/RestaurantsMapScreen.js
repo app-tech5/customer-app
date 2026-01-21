@@ -241,9 +241,9 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimeout = useRef(null)
 
-  // Trier les restaurants par distance comme dans RestaurantMarkers
+  // Afficher UNIQUEMENT les restaurants proches dans le carrousel (< 10km)
   const sortedRestaurants = React.useMemo(() => {
-    console.log('🏪 RestaurantsView - Tri des restaurants par distance, horizontal:', horizontal)
+    console.log('🏪 RestaurantsView - Filtrage restaurants proches, horizontal:', horizontal)
     return restaurantData
       .filter(restaurant => restaurant.latitude && restaurant.longitude)
       .map((restaurant, originalIndex) => ({
@@ -255,14 +255,9 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
             restaurant.latitude, restaurant.longitude
           ) : null
       }))
-      .sort((a, b) => {
-        if (a.distance === null && b.distance === null) return 0
-        if (a.distance === null) return 1
-        if (b.distance === null) return -1
-        return a.distance - b.distance
-      })
-      .slice(0, horizontal ? 20 : restaurantData.length) // Limiter seulement pour le carrousel horizontal
-  }, [restaurantData, userLocation, horizontal])
+      .filter(restaurant => restaurant.distance !== null && restaurant.distance < 10) // SEULEMENT < 10km
+      .sort((a, b) => a.distance - b.distance) // Trier par distance croissante
+  }, [restaurantData, userLocation])
 
   console.log(`🏪 RestaurantsView - ${sortedRestaurants.length} restaurants triés pour ${horizontal ? 'carrousel' : 'liste'}`)
 
@@ -351,7 +346,11 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           setCurrentIndex(finalIndex)
           setIsScrolling(false)
 
-          setFocusFunction(finalIndex)
+          // Utiliser l'index original du restaurant filtré
+          const originalIndex = sortedRestaurants[finalIndex]?.originalIndex
+          if (originalIndex !== undefined) {
+            setFocusFunction(originalIndex)
+          }
         } : () => { }}
         onScroll={horizontal ? (event) => {
           const { contentOffset, layoutMeasurement } = event.nativeEvent
@@ -363,7 +362,11 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           // Mettre à jour l'index seulement si différent et pas en train de scroller
           if (newIndex !== currentIndex && !isScrolling) {
             setCurrentIndex(newIndex)
-            setFocusFunction(newIndex)
+            // Utiliser l'index original du restaurant filtré
+            const originalIndex = sortedRestaurants[newIndex]?.originalIndex
+            if (originalIndex !== undefined) {
+              setFocusFunction(originalIndex)
+            }
           }
         } : (event) => {
           setDirection(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
