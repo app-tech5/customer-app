@@ -6,7 +6,6 @@ import LottieView from 'lottie-react-native'
 import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantItems'
 import { location } from '../global'
 import { MaterialIcons } from '@expo/vector-icons';
-import { ArrowBack } from '../components/restaurantDetail/About'
 import SearchBar from '../components/home/SearchBar'
 import BottomSheet from '@gorhom/bottom-sheet'
 import Categories from '../components/home/Categories'
@@ -78,7 +77,12 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           visible={visible} setVisible={setVisible} />
       </MapView>
       <View style={{ ...styles.header, width: width, }}>
-        <ArrowBack navigation={navigation} />
+        <TouchableOpacity
+          style={styles.arrowBack}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
         <View style={styles.searchbar}>
           <SearchBar />
         </View>
@@ -343,6 +347,10 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     paddingBottom: 10,
     zIndex: 1
+  },
+  arrowBack: {
+    padding: 10,
+    marginLeft: 5,
   },
   searchbar: { flex: 1, marginHorizontal: 10 },
   categories: {
