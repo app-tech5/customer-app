@@ -1,5 +1,5 @@
 import { View, Text, useWindowDimensions, Image, ScrollView, Animated, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState, useCallback } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
 import RestaurantItems from '../components/home/RestaurantItems'
 import LottieView from 'lottie-react-native'
@@ -105,6 +105,46 @@ export default function RestaurantsMapScreen({ route, navigation }) {
 }
 const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunction, focus, width, horizontal,
   Categories, scrollEnabled, offset, setOffset, direction, setDirection, setScrollEnabled, setVisible, navigation}) => {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimeout = useRef(null)
+
+  // Fonction utilitaire pour calculer l'index à partir du scroll
+  const calculateIndexFromScroll = useCallback((scrollX, containerWidth) => {
+    const itemWidth = containerWidth
+    const rawIndex = scrollX / itemWidth
+    return Math.max(0, Math.min(restaurantData.length - 1, Math.round(rawIndex)))
+  }, [restaurantData.length])
+
+  // Fonction utilitaire pour animer la carte vers un restaurant
+  const animateMapToRestaurant = useCallback((restaurant, delay = 0) => {
+    if (restaurant && restaurant.lat && restaurant.lng) {
+      // Clear any existing animation timeout
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current)
+      }
+
+      scrollTimeout.current = setTimeout(() => {
+        _map.current?.animateToRegion({
+          latitude: parseFloat(restaurant.lat),
+          longitude: parseFloat(restaurant.lng),
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421
+        }, 300)
+        scrollTimeout.current = null
+      }, delay)
+    }
+  }, [_map])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current)
+      }
+    }
+  }, [])
+
   return (
     <View style={horizontal ? styles.flatlist : {}}>
       {horizontal && <ListButton setVisible={setVisible} />}
@@ -112,14 +152,30 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
         ref={restaurantsRef}
         horizontal={horizontal}
         data={restaurantData}
-        keyExtractor={(item, index) => index}
+        keyExtractor={(item, index) => `${item.id || item._id || index}`}
         renderItem={({ item, index }) => {
+          const isActive = horizontal && index === currentIndex
           return (
-          <TouchableOpacity style={{...styles.restaurant,width: horizontal ? width * 0.9 : "auto",}}  onPress={()=>navigation.navigate("RestaurantDetail",
-          {
-            restaurant: item
-          })}>
-            <View style={{ ...styles.restaurantImage_restaurantInfo, paddingTop: horizontal ? 15 : "auto", paddingVertical: horizontal ? "auto" : 10 }}>
+          <TouchableOpacity
+            style={{
+              ...styles.restaurant,
+              width: horizontal ? width * 0.85 : "auto",
+              transform: horizontal ? [{ scale: isActive ? 1 : 0.95 }] : [],
+              opacity: horizontal ? (isActive ? 1 : 0.7) : 1
+            }}
+            onPress={()=>navigation.navigate("RestaurantDetail", { restaurant: item })}
+            activeOpacity={0.8}
+          >
+            <View style={{
+              ...styles.restaurantImage_restaurantInfo,
+              paddingTop: horizontal ? 15 : "auto",
+              paddingVertical: horizontal ? "auto" : 10,
+              shadowColor: horizontal ? "#000" : "transparent",
+              shadowOffset: horizontal ? { width: 0, height: 2 } : { width: 0, height: 0 },
+              shadowOpacity: horizontal ? 0.1 : 0,
+              shadowRadius: horizontal ? 4 : 0,
+              elevation: horizontal ? 3 : 0
+            }}>
               <RestaurantImage image={item.image} />
               <RestaurantInfo
                 name={item.name}
@@ -131,36 +187,93 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
         }}
         scrollEnabled={scrollEnabled}
         showsHorizontalScrollIndicator={false}
-        onScroll={horizontal ? (event) => {
-          let x = event.nativeEvent.contentOffset.x
-          let w = event.nativeEvent.layoutMeasurement.width
-          let index = Math.round(x / w)
-          const restaurant = restaurantData[Math.round(x / w)]
-          if (restaurant && restaurant.lat && restaurant.lng) {
-            _map.current.animateToRegion({
-              latitude: parseFloat(restaurant.lat),
-              longitude: parseFloat(restaurant.lng),
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421
-            })
+        snapToAlignment={horizontal ? "center" : "start"}
+        snapToInterval={horizontal ? width * 0.85 + 16 : undefined} // 16 pour les marges
+        decelerationRate={horizontal ? "fast" : "normal"}
+        onScrollBeginDrag={horizontal ? () => {
+          setIsScrolling(true)
+          // Clear any pending timeout
+          if (scrollTimeout.current) {
+            clearTimeout(scrollTimeout.current)
           }
-          setFocusFunction(index)
+        } : undefined}
+        onScrollEndDrag={horizontal ? (event) => {
+          // Délai pour laisser le momentum finir
+          scrollTimeout.current = setTimeout(() => {
+            setIsScrolling(false)
+          }, 100)
+        } : undefined}
+        onMomentumScrollEnd={horizontal ? (event) => {
+          const { contentOffset, layoutMeasurement } = event.nativeEvent
+          const scrollX = contentOffset.x
+          const containerWidth = layoutMeasurement.width || width * 0.85
+
+          const finalIndex = calculateIndexFromScroll(scrollX, containerWidth)
+
+          setCurrentIndex(finalIndex)
+          setIsScrolling(false)
+
+          // Animation finale de la carte
+          const restaurant = restaurantData[finalIndex]
+          animateMapToRestaurant(restaurant, 0)
+
+          setFocusFunction(finalIndex)
+        } : () => { }}
+        onScroll={horizontal ? (event) => {
+          const { contentOffset, layoutMeasurement } = event.nativeEvent
+          const scrollX = contentOffset.x
+          const containerWidth = layoutMeasurement.width || width * 0.85
+
+          const newIndex = calculateIndexFromScroll(scrollX, containerWidth)
+
+          // Mettre à jour l'index seulement si différent et pas en train de scroller
+          if (newIndex !== currentIndex && !isScrolling) {
+            setCurrentIndex(newIndex)
+
+            // Animation de la carte avec délai pour éviter les conflits
+            const restaurant = restaurantData[newIndex]
+            animateMapToRestaurant(restaurant, 50)
+
+            setFocusFunction(newIndex)
+          }
         } : (event) => {
           setDirection(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
           setOffset(event.nativeEvent.contentOffset.y)
           if (event.nativeEvent.contentOffset.y === 0 && direction === "down")
             setScrollEnabled(false)
         }}
-        onMomentumScrollEnd={horizontal ? () => {
-          restaurantsRef.current.scrollToIndex({
-            animated: true,
-            index: focus.findIndex((style) => style.backgroundColor === "black")
-          })
-        } : () => { }}
         ListHeaderComponent={!horizontal ? () => <View style={styles.categories}>
           <Categories />
         </View> : <></>}
       />
+      {horizontal && restaurantData && restaurantData.length > 1 && (
+        <View style={styles.paginationContainer}>
+          {restaurantData.map((_, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.paginationDot,
+                index === currentIndex && styles.paginationDotActive
+              ]}
+              onPress={() => {
+                // Navigation fluide vers l'index sélectionné
+                setCurrentIndex(index)
+                restaurantsRef.current?.scrollToIndex({
+                  index,
+                  animated: true,
+                  viewPosition: 0.5 // Centrer l'élément
+                })
+
+                // Animation de la carte synchronisée avec le scroll
+                const restaurant = restaurantData[index]
+                animateMapToRestaurant(restaurant, 150)
+
+                setFocusFunction(index)
+              }}
+            />
+          ))}
+        </View>
+      )}
     </View>
   )
 }
@@ -266,16 +379,31 @@ const styles = StyleSheet.create({
   },
   flatlist: {
     position: "absolute",
-    bottom: 70
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 30,
+    paddingLeft: 20, // Pour centrer le premier élément
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   restaurantsContainer:
   {
     flexDirection: "row"
   },
   restaurant: {
-    borderRadius: 10,
+    borderRadius: 15,
     backgroundColor: "white",
-    marginHorizontal: 5,
+    marginHorizontal: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   restaurantImage_restaurantInfo: {
     marginHorizontal: 10,
@@ -299,5 +427,25 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 5,
     marginBottom: 10
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingBottom: 20
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: '#fff',
+    width: 12,
+    height: 8,
+    borderRadius: 4,
   }
 })
