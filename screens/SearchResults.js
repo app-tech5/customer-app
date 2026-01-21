@@ -97,31 +97,51 @@ export default function SearchResults({route, navigation}) {
         }
         // Si c'est une recherche "Near me" par géolocalisation
         else if (name === 'NEAR_ME_SPECIAL') {
-          // Demander la permission de géolocalisation
-          const { status } = await Location.requestForegroundPermissionsAsync()
-          if (status !== 'granted') {
-            throw new Error('Location permission denied')
+          let userLat, userLon;
+
+          // D'abord essayer de récupérer les coordonnées depuis les données utilisateur
+          try {
+            const userData = await AsyncStorage.getItem('userData');
+            if (userData) {
+              const user = JSON.parse(userData);
+              if (user.location && user.location.latitude && user.location.longitude) {
+                userLat = user.location.latitude;
+                userLon = user.location.longitude;
+                console.log('📍 Utilisation des coordonnées utilisateur:', userLat, userLon);
+              }
+            }
+          } catch (error) {
+            console.log('Erreur récupération coordonnées utilisateur:', error);
           }
 
-          // Récupérer la position actuelle
-          const userLocation = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.High
-          })
+          // Si pas de coordonnées utilisateur, demander la géolocalisation
+          if (!userLat || !userLon) {
+            console.log('📍 Aucune coordonnée utilisateur, demande géolocalisation...');
+            const { status } = await Location.requestForegroundPermissionsAsync()
+            if (status !== 'granted') {
+              throw new Error('Location permission denied')
+            }
 
-          const userLat = userLocation.coords.latitude
-          const userLon = userLocation.coords.longitude
+            const userLocation = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.High
+            })
+
+            userLat = userLocation.coords.latitude
+            userLon = userLocation.coords.longitude
+          }
 
           // Récupérer tous les restaurants
           const allRestaurants = await getRestaurantsFromFirebase()
+          console.log(`🏪 ${allRestaurants.length} restaurants récupérés`);
 
           // Calculer les distances et filtrer/trier
           restaurantsResult = allRestaurants
-            .filter(restaurant => restaurant.lat && restaurant.lng) // Uniquement ceux avec coordonnées
+            .filter(restaurant => restaurant.latitude && restaurant.longitude) // Uniquement ceux avec coordonnées
             .map(restaurant => ({
               ...restaurant,
               distance: getDistanceFromLatLonInKm(
                 userLat, userLon,
-                restaurant.lat, restaurant.lng
+                restaurant.latitude, restaurant.longitude
               )
             }))
             .filter(restaurant => restaurant.distance <= 10) // Rayon de 10km
