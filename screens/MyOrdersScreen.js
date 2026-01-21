@@ -13,7 +13,33 @@ export default function MyOrdersScreen({ navigation }) {
 
   useEffect(() => {
     loadOrders()
-  }, [])
+
+    // Configurer le header avec le menu hamburger
+    navigation.setOptions({
+      title: i18n.t('drawer.myOrders', 'My Orders'),
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.openDrawer()}
+          style={{ padding: 10, marginLeft: 5 }}
+          accessibilityRole="button"
+          accessibilityLabel="Open menu"
+        >
+          <Ionicons name="menu" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.historyButton}
+          onPress={() => navigation.navigate('Orders')}
+        >
+          <Text style={styles.historyButtonText}>
+            {i18n.t('order.viewAll', 'View All')}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+        </TouchableOpacity>
+      )
+    })
+  }, [navigation])
 
   const loadOrders = async () => {
     try {
@@ -197,22 +223,6 @@ export default function MyOrdersScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <View style={styles.header}>
-        <View style={{ flex: 1 }} />
-        <Text style={styles.headerTitle}>
-          {i18n.t('drawer.myOrders', 'My Orders')}
-        </Text>
-        <TouchableOpacity
-          style={styles.historyButton}
-          onPress={() => navigation.navigate('Orders')}
-        >
-          <Text style={styles.historyButtonText}>
-            {i18n.t('order.viewAll', 'View All')}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.primary} />
-        </TouchableOpacity>
-      </View>
-
       {orders.length === 0 ? (
         <EmptyState />
       ) : (
@@ -234,24 +244,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 16,
-    backgroundColor: colors.background.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    flex: 1,
-    textAlign: 'center',
   },
   historyButton: {
     flexDirection: 'row',

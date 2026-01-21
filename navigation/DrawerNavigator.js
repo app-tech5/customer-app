@@ -115,6 +115,7 @@ export default function DrawerNavigator() {
             component={MyOrdersScreen}
             options={{
                 title: i18n.t('drawer.myOrders'),
+                headerShown: true,
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="receipt"
