@@ -89,6 +89,7 @@ export default function NearMeScreen({ route, navigation }) {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTop}>
+        <View style={{ flex: 1 }} />
         <TouchableOpacity
           style={styles.viewModeButton}
           disabled={true}
