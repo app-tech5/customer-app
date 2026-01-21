@@ -1,7 +1,7 @@
 import { View, Text,Image, TouchableOpacity, FlatList, useWindowDimensions, StyleSheet} from 'react-native'
 import React, {useState, useEffect, useRef} from 'react'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import Categories from './Categories';
 import PromotionBadge from '../PromotionBadge';
 
@@ -92,10 +92,22 @@ export const RestaurantInfo = (props)=>(
                 fontSize: 15,
                 fontWeight:"bold",
             }}>{props.name} - {props.city}</Text>
-            <Text style={{
-                fontSize: 13,
-                color: "grey"
-            }}>30-45 - min</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={{
+                    fontSize: 13,
+                    color: "grey"
+                }}>
+                    {props.distance ? `${props.distance.toFixed(1)} km • ` : ''}30-45 min
+                </Text>
+                {props.distance && (
+                    <Ionicons
+                        name="location"
+                        size={12}
+                        color="#4CAF50"
+                        style={{ marginLeft: 4 }}
+                    />
+                )}
+            </View>
         </View>
         <View style={{
                 backgroundColor: "#eee",

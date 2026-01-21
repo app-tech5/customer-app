@@ -17,6 +17,7 @@ export default function SearchResults({route, navigation}) {
   const [searchQuery, setSearchQuery] = useState('')
   const [cameFromOffers, setCameFromOffers] = useState(false)
   const [displayMode, setDisplayMode] = useState('restaurants')
+  const [distanceFilter, setDistanceFilter] = useState(10) // Rayon par défaut en km
 
   useEffect(()=>{
     const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope, searchTerm, restaurantData: prefilteredData, totalResults } = route.params
@@ -144,7 +145,7 @@ export default function SearchResults({route, navigation}) {
                 restaurant.latitude, restaurant.longitude
               )
             }))
-            .filter(restaurant => restaurant.distance <= 10) // Rayon de 10km
+            .filter(restaurant => restaurant.distance <= distanceFilter) // Rayon configurable
             .sort((a, b) => a.distance - b.distance) // Tri par distance croissante
         }
         // Cas spécial pour afficher tous les restaurants (promotions platform)
@@ -258,6 +259,63 @@ export default function SearchResults({route, navigation}) {
 
   }, [route.params, cameFromOffers])
 
+  // Recharger les données quand le filtre de distance change (pour Near Me seulement)
+  useEffect(() => {
+    if (route.params?.name === 'NEAR_ME_SPECIAL') {
+      const reloadData = async () => {
+        setLoader(true)
+        setError(null)
+        try {
+          // Récupérer la position utilisateur (depuis AsyncStorage ou géolocalisation)
+          let userLat, userLon;
+
+          const userData = await AsyncStorage.getItem('userData');
+          if (userData) {
+            const user = JSON.parse(userData);
+            if (user.location && user.location.latitude && user.location.longitude) {
+              userLat = user.location.latitude;
+              userLon = user.location.longitude;
+            }
+          }
+
+          if (!userLat || !userLon) {
+            const { status } = await Location.requestForegroundPermissionsAsync()
+            if (status !== 'granted') {
+              throw new Error('Location permission denied')
+            }
+            const userLocation = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.High
+            })
+            userLat = userLocation.coords.latitude
+            userLon = userLocation.coords.longitude
+          }
+
+          const allRestaurants = await getRestaurantsFromFirebase()
+
+          const filteredRestaurants = allRestaurants
+            .filter(restaurant => restaurant.latitude && restaurant.longitude)
+            .map(restaurant => ({
+              ...restaurant,
+              distance: getDistanceFromLatLonInKm(
+                userLat, userLon,
+                restaurant.latitude, restaurant.longitude
+              )
+            }))
+            .filter(restaurant => restaurant.distance <= distanceFilter)
+            .sort((a, b) => a.distance - b.distance)
+
+          setRestaurantData(filteredRestaurants)
+        } catch (err) {
+          console.error('Error reloading data with new distance filter:', err)
+        } finally {
+          setTimeout(() => setLoader(false), 800)
+        }
+      }
+
+      reloadData()
+    }
+  }, [distanceFilter])
+
   // Composant pour l'état vide
   const EmptyState = ({ query, isError }) => (
     <View style={styles.emptyContainer}>
@@ -303,7 +361,32 @@ export default function SearchResults({route, navigation}) {
           <Text style={styles.resultQuery}>{i18n.t('search.nearby', 'nearby')}</Text>
         )}
       </View>
-      {/* Ici on pourrait ajouter des boutons de tri/filtre à l'avenir */}
+
+      {/* Contrôles spécifiques pour Near Me */}
+      {route.params?.name === 'NEAR_ME_SPECIAL' && (
+        <View style={styles.nearMeControls}>
+          <Text style={styles.distanceLabel}>{i18n.t('search.distance', 'Distance')}:</Text>
+          <View style={styles.distanceButtons}>
+            {[5, 10, 15, 25].map(distance => (
+              <TouchableOpacity
+                key={distance}
+                style={[
+                  styles.distanceButton,
+                  distanceFilter === distance && styles.distanceButtonActive
+                ]}
+                onPress={() => setDistanceFilter(distance)}
+              >
+                <Text style={[
+                  styles.distanceButtonText,
+                  distanceFilter === distance && styles.distanceButtonTextActive
+                ]}>
+                  {distance}km
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   )
 
@@ -352,6 +435,7 @@ export default function SearchResults({route, navigation}) {
                 name={item.name}
                 rating={item.rating}
                 city={item.city}
+                distance={route.params?.name === 'NEAR_ME_SPECIAL' ? item.distance : undefined}
               />
             </TouchableOpacity>
           )}
@@ -437,5 +521,45 @@ const styles = StyleSheet.create({
     color: colors.text.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+  nearMeControls: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: colors.background.primary,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  distanceLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  distanceButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  distanceButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    backgroundColor: colors.background.secondary,
+  },
+  distanceButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  distanceButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.text.primary,
+  },
+  distanceButtonTextActive: {
+    color: colors.text.white,
   },
 })

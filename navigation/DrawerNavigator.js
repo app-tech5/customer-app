@@ -5,6 +5,7 @@ import BusinessConsoleScreen from '../screens/BusinessConsoleScreen';
 import DrawerContent from '../components/DrawerContent';
 import { SearchNavigator } from './Stacks';
 import SearchResults from '../screens/SearchResults';
+import NearMeScreen from '../screens/NearMeScreen';
 // import RestaurantsMapScreen from '../screens/RestaurantsMapScreen';
 import Offers from '../screens/Offers'
 import Settings from '../screens/Settings';
@@ -78,8 +79,7 @@ export default function DrawerNavigator() {
 
         <Drawer.Screen
             name = "NearMe"
-            component={SearchResults}
-            initialParams={{ name: 'NEAR_ME_SPECIAL' }}
+            component={NearMeScreen}
             options={{
                 title: i18n.t('search.nearMe'),
                 headerShown: true,
