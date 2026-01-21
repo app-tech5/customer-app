@@ -284,6 +284,8 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
 
     if (!lat || !lng) return null
 
+    const focusStyle = focus[index] || { backgroundColor: "white", color: "black", zIndex: 1 }
+
     return (
       <Marker
         key={`marker-${index}`}
@@ -293,10 +295,29 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
         }}
         title={restaurant.name || "Restaurant"}
         description="Test marker"
-        onPress={() => console.log('Marker pressed:', restaurant.name)}
+        onPress={() => {
+          if (visible) setVisible(false)
+          setTimeout(() => {
+            setFocusFunction(index)
+            restaurantsRef.current?.scrollToIndex({
+              index: index,
+              animated: true,
+              viewPosition: 0.5
+            })
+          }, 300)
+        }}
       >
-        <View style={styles.restaurant_marker}>
-          <MaterialIcons style={styles.restaurant_marker_icon} name="restaurant" size={15} color="black" />
+        <View style={{
+          ...styles.restaurant_marker,
+          backgroundColor: focusStyle.backgroundColor,
+          zIndex: focusStyle.zIndex
+        }}>
+          <MaterialIcons
+            style={styles.restaurant_marker_icon}
+            name="restaurant"
+            size={focusStyle.backgroundColor === "black" ? 18 : 15}
+            color={focusStyle.color}
+          />
         </View>
       </Marker>
     )
