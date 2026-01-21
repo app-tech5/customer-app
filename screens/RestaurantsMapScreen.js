@@ -50,7 +50,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   }
 
   // Vérifier que les données sont chargées
-  if (!restaurantData || restaurantData.length === 0 || !lat || !lng) {
+  if (!restaurantData || restaurantData.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Chargement des restaurants...</Text>
@@ -64,8 +64,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       <MapView
         ref={_map}
         initialRegion={{
-          latitude: lat,
-          longitude: lng,
+          latitude: lat || restaurantData[0]?.lat || 48.8566, // Paris par défaut
+          longitude: lng || restaurantData[0]?.lng || 2.3522, // Paris par défaut
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421
         }}
@@ -135,12 +135,15 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           let x = event.nativeEvent.contentOffset.x
           let w = event.nativeEvent.layoutMeasurement.width
           let index = Math.round(x / w)
-          _map.current.animateToRegion({
-            latitude: restaurantData[Math.round(x / w)].latitude,
-            longitude: restaurantData[Math.round(x / w)].longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421
-          })
+          const restaurant = restaurantData[Math.round(x / w)]
+          if (restaurant && restaurant.lat && restaurant.lng) {
+            _map.current.animateToRegion({
+              latitude: parseFloat(restaurant.lat),
+              longitude: parseFloat(restaurant.lng),
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421
+            })
+          }
           setFocusFunction(index)
         } : (event) => {
           setDirection(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
@@ -162,12 +165,14 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
   )
 }
 const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurantsRef, visible, setVisible }) => {
-  return restaurantData.map((restaurant, index) => {
+  return restaurantData
+    .filter(restaurant => restaurant.lat && restaurant.lng && !isNaN(restaurant.lat) && !isNaN(restaurant.lng))
+    .map((restaurant, index) => {
     return (
       <Marker key={index} title={restaurant.name} description="nasso"
         coordinate={{
-          latitude: restaurant.lat,
-          longitude: restaurant.lng,
+          latitude: parseFloat(restaurant.lat),
+          longitude: parseFloat(restaurant.lng),
         }}
         onPress={() => {
           if (visible)
