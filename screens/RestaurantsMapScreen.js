@@ -23,6 +23,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   const { restaurantData } = useContext(RestaurantsContext)
   const {lat,lng} = useSelector((state)=>state.userReducer)
   const [userLocation, setUserLocation] = useState(null)
+  const [isManualFocus, setIsManualFocus] = useState(false)
 
   // Récupérer la position utilisateur au montage du composant
   useEffect(() => {
@@ -103,19 +104,19 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         const minLng = Math.min(...lngs)
         const maxLng = Math.max(...lngs)
 
-        // Ajouter une marge de 10%
-        const latMargin = (maxLat - minLat) * 0.1
-        const lngMargin = (maxLng - minLng) * 0.1
+        // Ajouter une marge de 20%
+        const latMargin = (maxLat - minLat) * 0.2
+        const lngMargin = (maxLng - minLng) * 0.2
 
         const region = {
           latitude: (minLat + maxLat) / 2,
           longitude: (minLng + maxLng) / 2,
-          latitudeDelta: Math.max(maxLat - minLat + latMargin * 2, 0.005),
-          longitudeDelta: Math.max(maxLng - minLng + lngMargin * 2, 0.005)
+          latitudeDelta: Math.max(maxLat - minLat + latMargin * 2, 0.01),
+          longitudeDelta: Math.max(maxLng - minLng + lngMargin * 2, 0.01)
         }
 
-        console.log('🗺️ Ajustement automatique du zoom:', region)
-        _map.current.animateToRegion(region, 500)
+        console.log('🗺️ Zoom initial ajusté:', region)
+        _map.current.animateToRegion(region, 1000)
       }
     }
   }, [restaurantData, userLocation])
@@ -137,19 +138,19 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       backgroundColor: "black",
       color: "white",
       zIndex: 1000
-    }, ...Array(focus.length - index - 1).fill({
+    }, ...Array(Math.max(0, focus.length - index - 1)).fill({
       backgroundColor: "white",
       color: "black",
       zIndex: 1
     })])
 
-    // Centrer automatiquement la carte sur le marker sélectionné
+    // SEULE animation de la carte - centrer sur le restaurant sélectionné
     const restaurant = restaurantData[index]
     if (restaurant && restaurant.lat && restaurant.lng && _map.current) {
       _map.current.animateToRegion({
         latitude: parseFloat(restaurant.lat),
         longitude: parseFloat(restaurant.lng),
-        latitudeDelta: 0.005, // Garder un zoom rapproché
+        latitudeDelta: 0.005,
         longitudeDelta: 0.005
       }, 300)
     }
@@ -207,15 +208,15 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
               focus={focus} _map={_map} width={width} horizontal={false} Categories={Categories} scrollEnabled={scrollEnabled}
               setDirection={setDirection} setOffset={setOffset} offset={offset} direction={direction}
-              setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation}/>
+              setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>
       </BottomSheet>}
       {!visible && <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
-        focus={focus} _map={_map} width={width} horizontal={true} setVisible={setVisible} navigation={navigation} userLocation={userLocation}/>}
+        focus={focus} _map={_map} width={width} horizontal={true} setVisible={setVisible} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>}
     </View>
   )
 }
 const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunction, focus, width, horizontal,
-  Categories, scrollEnabled, offset, setOffset, direction, setDirection, setScrollEnabled, setVisible, navigation, userLocation}) => {
+  Categories, scrollEnabled, offset, setOffset, direction, setDirection, setScrollEnabled, setVisible, navigation, userLocation, isManualFocus, setIsManualFocus}) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimeout = useRef(null)
@@ -252,25 +253,6 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
     return Math.max(0, Math.min(sortedRestaurants.length - 1, Math.round(rawIndex)))
   }, [sortedRestaurants.length])
 
-  // Fonction utilitaire pour animer la carte vers un restaurant
-  const animateMapToRestaurant = useCallback((restaurant, delay = 0) => {
-    if (restaurant && restaurant.lat && restaurant.lng) {
-      // Clear any existing animation timeout
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current)
-      }
-
-      scrollTimeout.current = setTimeout(() => {
-        _map.current?.animateToRegion({
-          latitude: parseFloat(restaurant.lat),
-          longitude: parseFloat(restaurant.lng),
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421
-        }, 300)
-        scrollTimeout.current = null
-      }, delay)
-    }
-  }, [_map])
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -349,10 +331,6 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           setCurrentIndex(finalIndex)
           setIsScrolling(false)
 
-          // Animation finale de la carte
-          const restaurant = restaurantData[finalIndex]
-          animateMapToRestaurant(restaurant, 0)
-
           setFocusFunction(finalIndex)
         } : () => { }}
         onScroll={horizontal ? (event) => {
@@ -365,11 +343,6 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           // Mettre à jour l'index seulement si différent et pas en train de scroller
           if (newIndex !== currentIndex && !isScrolling) {
             setCurrentIndex(newIndex)
-
-            // Animation de la carte avec délai pour éviter les conflits
-            const restaurant = restaurantData[newIndex]
-            animateMapToRestaurant(restaurant, 50)
-
             setFocusFunction(newIndex)
           }
         } : (event) => {
