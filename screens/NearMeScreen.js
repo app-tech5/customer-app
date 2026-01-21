@@ -17,7 +17,7 @@ export default function NearMeScreen({ route, navigation }) {
   const [error, setError] = useState(null)
   const [userLocation, setUserLocation] = useState(null)
   const [distanceFilter, setDistanceFilter] = useState(10)
-  const [viewMode, setViewMode] = useState('list') // 'list' ou 'map'
+  const [viewMode, setViewMode] = useState('list') // 'list' uniquement pour le moment
 
   useEffect(() => {
     loadNearbyRestaurants()
@@ -92,12 +92,13 @@ export default function NearMeScreen({ route, navigation }) {
         <Text style={styles.title}>{i18n.t('search.nearMe')}</Text>
         <TouchableOpacity
           style={styles.viewModeButton}
+          disabled={true}
           onPress={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
         >
           <Ionicons
-            name={viewMode === 'list' ? 'map' : 'list'}
+            name="map-outline"
             size={20}
-            color={colors.primary}
+            color={colors.grey[400]}
           />
         </TouchableOpacity>
       </View>
@@ -244,7 +245,14 @@ const styles = StyleSheet.create({
   viewModeButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.grey[100],
+    opacity: 0.5,
+  },
+  viewModeButtonDisabled: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: colors.grey[100],
+    opacity: 0.5,
   },
   resultInfo: {
     alignItems: 'center',
