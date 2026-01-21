@@ -4,7 +4,8 @@ import BottomTabs from './BottomTabs'
 import BusinessConsoleScreen from '../screens/BusinessConsoleScreen';
 import DrawerContent from '../components/DrawerContent';
 import { SearchNavigator } from './Stacks';
-import RestaurantsMapScreen from '../screens/RestaurantsMapScreen';
+import SearchResults from '../screens/SearchResults';
+// import RestaurantsMapScreen from '../screens/RestaurantsMapScreen';
 import Offers from '../screens/Offers'
 import Settings from '../screens/Settings';
 import AccountScreen from '../screens/AccountScreen';
@@ -76,13 +77,14 @@ export default function DrawerNavigator() {
         />
 
         <Drawer.Screen
-            name = "Map"
-            component={RestaurantsMapScreen}
+            name = "NearMe"
+            component={SearchResults}
+            initialParams={{ name: 'NEAR_ME_SPECIAL' }}
             options={{
-                title: i18n.t('drawer.map'),
+                title: i18n.t('search.nearMe'),
                 drawerIcon: ({focused, size}) => (
-                    <FontAwesome
-                        name="map-marker"
+                    <Ionicons
+                        name="location-outline"
                         color={focused ? colors.primary : colors.grey[700]}
                         size={size}
                     />
