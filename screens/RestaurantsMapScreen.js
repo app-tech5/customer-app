@@ -15,11 +15,65 @@ import { getDistanceFromLatLonInKm } from '../utils'
 import { Icon } from 'react-native-elements'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import { useSelector } from 'react-redux'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as Location from 'expo-location'
 
 
 export default function RestaurantsMapScreen({ route, navigation }) {
   const { restaurantData } = useContext(RestaurantsContext)
   const {lat,lng} = useSelector((state)=>state.userReducer)
+  const [userLocation, setUserLocation] = useState(null)
+
+  // Récupérer la position utilisateur au montage du composant
+  useEffect(() => {
+    getUserLocation()
+  }, [])
+
+  const getUserLocation = async () => {
+    try {
+      console.log('📍 Tentative de récupération de la position utilisateur...')
+
+      // D'abord essayer depuis AsyncStorage (comme dans NearMeScreen)
+      const userData = await AsyncStorage.getItem('userData')
+      if (userData) {
+        const user = JSON.parse(userData)
+        if (user.location && user.location.latitude && user.location.longitude) {
+          const location = {
+            lat: user.location.latitude,
+            lng: user.location.longitude
+          }
+          console.log('✅ Position trouvée dans AsyncStorage:', location)
+          setUserLocation(location)
+          return
+        }
+      }
+
+      // Si pas de coordonnées utilisateur, demander géolocalisation
+      console.log('📍 Pas de position dans AsyncStorage, demande de géolocalisation...')
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        console.log('❌ Permission de géolocalisation refusée')
+        return
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High
+      })
+
+      const userPos = {
+        lat: location.coords.latitude,
+        lng: location.coords.longitude
+      }
+
+      console.log('✅ Position obtenue par géolocalisation:', userPos)
+      setUserLocation(userPos)
+
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération de la position:', error)
+    }
+  }
+
+  console.log('🔍 Position utilisateur récupérée:', { lat, lng, userLocation })
   const { width, height } = useWindowDimensions();
   const _map = useRef(null)
   const restaurantsRef = useRef(null)
@@ -74,7 +128,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         }}
       >
         <RestaurantMarkers restaurantData={restaurantData} focus={focus} setFocusFunction={setFocusFunction} restaurantsRef={restaurantsRef}
-          visible={visible} setVisible={setVisible} />
+          visible={visible} setVisible={setVisible} userLocation={userLocation} />
       </MapView>
       <View style={{ ...styles.header, width: width, }}>
         <TouchableOpacity
@@ -281,12 +335,24 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
     </View>
   )
 }
-const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurantsRef, visible, setVisible }) => {
+const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurantsRef, visible, setVisible, userLocation }) => {
+  console.log('🗺️ RestaurantMarkers - Calcul des distances pour', restaurantData?.length, 'restaurants')
+
   return restaurantData.map((restaurant, index) => {
     const lat = restaurant.latitude || restaurant.lat
     const lng = restaurant.longitude || restaurant.lng
 
     if (!lat || !lng) return null
+
+    // Calculer la distance si on a la position utilisateur
+    let distance = null
+    if (userLocation?.lat && userLocation?.lng) {
+      distance = getDistanceFromLatLonInKm(
+        userLocation.lat, userLocation.lng,
+        lat, lng
+      )
+      console.log(`📏 Distance pour ${restaurant.name}: ${distance.toFixed(2)} km`)
+    }
 
     const focusStyle = focus[index] || { backgroundColor: "white", color: "black", zIndex: 1 }
 
