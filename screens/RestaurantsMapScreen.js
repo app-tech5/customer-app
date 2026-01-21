@@ -74,8 +74,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           width: width
         }}
       >
-        <RestaurantMarkers restaurantData={restaurantData} focus={focus} setFocusFunction={setFocusFunction} restaurantsRef={restaurantsRef}
-          visible={visible} setVisible={setVisible} />
+        {/* <RestaurantMarkers restaurantData={restaurantData} focus={focus} setFocusFunction={setFocusFunction} restaurantsRef={restaurantsRef}
+          visible={visible} setVisible={setVisible} /> */}
       </MapView>
       <View style={{ ...styles.header, width: width, }}>
         <ArrowBack navigation={navigation} />
@@ -278,37 +278,109 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
   )
 }
 const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurantsRef, visible, setVisible }) => {
-  return restaurantData
-    .filter(restaurant => restaurant.lat && restaurant.lng && !isNaN(restaurant.lat) && !isNaN(restaurant.lng))
-    .map((restaurant, index) => {
+  // Vérifications de sécurité
+  if (!restaurantData || !Array.isArray(restaurantData) || restaurantData.length === 0) {
+    return null
+  }
+
+  if (!focus || !Array.isArray(focus)) {
+    return null
+  }
+
+  // Filtrer les restaurants valides une seule fois
+  const validRestaurants = React.useMemo(() => {
+    return restaurantData
+      .map((restaurant, originalIndex) => {
+        if (!restaurant) return null
+
+        const lat = restaurant.latitude || restaurant.lat
+        const lng = restaurant.longitude || restaurant.lng
+
+        if (!lat || !lng || isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) {
+          return null
+        }
+
+        return {
+          ...restaurant,
+          originalIndex,
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng)
+        }
+      })
+      .filter(restaurant => restaurant !== null)
+  }, [restaurantData])
+
+  // Si aucun restaurant valide, ne rien afficher
+  if (validRestaurants.length === 0) {
+    return null
+  }
+
+  // Fonction optimisée pour gérer le clic sur un marker
+  const handleMarkerPress = React.useCallback(async (restaurant, index) => {
+    try {
+      // Fermer le bottom sheet si ouvert
+      if (visible) {
+        setVisible(false)
+      }
+
+      // Attendre que le bottom sheet se ferme
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      // Mettre à jour le focus
+      setFocusFunction(index)
+
+      // Scroll vers l'élément dans le carrousel
+      restaurantsRef.current?.scrollToIndex({
+        index: restaurant.originalIndex,
+        animated: true,
+        viewPosition: 0.5
+      })
+    } catch (error) {
+      console.error('Erreur lors du clic sur marker:', error)
+    }
+  }, [visible, setVisible, setFocusFunction, restaurantsRef])
+
+  return validRestaurants.map((restaurant, index) => {
+    const focusStyle = (focus && focus[restaurant.originalIndex]) ?
+      focus[restaurant.originalIndex] :
+      { backgroundColor: "white", color: "black", zIndex: 1 }
+
     return (
-      <Marker key={index} title={restaurant.name} description="nasso"
+      <Marker
+        key={`marker-${restaurant.restaurantId || restaurant.id || restaurant._id || `fallback-${index}`}`}
+        title={restaurant.name}
+        description={`${restaurant.city || ''} - ${restaurant.rating || ''} ⭐`}
         coordinate={{
-          latitude: parseFloat(restaurant.lat),
-          longitude: parseFloat(restaurant.lng),
+          latitude: restaurant.latitude,
+          longitude: restaurant.longitude,
         }}
-        onPress={() => {
-          if (visible)
-            setVisible(false)
-          const wait = new Promise(resolve => setTimeout(resolve, 500));
-          wait.then(() => {
-            setFocusFunction(index)
-              .then(() => restaurantsRef.current.scrollToIndex({
-                animated: true,
-                index: index
-              }))
-          })
-        }}
+        onPress={() => handleMarkerPress(restaurant, restaurant.originalIndex)}
+        tracksViewChanges={false} // Optimisation des performances
       >
-        <View style={{ ...styles.restaurant_marker, backgroundColor: focus[index].backgroundColor, zIndex: focus[index].zIndex }}>
-          <MaterialIcons style={styles.restaurant_marker_icon} name="restaurant" size={15} color={focus[index].color} />
+        <View style={{
+          ...styles.restaurant_marker,
+          backgroundColor: focusStyle.backgroundColor,
+          zIndex: focusStyle.zIndex,
+          borderColor: focusStyle.backgroundColor === "black" ? "#fff" : "#ccc",
+          borderWidth: focusStyle.backgroundColor === "black" ? 2 : 1,
+        }}>
+          <MaterialIcons
+            style={styles.restaurant_marker_icon}
+            name="restaurant"
+            size={focusStyle.backgroundColor === "black" ? 18 : 15}
+            color={focusStyle.color}
+          />
         </View>
         <Callout tooltip>
           <View style={styles.bubble}>
-            <RestaurantInfo
-              name={restaurant.name}
-              rating={restaurant.rating}
-              city={restaurant.city} />
+            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#333' }}>
+              {restaurant.name?.substring(0, 20)}
+            </Text>
+            {restaurant.rating && (
+              <Text style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                ⭐ {restaurant.rating}
+              </Text>
+            )}
           </View>
         </Callout>
       </Marker>
@@ -364,10 +436,20 @@ const styles = StyleSheet.create({
   },
   restaurant_marker: {
     backgroundColor: "white",
-    borderRadius: 50,
+    borderRadius: 20,
     position: "absolute",
-    borderColor: '#ccc',
-    borderWidth: 0.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 30,
+    minHeight: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   restaurant_marker_shadow: {
     backgroundColor: "grey",
@@ -375,7 +457,7 @@ const styles = StyleSheet.create({
     width: 43, height: 43
   },
   restaurant_marker_icon: {
-    padding: 10,
+    padding: 6,
   },
   flatlist: {
     position: "absolute",
@@ -384,7 +466,6 @@ const styles = StyleSheet.create({
     right: 0,
     paddingBottom: 30,
     paddingLeft: 20, // Pour centrer le premier élément
-    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   restaurantsContainer:
   {
