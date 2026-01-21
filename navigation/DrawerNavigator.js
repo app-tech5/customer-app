@@ -82,6 +82,7 @@ export default function DrawerNavigator() {
             initialParams={{ name: 'NEAR_ME_SPECIAL' }}
             options={{
                 title: i18n.t('search.nearMe'),
+                headerShown: true,
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="location-outline"
