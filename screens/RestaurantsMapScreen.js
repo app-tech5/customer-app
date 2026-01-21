@@ -24,11 +24,11 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   const { width, height } = useWindowDimensions();
   const _map = useRef(null)
   const restaurantsRef = useRef(null)
-  const [visible, setVisible] = useState(route.params.visible)
+  const [visible, setVisible] = useState(route.params?.visible ?? false)
   const [scrollEnabled, setScrollEnabled] = useState(false)
   const [offset, setOffset] = useState(0)
   const [direction, setDirection] = useState("")
-  const [focus, setFocus] = useState(new Array(restaurantData.length).fill({
+  const [focus, setFocus] = useState(new Array(restaurantData?.length || 0).fill({
     backgroundColor: "white",
     color: "black",
     zIndex: 1,
@@ -47,6 +47,15 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       color: "black",
       zIndex: 1
     })])
+  }
+
+  // Vérifier que les données sont chargées
+  if (!restaurantData || restaurantData.length === 0 || !lat || !lng) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Chargement des restaurants...</Text>
+      </View>
+    )
   }
 
   return (
