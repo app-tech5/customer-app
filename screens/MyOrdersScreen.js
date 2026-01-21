@@ -46,6 +46,7 @@ export default function MyOrdersScreen({ navigation }) {
       setLoader(true)
       setError(null)
       const ordersData = await getOrders()
+
       // Trier par date décroissante (plus récent en premier)
       const sortedOrders = ordersData.sort((a, b) =>
         new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
@@ -62,9 +63,8 @@ export default function MyOrdersScreen({ navigation }) {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'pending': return colors.warning
-      case 'confirmed': return colors.info
       case 'preparing': return colors.primary
-      case 'ready': return colors.success
+      case 'out_for_delivery': return colors.info
       case 'delivered': return colors.success
       case 'cancelled': return colors.error
       default: return colors.grey[500]
@@ -114,7 +114,7 @@ export default function MyOrdersScreen({ navigation }) {
         <View style={styles.restaurantInfo}>
           <Ionicons name="restaurant" size={20} color={colors.primary} />
           <Text style={styles.restaurantName}>
-            {item.restaurantName || item.restaurant?.name || 'Restaurant'}
+            {item.restaurant?.name || item.restaurantName || 'Restaurant inconnu'}
           </Text>
         </View>
 
@@ -126,7 +126,7 @@ export default function MyOrdersScreen({ navigation }) {
             }
           </Text>
           <Text style={styles.orderTotal}>
-            {item.total || item.price || 'N/A'}
+            {item.totalPrice && !isNaN(item.totalPrice) ? `${item.totalPrice.toFixed(2)}€` : 'N/A'}
           </Text>
         </View>
       </View>

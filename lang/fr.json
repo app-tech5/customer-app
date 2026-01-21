@@ -174,9 +174,8 @@
     "items": "articles",
     "status": {
       "pending": "En attente",
-      "confirmed": "Confirmée",
       "preparing": "En préparation",
-      "ready": "Prête à être récupérée",
+      "out_for_delivery": "En cours de livraison",
       "delivered": "Livrée",
       "cancelled": "Annulée",
       "unknown": "Inconnu"

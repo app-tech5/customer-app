@@ -174,9 +174,8 @@
     "items": "items",
     "status": {
       "pending": "Pending",
-      "confirmed": "Confirmed",
       "preparing": "Preparing",
-      "ready": "Ready for pickup",
+      "out_for_delivery": "Out for delivery",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "unknown": "Unknown"
