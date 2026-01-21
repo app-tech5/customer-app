@@ -51,6 +51,9 @@
     "nearby": "à proximité",
     "result": "résultat",
     "results": "résultats",
+    "distance": "Distance",
+    "within": "Dans un rayon de",
+    "retry": "Réessayer",
     "loading": "Chargement des résultats...",
     "searching": "Recherche",
     "typeToSearch": "Tapez pour rechercher..."

@@ -51,6 +51,9 @@
     "nearby": "nearby",
     "result": "result",
     "results": "results",
+    "distance": "Distance",
+    "within": "Within",
+    "retry": "Retry",
     "loading": "Loading results...",
     "searching": "Searching",
     "typeToSearch": "Type to search..."
