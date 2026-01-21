@@ -293,7 +293,12 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
         }}
         title={restaurant.name || "Restaurant"}
         description="Test marker"
-      />
+        onPress={() => console.log('Marker pressed:', restaurant.name)}
+      >
+        <View style={styles.restaurant_marker}>
+          <MaterialIcons style={styles.restaurant_marker_icon} name="restaurant" size={15} color="black" />
+        </View>
+      </Marker>
     )
   }).filter(marker => marker !== null)
 }
