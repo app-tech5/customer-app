@@ -198,6 +198,7 @@ export default function MyOrdersScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <View style={styles.header}>
+        <View style={{ flex: 1 }} />
         <Text style={styles.headerTitle}>
           {i18n.t('drawer.myOrders', 'My Orders')}
         </Text>
@@ -239,7 +240,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 20,
+    paddingBottom: 16,
     backgroundColor: colors.background.primary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
@@ -248,6 +250,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.text.primary,
+    flex: 1,
+    textAlign: 'center',
   },
   historyButton: {
     flexDirection: 'row',
