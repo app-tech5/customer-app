@@ -137,11 +137,22 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       backgroundColor: "black",
       color: "white",
       zIndex: 1000
-    }, ...Array(focus.length - index).fill({
+    }, ...Array(focus.length - index - 1).fill({
       backgroundColor: "white",
       color: "black",
       zIndex: 1
     })])
+
+    // Centrer automatiquement la carte sur le marker sélectionné
+    const restaurant = restaurantData[index]
+    if (restaurant && restaurant.lat && restaurant.lng && _map.current) {
+      _map.current.animateToRegion({
+        latitude: parseFloat(restaurant.lat),
+        longitude: parseFloat(restaurant.lng),
+        latitudeDelta: 0.005, // Garder un zoom rapproché
+        longitudeDelta: 0.005
+      }, 300)
+    }
   }
 
   // Vérifier que les données sont chargées
