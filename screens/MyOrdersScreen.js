@@ -4,12 +4,14 @@ import { Ionicons } from '@expo/vector-icons'
 import { getOrders } from '../api'
 import i18n from '../i18n'
 import { colors } from '../global'
+import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 
 export default function MyOrdersScreen({ navigation }) {
   const [orders, setOrders] = useState([])
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
+  const { currency } = useSettings()
 
   useEffect(() => {
     loadOrders()
@@ -78,6 +80,7 @@ export default function MyOrdersScreen({ navigation }) {
     return i18n.t(`order.status.${status.toLowerCase()}`, status)
   }
 
+
   const formatDate = (dateString) => {
     if (!dateString) return ''
     const date = new Date(dateString)
@@ -128,7 +131,9 @@ export default function MyOrdersScreen({ navigation }) {
             }
           </Text>
           <Text style={styles.orderTotal}>
-            {item.totalPrice && !isNaN(item.totalPrice) ? `${item.totalPrice.toFixed(2)}€` : 'N/A'}
+            {item.totalPrice && !isNaN(item.totalPrice) ?
+              `${item.totalPrice.toFixed(2)}${currency.symbol}` : 'N/A'
+            }
           </Text>
         </View>
       </View>

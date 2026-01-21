@@ -25,6 +25,7 @@ import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import Settings from '../screens/Settings'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
+import { SettingProvider } from '../contexts/SettingContext'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 const store = configureStore();
@@ -39,9 +40,10 @@ export default function RootNavigation({statusBarColor}) {
     <ReduxProvider store={store}>
       <NavigationContainer>
       <LoaderContext.Provider value={{loading, setLoading}}>
-        <DeliverySettingsProvider>
-          <RestaurantsContext.Provider value={{restaurantData, setRestaurantData}}>
-            <CategoriesContextProvider> 
+        <SettingProvider>
+          <DeliverySettingsProvider>
+            <RestaurantsContext.Provider value={{restaurantData, setRestaurantData}}>
+              <CategoriesContextProvider> 
           <Stack.Navigator screenOptions={screenOptions}>
               <Stack.Screen name="Onboarding" component={OnboardingScreen}/>
               <Stack.Screen name="Splash" component={Splash}/>
@@ -57,9 +59,10 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="AddCard" component={AddCard}/>
               <Stack.Screen name="Settings" component={Settings}/>
           </Stack.Navigator>
-            </CategoriesContextProvider>
-          </RestaurantsContext.Provider>
-        </DeliverySettingsProvider>
+              </CategoriesContextProvider>
+            </RestaurantsContext.Provider>
+          </DeliverySettingsProvider>
+        </SettingProvider>
       </LoaderContext.Provider>
       </NavigationContainer>
     </ReduxProvider>

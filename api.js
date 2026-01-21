@@ -244,6 +244,11 @@ class ApiClient {
     }));
   }
 
+  async getSettings() {
+    const response = await this.apiCall('/resource/settings');
+    return response;
+  }
+
   async getOrderById(orderId) {
     return await this.apiCall(`/resource/orders/${orderId}`);
   }
@@ -567,6 +572,7 @@ export const getCategories = () => api.getCategories();
 export const getCategoriesFromRestaurant = (restaurantId) => api.getCategoriesFromRestaurant(restaurantId);
 export const searchRestaurantsByCategory = (categoryId) => api.searchRestaurantsByCategory(categoryId);
 export const getOrders = () => api.getOrders();
+export const getSettings = () => api.getSettings();
 export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const userInfos = (userId) => api.getUserInfo(userId);
 export const updateUser = (userData, userId) => api.updateUser(userId, userData);
