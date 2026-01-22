@@ -242,7 +242,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             marginBottom: 10
           }} />
           <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
-            focus={focus} _map={_map} width={width} horizontal={false} Categories={Categories} scrollEnabled={scrollEnabled}
+            focus={focus} _map={_map} width={width} horizontal={false} Categories={Categories} scrollEnabled={true}
             setDirection={setDirection} setOffset={setOffset} offset={offset} direction={direction}
             setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>
         </View>
