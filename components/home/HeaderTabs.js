@@ -1,24 +1,25 @@
 import { View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native'
 import React, {useState} from 'react'
 import { grey1 } from '../../global'
+import i18n from '../../i18n'
 
 export default function HeaderTabs(props) {
   return (
     <View style={{flexDirection: "row",...props.pickup || props.delivery?{...styles.pickup_delivery}:{alignSelf: "center"}}}>
-        <HeaderButton 
-            text="Delivery" 
-            btnColor="black" 
-            textColor="white" 
-            activeTab={props.activeTab} 
+        <HeaderButton
+            text={i18n.t('tabs.delivery')}
+            btnColor="black"
+            textColor="white"
+            activeTab={props.activeTab}
             setActiveTab={props.setActiveTab}
             delivery={props.delivery}
             setCity={props.setCity}
             searchbar={props.searchbar}/>
-        <HeaderButton 
-            text="Pickup" 
-            btnColor="white" 
-            textColor="black" 
-            activeTab={props.activeTab} 
+        <HeaderButton
+            text={i18n.t('tabs.pickup')}
+            btnColor="white"
+            textColor="black"
+            activeTab={props.activeTab}
             setActiveTab={props.setActiveTab}
             navigation={props.navigation}
             restaurantData={props.restaurantData}
@@ -38,10 +39,10 @@ const HeaderButton = (props) => (
         if(props.setActiveTab)
         props.setActiveTab(props.text)
         if(props.text && props.navigation)
-        if(props.text === 'Pickup') props.navigation.navigate('RestaurantsMapScreen',{
+        if(props.text === i18n.t('tabs.pickup')) props.navigation.navigate('RestaurantsMapScreen',{
           restaurantData: props.restaurantData
         })
-        if(props.text === 'Delivery' && !props.delivery){
+        if(props.text === i18n.t('tabs.delivery') && !props.delivery){
             props.setCity(null)
             props.searchbar.current?.setAddressText("")
         }

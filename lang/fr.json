@@ -114,6 +114,10 @@
     "address": "Adresse",
     "search": "Rechercher"
   },
+  "tabs": {
+    "delivery": "Livraison",
+    "pickup": "À emporter"
+  },
   "restaurant": {
     "details": "Détails",
     "menu": "Menu",

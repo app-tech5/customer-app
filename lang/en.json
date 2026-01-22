@@ -114,6 +114,10 @@
     "address": "Address",
     "search": "Search"
   },
+  "tabs": {
+    "delivery": "Delivery",
+    "pickup": "Pickup"
+  },
   "restaurant": {
     "details": "Details",
     "menu": "Menu",
