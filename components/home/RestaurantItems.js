@@ -4,6 +4,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import Categories from './Categories';
 import PromotionBadge from '../PromotionBadge';
+import { colors } from '../../global';
 
 export default function RestaurantItems({navigation,...props}) {
     const { width, height } = useWindowDimensions();
@@ -34,7 +35,7 @@ export default function RestaurantItems({navigation,...props}) {
                                     backgroundColor: "white",
                                     width: props.size ? width * props.size : width*0.8,
                                     borderRadius: 12,
-                                    shadowColor: '#000',
+                                    shadowColor: colors.shadow,
                                     shadowOffset: {
                                       width: 0,
                                       height: 2,
@@ -43,7 +44,7 @@ export default function RestaurantItems({navigation,...props}) {
                                     shadowRadius: 8,
                                     elevation: 3,
                                     borderWidth: 1,
-                                    borderColor: '#F2F2F7',
+                                    borderColor: colors.border.light,
                                     overflow: 'hidden'
                                 }}>
                                 {props.reward || item.reward ?<PromotionBadge restaurant={item} allPromotions={props.promotions} allMenus={props.allMenus}/>:<></>}
@@ -110,7 +111,7 @@ export const RestaurantInfo = (props)=>(
                 style={{
                     fontSize: 14,
                     fontWeight: "600",
-                    color: '#1C1C1E',
+                    color: colors.text.primary,
                     marginBottom: 4,
                     lineHeight: 18
                 }}
@@ -121,7 +122,7 @@ export const RestaurantInfo = (props)=>(
             <Text
                 style={{
                     fontSize: 12,
-                    color: "#8E8E93",
+                    color: colors.text.secondary,
                     marginBottom: 2
                 }}
             >
@@ -130,7 +131,7 @@ export const RestaurantInfo = (props)=>(
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={{
                     fontSize: 12,
-                    color: "#8E8E93"
+                    color: colors.text.secondary
                 }}>
                     {props.distance ? `${props.distance.toFixed(1)} km • ` : ''}30-45 min
                 </Text>
@@ -138,22 +139,22 @@ export const RestaurantInfo = (props)=>(
                     <Ionicons
                         name="location"
                         size={11}
-                        color="#34C759"
+                        color={colors.success}
                         style={{ marginLeft: 2 }}
                     />
                 )}
             </View>
         </View>
         <View style={{
-                backgroundColor: "#FFF",
+                backgroundColor: colors.background.card,
                 height: 28,
                 minWidth: 36,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 8,
                 borderWidth: 1,
-                borderColor: '#F2F2F7',
-                shadowColor: '#000',
+                borderColor: colors.border.light,
+                shadowColor: colors.shadow,
                 shadowOffset: {
                   width: 0,
                   height: 1,
@@ -163,11 +164,11 @@ export const RestaurantInfo = (props)=>(
                 elevation: 1,
             }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialCommunityIcons name="star" size={12} color="#FF9500" />
+                <MaterialCommunityIcons name="star" size={12} color={colors.rating} />
                 <Text style={{
                     fontSize: 12,
                     fontWeight: "600",
-                    color: '#FF9500',
+                    color: colors.rating,
                     marginLeft: 2
                 }}>
                     {props.rating ? parseFloat(props.rating).toFixed(1) : 'N/A'}

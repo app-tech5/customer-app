@@ -5,6 +5,7 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import SearchBar from '../components/home/SearchBar'
 import RestaurantItems, { localRestaurants } from '../components/home/RestaurantItems'
 import { Divider } from 'react-native-elements'
+import { colors } from '../global'
 // Données backend seulement - plus de données statiques
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurantsFromFirebase, getAllPromotions, getAllMenuItems } from '../api'
@@ -208,7 +209,7 @@ export default function Home({navigation}) {
                       name={section.icon}
                       type="material-community"
                       size={20}
-                      color="#1C1C1E"
+                      color={colors.primary}
                       style={styles.sectionIcon}
                     />
                   )}
@@ -269,12 +270,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1C1C1E',
+    color: colors.text.primary,
     letterSpacing: -0.5
   },
   seeAllText: {
     fontSize: 15,
-    color: '#FF6B6B',
+    color: colors.primary,
     fontWeight: '600'
   },
   sectionContainer: {
