@@ -128,7 +128,11 @@
     "addToCart": "Add to Cart",
     "viewCart": "View Cart",
     "total": "Total",
-    "orderNow": "Order Now"
+    "orderNow": "Order Now",
+    "deliveryTime": "min delivery",
+    "collectTime": "min preparation",
+    "unknownTime": "Time not specified",
+    "browseOffers": "Browse Offers"
   },
   "menu": {
     "product": "Product",
