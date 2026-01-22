@@ -1,10 +1,19 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
 export default function SearchBar({searchbar, cityHandler, style, setAddress, navigation, restaurantData}) {
   const [searchText, setSearchText] = useState('')
+
+  // Exposer la méthode setAddressText via la ref passée en prop
+  useEffect(() => {
+    if (searchbar && searchbar.current) {
+      searchbar.current.setAddressText = (text) => {
+        setSearchText(text)
+      }
+    }
+  }, [searchbar])
 
   const handleSearch = () => {
     console.log('🔍 SearchBar handleSearch called with:', searchText)
