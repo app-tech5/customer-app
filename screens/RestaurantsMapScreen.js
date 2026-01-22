@@ -210,11 +210,31 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           style={styles.arrowBack}
           onPress={() => navigation.navigate('Home')}
         >
-          <MaterialIcons name="arrow-back" size={24} color="black" />
+          <View style={styles.backButton}>
+            <MaterialIcons name="arrow-back" size={24} color="#333" />
+          </View>
         </TouchableOpacity>
         <View style={styles.searchbar}>
           <SearchBar />
         </View>
+        {/* Indicateur de position */}
+        {userLocation && (
+          <TouchableOpacity
+            style={styles.locationIndicator}
+            onPress={() => {
+              if (_map.current && userLocation.lat && userLocation.lng) {
+                _map.current.animateToRegion({
+                  latitude: userLocation.lat,
+                  longitude: userLocation.lng,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01
+                }, 500)
+              }
+            }}
+          >
+            <MaterialIcons name="my-location" size={16} color="#4CAF50" />
+          </TouchableOpacity>
+        )}
       </View>
       {visible && (
         <View style={{
@@ -549,16 +569,52 @@ const ListButton = ({ setVisible }) => {
 const styles = StyleSheet.create({
   header: {
     position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    paddingBottom: 10,
-    zIndex: 1
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 10 : 50,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10
   },
   arrowBack: {
     padding: 10,
     marginLeft: 5,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3
+  },
+  locationIndicator: {
+    position: 'absolute',
+    right: 20,
+    top: Platform.OS === "android" ? StatusBar.currentHeight + 15 : 55,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3
   },
   searchbar: { flex: 1, marginHorizontal: 10 },
   categories: {
