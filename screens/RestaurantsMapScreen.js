@@ -7,7 +7,8 @@ import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantIt
 import { location } from '../global'
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchBar from '../components/home/SearchBar'
-import BottomSheet from '@gorhom/bottom-sheet'
+// BottomSheet temporairement désactivé pour éviter les conflits Reanimated
+// import BottomSheet from '@gorhom/bottom-sheet'
 import Categories from '../components/home/Categories'
 import { FlatList } from 'react-native-gesture-handler'
 import Reward from '../components/Reward'
@@ -215,21 +216,37 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           <SearchBar />
         </View>
       </View>
-      {visible && <BottomSheet index={1} snapPoints={["20%", "40%", "95%"]}
-        handleIndicatorStyle={{ backgroundColor: "#d9d9d9", width: 100 }}
-        onChange={(index) => {
-          if (index === 2) {
-            setScrollEnabled(true)
-          }
-          if (index === 0) {
-          }
-        }}
-      >
-            <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
-              focus={focus} _map={_map} width={width} horizontal={false} Categories={Categories} scrollEnabled={scrollEnabled}
-              setDirection={setDirection} setOffset={setOffset} offset={offset} direction={direction}
-              setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>
-      </BottomSheet>}
+      {visible && (
+        <View style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '60%',
+          backgroundColor: 'white',
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 5,
+          elevation: 10
+        }}>
+          <View style={{
+            height: 4,
+            width: 40,
+            backgroundColor: '#d9d9d9',
+            borderRadius: 2,
+            alignSelf: 'center',
+            marginTop: 10,
+            marginBottom: 10
+          }} />
+          <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
+            focus={focus} _map={_map} width={width} horizontal={false} Categories={Categories} scrollEnabled={scrollEnabled}
+            setDirection={setDirection} setOffset={setOffset} offset={offset} direction={direction}
+            setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>
+        </View>
+      )}
       {!visible && <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
         focus={focus} _map={_map} width={width} horizontal={true} setVisible={setVisible} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>}
     </View>
