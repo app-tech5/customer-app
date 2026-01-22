@@ -182,7 +182,7 @@ export default function Home({navigation}) {
                 allMenus={allMenus}
                 navigation={navigation}
                 horizontal={true}
-                size="100%"
+                size={0.75}
               />
             </View>
           ))}

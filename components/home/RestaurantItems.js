@@ -31,7 +31,7 @@ export default function RestaurantItems({navigation,...props}) {
                                     marginTop: 8,
                                     padding: 15,
                                     backgroundColor: "white",
-                                   width: props.size?width:width*0.8
+                                   width: props.size ? width * props.size : width*0.8
                                 }}>
                                 {props.reward || item.reward ?<PromotionBadge restaurant={item} allPromotions={props.promotions} allMenus={props.allMenus}/>:<></>}
                                 <View >
