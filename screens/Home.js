@@ -69,7 +69,7 @@ export default function Home({navigation}) {
     if (restaurantsWithPromotions.length >= 2) {
       sections.push({
         id: 'special_offers',
-        title: '🎉 Offres spéciales',
+        title: '🔥 Offres du moment',
         restaurants: restaurantsWithPromotions.slice(0, 8),
         type: 'promotions'
       })
@@ -83,55 +83,85 @@ export default function Home({navigation}) {
     if (topRated.length >= 2) {
       sections.push({
         id: 'top_rated',
-        title: '⭐ Les mieux notés',
+        title: '🏆 Les mieux notés',
         restaurants: topRated.slice(0, 8),
         type: 'rating'
       })
     }
 
-    // 3. Section "Livraison rapide" - Restaurants avec deliveryTime court
-    const fastDelivery = restaurantData
-      .filter(restaurant => restaurant.deliveryTime && parseInt(restaurant.deliveryTime) <= 25)
-      .sort((a, b) => parseInt(a.deliveryTime || 0) - parseInt(b.deliveryTime || 0))
+    // 3. Section "Cuisine rapide" - Restaurants avec collectTime <= 25 min (moyenne 29min)
+    const quickCuisine = restaurantData
+      .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 25)
+      .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
 
-    if (fastDelivery.length >= 2) {
+    if (quickCuisine.length >= 2) {
       sections.push({
-        id: 'fast_delivery',
-        title: '🚀 Livraison rapide',
-        restaurants: fastDelivery.slice(0, 8),
-        type: 'delivery'
+        id: 'quick_cuisine',
+        title: '⚡ Cuisine rapide',
+        restaurants: quickCuisine.slice(0, 8),
+        type: 'cuisine'
       })
     }
 
-    // 4. Section "Cuisine rapide" - Restaurants avec collectTime <= 15 min
-    const quickPickup = restaurantData
-      .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 15)
+    // 4. Section "À emporter express" - Restaurants avec collectTime <= 20 min
+    const expressPickup = restaurantData
+      .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 20)
       .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
 
-    if (quickPickup.length >= 2) {
+    if (expressPickup.length >= 2) {
       sections.push({
-        id: 'quick_pickup',
-        title: '⚡ Cuisine rapide',
-        restaurants: quickPickup.slice(0, 8),
+        id: 'express_pickup',
+        title: '🏃 À emporter express',
+        restaurants: expressPickup.slice(0, 8),
         type: 'pickup'
       })
     }
 
-    // 5. Section "Populaires près de chez vous" - Restaurants populaires
-    const popularNearby = restaurantData
-      .filter(restaurant => restaurant.review_count && parseInt(restaurant.review_count) > 100)
+    // 5. Section "Les plus populaires" - Restaurants avec le plus d'avis (> 150 avis)
+    const mostPopular = restaurantData
+      .filter(restaurant => restaurant.review_count && parseInt(restaurant.review_count) > 150)
       .sort((a, b) => parseInt(b.review_count || 0) - parseInt(a.review_count || 0))
 
-    if (popularNearby.length >= 2) {
+    if (mostPopular.length >= 2) {
       sections.push({
-        id: 'popular_nearby',
-        title: '🔥 Populaires près de chez vous',
-        restaurants: popularNearby.slice(0, 8),
+        id: 'most_popular',
+        title: '🌟 Les plus populaires',
+        restaurants: mostPopular.slice(0, 8),
         type: 'popular'
       })
     }
 
-    // 6. Section "Découvrir" - Restaurants diversifiés (toujours affichée si on a au moins 3 restaurants)
+    // 6. Section "Cuisine italienne" - Basé sur les données (8 restaurants italiens)
+    const italianRestaurants = restaurantData.filter(restaurant =>
+      restaurant.categories?.some(cat =>
+        cat.title?.toLowerCase().includes('italian') || cat.title?.toLowerCase().includes('pizza')
+      )
+    )
+    if (italianRestaurants.length >= 2) {
+      sections.push({
+        id: 'italian_cuisine',
+        title: '🇮🇹 Cuisine italienne',
+        restaurants: italianRestaurants.slice(0, 8),
+        type: 'category'
+      })
+    }
+
+    // 7. Section "Cuisine américaine" - Basé sur les données (7 restaurants américains)
+    const americanRestaurants = restaurantData.filter(restaurant =>
+      restaurant.categories?.some(cat =>
+        cat.title?.toLowerCase().includes('american') || cat.title?.toLowerCase().includes('fast food')
+      )
+    )
+    if (americanRestaurants.length >= 2) {
+      sections.push({
+        id: 'american_cuisine',
+        title: '🍔 Cuisine américaine',
+        restaurants: americanRestaurants.slice(0, 8),
+        type: 'category'
+      })
+    }
+
+    // 8. Section "Découvrir" - Restaurants diversifiés (toujours affichée si on a au moins 3 restaurants)
     if (restaurantData.length >= 3) {
       const discover = restaurantData.slice(0, 12)
       sections.push({
