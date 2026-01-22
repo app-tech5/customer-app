@@ -1,5 +1,6 @@
 import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity} from 'react-native'
 import React, {useState, useEffect, useRef, useContext} from 'react'
+import { Icon } from 'react-native-elements'
 import HeaderTabs from '../components/home/HeaderTabs'
 import SearchBar from '../components/home/SearchBar'
 import RestaurantItems, { localRestaurants } from '../components/home/RestaurantItems'
@@ -69,7 +70,8 @@ export default function Home({navigation}) {
     if (restaurantsWithPromotions.length >= 2) {
       sections.push({
         id: 'special_offers',
-        title: '🔥 Offres du moment',
+        title: 'Offres du moment',
+        icon: 'local-offer',
         restaurants: restaurantsWithPromotions.slice(0, 8),
         type: 'promotions'
       })
@@ -83,7 +85,8 @@ export default function Home({navigation}) {
     if (topRated.length >= 2) {
       sections.push({
         id: 'top_rated',
-        title: '🏆 Les mieux notés',
+        title: 'Les mieux notés',
+        icon: 'star',
         restaurants: topRated.slice(0, 8),
         type: 'rating'
       })
@@ -97,7 +100,8 @@ export default function Home({navigation}) {
     if (quickCuisine.length >= 2) {
       sections.push({
         id: 'quick_cuisine',
-        title: '⚡ Cuisine rapide',
+        title: 'Cuisine rapide',
+        icon: 'flash',
         restaurants: quickCuisine.slice(0, 8),
         type: 'cuisine'
       })
@@ -111,7 +115,8 @@ export default function Home({navigation}) {
     if (expressPickup.length >= 2) {
       sections.push({
         id: 'express_pickup',
-        title: '🏃 À emporter express',
+        title: 'À emporter express',
+        icon: 'run',
         restaurants: expressPickup.slice(0, 8),
         type: 'pickup'
       })
@@ -125,7 +130,8 @@ export default function Home({navigation}) {
     if (mostPopular.length >= 2) {
       sections.push({
         id: 'most_popular',
-        title: '🌟 Les plus populaires',
+        title: 'Les plus populaires',
+        icon: 'trending-up',
         restaurants: mostPopular.slice(0, 8),
         type: 'popular'
       })
@@ -140,7 +146,8 @@ export default function Home({navigation}) {
     if (italianRestaurants.length >= 2) {
       sections.push({
         id: 'italian_cuisine',
-        title: '🇮🇹 Cuisine italienne',
+        title: 'Cuisine italienne',
+        icon: 'food-variant',
         restaurants: italianRestaurants.slice(0, 8),
         type: 'category'
       })
@@ -155,7 +162,8 @@ export default function Home({navigation}) {
     if (americanRestaurants.length >= 2) {
       sections.push({
         id: 'american_cuisine',
-        title: '🍔 Cuisine américaine',
+        title: 'Cuisine américaine',
+        icon: 'hamburger',
         restaurants: americanRestaurants.slice(0, 8),
         type: 'category'
       })
@@ -166,7 +174,8 @@ export default function Home({navigation}) {
       const discover = restaurantData.slice(0, 12)
       sections.push({
         id: 'discover',
-        title: '🍽️ Découvrir',
+        title: 'Découvrir',
+        icon: 'compass-outline',
         restaurants: discover,
         type: 'discover'
       })
@@ -193,7 +202,18 @@ export default function Home({navigation}) {
           {createDynamicSections.map((section) => (
             <View key={section.id} style={styles.sectionContainer}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{section.title}</Text>
+                <View style={styles.sectionTitleContainer}>
+                  {section.icon && (
+                    <Icon
+                      name={section.icon}
+                      type="material-community"
+                      size={20}
+                      color="#1C1C1E"
+                      style={styles.sectionIcon}
+                    />
+                  )}
+                  <Text style={styles.sectionTitle}>{section.title}</Text>
+                </View>
                 <TouchableOpacity
                   onPress={() => {
                     // Navigation vers une vue détaillée de la section
@@ -238,6 +258,13 @@ const styles = StyleSheet.create({
     paddingTop: 25,
     paddingBottom: 12,
     backgroundColor: '#fff'
+  },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  sectionIcon: {
+    marginRight: 8
   },
   sectionTitle: {
     fontSize: 20,
