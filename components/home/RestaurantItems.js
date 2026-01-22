@@ -162,13 +162,17 @@ export const RestaurantInfo = (props)=>(
                 shadowRadius: 2,
                 elevation: 1,
             }}>
-            <Text style={{
-                fontSize: 12,
-                fontWeight: "600",
-                color: '#FF9500'
-            }}>
-                ⭐ {props.rating ? parseFloat(props.rating).toFixed(1) : 'N/A'}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MaterialCommunityIcons name="star" size={12} color="#FF9500" />
+                <Text style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    color: '#FF9500',
+                    marginLeft: 2
+                }}>
+                    {props.rating ? parseFloat(props.rating).toFixed(1) : 'N/A'}
+                </Text>
+            </View>
         </View>
     </View>
 )
