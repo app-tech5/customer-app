@@ -66,7 +66,7 @@ export default function Home({navigation}) {
       )
     })
 
-    if (restaurantsWithPromotions.length > 0) {
+    if (restaurantsWithPromotions.length >= 2) {
       sections.push({
         id: 'special_offers',
         title: '🎉 Offres spéciales',
@@ -80,7 +80,7 @@ export default function Home({navigation}) {
       .filter(restaurant => restaurant.rating && parseFloat(restaurant.rating) >= 4.5)
       .sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0))
 
-    if (topRated.length > 0) {
+    if (topRated.length >= 2) {
       sections.push({
         id: 'top_rated',
         title: '⭐ Les mieux notés',
@@ -94,7 +94,7 @@ export default function Home({navigation}) {
       .filter(restaurant => restaurant.deliveryTime && parseInt(restaurant.deliveryTime) <= 25)
       .sort((a, b) => parseInt(a.deliveryTime || 0) - parseInt(b.deliveryTime || 0))
 
-    if (fastDelivery.length > 0) {
+    if (fastDelivery.length >= 2) {
       sections.push({
         id: 'fast_delivery',
         title: '🚀 Livraison rapide',
@@ -108,7 +108,7 @@ export default function Home({navigation}) {
       .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 15)
       .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
 
-    if (quickPickup.length > 0) {
+    if (quickPickup.length >= 2) {
       sections.push({
         id: 'quick_pickup',
         title: '⚡ Cuisine rapide',
@@ -122,7 +122,7 @@ export default function Home({navigation}) {
       .filter(restaurant => restaurant.review_count && parseInt(restaurant.review_count) > 100)
       .sort((a, b) => parseInt(b.review_count || 0) - parseInt(a.review_count || 0))
 
-    if (popularNearby.length > 0) {
+    if (popularNearby.length >= 2) {
       sections.push({
         id: 'popular_nearby',
         title: '🔥 Populaires près de chez vous',
@@ -131,14 +131,16 @@ export default function Home({navigation}) {
       })
     }
 
-    // 6. Section "Découvrir" - Restaurants diversifiés
-    const discover = restaurantData.slice(0, 12)
-    sections.push({
-      id: 'discover',
-      title: '🍽️ Découvrir',
-      restaurants: discover,
-      type: 'discover'
-    })
+    // 6. Section "Découvrir" - Restaurants diversifiés (toujours affichée si on a au moins 3 restaurants)
+    if (restaurantData.length >= 3) {
+      const discover = restaurantData.slice(0, 12)
+      sections.push({
+        id: 'discover',
+        title: '🍽️ Découvrir',
+        restaurants: discover,
+        type: 'discover'
+      })
+    }
 
     return sections
   }, [restaurantData, allPromotions])
