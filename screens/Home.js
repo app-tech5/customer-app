@@ -1,6 +1,7 @@
 import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity} from 'react-native'
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import { Icon } from 'react-native-elements'
+import i18n from '../i18n'
 import HeaderTabs from '../components/home/HeaderTabs'
 import SearchBar from '../components/home/SearchBar'
 import RestaurantItems, { localRestaurants } from '../components/home/RestaurantItems'
@@ -71,7 +72,7 @@ export default function Home({navigation}) {
     if (restaurantsWithPromotions.length >= 2) {
       sections.push({
         id: 'special_offers',
-        title: 'Offres du moment',
+        title: i18n.t('home.sections.specialOffers'),
         icon: 'local-offer',
         restaurants: restaurantsWithPromotions.slice(0, 8),
         type: 'promotions'
@@ -86,7 +87,7 @@ export default function Home({navigation}) {
     if (topRated.length >= 2) {
       sections.push({
         id: 'top_rated',
-        title: 'Les mieux notés',
+        title: i18n.t('home.sections.topRated'),
         icon: 'star',
         restaurants: topRated.slice(0, 8),
         type: 'rating'
@@ -101,7 +102,7 @@ export default function Home({navigation}) {
     if (quickCuisine.length >= 2) {
       sections.push({
         id: 'quick_cuisine',
-        title: 'Cuisine rapide',
+        title: i18n.t('home.sections.quickCuisine'),
         icon: 'flash',
         restaurants: quickCuisine.slice(0, 8),
         type: 'cuisine'
@@ -116,7 +117,7 @@ export default function Home({navigation}) {
     if (expressPickup.length >= 2) {
       sections.push({
         id: 'express_pickup',
-        title: 'À emporter express',
+        title: i18n.t('home.sections.expressPickup'),
         icon: 'run',
         restaurants: expressPickup.slice(0, 8),
         type: 'pickup'
@@ -131,7 +132,7 @@ export default function Home({navigation}) {
     if (mostPopular.length >= 2) {
       sections.push({
         id: 'most_popular',
-        title: 'Les plus populaires',
+        title: i18n.t('home.sections.mostPopular'),
         icon: 'trending-up',
         restaurants: mostPopular.slice(0, 8),
         type: 'popular'
@@ -147,7 +148,7 @@ export default function Home({navigation}) {
     if (italianRestaurants.length >= 2) {
       sections.push({
         id: 'italian_cuisine',
-        title: 'Cuisine italienne',
+        title: i18n.t('home.sections.italianCuisine'),
         icon: 'food-variant',
         restaurants: italianRestaurants.slice(0, 8),
         type: 'category'
@@ -163,7 +164,7 @@ export default function Home({navigation}) {
     if (americanRestaurants.length >= 2) {
       sections.push({
         id: 'american_cuisine',
-        title: 'Cuisine américaine',
+        title: i18n.t('home.sections.americanCuisine'),
         icon: 'hamburger',
         restaurants: americanRestaurants.slice(0, 8),
         type: 'category'
@@ -175,7 +176,7 @@ export default function Home({navigation}) {
       const discover = restaurantData.slice(0, 12)
       sections.push({
         id: 'discover',
-        title: 'Découvrir',
+        title: i18n.t('home.sections.discover'),
         icon: 'compass-outline',
         restaurants: discover,
         type: 'discover'
@@ -229,7 +230,7 @@ export default function Home({navigation}) {
                     })
                   }}
                 >
-                  <Text style={styles.seeAllText}>Voir tout</Text>
+                  <Text style={styles.seeAllText}>{i18n.t('home.viewAll')}</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.restaurantList}>

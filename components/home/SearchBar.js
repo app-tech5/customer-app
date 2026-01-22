@@ -2,6 +2,7 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import i18n from '../../i18n'
 
 export default function SearchBar({searchbar, cityHandler, style, setAddress, navigation, restaurantData}) {
   const [searchText, setSearchText] = useState('')
@@ -81,7 +82,7 @@ export default function SearchBar({searchbar, cityHandler, style, setAddress, na
             paddingHorizontal: 10,
             paddingVertical: 10,
           }}
-          placeholder={!style?"Rechercher un restaurant ou une ville":"Address"}
+          placeholder={!style ? i18n.t('search.restaurantOrCity') : i18n.t('search.address')}
           placeholderTextColor="#999"
           value={searchText}
           onChangeText={setSearchText}
@@ -101,7 +102,7 @@ export default function SearchBar({searchbar, cityHandler, style, setAddress, na
             onPress={handleSearch}
           >
             <Ionicons name='search' size={11} style={{marginRight: 6}}/>
-            <Text>Rechercher</Text>
+            <Text>{i18n.t('search.search')}</Text>
           </TouchableOpacity>
         )}
       </View>

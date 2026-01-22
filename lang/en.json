@@ -97,7 +97,22 @@
     "categories": "Categories",
     "viewAll": "View All",
     "noRestaurants": "No restaurants found",
-    "retry": "Retry"
+    "retry": "Retry",
+    "sections": {
+      "specialOffers": "Special Offers",
+      "topRated": "Top Rated",
+      "quickCuisine": "Quick Cuisine",
+      "expressPickup": "Express Pickup",
+      "mostPopular": "Most Popular",
+      "italianCuisine": "Italian Cuisine",
+      "americanCuisine": "American Cuisine",
+      "discover": "Discover"
+    }
+  },
+  "search": {
+    "restaurantOrCity": "Search for a restaurant or city",
+    "address": "Address",
+    "search": "Search"
   },
   "restaurant": {
     "details": "Details",

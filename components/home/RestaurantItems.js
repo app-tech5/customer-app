@@ -5,6 +5,7 @@ import { AntDesign, Ionicons } from '@expo/vector-icons';
 import Categories from './Categories';
 import PromotionBadge from '../PromotionBadge';
 import { colors } from '../../global';
+import i18n from '../../i18n';
 
 export default function RestaurantItems({navigation,...props}) {
     const { width, height } = useWindowDimensions();
@@ -136,7 +137,7 @@ export const RestaurantInfo = (props)=>(
                     color: colors.text.secondary
                 }}>
                     {props.distance ? `${props.distance.toFixed(1)} km • ` : ''}
-                    {props.deliveryTime ? `${props.deliveryTime} min livraison` : props.collectTime ? `${props.collectTime} min préparation` : 'Temps non spécifié'}
+                    {props.deliveryTime ? `${props.deliveryTime} ${i18n.t('restaurant.deliveryTime')}` : props.collectTime ? `${props.collectTime} ${i18n.t('restaurant.collectTime')}` : i18n.t('restaurant.unknownTime')}
                 </Text>
                 {props.distance && (
                     <Ionicons
@@ -186,7 +187,7 @@ const Affiche = (props)=> {
           <View style={{...styles.container1, backgroundColor: props.adsColor}}>
             <Text style={{...styles.text, color: props.adsColor==="#800000"?"white":"black"}}>{props.ads}</Text>
             <View style={styles.button}>
-              <Text style={styles.buttonText}>Browse Offers</Text>
+              <Text style={styles.buttonText}>{i18n.t('restaurant.browseOffers')}</Text>
               <AntDesign name="arrowright" size={18} color="black" />
             </View>
           </View>

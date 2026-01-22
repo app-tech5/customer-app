@@ -97,7 +97,22 @@
     "categories": "Catégories",
     "viewAll": "Voir tout",
     "noRestaurants": "Aucun restaurant trouvé",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "sections": {
+      "specialOffers": "Offres du moment",
+      "topRated": "Les mieux notés",
+      "quickCuisine": "Cuisine rapide",
+      "expressPickup": "À emporter express",
+      "mostPopular": "Les plus populaires",
+      "italianCuisine": "Cuisine italienne",
+      "americanCuisine": "Cuisine américaine",
+      "discover": "Découvrir"
+    }
+  },
+  "search": {
+    "restaurantOrCity": "Rechercher un restaurant ou une ville",
+    "address": "Adresse",
+    "search": "Rechercher"
   },
   "restaurant": {
     "details": "Détails",
