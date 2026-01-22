@@ -161,7 +161,7 @@ export default function Home({navigation}) {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Affichage dynamique des sections basées sur les données backend - comme Uber Eats */}
           {createDynamicSections.map((section) => (
-            <View key={section.id}>
+            <View key={section.id} style={styles.sectionContainer}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>{section.title}</Text>
                 <TouchableOpacity
@@ -178,14 +178,16 @@ export default function Home({navigation}) {
                   <Text style={styles.seeAllText}>Voir tout</Text>
                 </TouchableOpacity>
               </View>
-              <RestaurantItems
-                restaurantData={section.restaurants}
-                promotions={allPromotions}
-                allMenus={allMenus}
-                navigation={navigation}
-                horizontal={true}
-                size={0.75}
-              />
+              <View style={styles.restaurantList}>
+                <RestaurantItems
+                  restaurantData={section.restaurants}
+                  promotions={allPromotions}
+                  allMenus={allMenus}
+                  navigation={navigation}
+                  horizontal={true}
+                  size={0.75}
+                />
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -203,18 +205,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingTop: 25,
+    paddingBottom: 12,
     backgroundColor: '#fff'
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333'
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1C1C1E',
+    letterSpacing: -0.5
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#FF6B6B',
     fontWeight: '600'
+  },
+  sectionContainer: {
+    marginBottom: 8,
+    backgroundColor: '#fff'
+  },
+  restaurantList: {
+    paddingLeft: 20,
+    paddingBottom: 20
   }
 })
  
