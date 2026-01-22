@@ -208,7 +208,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       <View style={{ ...styles.header, width: width, }}>
         <TouchableOpacity
           style={styles.arrowBack}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.goBack()}
         >
           <View style={styles.backButton}>
             <MaterialIcons name="arrow-back" size={24} color="#333" />
