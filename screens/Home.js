@@ -72,14 +72,14 @@ export default function Home({navigation}) {
         <ScrollView showsVerticalScrollIndicator={false}>
           <RestaurantItems restaurantData={restaurantData} promotions={allPromotions} allMenus={allMenus} reward="$60 until $9 reward" navigation={navigation} size="100%" horizontal={true}/>
           <RestaurantItems restaurantData={restaurantData} promotions={allPromotions} allMenus={allMenus} navigation={navigation} ads={true} size="100%" flatlist={flatlist} horizontal={true}/>
-          <RestaurantRowsItems themes={themes} restaurantData={restaurantData} navigation={navigation} />
+          <RestaurantRowsItems themes={themes} restaurantData={restaurantData} navigation={navigation} allPromotions={allPromotions} allMenus={allMenus} />
         </ScrollView>}
       <Divider width={1}/>
      </View>
      </SafeAreaView>
   )
 }
-const RestaurantRowsItems = ({themes, restaurantData, navigation}) => {
+const RestaurantRowsItems = ({themes, restaurantData, navigation, allPromotions, allMenus}) => {
   return themes.map((theme, index)=>{
       return(
         <View key={index}>
