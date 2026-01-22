@@ -28,6 +28,7 @@ import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
 import { SettingProvider } from '../contexts/SettingContext'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
+import SearchResults from '../screens/SearchResults'
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
     const Stack = createStackNavigator();
@@ -54,6 +55,7 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="OrderCompleted" component={OrderCompleted}/>
               <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
               <Stack.Screen name="ItemResults" component={ItemResults} options={{ headerShown: true }} />
+              <Stack.Screen name="SearchResults" component={SearchResults} options={{ headerShown: true }} />
               <Stack.Screen name="Offers" component={Offers}/>
               <Stack.Screen name="Wallet" component={Wallet}/>
               <Stack.Screen name="AddCard" component={AddCard}/>

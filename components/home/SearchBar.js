@@ -7,22 +7,39 @@ export default function SearchBar({searchbar, cityHandler, style, setAddress, na
   const [searchText, setSearchText] = useState('')
 
   const handleSearch = () => {
-    if (!searchText.trim()) return
+    console.log('🔍 SearchBar handleSearch called with:', searchText)
+
+    if (!searchText.trim()) {
+      console.log('❌ Search text is empty')
+      return
+    }
+
+    // Vérification que restaurantData existe
+    if (!restaurantData || !Array.isArray(restaurantData)) {
+      console.warn('❌ SearchBar: restaurantData is not available', restaurantData)
+      return
+    }
+
+    console.log('📊 Searching in', restaurantData.length, 'restaurants')
 
     // Recherche locale dans les restaurants par nom ou ville
     const filteredRestaurants = restaurantData.filter(restaurant =>
-      restaurant.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      restaurant.city?.toLowerCase().includes(searchText.toLowerCase())
+      restaurant?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      restaurant?.city?.toLowerCase().includes(searchText.toLowerCase())
     )
 
-    // Navigation vers les résultats de recherche dans le SearchNavigator
-    navigation.navigate('Search', {
-      screen: 'SearchResults',
-      params: {
-        searchTerm: searchText,
-        restaurantData: filteredRestaurants,
-        totalResults: filteredRestaurants.length
-      }
+    console.log('✅ Found', filteredRestaurants.length, 'matching restaurants')
+
+    // Navigation vers les résultats de recherche
+    console.log('🚀 Navigating to SearchResults with:', {
+      searchTerm: searchText,
+      totalResults: filteredRestaurants.length
+    })
+
+    navigation.navigate('SearchResults', {
+      searchTerm: searchText,
+      restaurantData: filteredRestaurants,
+      totalResults: filteredRestaurants.length
     })
   }
 

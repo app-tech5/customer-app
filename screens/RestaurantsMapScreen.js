@@ -215,7 +215,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           </View>
         </TouchableOpacity>
         <View style={styles.searchbar}>
-          <SearchBar />
+          <SearchBar restaurantData={restaurantData} navigation={navigation} />
         </View>
         {/* Indicateur de position */}
         {userLocation && (
