@@ -54,7 +54,10 @@ export default function RestaurantItems({navigation,...props}) {
                                     name={item.name.substring(0,25)}
                                     rating={item.rating}
                                     city={item.city}
-                                    distance={item.distance}/>
+                                    distance={item.distance}
+                                    deliveryTime={item.deliveryTime}
+                                    collectTime={item.collectTime}
+                                    review_count={item.review_count}/>
                             </View>
                         </TouchableOpacity>
                     )
@@ -133,7 +136,8 @@ export const RestaurantInfo = (props)=>(
                     fontSize: 12,
                     color: colors.text.secondary
                 }}>
-                    {props.distance ? `${props.distance.toFixed(1)} km • ` : ''}30-45 min
+                    {props.distance ? `${props.distance.toFixed(1)} km • ` : ''}
+                    {props.deliveryTime ? `${props.deliveryTime} min livraison` : props.collectTime ? `${props.collectTime} min préparation` : 'Temps non spécifié'}
                 </Text>
                 {props.distance && (
                     <Ionicons
@@ -172,6 +176,7 @@ export const RestaurantInfo = (props)=>(
                     marginLeft: 2
                 }}>
                     {props.rating ? parseFloat(props.rating).toFixed(1) : 'N/A'}
+                    {props.review_count ? ` (${props.review_count})` : ''}
                 </Text>
             </View>
         </View>
