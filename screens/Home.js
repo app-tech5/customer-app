@@ -217,12 +217,15 @@ export default function Home({navigation}) {
                 </View>
                 <TouchableOpacity
                   onPress={() => {
-                    // Navigation vers une vue détaillée de la section
-                    navigation.navigate('SearchResults', {
-                      searchTerm: section.title,
-                      restaurantData: section.restaurants,
-                      totalResults: section.restaurants.length,
-                      sectionType: section.id
+                    // Navigation vers une vue détaillée de la section via le stack Search
+                    navigation.navigate('Search', {
+                      screen: 'SearchResults',
+                      params: {
+                        searchTerm: section.title,
+                        restaurantData: section.restaurants,
+                        totalResults: section.restaurants.length,
+                        sectionType: section.id
+                      }
                     })
                   }}
                 >
