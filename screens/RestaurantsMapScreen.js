@@ -468,12 +468,37 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
         onPress={() => {
           if (visible) setVisible(false)
           setTimeout(() => {
-            setFocusFunction(restaurant.originalIndex)
-            restaurantsRef.current?.scrollToIndex({
-              index: restaurant.originalIndex,
-              animated: true,
-              viewPosition: 0.5
-            })
+            // 🔥 CORRECTION: Trouver l'index dans le carrousel filtré
+            // Le carrousel affiche seulement les restaurants proches (< 10km)
+            const sortedRestaurants = restaurantData
+              .filter(r => r.latitude && r.longitude)
+              .map((r, originalIndex) => ({
+                ...r,
+                originalIndex,
+                distance: userLocation?.lat && userLocation?.lng ?
+                  getDistanceFromLatLonInKm(
+                    userLocation.lat, userLocation.lng,
+                    r.latitude || r.lat,
+                    r.longitude || r.lng
+                  ) : null
+              }))
+              .filter(r => r.distance !== null && r.distance < 10)
+              .sort((a, b) => a.distance - b.distance)
+
+            // Trouver l'index du restaurant cliqué dans la liste filtrée du carrousel
+            const carouselIndex = sortedRestaurants.findIndex(r => r.originalIndex === restaurant.originalIndex)
+
+            if (carouselIndex !== -1) {
+              console.log(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
+              setFocusFunction(carouselIndex)
+              restaurantsRef.current?.scrollToIndex({
+                index: carouselIndex,
+                animated: true,
+                viewPosition: 0.5
+              })
+            } else {
+              console.log(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
+            }
           }, 300)
         }}
       >
