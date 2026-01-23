@@ -224,6 +224,8 @@
     "track": "Track Order",
     "reorder": "Reorder",
     "viewAll": "View All",
+    "allOrders": "All Orders",
+    "all": "All",
     "startOrdering": "Start Ordering",
     "loadingError": "Error loading orders",
     "noOrdersTitle": "No orders yet",
@@ -231,6 +233,11 @@
     "errorTitle": "Unable to load orders",
     "item": "item",
     "items": "items",
+    "searchPlaceholder": "Search by restaurant or order ID...",
+    "result": "order",
+    "results": "orders",
+    "noResults": "No orders found",
+    "tryDifferentSearch": "Try adjusting your search or filters",
     "status": {
       "pending": "Pending",
       "preparing": "Preparing",
@@ -242,8 +249,7 @@
     "estimatedTime": "Estimated time",
     "minutes": "minutes",
     "orderId": "Order",
-    "date": "Date",
-    "items": "Items"
+    "date": "Date"
   },
   "profile": {
     "title": "Profile",
@@ -286,7 +292,8 @@
     "available": "Available",
     "unavailable": "Unavailable",
     "minutesAbbrev": "min",
-    "clearAll": "Clear All"
+    "clearAll": "Clear All",
+    "retry": "Retry"
   },
   "errors": {
     "network": "Network connection error",

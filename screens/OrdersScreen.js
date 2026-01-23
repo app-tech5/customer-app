@@ -1,5 +1,5 @@
-import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { getOrders } from '../api'
 import i18n from '../i18n'
@@ -11,6 +11,8 @@ export default function OrdersScreen({ navigation }) {
   const [orders, setOrders] = useState([])
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState(null)
   const { currency } = useSettings()
 
   useEffect(() => {
@@ -74,6 +76,39 @@ export default function OrdersScreen({ navigation }) {
     const date = new Date(dateString)
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
+
+  // Filtrer les commandes selon la recherche et le statut
+  const filteredOrders = useMemo(() => {
+    let filtered = orders
+
+    // Filtre par statut
+    if (selectedStatus) {
+      filtered = filtered.filter(order => 
+        order.status?.toLowerCase() === selectedStatus.toLowerCase()
+      )
+    }
+
+    // Filtre par recherche (nom du restaurant ou ID de commande)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(order => {
+        const restaurantName = (order.restaurant?.name || order.restaurantName || '').toLowerCase()
+        const orderId = String(order.id || order._id || '').toLowerCase()
+        return restaurantName.includes(query) || orderId.includes(query)
+      })
+    }
+
+    return filtered
+  }, [orders, searchQuery, selectedStatus])
+
+  const statusFilters = [
+    { label: i18n.t('order.all', 'All'), value: null },
+    { label: i18n.t('order.status.pending', 'Pending'), value: 'pending' },
+    { label: i18n.t('order.status.preparing', 'Preparing'), value: 'preparing' },
+    { label: i18n.t('order.status.out_for_delivery', 'Out for Delivery'), value: 'out_for_delivery' },
+    { label: i18n.t('order.status.delivered', 'Delivered'), value: 'delivered' },
+    { label: i18n.t('order.status.cancelled', 'Cancelled'), value: 'cancelled' },
+  ]
 
   const renderOrderItem = ({ item }) => (
     <TouchableOpacity
@@ -221,15 +256,83 @@ export default function OrdersScreen({ navigation }) {
       {orders.length === 0 ? (
         <EmptyState />
       ) : (
-        <FlatList
-          data={orders}
-          keyExtractor={(item, index) => String(item.id || item._id || index)}
-          renderItem={renderOrderItem}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
-          refreshing={loader}
-          onRefresh={loadOrders}
-        />
+        <>
+          {/* Barre de recherche */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={i18n.t('order.searchPlaceholder', 'Search by restaurant or order ID...')}
+              placeholderTextColor={colors.text.secondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Filtres par statut */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.filtersContainer}
+            contentContainerStyle={styles.filtersContent}
+          >
+            {statusFilters.map((filter) => (
+              <TouchableOpacity
+                key={filter.value || 'all'}
+                style={[
+                  styles.filterChip,
+                  selectedStatus === filter.value && styles.filterChipActive
+                ]}
+                onPress={() => setSelectedStatus(filter.value)}
+              >
+                <Text style={[
+                  styles.filterChipText,
+                  selectedStatus === filter.value && styles.filterChipTextActive
+                ]}>
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Compteur de résultats */}
+          <View style={styles.resultsHeader}>
+            <Text style={styles.resultsText}>
+              {filteredOrders.length} {filteredOrders.length === 1 ? 
+                i18n.t('order.result', 'order') : 
+                i18n.t('order.results', 'orders')
+              }
+            </Text>
+          </View>
+
+          {/* Liste des commandes */}
+          {filteredOrders.length === 0 ? (
+            <View style={styles.noResultsContainer}>
+              <Ionicons name="search-outline" size={64} color={colors.grey[400]} />
+              <Text style={styles.noResultsText}>
+                {i18n.t('order.noResults', 'No orders found')}
+              </Text>
+              <Text style={styles.noResultsSubtext}>
+                {i18n.t('order.tryDifferentSearch', 'Try adjusting your search or filters')}
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredOrders}
+              keyExtractor={(item, index) => String(item.id || item._id || index)}
+              renderItem={renderOrderItem}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContainer}
+              refreshing={loader}
+              onRefresh={loadOrders}
+            />
+          )}
+        </>
       )}
     </SafeAreaView>
   )
@@ -239,6 +342,90 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.primary,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text.primary,
+    paddingVertical: 12,
+  },
+  clearButton: {
+    padding: 4,
+  },
+  filtersContainer: {
+    maxHeight: 50,
+    marginBottom: 8,
+  },
+  filtersContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.background.primary,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  filterChipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  filterChipText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    fontWeight: '500',
+  },
+  filterChipTextActive: {
+    color: colors.text.white,
+  },
+  resultsHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: colors.background.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  resultsText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    fontWeight: '500',
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingTop: 64,
+  },
+  noResultsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noResultsSubtext: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
   listContainer: {
     padding: 16,

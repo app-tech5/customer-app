@@ -220,6 +220,8 @@
     "track": "Suivre commande",
     "reorder": "Recommander",
     "viewAll": "Voir tout",
+    "allOrders": "Toutes les commandes",
+    "all": "Tout",
     "startOrdering": "Commencer à commander",
     "loadingError": "Erreur lors du chargement des commandes",
     "noOrdersTitle": "Aucune commande",
@@ -227,6 +229,11 @@
     "errorTitle": "Impossible de charger les commandes",
     "item": "article",
     "items": "articles",
+    "searchPlaceholder": "Rechercher par restaurant ou numéro de commande...",
+    "result": "commande",
+    "results": "commandes",
+    "noResults": "Aucune commande trouvée",
+    "tryDifferentSearch": "Essayez d'ajuster votre recherche ou vos filtres",
     "status": {
       "pending": "En attente",
       "preparing": "En préparation",
@@ -238,8 +245,7 @@
     "estimatedTime": "Temps estimé",
     "minutes": "minutes",
     "orderId": "Commande",
-    "date": "Date",
-    "items": "Articles"
+    "date": "Date"
   },
   "profile": {
     "title": "Profil",
@@ -282,7 +288,8 @@
     "available": "Disponible",
     "unavailable": "Indisponible",
     "minutesAbbrev": "min",
-    "clearAll": "Tout effacer"
+    "clearAll": "Tout effacer",
+    "retry": "Réessayer"
   },
   "errors": {
     "network": "Erreur de connexion réseau",
