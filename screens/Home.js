@@ -170,6 +170,50 @@ export default function Home({navigation}) {
       })
     }
 
+    // Filtre par fonctionnalités
+    if (appliedFilters.features && appliedFilters.features.length > 0) {
+      filtered = filtered.filter(restaurant => {
+        return appliedFilters.features.every(feature => {
+          switch (feature) {
+            case 'free_delivery':
+              // Livraison gratuite : frais = 0 OU distance < 2km (livraison locale gratuite)
+              if (restaurant.deliveryOptions?.isFreeDelivery?.enabled) {
+                return true
+              }
+              // Simulation : livraison gratuite pour restaurants très proches
+              return restaurant.distance ? restaurant.distance < 2 : false
+
+            case 'open_now':
+              // Restaurant ouvert : is_closed = false
+              return restaurant.is_closed !== true
+
+            case 'special_offers':
+              // Offres spéciales : promotions actives pour ce restaurant
+              return allPromotions?.some(promotion =>
+                promotion.scope === 'restaurant' &&
+                promotion.isActive &&
+                new Date() >= new Date(promotion.startDate) &&
+                new Date() <= new Date(promotion.endDate) &&
+                promotion.applicableRestaurants?.some(restId =>
+                  restId.toString() === restaurant._id ||
+                  restId.toString() === restaurant.id ||
+                  restId.toString() === restaurant.restaurantId
+                )
+              ) || false
+
+            case 'new_restaurant':
+              // Nouveau restaurant : créé il y a moins de 30 jours
+              return restaurant.createdAt ?
+                (new Date() - new Date(restaurant.createdAt)) < (30 * 24 * 60 * 60 * 1000) :
+                false
+
+            default:
+              return true
+          }
+        })
+      })
+    }
+
     return filtered
   }
 
@@ -229,6 +273,38 @@ export default function Home({navigation}) {
       })
     }
 
+    if (appliedFilters.sort === 'deals') {
+      return sorted.sort((a, b) => {
+        // Compter les promotions actives pour chaque restaurant
+        const aPromotionCount = allPromotions?.filter(promotion =>
+          promotion.scope === 'restaurant' && // Uniquement les promos restaurant
+          promotion.isActive &&
+          new Date() >= new Date(promotion.startDate) &&
+          new Date() <= new Date(promotion.endDate) &&
+          promotion.applicableRestaurants?.some(restId =>
+            restId.toString() === a._id ||
+            restId.toString() === a.id ||
+            restId.toString() === a.restaurantId
+          )
+        ).length || 0
+
+        const bPromotionCount = allPromotions?.filter(promotion =>
+          promotion.scope === 'restaurant' && // Uniquement les promos restaurant
+          promotion.isActive &&
+          new Date() >= new Date(promotion.startDate) &&
+          new Date() <= new Date(promotion.endDate) &&
+          promotion.applicableRestaurants?.some(restId =>
+            restId.toString() === b._id ||
+            restId.toString() === b.id ||
+            restId.toString() === b.restaurantId
+          )
+        ).length || 0
+
+        // Tri décroissant : plus de promotions = mieux
+        return bPromotionCount - aPromotionCount
+      })
+    }
+
     return restaurants
   }
 
@@ -264,12 +340,15 @@ export default function Home({navigation}) {
 
     // 1. Section "Offres spéciales" - Restaurants avec promotions actives du backend
     const restaurantsWithPromotions = sortedData.filter(restaurant => {
-      const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id
+      const restaurantId = restaurant._id || restaurant.id || restaurant.restaurantId
       return allPromotions?.some(promotion =>
-        promotion.restaurantId === restaurantId &&
+        promotion.scope === 'restaurant' &&
         promotion.isActive &&
         new Date() >= new Date(promotion.startDate) &&
-        new Date() <= new Date(promotion.endDate)
+        new Date() <= new Date(promotion.endDate) &&
+        promotion.applicableRestaurants?.some(restId =>
+          restId.toString() === restaurantId.toString()
+        )
       )
     })
 
