@@ -4,9 +4,17 @@ import { Icon,withBadge} from 'react-native-elements'
 import { FontAwesome } from '@expo/vector-icons'
 import FilterModal from '../FilterModal'
 
-export default function HomeHeader({navigation}) {
+export default function HomeHeader({navigation, onApplyFilters}) {
 
     const [filter, setFilter] = useState(false)
+
+    const handleApplyFilters = (filters) => {
+        if (onApplyFilters) {
+            onApplyFilters(filters)
+        }
+        setFilter(false)
+    }
+
   return (
       <>
           <View style={{
@@ -16,17 +24,17 @@ export default function HomeHeader({navigation}) {
           }}>
              <Menu navigation={navigation}/>
               <TouchableOpacity onPress={()=>setFilter(true)}>
-          
+
                   <FontAwesome
                       name='filter'
                       color="grey"
                       size={25}
-          
+
                   />
-          
+
               </TouchableOpacity>
           </View>
-          <FilterModal visible={filter} setVisible={setFilter}/>
+          <FilterModal visible={filter} setVisible={setFilter} onApplyFilters={handleApplyFilters}/>
       </>
   )
 }

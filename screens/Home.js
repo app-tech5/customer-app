@@ -21,6 +21,7 @@ export default function Home({navigation}) {
   const [activeTab, setActiveTab]= useState("Delivery")
   const [allPromotions, setAllPromotions] = useState([])
   const [allMenus, setAllMenus] = useState([])
+  const [appliedFilters, setAppliedFilters] = useState(null)
   const flatlist = useRef(null)
   const searchbar = useRef(null)
   useEffect(()=>{
@@ -52,14 +53,107 @@ export default function Home({navigation}) {
       });
   },[])
 
+  // Fonction pour appliquer les filtres aux restaurants
+  const applyFiltersToRestaurants = (restaurants) => {
+    if (!appliedFilters) return restaurants
+
+    let filtered = [...restaurants]
+
+    // Filtre par frais de livraison maximum
+    if (appliedFilters.maxDeliveryFee) {
+      filtered = filtered.filter(restaurant =>
+        !restaurant.deliveryFee || parseFloat(restaurant.deliveryFee) <= appliedFilters.maxDeliveryFee
+      )
+    }
+
+    // Filtre par gamme de prix
+    if (appliedFilters.priceRange && appliedFilters.priceRange.length > 0) {
+      filtered = filtered.filter(restaurant => {
+        const priceLevel = restaurant.priceLevel || restaurant.price_range || 2
+        const priceLabels = {budget: 1, moderate: 2, expensive: 3, luxury: 4}
+        return appliedFilters.priceRange.some(range => priceLabels[range] === priceLevel)
+      })
+    }
+
+    // Filtre par type de cuisine
+    if (appliedFilters.cuisine && appliedFilters.cuisine.length > 0) {
+      filtered = filtered.filter(restaurant => {
+        const restaurantCategories = restaurant.categories || []
+        return appliedFilters.cuisine.some(cuisine =>
+          restaurantCategories.some(cat =>
+            cat.title?.toLowerCase().includes(cuisine) ||
+            cat.name?.toLowerCase().includes(cuisine)
+          )
+        )
+      })
+    }
+
+    // Filtre par fonctionnalités
+    if (appliedFilters.features && appliedFilters.features.length > 0) {
+      filtered = filtered.filter(restaurant => {
+        return appliedFilters.features.every(feature => {
+          switch (feature) {
+            case 'free_delivery':
+              return !restaurant.deliveryFee || parseFloat(restaurant.deliveryFee) === 0
+            case 'open_now':
+              return restaurant.isOpen !== false // Par défaut considéré ouvert
+            case 'special_offers':
+              return allPromotions?.some(promotion =>
+                promotion.restaurantId === restaurant.restaurantId &&
+                promotion.isActive
+              )
+            case 'new_restaurant':
+              return restaurant.isNew || false
+            default:
+              return true
+          }
+        })
+      })
+    }
+
+    return filtered
+  }
+
+  // Fonction pour trier les restaurants
+  const sortRestaurants = (restaurants) => {
+    if (!appliedFilters?.sort) return restaurants
+
+    const sorted = [...restaurants]
+    switch (appliedFilters.sort) {
+      case 'popular':
+        return sorted.sort((a, b) => (parseInt(b.review_count) || 0) - (parseInt(a.review_count) || 0))
+      case 'rating':
+        return sorted.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
+      case 'delivery':
+        return sorted.sort((a, b) => (parseInt(a.collectTime) || 0) - (parseInt(b.collectTime) || 0))
+      case 'deals':
+        return sorted.sort((a, b) => {
+          const aHasDeals = allPromotions?.some(p => p.restaurantId === a.restaurantId && p.isActive) ? 1 : 0
+          const bHasDeals = allPromotions?.some(p => p.restaurantId === b.restaurantId && p.isActive) ? 1 : 0
+          return bHasDeals - aHasDeals
+        })
+      case 'picked':
+      default:
+        return sorted // Tri par défaut (recommandé)
+    }
+  }
+
+  const handleApplyFilters = (filters) => {
+    setAppliedFilters(filters)
+  }
+
   // Créer des sections dynamiques basées sur les données backend uniquement
   const createDynamicSections = React.useMemo(() => {
     if (!restaurantData || restaurantData.length === 0) return []
 
+    // Appliquer les filtres aux données
+    const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantData) : restaurantData
+    const sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
+
     const sections = []
 
     // 1. Section "Offres spéciales" - Restaurants avec promotions actives du backend
-    const restaurantsWithPromotions = restaurantData.filter(restaurant => {
+    const restaurantsWithPromotions = sortedData.filter(restaurant => {
       const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id
       return allPromotions?.some(promotion =>
         promotion.restaurantId === restaurantId &&
@@ -80,7 +174,7 @@ export default function Home({navigation}) {
     }
 
     // 2. Section "Les mieux notés" - Restaurants avec rating >= 4.5
-    const topRated = restaurantData
+    const topRated = sortedData
       .filter(restaurant => restaurant.rating && parseFloat(restaurant.rating) >= 4.5)
       .sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0))
 
@@ -95,7 +189,7 @@ export default function Home({navigation}) {
     }
 
     // 3. Section "Cuisine rapide" - Restaurants avec collectTime <= 25 min (moyenne 29min)
-    const quickCuisine = restaurantData
+    const quickCuisine = sortedData
       .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 25)
       .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
 
@@ -110,7 +204,7 @@ export default function Home({navigation}) {
     }
 
     // 4. Section "À emporter express" - Restaurants avec collectTime <= 20 min
-    const expressPickup = restaurantData
+    const expressPickup = sortedData
       .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 20)
       .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
 
@@ -125,7 +219,7 @@ export default function Home({navigation}) {
     }
 
     // 5. Section "Les plus populaires" - Restaurants avec le plus d'avis (> 150 avis)
-    const mostPopular = restaurantData
+    const mostPopular = sortedData
       .filter(restaurant => restaurant.review_count && parseInt(restaurant.review_count) > 150)
       .sort((a, b) => parseInt(b.review_count || 0) - parseInt(a.review_count || 0))
 
@@ -140,7 +234,7 @@ export default function Home({navigation}) {
     }
 
     // 6. Section "Cuisine italienne" - Basé sur les données (8 restaurants italiens)
-    const italianRestaurants = restaurantData.filter(restaurant =>
+    const italianRestaurants = sortedData.filter(restaurant =>
       restaurant.categories?.some(cat =>
         cat.title?.toLowerCase().includes('italian') || cat.title?.toLowerCase().includes('pizza')
       )
@@ -156,7 +250,7 @@ export default function Home({navigation}) {
     }
 
     // 7. Section "Cuisine américaine" - Basé sur les données (7 restaurants américains)
-    const americanRestaurants = restaurantData.filter(restaurant =>
+    const americanRestaurants = sortedData.filter(restaurant =>
       restaurant.categories?.some(cat =>
         cat.title?.toLowerCase().includes('american') || cat.title?.toLowerCase().includes('fast food')
       )
@@ -172,8 +266,8 @@ export default function Home({navigation}) {
     }
 
     // 8. Section "Découvrir" - Restaurants diversifiés (toujours affichée si on a au moins 3 restaurants)
-    if (restaurantData.length >= 3) {
-      const discover = restaurantData.slice(0, 12)
+    if (sortedData.length >= 3) {
+      const discover = sortedData.slice(0, 12)
       sections.push({
         id: 'discover',
         title: i18n.t('home.sections.discover'),
@@ -184,7 +278,7 @@ export default function Home({navigation}) {
     }
 
     return sections
-  }, [restaurantData, allPromotions])
+  }, [restaurantData, allPromotions, appliedFilters])
   if(!restaurantData)
   return <Loader />
   return (
@@ -196,7 +290,7 @@ export default function Home({navigation}) {
      <View style={{flex: 1}}>
       <View style={{ backgroundColor: "white", padding: 15 }}>
         <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} navigation={navigation} restaurantData={restaurantData} setCity={setCity} searchbar={searchbar}/>
-       <HomeHeader navigation={navigation}/>
+       <HomeHeader navigation={navigation} onApplyFilters={handleApplyFilters}/>
         <SearchBar cityHandler={setCity} navigation={navigation} restaurantData={restaurantData} searchbar={searchbar}/>
       </View>
         <ScrollView showsVerticalScrollIndicator={false}>
