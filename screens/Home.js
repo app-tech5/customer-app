@@ -6,7 +6,7 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import SearchBar from '../components/home/SearchBar'
 import RestaurantItems, { localRestaurants } from '../components/home/RestaurantItems'
 import { Divider } from 'react-native-elements'
-import { colors } from '../global'
+import { colors, getDistanceFromLatLonInKm } from '../global'
 // Données backend seulement - plus de données statiques
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurantsFromFirebase, getAllPromotions, getAllMenuItems } from '../api'
@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AntDesign } from '@expo/vector-icons'
 import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
+import * as Location from 'expo-location'
 
 export default function Home({navigation}) {
   const {restaurantData, setRestaurantData} = useContext(RestaurantsContext)
@@ -22,9 +23,58 @@ export default function Home({navigation}) {
   const [allPromotions, setAllPromotions] = useState([])
   const [allMenus, setAllMenus] = useState([])
   const [appliedFilters, setAppliedFilters] = useState(null)
+  const [userLocation, setUserLocation] = useState(null)
   const flatlist = useRef(null)
   const searchbar = useRef(null)
+  // Récupérer la position utilisateur
+  const getUserLocation = async () => {
+    try {
+      console.log('📍 Home - Tentative de récupération de la position utilisateur...')
+
+      // D'abord essayer depuis AsyncStorage (comme dans RestaurantsMapScreen)
+      const userData = await AsyncStorage.getItem('userData')
+      if (userData) {
+        const user = JSON.parse(userData)
+        if (user.location && user.location.latitude && user.location.longitude) {
+          const location = {
+            lat: user.location.latitude,
+            lng: user.location.longitude
+          }
+          console.log('✅ Home - Position trouvée dans AsyncStorage:', location)
+          setUserLocation(location)
+          return
+        }
+      }
+
+      // Si pas de coordonnées utilisateur, demander géolocalisation
+      console.log('📍 Home - Pas de position dans AsyncStorage, demande de géolocalisation...')
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        console.log('❌ Home - Permission de géolocalisation refusée')
+        return
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High
+      })
+
+      const userPos = {
+        lat: location.coords.latitude,
+        lng: location.coords.longitude
+      }
+
+      console.log('✅ Home - Position obtenue par géolocalisation:', userPos)
+      setUserLocation(userPos)
+
+    } catch (error) {
+      console.error('❌ Home - Erreur lors de la récupération de la position:', error)
+    }
+  }
+
   useEffect(()=>{
+    // Charger la position utilisateur
+    getUserLocation()
+
     // Charger les restaurants directement depuis l'API (pas de cache)
     getRestaurantsFromFirebase()
       .then(async (restaurants)=>{
@@ -60,10 +110,15 @@ export default function Home({navigation}) {
     // Filtre par frais de livraison maximum
     if (appliedFilters.maxDeliveryFee) {
       filtered = filtered.filter(restaurant => {
-        // Simulation simple : frais de livraison fixes pour l'instant
-        // TODO: Calculer la vraie distance depuis la position utilisateur
-        const simulatedFee = 2.5 // Frais par défaut pour tous
-        return simulatedFee <= appliedFilters.maxDeliveryFee
+        // Calculer les frais de livraison basés sur la vraie distance
+        let deliveryFee = 2.5 // Frais de base
+
+        if (restaurant.distance) {
+          // Frais progressifs selon la distance : 0.5€ par km
+          deliveryFee = Math.max(1, Math.min(10, 1 + (restaurant.distance * 0.5)))
+        }
+
+        return deliveryFee <= appliedFilters.maxDeliveryFee
       })
     }
 
@@ -116,8 +171,18 @@ export default function Home({navigation}) {
   const createDynamicSections = React.useMemo(() => {
     if (!restaurantData || restaurantData.length === 0) return []
 
+    // Ajouter la distance calculée à chaque restaurant
+    const restaurantsWithDistance = restaurantData.map(restaurant => ({
+      ...restaurant,
+      distance: userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude ?
+        getDistanceFromLatLonInKm(
+          userLocation.lat, userLocation.lng,
+          parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
+        ) : null
+    }))
+
     // Appliquer les filtres aux données
-    const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantData) : restaurantData
+    const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantsWithDistance) : restaurantsWithDistance
     const sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
 
     const sections = []
@@ -264,7 +329,7 @@ export default function Home({navigation}) {
     }
 
     return sections
-  }, [restaurantData, allPromotions, appliedFilters])
+  }, [restaurantData, allPromotions, appliedFilters, userLocation])
   if(!restaurantData)
   return <Loader />
   return (
