@@ -2,6 +2,7 @@ import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView, Platform} 
 import React, {useState} from 'react'
 import { AntDesign, Ionicons, FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons} from '@expo/vector-icons'
 import { colors, currency } from '../global'
+import i18n from '../i18n'
 
 export default function FilterModal({visible, setVisible, onApplyFilters}) {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -75,47 +76,47 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 <TouchableOpacity onPress={() => setVisible(false)} style={styles.closeButton}>
                   <AntDesign name="close" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
-                <Text style={styles.textHeader}>Filtres</Text>
+                <Text style={styles.textHeader}>{i18n.t('filters.title')}</Text>
                 <TouchableOpacity onPress={handleResetFilters}>
-                  <Text style={styles.resetText}>Réinitialiser</Text>
+                  <Text style={styles.resetText}>{i18n.t('filters.reset')}</Text>
                 </TouchableOpacity>
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
                 {/* Tri */}
-                <SectionTitle text="Trier par" />
+                <SectionTitle text={i18n.t('filters.sortBy')} />
                 <View style={styles.filterGroup}>
                   <FilterOption
                     icon="star"
-                    text="Recommandé pour vous"
+                    text={i18n.t('filters.sort.recommended')}
                     iconType="MaterialCommunityIcons"
                     selected={selectedFilters.sort === 'picked'}
                     onPress={() => handleFilterSelect('sort', 'picked')}
                   />
                   <FilterOption
                     icon="trending-up"
-                    text="Les plus populaires"
+                    text={i18n.t('filters.sort.mostPopular')}
                     iconType="MaterialIcons"
                     selected={selectedFilters.sort === 'popular'}
                     onPress={() => handleFilterSelect('sort', 'popular')}
                   />
                   <FilterOption
                     icon="star"
-                    text="Mieux notés"
+                    text={i18n.t('filters.sort.bestRated')}
                     iconType="AntDesign"
                     selected={selectedFilters.sort === 'rating'}
                     onPress={() => handleFilterSelect('sort', 'rating')}
                   />
                   <FilterOption
                     icon="clock-time-three"
-                    text="Livraison rapide"
+                    text={i18n.t('filters.sort.fastDelivery')}
                     iconType="MaterialCommunityIcons"
                     selected={selectedFilters.sort === 'delivery'}
                     onPress={() => handleFilterSelect('sort', 'delivery')}
                   />
                   <FilterOption
                     icon="tag"
-                    text="Meilleurs offres"
+                    text={i18n.t('filters.sort.bestDeals')}
                     iconType="AntDesign"
                     selected={selectedFilters.sort === 'deals'}
                     onPress={() => handleFilterSelect('sort', 'deals')}
@@ -123,7 +124,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 </View>
 
                 {/* Frais de livraison maximum */}
-                <SectionTitle text="Frais de livraison maximum" />
+                <SectionTitle text={i18n.t('filters.maxDeliveryFee')} />
                 <View style={styles.deliveryFeeContainer}>
                   <View style={styles.deliveryFeeOptions}>
                     {[5, 10, 15, 20].map((fee) => (
@@ -147,7 +148,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 </View>
 
                 {/* Gamme de prix */}
-                <SectionTitle text="Gamme de prix" />
+                <SectionTitle text={i18n.t('filters.priceRange')} />
                 <View style={styles.priceRangeContainer}>
                   {[
                     {label: '$', value: 'budget'},
@@ -174,20 +175,20 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 </View>
 
                 {/* Type de cuisine */}
-                <SectionTitle text="Type de cuisine" />
+                <SectionTitle text={i18n.t('filters.cuisineType')} />
                 <View style={styles.filterGroup}>
                   {[
-                    {icon: 'pizza', text: 'Italienne', search: 'italian', type: 'MaterialCommunityIcons'},
-                    {icon: 'cutlery', text: 'Américaine', search: 'american', type: 'FontAwesome'},
-                    {icon: 'noodles', text: 'Asiatique', search: 'asian', type: 'MaterialCommunityIcons'},
-                    {icon: 'food-variant', text: 'Française', search: 'french', type: 'MaterialCommunityIcons'},
-                    {icon: 'leaf', text: 'Végétarienne', search: 'vegetarian', type: 'FontAwesome'},
-                    {icon: 'glass-wine', text: 'Bar & Vin', search: 'bar', type: 'MaterialCommunityIcons'}
+                    {icon: 'pizza', text: i18n.t('filters.cuisine.italian'), search: 'italian', type: 'MaterialCommunityIcons'},
+                    {icon: 'cutlery', text: i18n.t('filters.cuisine.american'), search: 'american', type: 'FontAwesome'},
+                    {icon: 'noodles', text: i18n.t('filters.cuisine.asian'), search: 'asian', type: 'MaterialCommunityIcons'},
+                    {icon: 'food-variant', text: i18n.t('filters.cuisine.french'), search: 'french', type: 'MaterialCommunityIcons'},
+                    {icon: 'leaf', text: i18n.t('filters.cuisine.vegetarian'), search: 'vegetarian', type: 'FontAwesome'},
+                    {icon: 'glass-wine', text: i18n.t('filters.cuisine.bar'), search: 'bar', type: 'MaterialCommunityIcons'}
                   ].map((cuisine) => (
                     <FilterOption
                       key={cuisine.text}
                       icon={cuisine.icon}
-                      text={cuisine.text}
+                      text={i18n.t(`filters.cuisine.${cuisine.search}`)}
                       iconType={cuisine.type}
                       selected={selectedFilters.cuisine.includes(cuisine.search)}
                       onPress={() => handleCuisineToggle(cuisine.search)}
@@ -196,32 +197,32 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 </View>
 
                 {/* Fonctionnalités */}
-                <SectionTitle text="Fonctionnalités" />
+                <SectionTitle text={i18n.t('filters.features')} />
                 <View style={styles.filterGroup}>
                   <FilterOption
                     icon="local-shipping"
-                    text="Livraison gratuite"
+                    text={i18n.t('filters.featuresList.freeDelivery')}
                     iconType="MaterialIcons"
                     selected={selectedFilters.features.includes('free_delivery')}
                     onPress={() => handleFeatureToggle('free_delivery')}
                   />
                   <FilterOption
                     icon="schedule"
-                    text="Ouvert maintenant"
+                    text={i18n.t('filters.featuresList.openNow')}
                     iconType="MaterialIcons"
                     selected={selectedFilters.features.includes('open_now')}
                     onPress={() => handleFeatureToggle('open_now')}
                   />
                   <FilterOption
                     icon="local-offer"
-                    text="Offres spéciales"
+                    text={i18n.t('filters.featuresList.specialOffers')}
                     iconType="MaterialIcons"
                     selected={selectedFilters.features.includes('special_offers')}
                     onPress={() => handleFeatureToggle('special_offers')}
                   />
                   <FilterOption
                     icon="star"
-                    text="Nouveau restaurant"
+                    text={i18n.t('filters.featuresList.newRestaurant')}
                     iconType="MaterialIcons"
                     selected={selectedFilters.features.includes('new_restaurant')}
                     onPress={() => handleFeatureToggle('new_restaurant')}
@@ -231,7 +232,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
 
               <View style={styles.footer}>
                 <TouchableOpacity style={styles.applyButton} onPress={handleApplyFilters}>
-                  <Text style={styles.applyButtonText}>Appliquer les filtres</Text>
+                  <Text style={styles.applyButtonText}>{i18n.t('filters.apply')}</Text>
                 </TouchableOpacity>
               </View>
           </View>

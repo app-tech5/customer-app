@@ -12,6 +12,7 @@ import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
 import { colors, currency } from '../global'
+import i18n from '../i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const { height } = Dimensions.get('window')
@@ -177,13 +178,13 @@ export default function RestaurantDetailComponent({
                   color={colors.primary}
                   size={20}
                 />
-                <Text style={styles.deliveryDetailsTitle}>Delivery Fee Details</Text>
+                <Text style={styles.deliveryDetailsTitle}>{i18n.t('restaurant.deliveryFeeDetails')}</Text>
               </View>
 
               {restaurant.deliveryOptions ? (
                 <View style={styles.deliveryBreakdown}>
                   <View style={styles.feeRow}>
-                    <Text style={styles.feeLabel}>Fixed fee:</Text>
+                    <Text style={styles.feeLabel}>{i18n.t('restaurant.fixedFee')}</Text>
                     <Text style={styles.feeValue}>
                       {Number(restaurant.deliveryOptions.fixedFee || 0).toLocaleString('en', { style: 'currency', currency: currency })}
                     </Text>
@@ -192,7 +193,7 @@ export default function RestaurantDetailComponent({
                   {restaurant.distance && restaurant.deliveryOptions.distanceFee && (
                     <>
                       <View style={styles.feeRow}>
-                        <Text style={styles.feeLabel}>Base distance fee:</Text>
+                        <Text style={styles.feeLabel}>{i18n.t('restaurant.baseDistanceFee')}</Text>
                         <Text style={styles.feeValue}>
                           {Number(parseFloat(restaurant.deliveryOptions.distanceFee.base) || 0).toLocaleString('en', { style: 'currency', currency: currency })}
                         </Text>

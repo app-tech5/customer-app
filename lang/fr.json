@@ -57,7 +57,41 @@
     "locationActive": "Localisation active",
     "loading": "Chargement des résultats...",
     "searching": "Recherche",
-    "typeToSearch": "Tapez pour rechercher..."
+    "typeToSearch": "Tapez pour rechercher...",
+    "restaurantOrCity": "Rechercher un restaurant ou une ville",
+    "address": "Adresse",
+    "search": "Rechercher"
+  },
+  "filters": {
+    "title": "Filtres",
+    "reset": "Réinitialiser",
+    "sortBy": "Trier par",
+    "sort": {
+      "recommended": "Recommandé pour vous",
+      "mostPopular": "Les plus populaires",
+      "bestRated": "Mieux notés",
+      "fastDelivery": "Livraison rapide",
+      "bestDeals": "Meilleurs offres"
+    },
+    "maxDeliveryFee": "Frais de livraison maximum",
+    "priceRange": "Gamme de prix",
+    "cuisineType": "Type de cuisine",
+    "cuisine": {
+      "italian": "Italienne",
+      "american": "Américaine",
+      "asian": "Asiatique",
+      "french": "Française",
+      "vegetarian": "Végétarienne",
+      "bar": "Bar & Vin"
+    },
+    "features": "Fonctionnalités",
+    "featuresList": {
+      "freeDelivery": "Livraison gratuite",
+      "openNow": "Ouvert maintenant",
+      "specialOffers": "Offres spéciales",
+      "newRestaurant": "Nouveau restaurant"
+    },
+    "apply": "Appliquer les filtres"
   },
   "auth": {
     "welcome": "Bienvenue !",
@@ -109,11 +143,6 @@
       "discover": "Découvrir"
     }
   },
-  "search": {
-    "restaurantOrCity": "Rechercher un restaurant ou une ville",
-    "address": "Adresse",
-    "search": "Rechercher"
-  },
   "tabs": {
     "delivery": "Livraison",
     "pickup": "À emporter"
@@ -132,7 +161,14 @@
     "addToCart": "Ajouter au panier",
     "viewCart": "Voir le panier",
     "total": "Total",
-    "orderNow": "Commander"
+    "orderNow": "Commander",
+    "deliveryFeeDetails": "Détails des frais de livraison",
+    "fixedFee": "Frais fixes:",
+    "baseDistanceFee": "Frais de base distance:",
+    "distanceFee": "Distance: {distance}km × {rate}/km",
+    "freeDelivery": "Livraison gratuite disponible",
+    "totalDeliveryFee": "Total frais de livraison:",
+    "noDeliveryOptions": "Options de livraison non disponibles"
   },
   "menu": {
     "product": "Produit",

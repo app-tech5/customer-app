@@ -57,7 +57,41 @@
     "locationActive": "Location active",
     "loading": "Loading results...",
     "searching": "Searching",
-    "typeToSearch": "Type to search..."
+    "typeToSearch": "Type to search...",
+    "restaurantOrCity": "Search for a restaurant or city",
+    "address": "Address",
+    "search": "Search"
+  },
+  "filters": {
+    "title": "Filters",
+    "reset": "Reset",
+    "sortBy": "Sort by",
+    "sort": {
+      "recommended": "Recommended for you",
+      "mostPopular": "Most popular",
+      "bestRated": "Best rated",
+      "fastDelivery": "Fast delivery",
+      "bestDeals": "Best deals"
+    },
+    "maxDeliveryFee": "Maximum delivery fee",
+    "priceRange": "Price range",
+    "cuisineType": "Cuisine type",
+    "cuisine": {
+      "italian": "Italian",
+      "american": "American",
+      "asian": "Asian",
+      "french": "French",
+      "vegetarian": "Vegetarian",
+      "bar": "Bar & Wine"
+    },
+    "features": "Features",
+    "featuresList": {
+      "freeDelivery": "Free delivery",
+      "openNow": "Open now",
+      "specialOffers": "Special offers",
+      "newRestaurant": "New restaurant"
+    },
+    "apply": "Apply filters"
   },
   "auth": {
     "welcome": "Welcome!",
@@ -109,11 +143,6 @@
       "discover": "Discover"
     }
   },
-  "search": {
-    "restaurantOrCity": "Search for a restaurant or city",
-    "address": "Address",
-    "search": "Search"
-  },
   "tabs": {
     "delivery": "Delivery",
     "pickup": "Pickup"
@@ -136,7 +165,14 @@
     "deliveryTime": "min delivery",
     "collectTime": "min preparation",
     "unknownTime": "Time not specified",
-    "browseOffers": "Browse Offers"
+    "browseOffers": "Browse Offers",
+    "deliveryFeeDetails": "Delivery Fee Details",
+    "fixedFee": "Fixed fee:",
+    "baseDistanceFee": "Base distance fee:",
+    "distanceFee": "Distance: {distance}km × {rate}/km",
+    "freeDelivery": "Free delivery available",
+    "totalDeliveryFee": "Total delivery fee:",
+    "noDeliveryOptions": "Delivery options not available"
   },
   "menu": {
     "product": "Product",
