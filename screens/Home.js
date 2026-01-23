@@ -110,15 +110,65 @@ export default function Home({navigation}) {
     // Filtre par frais de livraison maximum
     if (appliedFilters.maxDeliveryFee) {
       filtered = filtered.filter(restaurant => {
-        // Calculer les frais de livraison basés sur la vraie distance
-        let deliveryFee = 2.5 // Frais de base
-
-        if (restaurant.distance) {
-          // Frais progressifs selon la distance : 0.5€ par km
-          deliveryFee = Math.max(1, Math.min(10, 1 + (restaurant.distance * 0.5)))
+        // Si pas de distance calculée, rejeter le restaurant (trop loin ou pas de GPS)
+        if (!restaurant.distance) {
+          console.log(`❌ Restaurant ${restaurant.name}: pas de distance calculée, rejeté`)
+          return false
         }
 
-        return deliveryFee <= appliedFilters.maxDeliveryFee
+        // Si restaurant trop loin (> 50km), le rejeter automatiquement
+        if (restaurant.distance > 50) {
+          console.log(`❌ Restaurant ${restaurant.name}: ${restaurant.distance.toFixed(1)}km, trop loin, rejeté`)
+          return false
+        }
+
+        // DEBUG: Montrer exactement pourquoi ce restaurant passe le filtre
+        console.log(`🔍 DEBUG Restaurant: ${restaurant.name}`)
+        console.log(`   - Distance calculée: ${restaurant.distance}`)
+        console.log(`   - DeliveryOptions existe: ${!!restaurant.deliveryOptions}`)
+        if (restaurant.deliveryOptions) {
+          console.log(`   - FixedFee: ${restaurant.deliveryOptions.fixedFee}`)
+          console.log(`   - DistanceFee:`, restaurant.deliveryOptions.distanceFee)
+          console.log(`   - IsFreeDelivery:`, restaurant.deliveryOptions.isFreeDelivery)
+        }
+
+        // Utiliser les vraies données deliveryOptions de la DB
+        let deliveryFee = 2.5 // Frais par défaut si pas de deliveryOptions
+        let calculationSteps = ['Frais par défaut: 2.50€']
+
+        if (restaurant.deliveryOptions) {
+          const options = restaurant.deliveryOptions
+          deliveryFee = options.fixedFee || 0
+          calculationSteps = [`FixedFee: ${deliveryFee.toFixed(2)}€`]
+
+          // Ajouter les frais de distance si disponible
+          if (restaurant.distance && options.distanceFee) {
+            const baseDistanceFee = parseFloat(options.distanceFee.base) || 0
+            const perKmFee = parseFloat(options.distanceFee.perKm) || 0
+            const distanceFee = restaurant.distance * perKmFee
+
+            calculationSteps.push(`Base distance: ${baseDistanceFee.toFixed(2)}€`)
+            calculationSteps.push(`Distance: ${restaurant.distance.toFixed(1)}km × ${perKmFee.toFixed(2)}€ = ${distanceFee.toFixed(2)}€`)
+
+            deliveryFee += baseDistanceFee + distanceFee
+            calculationSteps.push(`Total calculé: ${deliveryFee.toFixed(2)}€`)
+          } else {
+            calculationSteps.push('Pas de frais de distance (distance ou distanceFee manquant)')
+          }
+
+          // Vérifier livraison gratuite
+          if (options.isFreeDelivery && options.isFreeDelivery.enabled) {
+            deliveryFee = 0
+            calculationSteps.push('LIVRAISON GRATUITE !')
+          }
+        }
+
+        const kept = deliveryFee <= appliedFilters.maxDeliveryFee
+        console.log(`💰 Calcul détaillé pour ${restaurant.name}:`)
+        calculationSteps.forEach(step => console.log(`   ${step}`))
+        console.log(`   Final: ${deliveryFee.toFixed(2)}€ ≤ ${appliedFilters.maxDeliveryFee}€ = ${kept}`)
+
+        return kept
       })
     }
 
@@ -129,6 +179,19 @@ export default function Home({navigation}) {
         const priceLevel = priceString.length // $ = 1, $$ = 2, $$$ = 3, $$$$ = 4
         const priceLabels = {budget: 1, moderate: 2, expensive: 3, luxury: 4}
         return appliedFilters.priceRange.some(range => priceLabels[range] === priceLevel)
+      })
+    }
+
+    // Filtre par type de cuisine
+    if (appliedFilters.cuisine && appliedFilters.cuisine.length > 0) {
+      filtered = filtered.filter(restaurant => {
+        const restaurantCategories = restaurant.categories || []
+        return appliedFilters.cuisine.some(cuisine =>
+          restaurantCategories.some(cat =>
+            cat.title?.toLowerCase().includes(cuisine) ||
+            cat.alias?.toLowerCase().includes(cuisine)
+          )
+        )
       })
     }
 
@@ -172,14 +235,22 @@ export default function Home({navigation}) {
     if (!restaurantData || restaurantData.length === 0) return []
 
     // Ajouter la distance calculée à chaque restaurant
-    const restaurantsWithDistance = restaurantData.map(restaurant => ({
-      ...restaurant,
-      distance: userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude ?
+    const restaurantsWithDistance = restaurantData.map(restaurant => {
+      const distance = userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude ?
         getDistanceFromLatLonInKm(
           userLocation.lat, userLocation.lng,
           parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
         ) : null
-    }))
+
+      if (distance > 100) {
+        console.log(`🌍 Restaurant lointain: ${restaurant.name} - ${distance.toFixed(1)}km de Paris`)
+      }
+
+      return {
+        ...restaurant,
+        distance
+      }
+    })
 
     // Appliquer les filtres aux données
     const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantsWithDistance) : restaurantsWithDistance
