@@ -11,7 +11,7 @@ import {
 import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
-import { colors } from '../global'
+import { colors, currency } from '../global'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const { height } = Dimensions.get('window')
@@ -168,7 +168,7 @@ export default function RestaurantDetailComponent({
                   <View style={styles.feeRow}>
                     <Text style={styles.feeLabel}>Fixed fee:</Text>
                     <Text style={styles.feeValue}>
-                      {Number(restaurant.deliveryOptions.fixedFee || 0).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                      {Number(restaurant.deliveryOptions.fixedFee || 0).toLocaleString('en', { style: 'currency', currency: currency })}
                     </Text>
                   </View>
 
@@ -177,7 +177,7 @@ export default function RestaurantDetailComponent({
                       <View style={styles.feeRow}>
                         <Text style={styles.feeLabel}>Base distance fee:</Text>
                         <Text style={styles.feeValue}>
-                          {Number(parseFloat(restaurant.deliveryOptions.distanceFee.base) || 0).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                          {Number(parseFloat(restaurant.deliveryOptions.distanceFee.base) || 0).toLocaleString('en', { style: 'currency', currency: currency })}
                         </Text>
                       </View>
 
@@ -186,7 +186,7 @@ export default function RestaurantDetailComponent({
                           Distance: {restaurant.distance.toFixed(1)}km × {parseFloat(restaurant.deliveryOptions.distanceFee.perKm) || 0}/km
                         </Text>
                         <Text style={styles.feeValue}>
-                          {Number((restaurant.distance * parseFloat(restaurant.deliveryOptions.distanceFee.perKm)) || 0).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                          {Number((restaurant.distance * parseFloat(restaurant.deliveryOptions.distanceFee.perKm)) || 0).toLocaleString('en', { style: 'currency', currency: currency })}
                         </Text>
                       </View>
                     </>
@@ -204,7 +204,7 @@ export default function RestaurantDetailComponent({
                   <View style={[styles.feeRow, styles.totalRow]}>
                     <Text style={styles.totalLabel}>Total delivery fee:</Text>
                     <Text style={styles.totalValue}>
-                      {Number(deliveryFee).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                      {Number(deliveryFee).toLocaleString('en', { style: 'currency', currency: currency })}
                     </Text>
                   </View>
                 </View>

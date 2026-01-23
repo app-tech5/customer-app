@@ -1,7 +1,7 @@
 import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView, Platform} from 'react-native'
 import React, {useState} from 'react'
 import { AntDesign, Ionicons, FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons} from '@expo/vector-icons'
-import { colors } from '../global'
+import { colors, currency } from '../global'
 
 export default function FilterModal({visible, setVisible, onApplyFilters}) {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -139,7 +139,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                           styles.deliveryFeeText,
                           selectedFilters.maxDeliveryFee === fee && styles.deliveryFeeTextSelected
                         ]}>
-                          {fee === 20 ? `${fee}+ €` : `${fee} €`}
+                          {fee === 20 ? `${fee}+ ${currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '$'}` : `${fee} ${currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '$'}`}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -150,10 +150,10 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 <SectionTitle text="Gamme de prix" />
                 <View style={styles.priceRangeContainer}>
                   {[
-                    {label: '€', value: 'budget'},
-                    {label: '€€', value: 'moderate'},
-                    {label: '€€€', value: 'expensive'},
-                    {label: '€€€€', value: 'luxury'}
+                    {label: '$', value: 'budget'},
+                    {label: '$$', value: 'moderate'},
+                    {label: '$$$', value: 'expensive'},
+                    {label: '$$$$', value: 'luxury'}
                   ].map((range) => (
                     <TouchableOpacity
                       key={range.value}
