@@ -60,9 +60,20 @@ export default function Home({navigation}) {
     // Filtre par frais de livraison maximum
     if (appliedFilters.maxDeliveryFee) {
       filtered = filtered.filter(restaurant => {
-        // Simulation : frais de livraison entre 1€ et 5€ basé sur la distance
-        const simulatedFee = restaurant.distance ? Math.max(1, Math.min(5, restaurant.distance * 0.5)) : 2.5
+        // Simulation simple : frais de livraison fixes pour l'instant
+        // TODO: Calculer la vraie distance depuis la position utilisateur
+        const simulatedFee = 2.5 // Frais par défaut pour tous
         return simulatedFee <= appliedFilters.maxDeliveryFee
+      })
+    }
+
+    // Filtre par gamme de prix
+    if (appliedFilters.priceRange && appliedFilters.priceRange.length > 0) {
+      filtered = filtered.filter(restaurant => {
+        const priceString = restaurant.price || '$' // Valeur par défaut
+        const priceLevel = priceString.length // $ = 1, $$ = 2, $$$ = 3, $$$$ = 4
+        const priceLabels = {budget: 1, moderate: 2, expensive: 3, luxury: 4}
+        return appliedFilters.priceRange.some(range => priceLabels[range] === priceLevel)
       })
     }
 
