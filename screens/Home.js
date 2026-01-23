@@ -55,90 +55,30 @@ export default function Home({navigation}) {
 
   // Fonction pour appliquer les filtres aux restaurants
   const applyFiltersToRestaurants = (restaurants) => {
-    if (!appliedFilters) return restaurants
-
-    let filtered = [...restaurants]
-
-    // Filtre par frais de livraison maximum
-    if (appliedFilters.maxDeliveryFee) {
-      filtered = filtered.filter(restaurant =>
-        !restaurant.deliveryFee || parseFloat(restaurant.deliveryFee) <= appliedFilters.maxDeliveryFee
-      )
-    }
-
-    // Filtre par gamme de prix
-    if (appliedFilters.priceRange && appliedFilters.priceRange.length > 0) {
-      filtered = filtered.filter(restaurant => {
-        const priceLevel = restaurant.priceLevel || restaurant.price_range || 2
-        const priceLabels = {budget: 1, moderate: 2, expensive: 3, luxury: 4}
-        return appliedFilters.priceRange.some(range => priceLabels[range] === priceLevel)
-      })
-    }
-
-    // Filtre par type de cuisine
-    if (appliedFilters.cuisine && appliedFilters.cuisine.length > 0) {
-      filtered = filtered.filter(restaurant => {
-        const restaurantCategories = restaurant.categories || []
-        return appliedFilters.cuisine.some(cuisine =>
-          restaurantCategories.some(cat =>
-            cat.title?.toLowerCase().includes(cuisine) ||
-            cat.name?.toLowerCase().includes(cuisine)
-          )
-        )
-      })
-    }
-
-    // Filtre par fonctionnalités
-    if (appliedFilters.features && appliedFilters.features.length > 0) {
-      filtered = filtered.filter(restaurant => {
-        return appliedFilters.features.every(feature => {
-          switch (feature) {
-            case 'free_delivery':
-              return !restaurant.deliveryFee || parseFloat(restaurant.deliveryFee) === 0
-            case 'open_now':
-              return restaurant.isOpen !== false // Par défaut considéré ouvert
-            case 'special_offers':
-              return allPromotions?.some(promotion =>
-                promotion.restaurantId === restaurant.restaurantId &&
-                promotion.isActive
-              )
-            case 'new_restaurant':
-              return restaurant.isNew || false
-            default:
-              return true
-          }
-        })
-      })
-    }
-
-    return filtered
+    return restaurants
   }
 
   // Fonction pour trier les restaurants
   const sortRestaurants = (restaurants) => {
-    if (!appliedFilters?.sort) return restaurants
+    if (!appliedFilters?.sort) {
+      return restaurants
+    }
 
     const sorted = [...restaurants]
-    switch (appliedFilters.sort) {
-      case 'popular':
-        return sorted.sort((a, b) => (parseInt(b.review_count) || 0) - (parseInt(a.review_count) || 0))
-      case 'rating':
-        return sorted.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
-      case 'delivery':
-        return sorted.sort((a, b) => (parseInt(a.collectTime) || 0) - (parseInt(b.collectTime) || 0))
-      case 'deals':
-        return sorted.sort((a, b) => {
-          const aHasDeals = allPromotions?.some(p => p.restaurantId === a.restaurantId && p.isActive) ? 1 : 0
-          const bHasDeals = allPromotions?.some(p => p.restaurantId === b.restaurantId && p.isActive) ? 1 : 0
-          return bHasDeals - aHasDeals
-        })
-      case 'picked':
-      default:
-        return sorted // Tri par défaut (recommandé)
+
+    if (appliedFilters.sort === 'popular') {
+      return sorted.sort((a, b) => {
+        const aCount = parseInt(a.review_count) || 0
+        const bCount = parseInt(b.review_count) || 0
+        return bCount - aCount  // Tri décroissant : plus d'avis = mieux
+      })
     }
+
+    return restaurants
   }
 
   const handleApplyFilters = (filters) => {
+    console.log('🎯 Applying filters from modal:', filters)
     setAppliedFilters(filters)
   }
 
