@@ -178,7 +178,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 <View style={styles.filterGroup}>
                   {[
                     {icon: 'pizza', text: 'Italienne', search: 'italian', type: 'MaterialCommunityIcons'},
-                    {icon: 'hamburger', text: 'Américaine', search: 'american', type: 'FontAwesome'},
+                    {icon: 'cutlery', text: 'Américaine', search: 'american', type: 'FontAwesome'},
                     {icon: 'noodles', text: 'Asiatique', search: 'asian', type: 'MaterialCommunityIcons'},
                     {icon: 'food-variant', text: 'Française', search: 'french', type: 'MaterialCommunityIcons'},
                     {icon: 'leaf', text: 'Végétarienne', search: 'vegetarian', type: 'FontAwesome'},
