@@ -177,20 +177,20 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 <SectionTitle text="Type de cuisine" />
                 <View style={styles.filterGroup}>
                   {[
-                    {icon: 'pizza', text: 'Italienne', type: 'MaterialCommunityIcons'},
-                    {icon: 'hamburger', text: 'Américaine', type: 'FontAwesome'},
-                    {icon: 'noodles', text: 'Asiatique', type: 'MaterialCommunityIcons'},
-                    {icon: 'food-variant', text: 'Française', type: 'MaterialCommunityIcons'},
-                    {icon: 'leaf', text: 'Végétarienne', type: 'FontAwesome'},
-                    {icon: 'glass-wine', text: 'Bar & Vin', type: 'MaterialCommunityIcons'}
+                    {icon: 'pizza', text: 'Italienne', search: 'italian', type: 'MaterialCommunityIcons'},
+                    {icon: 'hamburger', text: 'Américaine', search: 'american', type: 'FontAwesome'},
+                    {icon: 'noodles', text: 'Asiatique', search: 'asian', type: 'MaterialCommunityIcons'},
+                    {icon: 'food-variant', text: 'Française', search: 'french', type: 'MaterialCommunityIcons'},
+                    {icon: 'leaf', text: 'Végétarienne', search: 'vegetarian', type: 'FontAwesome'},
+                    {icon: 'glass-wine', text: 'Bar & Vin', search: 'bar', type: 'MaterialCommunityIcons'}
                   ].map((cuisine) => (
                     <FilterOption
                       key={cuisine.text}
                       icon={cuisine.icon}
                       text={cuisine.text}
                       iconType={cuisine.type}
-                      selected={selectedFilters.cuisine.includes(cuisine.text.toLowerCase())}
-                      onPress={() => handleCuisineToggle(cuisine.text.toLowerCase())}
+                      selected={selectedFilters.cuisine.includes(cuisine.search)}
+                      onPress={() => handleCuisineToggle(cuisine.search)}
                     />
                   ))}
                 </View>

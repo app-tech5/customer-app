@@ -161,12 +161,29 @@ export default function Home({navigation}) {
     if (appliedFilters.cuisine && appliedFilters.cuisine.length > 0) {
       filtered = filtered.filter(restaurant => {
         const restaurantCategories = restaurant.categories || []
-        return appliedFilters.cuisine.some(cuisine =>
-          restaurantCategories.some(cat =>
-            cat.title?.toLowerCase().includes(cuisine) ||
-            cat.alias?.toLowerCase().includes(cuisine)
-          )
-        )
+        return appliedFilters.cuisine.some(cuisine => {
+          // Logique spéciale pour chaque type de cuisine
+          return restaurantCategories.some(cat => {
+            const title = cat.title?.toLowerCase()
+
+            switch (cuisine) {
+              case 'italian':
+                return title === 'italian' || title === 'pizza' || title === 'mediterranean'
+              case 'american':
+                return title === 'american' || title === 'fast food'
+              case 'asian':
+                return title === 'asian'
+              case 'french':
+                return title === 'french'
+              case 'vegetarian':
+                return title?.includes('vegetarian')
+              case 'bar':
+                return title?.includes('bar') || title?.includes('wine')
+              default:
+                return title?.includes(cuisine)
+            }
+          })
+        })
       })
     }
 
