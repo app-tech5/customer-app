@@ -55,7 +55,18 @@ export default function Home({navigation}) {
 
   // Fonction pour appliquer les filtres aux restaurants
   const applyFiltersToRestaurants = (restaurants) => {
-    return restaurants
+    let filtered = [...restaurants]
+
+    // Filtre par frais de livraison maximum
+    if (appliedFilters.maxDeliveryFee) {
+      filtered = filtered.filter(restaurant => {
+        // Simulation : frais de livraison entre 1€ et 5€ basé sur la distance
+        const simulatedFee = restaurant.distance ? Math.max(1, Math.min(5, restaurant.distance * 0.5)) : 2.5
+        return simulatedFee <= appliedFilters.maxDeliveryFee
+      })
+    }
+
+    return filtered
   }
 
   // Fonction pour trier les restaurants
