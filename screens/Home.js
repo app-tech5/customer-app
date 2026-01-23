@@ -205,6 +205,30 @@ export default function Home({navigation}) {
       })
     }
 
+    if (appliedFilters.sort === 'delivery') {
+      return sorted.sort((a, b) => {
+        // Calcul du delivery time total pour chaque restaurant
+        const prepTimeA = parseInt(a.collectTime) || 25
+        const prepTimeB = parseInt(b.collectTime) || 25
+
+        // Si on a la distance, calculer le temps de trajet
+        let totalTimeA = prepTimeA
+        let totalTimeB = prepTimeB
+
+        if (a.distance && a.distance > 0) {
+          const travelTimeA = (a.distance / 45) * 60 // 45 km/h
+          totalTimeA += travelTimeA
+        }
+
+        if (b.distance && b.distance > 0) {
+          const travelTimeB = (b.distance / 45) * 60 // 45 km/h
+          totalTimeB += travelTimeB
+        }
+
+        return totalTimeA - totalTimeB  // Tri croissant : plus petit temps total = mieux
+      })
+    }
+
     return restaurants
   }
 
