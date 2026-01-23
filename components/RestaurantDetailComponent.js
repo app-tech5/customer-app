@@ -151,15 +151,69 @@ export default function RestaurantDetailComponent({
               text={`Delivery time: ${deliveryTime.min}-${deliveryTime.max} min`}
             />
 
-            <RestaurantInfo
-              iconName="currency-usd"
-              iconType="material-community"
-              iconSize={22}
-              text={`Delivery fee: ${Number(deliveryFee).toLocaleString(
-                'en',
-                { style: 'currency', currency: 'USD' }
-              )}`}
-            />
+            {/* Détails des frais de livraison */}
+            <View style={styles.deliveryDetailsContainer}>
+              <View style={styles.deliveryDetailsHeader}>
+                <Icon
+                  name="information-outline"
+                  type="material-community"
+                  color={colors.primary}
+                  size={20}
+                />
+                <Text style={styles.deliveryDetailsTitle}>Delivery Fee Details</Text>
+              </View>
+
+              {restaurant.deliveryOptions ? (
+                <View style={styles.deliveryBreakdown}>
+                  <View style={styles.feeRow}>
+                    <Text style={styles.feeLabel}>Fixed fee:</Text>
+                    <Text style={styles.feeValue}>
+                      {Number(restaurant.deliveryOptions.fixedFee || 0).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                    </Text>
+                  </View>
+
+                  {restaurant.distance && restaurant.deliveryOptions.distanceFee && (
+                    <>
+                      <View style={styles.feeRow}>
+                        <Text style={styles.feeLabel}>Base distance fee:</Text>
+                        <Text style={styles.feeValue}>
+                          {Number(parseFloat(restaurant.deliveryOptions.distanceFee.base) || 0).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                        </Text>
+                      </View>
+
+                      <View style={styles.feeRow}>
+                        <Text style={styles.feeLabel}>
+                          Distance: {restaurant.distance.toFixed(1)}km × {parseFloat(restaurant.deliveryOptions.distanceFee.perKm) || 0}/km
+                        </Text>
+                        <Text style={styles.feeValue}>
+                          {Number((restaurant.distance * parseFloat(restaurant.deliveryOptions.distanceFee.perKm)) || 0).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+
+                  {restaurant.deliveryOptions.isFreeDelivery?.enabled && (
+                    <View style={styles.freeDeliveryRow}>
+                      <Icon name="check-circle" type="material-community" color="#4CAF50" size={16} />
+                      <Text style={styles.freeDeliveryText}>Free delivery available</Text>
+                    </View>
+                  )}
+
+                  <Divider style={styles.feeDivider} />
+
+                  <View style={[styles.feeRow, styles.totalRow]}>
+                    <Text style={styles.totalLabel}>Total delivery fee:</Text>
+                    <Text style={styles.totalValue}>
+                      {Number(deliveryFee).toLocaleString('en', { style: 'currency', currency: 'USD' })}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.noDeliveryOptions}>
+                  Delivery options not available
+                </Text>
+              )}
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -240,5 +294,98 @@ const styles = StyleSheet.create({
 
   divider: {
     marginHorizontal: 20
+  },
+
+  // Styles pour les détails des frais de livraison
+  deliveryDetailsContainer: {
+    marginHorizontal: 20,
+    marginVertical: 10,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border.light
+  },
+
+  deliveryDetailsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+
+  deliveryDetailsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginLeft: 8
+  },
+
+  deliveryBreakdown: {
+    gap: 8
+  },
+
+  feeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4
+  },
+
+  feeLabel: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    flex: 1
+  },
+
+  feeValue: {
+    fontSize: 14,
+    color: colors.text.primary,
+    fontWeight: '500'
+  },
+
+  freeDeliveryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    backgroundColor: '#E8F5E8',
+    borderRadius: 6,
+    paddingHorizontal: 8
+  },
+
+  freeDeliveryText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '600',
+    marginLeft: 6
+  },
+
+  feeDivider: {
+    marginVertical: 8,
+    backgroundColor: colors.border.medium
+  },
+
+  totalRow: {
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.medium
+  },
+
+  totalLabel: {
+    fontSize: 16,
+    color: colors.text.primary,
+    fontWeight: '600'
+  },
+
+  totalValue: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '700'
+  },
+
+  noDeliveryOptions: {
+    fontSize: 14,
+    color: colors.text.muted,
+    textAlign: 'center',
+    paddingVertical: 8
   }
 })
