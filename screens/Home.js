@@ -74,6 +74,14 @@ export default function Home({navigation}) {
       })
     }
 
+    if (appliedFilters.sort === 'rating') {
+      return sorted.sort((a, b) => {
+        const aRating = parseFloat(a.rating) || 0
+        const bRating = parseFloat(b.rating) || 0
+        return bRating - aRating  // Tri décroissant : meilleur rating = mieux
+      })
+    }
+
     return restaurants
   }
 
