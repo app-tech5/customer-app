@@ -114,9 +114,13 @@ export default function Home({navigation}) {
     }
 
     // 2. Section "Les mieux notés" - Restaurants avec rating >= 4.5
-    const topRated = sortedData
+    let topRated = sortedData
       .filter(restaurant => restaurant.rating && parseFloat(restaurant.rating) >= 4.5)
-      .sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0))
+
+    // Ne trier que si aucun tri global n'est appliqué
+    if (!appliedFilters?.sort) {
+      topRated = topRated.sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0))
+    }
 
     if (topRated.length >= 2) {
       sections.push({
@@ -129,9 +133,13 @@ export default function Home({navigation}) {
     }
 
     // 3. Section "Cuisine rapide" - Restaurants avec collectTime <= 25 min (moyenne 29min)
-    const quickCuisine = sortedData
+    let quickCuisine = sortedData
       .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 25)
-      .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
+
+    // Ne trier que si aucun tri global n'est appliqué
+    if (!appliedFilters?.sort) {
+      quickCuisine = quickCuisine.sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
+    }
 
     if (quickCuisine.length >= 2) {
       sections.push({
@@ -144,9 +152,13 @@ export default function Home({navigation}) {
     }
 
     // 4. Section "À emporter express" - Restaurants avec collectTime <= 20 min
-    const expressPickup = sortedData
+    let expressPickup = sortedData
       .filter(restaurant => restaurant.collectTime && parseInt(restaurant.collectTime) <= 20)
-      .sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
+
+    // Ne trier que si aucun tri global n'est appliqué
+    if (!appliedFilters?.sort) {
+      expressPickup = expressPickup.sort((a, b) => parseInt(a.collectTime || 0) - parseInt(b.collectTime || 0))
+    }
 
     if (expressPickup.length >= 2) {
       sections.push({
@@ -159,9 +171,13 @@ export default function Home({navigation}) {
     }
 
     // 5. Section "Les plus populaires" - Restaurants avec le plus d'avis (> 150 avis)
-    const mostPopular = sortedData
+    let mostPopular = sortedData
       .filter(restaurant => restaurant.review_count && parseInt(restaurant.review_count) > 150)
-      .sort((a, b) => parseInt(b.review_count || 0) - parseInt(a.review_count || 0))
+
+    // Ne trier que si aucun tri global n'est appliqué
+    if (!appliedFilters?.sort) {
+      mostPopular = mostPopular.sort((a, b) => parseInt(b.review_count || 0) - parseInt(a.review_count || 0))
+    }
 
     if (mostPopular.length >= 2) {
       sections.push({
