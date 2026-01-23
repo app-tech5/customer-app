@@ -47,8 +47,31 @@ export default function RestaurantDetailComponent({
   const openingTimeFormatted = formatTime(openingTime)
   const closingTimeFormatted = formatTime(closingTime)
 
-  // Calcul des frais de livraison pour ce restaurant
-  const deliveryFee = deliverySettings?.fixedDeliveryFee || 2.99
+  // Calcul des frais de livraison basé sur les deliveryOptions du restaurant
+  const calculateDeliveryFee = () => {
+    if (!restaurant.deliveryOptions) {
+      return 2.99 // Frais par défaut si pas d'options
+    }
+
+    const options = restaurant.deliveryOptions
+    let fee = options.fixedFee || 0
+
+    // Si on a une distance et des frais par km, ajouter les frais de distance
+    if (restaurant.distance && options.distanceFee) {
+      const baseDistanceFee = parseFloat(options.distanceFee.base) || 0
+      const perKmFee = parseFloat(options.distanceFee.perKm) || 0
+      fee += baseDistanceFee + (restaurant.distance * perKmFee)
+    }
+
+    // Livraison gratuite ?
+    if (options.isFreeDelivery && options.isFreeDelivery.enabled) {
+      return 0
+    }
+
+    return fee
+  }
+
+  const deliveryFee = calculateDeliveryFee()
 
   const restaurantDescription =
     description && description.trim() !== ''
