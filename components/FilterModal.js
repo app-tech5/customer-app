@@ -54,13 +54,18 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
   }
 
   const handleResetFilters = () => {
-    setSelectedFilters({
+    const resetFilters = {
       sort: null,
       maxDeliveryFee: 15,
       priceRange: [],
       cuisine: [],
       features: []
-    })
+    }
+    setSelectedFilters(resetFilters)
+    if (onApplyFilters) {
+      onApplyFilters(resetFilters)  // Appliquer les filtres remis à zéro
+    }
+    setVisible(false)  // Fermer le modal après reset
   }
 
   return (
