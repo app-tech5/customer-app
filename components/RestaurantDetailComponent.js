@@ -20,7 +20,8 @@ export default function RestaurantDetailComponent({
   restaurant,
   visible,
   setVisible,
-  deliveryTime
+  deliveryTime,
+  distance = null
 }) {
   const { deliverySettings } = useDeliverySettings()
 
@@ -49,25 +50,41 @@ export default function RestaurantDetailComponent({
 
   // Calcul des frais de livraison basé sur les deliveryOptions du restaurant
   const calculateDeliveryFee = () => {
+    console.log('🧾 Calculating delivery fee for:', restaurant.name)
+    console.log('📦 deliveryOptions:', restaurant.deliveryOptions)
+    console.log('📏 distance:', restaurant.distance)
+
     if (!restaurant.deliveryOptions) {
+      console.log('⚠️ No deliveryOptions, using default 2.99€')
       return 2.99 // Frais par défaut si pas d'options
     }
 
     const options = restaurant.deliveryOptions
     let fee = options.fixedFee || 0
+    console.log('💰 Starting with fixedFee:', fee)
 
     // Si on a une distance et des frais par km, ajouter les frais de distance
     if (restaurant.distance && options.distanceFee) {
       const baseDistanceFee = parseFloat(options.distanceFee.base) || 0
       const perKmFee = parseFloat(options.distanceFee.perKm) || 0
-      fee += baseDistanceFee + (restaurant.distance * perKmFee)
+      const distanceFee = restaurant.distance * perKmFee
+      fee += baseDistanceFee + distanceFee
+      console.log('📏 Adding distance fees:', baseDistanceFee, '+', distanceFee, '= total distance fee:', baseDistanceFee + distanceFee)
     }
 
     // Livraison gratuite ?
     if (options.isFreeDelivery && options.isFreeDelivery.enabled) {
+      console.log('🎁 FREE DELIVERY enabled, returning 0€')
       return 0
     }
 
+    // Simulation : livraison gratuite pour restaurants très proches (< 2km)
+    if (distance && distance < 2) {
+      console.log('🎁 FREE DELIVERY by proximity (< 2km), returning 0€')
+      return 0
+    }
+
+    console.log('💸 Final delivery fee:', fee)
     return fee
   }
 
