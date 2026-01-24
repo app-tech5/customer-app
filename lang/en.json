@@ -263,7 +263,40 @@
     "total": "Total",
     "estimatedArrival": "Estimated arrival",
     "refresh": "Refresh Status",
-    "notFound": "Order not found"
+    "notFound": "Order not found",
+    "title": "My Orders",
+    "auth_required": "Sign in required",
+    "auth_required_subtitle": "Please sign in to view your orders",
+    "error": {
+      "fetch_failed": "Failed to load orders",
+      "network_error": "Network error. Please check your connection."
+    },
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "preparing": "Preparing",
+      "out_for_delivery": "Out for delivery",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "empty": {
+      "no_orders": "No orders yet",
+      "no_orders_subtitle": "Your orders will appear here once you place them",
+      "no_orders_filter": "No orders found",
+      "no_orders_filter_subtitle": "Try changing your filter to see more orders"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "days_ago": "days ago"
+    },
+    "yourOrders": "Your Orders",
+    "total": "Total",
+    "completed": "Completed",
+    "active": "Active",
+    "justNow": "Just now",
+    "ago": "ago",
+    "unknown_restaurant": "Unknown Restaurant"
   },
   "profile": {
     "title": "Profile",

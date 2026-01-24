@@ -261,7 +261,40 @@
     "total": "Total",
     "estimatedArrival": "Arrivée estimée",
     "refresh": "Actualiser le statut",
-    "notFound": "Commande introuvable"
+    "notFound": "Commande introuvable",
+    "title": "Mes Commandes",
+    "auth_required": "Connexion requise",
+    "auth_required_subtitle": "Veuillez vous connecter pour voir vos commandes",
+    "error": {
+      "fetch_failed": "Échec du chargement des commandes",
+      "network_error": "Erreur réseau. Vérifiez votre connexion."
+    },
+    "filters": {
+      "all": "Toutes",
+      "pending": "En attente",
+      "preparing": "En préparation",
+      "out_for_delivery": "En livraison",
+      "delivered": "Livrée",
+      "cancelled": "Annulée"
+    },
+    "empty": {
+      "no_orders": "Aucune commande",
+      "no_orders_subtitle": "Vos commandes apparaîtront ici une fois que vous en passerez",
+      "no_orders_filter": "Aucune commande trouvée",
+      "no_orders_filter_subtitle": "Essayez de changer votre filtre pour voir plus de commandes"
+    },
+    "time": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "days_ago": "jours"
+    },
+    "yourOrders": "Vos Commandes",
+    "total": "Total",
+    "completed": "Terminées",
+    "active": "Actives",
+    "justNow": "À l'instant",
+    "ago": "",
+    "unknown_restaurant": "Restaurant inconnu"
   },
   "profile": {
     "title": "Profil",
