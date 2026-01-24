@@ -253,6 +253,17 @@ class ApiClient {
     return await this.apiCall(`/resource/orders/${orderId}`);
   }
 
+  async updateOrderStatus(orderId, status) {
+    return await this.apiCall(`/resource/orders/${orderId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async cancelOrder(orderId) {
+    return await this.updateOrderStatus(orderId, 'cancelled');
+  }
+
   // Drivers
   async getDriverInfo(driverId) {
     return await this.apiCall(`/resource/drivers/${driverId}`);
@@ -573,6 +584,8 @@ export const getCategoriesFromRestaurant = (restaurantId) => api.getCategoriesFr
 export const searchRestaurantsByCategory = (categoryId) => api.searchRestaurantsByCategory(categoryId);
 export const getOrders = () => api.getOrders();
 export const getOrderById = (orderId) => api.getOrderById(orderId);
+export const updateOrderStatus = (orderId, status) => api.updateOrderStatus(orderId, status);
+export const cancelOrder = (orderId) => api.cancelOrder(orderId);
 export const getSettings = () => api.getSettings();
 export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const userInfos = (userId) => api.getUserInfo(userId);

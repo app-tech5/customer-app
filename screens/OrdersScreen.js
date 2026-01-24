@@ -1,7 +1,8 @@
-import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native'
+import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { getOrders } from '../api'
+import { useDispatch } from 'react-redux'
+import { getOrders, cancelOrder } from '../api'
 import i18n from '../i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
@@ -13,7 +14,10 @@ export default function OrdersScreen({ navigation }) {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState(null)
+  const [sortBy, setSortBy] = useState('date_desc') // date_desc, date_asc, amount_desc, amount_asc, restaurant, status
+  const [showSortMenu, setShowSortMenu] = useState(false)
   const { currency } = useSettings()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     loadOrders()
@@ -41,10 +45,8 @@ export default function OrdersScreen({ navigation }) {
 
       const ordersData = await getOrders()
 
-      // Trier par date décroissante (plus récent en premier)
-      const sortedOrders = ordersData.sort((a, b) =>
-        new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
-      )
+      // Appliquer le tri sélectionné
+      const sortedOrders = sortOrders(ordersData, sortBy)
 
       setOrders(sortedOrders)
     } catch (err) {
@@ -52,6 +54,223 @@ export default function OrdersScreen({ navigation }) {
       setError(i18n.t('order.loadingError', 'Error loading orders'))
     } finally {
       setLoader(false)
+    }
+  }
+
+  const handleReorder = async (order) => {
+    try {
+      // Vérifier que la commande a des items
+      if (!order.items || order.items.length === 0) {
+        Alert.alert(
+          i18n.t('order.reorderError', 'Reorder Error'),
+          i18n.t('order.noItemsToReorder', 'No items to reorder')
+        )
+        return
+      }
+
+      // Demander confirmation à l'utilisateur
+      Alert.alert(
+        i18n.t('order.confirmReorder', 'Confirm Reorder'),
+        i18n.t('order.reorderMessage', 'This will add all items from this order to your cart. Continue?'),
+        [
+          {
+            text: i18n.t('common.cancel', 'Cancel'),
+            style: 'cancel'
+          },
+          {
+            text: i18n.t('order.confirm', 'Confirm'),
+            onPress: () => proceedWithReorder(order)
+          }
+        ]
+      )
+    } catch (error) {
+      console.error('Error reordering:', error)
+      Alert.alert(
+        i18n.t('order.reorderError', 'Reorder Error'),
+        i18n.t('order.reorderFailed', 'Failed to reorder items')
+      )
+    }
+  }
+
+  const proceedWithReorder = (order) => {
+    try {
+      // Transformer les items de commande en items de panier
+      const cartItems = order.items.map(item => {
+        // Créer l'item de base pour le panier
+        const cartItem = {
+          id: item.item?._id || item.item || item._id,
+          name: item.name || item.item?.name || 'Unknown Item',
+          price: item.price || item.item?.price || 0,
+          image: item.image || item.item?.image || '',
+          restaurantName: order.restaurant?.name || order.restaurantName || 'Unknown Restaurant',
+          restaurantImage: order.restaurant?.image || order.restaurantImage || '',
+          restaurant: order.restaurant || { name: order.restaurantName || 'Unknown Restaurant' },
+          uniqueKey: `${item.item?._id || item._id}_${Date.now()}_${Math.random()}`
+        }
+
+        // Ajouter les extras si présents
+        if (item.extras && item.extras.length > 0) {
+          cartItem.extras = item.extras
+          // Recalculer le prix total avec les extras
+          const extrasTotal = item.extras.reduce((sum, extra) => sum + (extra.price * extra.quantity), 0)
+          cartItem.totalPrice = (item.price || 0) + extrasTotal
+        }
+
+        // Ajouter les variants si présents
+        if (item.variants && item.variants.length > 0) {
+          cartItem.variants = item.variants
+          // Recalculer le prix total avec les variants
+          const variantsTotal = item.variants.reduce((sum, variant) => sum + variant.extra, 0)
+          cartItem.totalPrice = (cartItem.totalPrice || item.price || 0) + variantsTotal
+        }
+
+        // Prix total par défaut
+        if (!cartItem.totalPrice) {
+          cartItem.totalPrice = item.price || 0
+        }
+
+        return cartItem
+      })
+
+      // Ajouter tous les items au panier (en respectant les quantités)
+      order.items.forEach(orderItem => {
+        // Trouver l'item de panier correspondant
+        const cartItem = cartItems.find(ci => ci.id === (orderItem.item?._id || orderItem.item || orderItem._id))
+
+        if (cartItem) {
+          // Ajouter l'item autant de fois que sa quantité
+          const quantity = orderItem.quantity || 1
+          for (let i = 0; i < quantity; i++) {
+            dispatch({
+              type: 'ADD_TO_CART',
+              payload: cartItem
+            })
+          }
+        }
+      })
+
+      // Naviguer vers le restaurant ou afficher un message de succès
+      Alert.alert(
+        i18n.t('order.reorderSuccess', 'Items Added'),
+        i18n.t('order.reorderSuccessMessage', 'All items have been added to your cart. Would you like to view your cart or continue shopping?'),
+        [
+          {
+            text: i18n.t('order.viewCart', 'View Cart'),
+            onPress: () => navigation.navigate('CartScreen')
+          },
+          {
+            text: i18n.t('order.continueShopping', 'Continue'),
+            style: 'cancel'
+          }
+        ]
+      )
+    } catch (error) {
+      console.error('Error processing reorder:', error)
+      Alert.alert(
+        i18n.t('order.reorderError', 'Reorder Error'),
+        i18n.t('order.reorderFailed', 'Failed to add items to cart')
+      )
+    }
+  }
+
+  const handleCancelOrder = async (order) => {
+    try {
+      // Vérifier que la commande peut être annulée
+      if (order.status?.toLowerCase() !== 'pending') {
+        Alert.alert(
+          i18n.t('order.cancelError', 'Cancel Error'),
+          i18n.t('order.cannotCancel', 'This order cannot be cancelled')
+        )
+        return
+      }
+
+      // Demander confirmation
+      Alert.alert(
+        i18n.t('order.confirmCancel', 'Confirm Cancellation'),
+        i18n.t('order.cancelMessage', 'Are you sure you want to cancel this order? This action cannot be undone.'),
+        [
+          {
+            text: i18n.t('common.cancel', 'Cancel'),
+            style: 'cancel'
+          },
+          {
+            text: i18n.t('order.confirmCancelButton', 'Cancel Order'),
+            style: 'destructive',
+            onPress: () => proceedWithCancel(order)
+          }
+        ]
+      )
+    } catch (error) {
+      console.error('Error cancelling order:', error)
+      Alert.alert(
+        i18n.t('order.cancelError', 'Cancel Error'),
+        i18n.t('order.cancelFailed', 'Failed to cancel order')
+      )
+    }
+  }
+
+  const proceedWithCancel = async (order) => {
+    try {
+      const orderId = order.id || order._id
+      await cancelOrder(orderId)
+
+      // Mettre à jour la commande localement
+      setOrders(prevOrders =>
+        prevOrders.map(o =>
+          (o.id || o._id) === orderId
+            ? { ...o, status: 'cancelled' }
+            : o
+        )
+      )
+
+      Alert.alert(
+        i18n.t('order.cancelSuccess', 'Order Cancelled'),
+        i18n.t('order.cancelSuccessMessage', 'Your order has been successfully cancelled')
+      )
+    } catch (error) {
+      console.error('Error cancelling order:', error)
+      Alert.alert(
+        i18n.t('order.cancelError', 'Cancel Error'),
+        i18n.t('order.cancelFailed', 'Failed to cancel order')
+      )
+    }
+  }
+
+  const sortOrders = (orders, sortType) => {
+    const sorted = [...orders]
+
+    switch (sortType) {
+      case 'date_desc':
+        return sorted.sort((a, b) =>
+          new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
+        )
+      case 'date_asc':
+        return sorted.sort((a, b) =>
+          new Date(a.createdAt || a.date) - new Date(b.createdAt || b.date)
+        )
+      case 'amount_desc':
+        return sorted.sort((a, b) =>
+          (b.totalPrice || 0) - (a.totalPrice || 0)
+        )
+      case 'amount_asc':
+        return sorted.sort((a, b) =>
+          (a.totalPrice || 0) - (b.totalPrice || 0)
+        )
+      case 'restaurant':
+        return sorted.sort((a, b) => {
+          const restaurantA = (a.restaurant?.name || a.restaurantName || '').toLowerCase()
+          const restaurantB = (b.restaurant?.name || b.restaurantName || '').toLowerCase()
+          return restaurantA.localeCompare(restaurantB)
+        })
+      case 'status':
+        const statusOrder = { pending: 1, preparing: 2, out_for_delivery: 3, delivered: 4, cancelled: 5 }
+        return sorted.sort((a, b) => {
+          const statusA = statusOrder[a.status?.toLowerCase()] || 6
+          const statusB = statusOrder[b.status?.toLowerCase()] || 6
+          return statusA - statusB
+        })
+      default:
+        return sorted
     }
   }
 
@@ -104,6 +323,14 @@ export default function OrdersScreen({ navigation }) {
     return `${diffInWeeks}w ${i18n.t('order.ago', 'ago')}`
   }
 
+  const isNewOrder = (dateString) => {
+    if (!dateString) return false
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
+    return diffInHours < 24 // Considérer comme nouvelle si moins de 24h
+  }
+
   // Statistiques des commandes
   const orderStats = useMemo(() => {
     const stats = {
@@ -146,8 +373,9 @@ export default function OrdersScreen({ navigation }) {
       })
     }
 
-    return filtered
-  }, [orders, searchQuery, selectedStatus])
+    // Appliquer le tri sur les résultats filtrés
+    return sortOrders(filtered, sortBy)
+  }, [orders, searchQuery, selectedStatus, sortBy])
 
   const statusFilters = [
     { label: i18n.t('order.all', 'All'), value: null, count: orderStats.total },
@@ -157,6 +385,20 @@ export default function OrdersScreen({ navigation }) {
     { label: i18n.t('order.status.delivered', 'Delivered'), value: 'delivered', count: orderStats.delivered },
     { label: i18n.t('order.status.cancelled', 'Cancelled'), value: 'cancelled', count: orderStats.cancelled },
   ]
+
+  const sortOptions = [
+    { label: i18n.t('order.sort.dateDesc', 'Newest First'), value: 'date_desc' },
+    { label: i18n.t('order.sort.dateAsc', 'Oldest First'), value: 'date_asc' },
+    { label: i18n.t('order.sort.amountDesc', 'Highest Amount'), value: 'amount_desc' },
+    { label: i18n.t('order.sort.amountAsc', 'Lowest Amount'), value: 'amount_asc' },
+    { label: i18n.t('order.sort.restaurant', 'Restaurant A-Z'), value: 'restaurant' },
+    { label: i18n.t('order.sort.status', 'By Status'), value: 'status' },
+  ]
+
+  const getCurrentSortLabel = () => {
+    const option = sortOptions.find(opt => opt.value === sortBy)
+    return option ? option.label : i18n.t('order.sort.dateDesc', 'Newest First')
+  }
 
   const renderOrderItem = ({ item, index }) => (
     <View style={styles.orderItemContainer}>
@@ -176,9 +418,18 @@ export default function OrdersScreen({ navigation }) {
         {/* Header avec statut et date */}
         <View style={styles.orderHeader}>
           <View style={styles.orderLeft}>
-            <Text style={styles.orderId}>
-              {i18n.t('order.orderId', 'Order')} #{item.id || item._id}
-            </Text>
+            <View style={styles.orderIdContainer}>
+              <Text style={styles.orderId}>
+                {i18n.t('order.orderId', 'Order')} #{item.id || item._id}
+              </Text>
+              {isNewOrder(item.createdAt || item.date) && (
+                <View style={styles.newBadge}>
+                  <Text style={styles.newBadgeText}>
+                    {i18n.t('order.new', 'NEW')}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text style={styles.orderTime}>
               {formatTimeAgo(item.createdAt || item.date)}
             </Text>
@@ -229,6 +480,17 @@ export default function OrdersScreen({ navigation }) {
 
         {/* Actions */}
         <View style={styles.orderActions}>
+          {item.status?.toLowerCase() === 'pending' && (
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => handleCancelOrder(item)}
+            >
+              <Ionicons name="close-circle" size={16} color={colors.error} />
+              <Text style={styles.cancelButtonText}>
+                {i18n.t('order.cancel', 'Cancel')}
+              </Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.trackButton}
             onPress={() => navigation.navigate('OrderTracking', { order: item })}
@@ -241,10 +503,7 @@ export default function OrdersScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.reorderButton}
-            onPress={() => {
-              // Logique de re-commande
-              console.log('Reorder:', item.id)
-            }}
+            onPress={() => handleReorder(item)}
           >
             <Ionicons name="refresh" size={16} color={colors.primary} />
             <Text style={styles.reorderButtonText}>
@@ -343,22 +602,68 @@ export default function OrdersScreen({ navigation }) {
           {/* Statistiques */}
           <StatsHeader />
 
-          {/* Barre de recherche */}
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder={i18n.t('order.searchPlaceholder', 'Search by restaurant or order ID...')}
-              placeholderTextColor={colors.text.secondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-                <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
-              </TouchableOpacity>
-            )}
+          {/* Barre de recherche et tri */}
+          <View style={styles.searchSortContainer}>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder={i18n.t('order.searchPlaceholder', 'Search by restaurant or order ID...')}
+                placeholderTextColor={colors.text.secondary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                  <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={styles.sortButton}
+              onPress={() => setShowSortMenu(!showSortMenu)}
+            >
+              <Ionicons name="swap-vertical" size={20} color={colors.primary} />
+              <Text style={styles.sortButtonText}>
+                {getCurrentSortLabel()}
+              </Text>
+              <Ionicons
+                name={showSortMenu ? "chevron-up" : "chevron-down"}
+                size={16}
+                color={colors.primary}
+              />
+            </TouchableOpacity>
           </View>
+
+          {/* Menu de tri */}
+          {showSortMenu && (
+            <View style={styles.sortMenu}>
+              {sortOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.sortMenuItem,
+                    sortBy === option.value && styles.sortMenuItemActive
+                  ]}
+                  onPress={() => {
+                    setSortBy(option.value)
+                    setShowSortMenu(false)
+                  }}
+                >
+                  <Text style={[
+                    styles.sortMenuItemText,
+                    sortBy === option.value && styles.sortMenuItemTextActive
+                  ]}>
+                    {option.label}
+                  </Text>
+                  {sortBy === option.value && (
+                    <Ionicons name="checkmark" size={16} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
           {/* Filtres par statut */}
           <ScrollView
@@ -466,11 +771,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.primary,
-    marginHorizontal: 20,
-    marginBottom: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
@@ -493,6 +797,68 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
+  },
+  searchSortContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 16,
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    marginLeft: 12,
+  },
+  sortButtonText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '600',
+    marginHorizontal: 8,
+  },
+  sortMenu: {
+    backgroundColor: colors.background.primary,
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  sortMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  sortMenuItemActive: {
+    backgroundColor: colors.primary + '10',
+  },
+  sortMenuItemText: {
+    fontSize: 14,
+    color: colors.text.primary,
+    fontWeight: '500',
+  },
+  sortMenuItemTextActive: {
+    color: colors.primary,
+    fontWeight: '600',
   },
   filtersContainer: {
     marginBottom: 16,
@@ -621,6 +987,24 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 16,
   },
+  orderIdContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  newBadge: {
+    backgroundColor: colors.success,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  newBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.text.white,
+    letterSpacing: 0.5,
+  },
   orderLeft: {
     flex: 1,
   },
@@ -743,6 +1127,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text.white,
+    marginLeft: 6,
+  },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+    borderRadius: 12,
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.error,
+    marginRight: 6,
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.error,
     marginLeft: 6,
   },
   emptyContainer: {
