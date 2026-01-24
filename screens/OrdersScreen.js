@@ -16,7 +16,7 @@ export default function OrdersScreen({ navigation }) {
   const { currency } = useSettings()
 
   useEffect(() => {
-    loadOrders()
+    // loadOrders()
 
     // Configurer le header avec le bouton retour
     navigation.setOptions({
@@ -83,7 +83,7 @@ export default function OrdersScreen({ navigation }) {
 
     // Filtre par statut
     if (selectedStatus) {
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.status?.toLowerCase() === selectedStatus.toLowerCase()
       )
     }
@@ -119,6 +119,7 @@ export default function OrdersScreen({ navigation }) {
       }}
       activeOpacity={0.7}
     >
+
       <View style={styles.orderHeader}>
         <View style={styles.orderInfo}>
           <Text style={styles.orderId}>
@@ -147,7 +148,7 @@ export default function OrdersScreen({ navigation }) {
         </View>
 
         <View style={styles.orderDetails}>
-          <Text style={styles.itemCount}>
+          {/* <Text style={styles.itemCount}>
             {item.items?.length || 0} {item.items?.length === 1 ?
               i18n.t('order.item', 'item') :
               i18n.t('order.items', 'items')
@@ -157,11 +158,11 @@ export default function OrdersScreen({ navigation }) {
             {item.totalPrice && !isNaN(item.totalPrice) ?
               `${item.totalPrice.toFixed(2)}${currency.symbol}` : 'N/A'
             }
-          </Text>
+          </Text> */}
         </View>
       </View>
 
-      <View style={styles.orderActions}>
+      {/* <View style={styles.orderActions}>
         <TouchableOpacity
           style={styles.trackButton}
           onPress={() => {
@@ -187,7 +188,7 @@ export default function OrdersScreen({ navigation }) {
             {i18n.t('order.reorder', 'Reorder')}
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </TouchableOpacity>
   )
 
@@ -250,13 +251,13 @@ export default function OrdersScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       {orders.length === 0 ? (
         <EmptyState />
       ) : (
-        <>
+        <View> 
           {/* Barre de recherche */}
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
@@ -275,11 +276,11 @@ export default function OrdersScreen({ navigation }) {
           </View>
 
           {/* Filtres par statut */}
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.filtersContainer}
-            contentContainerStyle={styles.filtersContent}
+          contentContainerStyle={styles.filtersContent}
           >
             {statusFilters.map((filter) => (
               <TouchableOpacity
@@ -290,10 +291,12 @@ export default function OrdersScreen({ navigation }) {
                 ]}
                 onPress={() => setSelectedStatus(filter.value)}
               >
-                <Text style={[
+                <Text
+                style={[
                   styles.filterChipText,
                   selectedStatus === filter.value && styles.filterChipTextActive
-                ]}>
+                ]}
+                >
                   {filter.label}
                 </Text>
               </TouchableOpacity>
@@ -303,8 +306,8 @@ export default function OrdersScreen({ navigation }) {
           {/* Compteur de résultats */}
           <View style={styles.resultsHeader}>
             <Text style={styles.resultsText}>
-              {filteredOrders.length} {filteredOrders.length === 1 ? 
-                i18n.t('order.result', 'order') : 
+              {filteredOrders.length} {filteredOrders.length === 1 ?
+                i18n.t('order.result', 'order') :
                 i18n.t('order.results', 'orders')
               }
             </Text>
@@ -332,15 +335,15 @@ export default function OrdersScreen({ navigation }) {
               onRefresh={loadOrders}
             />
           )}
-        </>
+        </View>
       )}
-    </SafeAreaView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: colors.background.secondary,
   },
   searchContainer: {
@@ -368,8 +371,9 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   filtersContainer: {
-    maxHeight: 50,
+    // height: 67,
     marginBottom: 8,
+    // borderWidth: 1
   },
   filtersContent: {
     paddingHorizontal: 16,
@@ -475,7 +479,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   orderContent: {
-    marginBottom: 12,
+    // marginBottom: 12,
   },
   restaurantInfo: {
     flexDirection: 'row',
