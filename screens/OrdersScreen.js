@@ -16,7 +16,7 @@ export default function OrdersScreen({ navigation }) {
   const { currency } = useSettings()
 
   useEffect(() => {
-    // loadOrders()
+    loadOrders()
 
     // Configurer le header avec le bouton retour
     navigation.setOptions({
