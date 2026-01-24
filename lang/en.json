@@ -244,12 +244,26 @@
       "out_for_delivery": "Out for delivery",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "title": "Order Status"
     },
     "estimatedTime": "Estimated time",
     "minutes": "minutes",
+    "min": "min",
     "orderId": "Order",
-    "date": "Date"
+    "date": "Date",
+    "restaurant": "Restaurant",
+    "driver": "Delivery Driver",
+    "driverName": "Driver",
+    "deliveryAddress": "Delivery Address",
+    "details": "Order Details",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "tax": "Tax",
+    "total": "Total",
+    "estimatedArrival": "Estimated arrival",
+    "refresh": "Refresh Status",
+    "notFound": "Order not found"
   },
   "profile": {
     "title": "Profile",

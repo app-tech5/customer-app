@@ -11,6 +11,7 @@ import SearchResults from '../screens/SearchResults'
 import CategoryResults from '../screens/CategoryResults'
 import SearchScreen from '../screens/SearchScreen'
 import OrdersScreen from '../screens/OrdersScreen'
+import OrderTracking from '../screens/OrderTracking'
 import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
 import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
@@ -81,6 +82,11 @@ export function OrderNavigator() {
           name="OrderDetails"
           component={OrderDetails}
           options={{headerShown: false}}/>
+
+       <OrderStack.Screen 
+          name="OrderTracking"
+          component={OrderTracking}
+          options={{headerShown: true}}/>
 
        <OrderStack.Screen 
           name="Orders"

@@ -13,6 +13,7 @@ import AccountScreen from '../screens/AccountScreen';
 import Wallet from '../screens/Wallet';
 import OrdersScreen from '../screens/OrdersScreen';
 import MyOrdersScreen from '../screens/MyOrdersScreen';
+import OrderTracking from '../screens/OrderTracking'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo, AntDesign, Feather } from '@expo/vector-icons'
 import i18n from '../i18n';
 import { colors } from '../global';
@@ -138,6 +139,16 @@ export default function DrawerNavigator() {
                         size={size}
                     />
                 )
+            }}
+        />
+
+        <Drawer.Screen
+            name = "OrderTracking"
+            component={OrderTracking}
+            options={{
+                title: i18n.t('order.tracking', 'Track Order'),
+                headerShown: true,
+                drawerItemStyle: { display: 'none' } // Cacher du drawer mais accessible via navigation
             }}
         />
 

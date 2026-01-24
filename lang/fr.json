@@ -244,8 +244,24 @@
     },
     "estimatedTime": "Temps estimé",
     "minutes": "minutes",
+    "min": "min",
     "orderId": "Commande",
-    "date": "Date"
+    "date": "Date",
+    "status": {
+      "title": "Statut de la commande"
+    },
+    "restaurant": "Restaurant",
+    "driver": "Livreur",
+    "driverName": "Livreur",
+    "deliveryAddress": "Adresse de livraison",
+    "details": "Détails de la commande",
+    "subtotal": "Sous-total",
+    "deliveryFee": "Frais de livraison",
+    "tax": "TVA",
+    "total": "Total",
+    "estimatedArrival": "Arrivée estimée",
+    "refresh": "Actualiser le statut",
+    "notFound": "Commande introuvable"
   },
   "profile": {
     "title": "Profil",
