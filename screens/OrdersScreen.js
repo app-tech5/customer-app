@@ -156,7 +156,13 @@ export default function OrdersScreen({ navigation }) {
         [
           {
             text: i18n.t('order.viewCart', 'View Cart'),
-            onPress: () => navigation.navigate('CartScreen')
+            onPress: () => navigation.navigate('BottomTabs', {
+              screen: 'Cart',
+              params: {
+                screen: 'Carts',
+              },
+            })
+
           },
           {
             text: i18n.t('order.continueShopping', 'Continue'),
@@ -863,7 +869,7 @@ const styles = StyleSheet.create({
   filtersContainer: {
     marginBottom: 16,
     maxHeight: 60,
-    minHeight:60
+    minHeight: 60
   },
   filtersContent: {
     paddingHorizontal: 20,
@@ -885,7 +891,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
     height: 45
-     
+
   },
   filterChipActive: {
     backgroundColor: colors.primary,
