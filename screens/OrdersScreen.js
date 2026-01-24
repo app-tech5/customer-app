@@ -496,6 +496,8 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     marginBottom: 16,
+    maxHeight: 60,
+    minHeight:60
   },
   filtersContent: {
     paddingHorizontal: 20,
@@ -516,10 +518,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
+    height: 45
+     
   },
   filterChipActive: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
+    height: 45
   },
   filterChipText: {
     fontSize: 14,
