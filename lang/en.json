@@ -304,13 +304,30 @@
     "active": "Active",
     "justNow": "Just now",
     "ago": "ago",
+    "timeAgo": "ago",
     "new": "NEW",
-    "unknown_restaurant": "Unknown Restaurant"
+    "unknown_restaurant": "Unknown Restaurant",
+    "orderDetails": "Order Details",
+    "extras": "Extras",
+    "variants": "Variants",
+    "deliveryInfo": "Delivery Information",
+    "paymentInfo": "Payment Information",
+    "orderSummary": "Order Summary",
+    "deliveryType": "Delivery Type",
+    "paymentMethod": "Payment Method",
+    "paymentStatus": "Payment Status",
+    "transactionId": "Transaction ID",
+    "reorder": "Reorder"
   },
   "payment": {
     "credit_card": "Card",
     "mobile_money": "Mobile",
-    "cash": "Cash"
+    "cash": "Cash",
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed"
+    }
   },
   "delivery": {
     "delivery": "Delivery",

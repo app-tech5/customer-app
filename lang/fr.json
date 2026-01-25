@@ -36,7 +36,6 @@
     "browseByCategory": "Parcourir par catégorie",
     "restaurants": "Restaurants",
     "dishes": "Plats",
-    "results": "Résultats de recherche",
     "noResults": "Aucun résultat trouvé",
     "noResultsTitle": "Aucun restaurant trouvé",
     "noResultsSubtitle": "Essayez de modifier vos critères de recherche",
@@ -194,22 +193,14 @@
     "addItems": "Ajoutez des articles pour commencer",
     "quantity": "Quantité",
     "price": "Prix",
-    "subtotal": "Sous-total",
-    "deliveryFee": "Frais de livraison",
-    "tax": "TVA",
-    "total": "Total",
     "checkout": "Valider la commande",
     "clearCart": "Vider le panier",
     "confirmClear": "Vider tous les articles du panier ?",
     "cancel": "Annuler",
     "confirm": "Confirmer",
-    "checkout": "Commander",
     "viewCart": "Voir le panier",
     "item": "article",
     "itemsSuffix": "s",
-    "subtotal": "Sous-total",
-    "deliveryFee": "Frais de livraison",
-    "tax": "TVA",
     "free": "GRATUIT"
   },
   "order": {
@@ -255,9 +246,6 @@
     "min": "min",
     "orderId": "Commande",
     "date": "Date",
-    "status": {
-      "title": "Statut de la commande"
-    },
     "restaurant": "Restaurant",
     "driver": "Livreur",
     "driverName": "Livreur",
@@ -297,18 +285,34 @@
       "days_ago": "jours"
     },
     "yourOrders": "Vos Commandes",
-    "total": "Total",
     "completed": "Terminées",
     "active": "Actives",
     "justNow": "À l'instant",
     "ago": "",
+    "timeAgo": "Il y a",
     "new": "NOUVEAU",
-    "unknown_restaurant": "Restaurant inconnu"
+    "unknown_restaurant": "Restaurant inconnu",
+    "orderDetails": "Détails de la commande",
+    "extras": "Extras",
+    "variants": "Variantes",
+    "deliveryInfo": "Informations de livraison",
+    "paymentInfo": "Informations de paiement",
+    "orderSummary": "Résumé de la commande",
+    "deliveryType": "Type de livraison",
+    "paymentMethod": "Mode de paiement",
+    "paymentStatus": "Statut du paiement",
+    "transactionId": "ID de transaction",
+    "reorder": "Commander à nouveau"
   },
   "payment": {
     "credit_card": "Carte",
     "mobile_money": "Mobile",
-    "cash": "Espèces"
+    "cash": "Espèces",
+    "status": {
+      "pending": "En attente",
+      "paid": "Payé",
+      "failed": "Échoué"
+    }
   },
   "delivery": {
     "delivery": "Livraison",

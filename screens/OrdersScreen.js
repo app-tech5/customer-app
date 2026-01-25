@@ -18,17 +18,17 @@ export default function OrdersScreen({ navigation }) {
   useEffect(() => {
     loadOrders()
 
-    // Configurer le header avec le bouton retour
+    // Configurer le header avec le menu hamburger
     navigation.setOptions({
       title: i18n.t('order.allOrders', 'All Orders'),
       headerLeft: () => (
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.toggleDrawer()}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel="Open menu"
         >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          <Ionicons name="menu" size={24} color={colors.text.primary} />
         </TouchableOpacity>
       ),
     })
