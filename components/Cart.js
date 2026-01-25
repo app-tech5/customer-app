@@ -69,45 +69,92 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
         })
     }
 
-    const updateItemQuantity = (itemId, newQuantity) => {
+    const updateItemQuantity = async (itemId, newQuantity) => {
         if (newQuantity <= 0) {
-            // Supprimer l'item
-            dispatch({
-                type: 'REMOVE_FROM_CARD',
-                payload: itemId
-            })
+            // Supprimer tous les items de cet ID
+            const itemsToRemove = items.filter(item => item.id === itemId)
+            for (const item of itemsToRemove) {
+                dispatch({
+                    type: 'REMOVE_FROM_CARD',
+                    payload: itemId
+                })
+
+                // Synchroniser avec le backend
+                try {
+                    const { removeFromCart } = await import('../api')
+                    if (item.uniqueKey) {
+                        await removeFromCart(item.uniqueKey)
+                    }
+                } catch (error) {
+                    console.error('Error syncing remove from cart:', error)
+                }
+            }
         } else {
             // Mettre à jour la quantité
             const currentQuantity = items.filter(item => item.id === itemId).length
             if (newQuantity > currentQuantity) {
                 // Ajouter des items
                 const itemToAdd = items.find(item => item.id === itemId)
-                for (let i = currentQuantity; i < newQuantity; i++) {
-                    dispatch({
-                        type: 'ADD_TO_CART',
-                        payload: itemToAdd
-                    })
+                if (itemToAdd) {
+                    for (let i = currentQuantity; i < newQuantity; i++) {
+                        // Créer un nouvel item avec une uniqueKey différente
+                        const newItem = {
+                            ...itemToAdd,
+                            uniqueKey: `${itemToAdd.id}_${Date.now()}_${Math.random()}`
+                        }
+
+                        dispatch({
+                            type: 'ADD_TO_CART',
+                            payload: newItem
+                        })
+
+                        // Synchroniser avec le backend
+                        try {
+                            const { addToCart } = await import('../api')
+                            await addToCart(newItem)
+                        } catch (error) {
+                            console.error('Error syncing add to cart:', error)
+                        }
+                    }
                 }
             } else {
                 // Supprimer des items (garder seulement newQuantity items)
                 const itemsToRemove = items.filter(item => item.id === itemId).slice(newQuantity)
-                itemsToRemove.forEach(() => {
+                for (const item of itemsToRemove) {
                     dispatch({
                         type: 'REMOVE_FROM_CARD',
                         payload: itemId
                     })
-                })
+
+                    // Synchroniser avec le backend
+                    try {
+                        const { removeFromCart } = await import('../api')
+                        if (item.uniqueKey) {
+                            await removeFromCart(item.uniqueKey)
+                        }
+                    } catch (error) {
+                        console.error('Error syncing remove from cart:', error)
+                    }
+                }
             }
         }
     }
 
-    const removeAllItems = () => {
-        items.forEach(item => {
-            dispatch({
-                type: 'REMOVE_FROM_CARD',
-                payload: item.id
-            })
+    const removeAllItems = async () => {
+        // Vider le panier pour ce restaurant
+        dispatch({
+            type: 'CLEAR_RESTAURANT',
+            payload: restaurantName
         })
+
+        // Synchroniser avec le backend
+        try {
+            const { clearRestaurantFromCart } = await import('../api')
+            await clearRestaurantFromCart(restaurantName)
+        } catch (error) {
+            console.error('Error syncing clear restaurant:', error)
+        }
+
         closeModal()
     }
 

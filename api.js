@@ -532,6 +532,50 @@ class ApiClient {
     }
   }
 
+  // GESTION DU PANIER
+  async getCart() {
+    return await this.apiCall('/cart');
+  }
+
+  async addToCart(itemData) {
+    return await this.apiCall('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify(itemData),
+    });
+  }
+
+  async removeFromCart(uniqueKey) {
+    return await this.apiCall(`/cart/items/${uniqueKey}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateCartItem(uniqueKey, itemData) {
+    return await this.apiCall(`/cart/items/${uniqueKey}`, {
+      method: 'PUT',
+      body: JSON.stringify(itemData),
+    });
+  }
+
+  async clearRestaurantFromCart(restaurantName) {
+    return await this.apiCall(`/cart/restaurant/${encodeURIComponent(restaurantName)}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearCart() {
+    return await this.apiCall('/cart', {
+      method: 'DELETE',
+    });
+  }
+
+  async syncCart(localItems) {
+    return await this.apiCall('/cart/sync', {
+      method: 'POST',
+      body: JSON.stringify({ localItems }),
+    });
+  }
+
   // Méthodes utilitaires
   setToken(token) {
     this.token = token;
@@ -756,6 +800,15 @@ export const filterRestaurantPromotions = (allPromotions, restaurantId, allMenus
 };
 
 export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromotions(restaurantId);
+
+// GESTION DU PANIER
+export const getCart = () => api.getCart();
+export const addToCart = (itemData) => api.addToCart(itemData);
+export const removeFromCart = (uniqueKey) => api.removeFromCart(uniqueKey);
+export const updateCartItem = (uniqueKey, itemData) => api.updateCartItem(uniqueKey, itemData);
+export const clearRestaurantFromCart = (restaurantName) => api.clearRestaurantFromCart(restaurantName);
+export const clearCart = () => api.clearCart();
+export const syncCart = (localItems) => api.syncCart(localItems);
 
 // GESTION DES FAVORIS
 export const getFavorites = () => api.getFavorites();

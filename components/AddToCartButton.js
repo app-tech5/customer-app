@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Feather } from '@expo/vector-icons'
 import { colors } from '../global'
+import { addToCart as addToCartAPI } from '../api'
 
 export default function AddToCartButton({ food, restaurant, style }) {
 
@@ -62,7 +63,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
     ]).start(() => setIsPressed(false))
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!food || !restaurant) {
       console.warn('AddToCartButton: Missing food or restaurant data')
       return
@@ -82,25 +83,50 @@ export default function AddToCartButton({ food, restaurant, style }) {
     })
 
     animatePress()
+    const cartItem = {
+      ...food,
+      restaurantName: restaurant.name,
+      restaurantImage: restaurant.image,
+      restaurant: restaurant,
+      uniqueKey: `${food.id}_${Date.now()}_${Math.random()}` // Ajout d'une clé unique pour éviter les conflits
+    }
+
+    // Ajouter au state Redux local
     dispatch({
       type: 'ADD_TO_CART',
-      payload: {
-        ...food,
-        restaurantName: restaurant.name,
-        restaurantImage: restaurant.image,
-        restaurant: restaurant,
-        uniqueKey: `${food.id}_${Date.now()}` // Ajout d'une clé unique pour éviter les conflits
-      }
+      payload: cartItem
     })
+
+    // Synchroniser avec le backend (sans bloquer l'UI)
+    try {
+      await addToCartAPI(cartItem)
+    } catch (error) {
+      console.error('Error syncing add to cart:', error)
+    }
   }
 
-  const handleRemoveFromCart = () => {
+  const handleRemoveFromCart = async () => {
     if (quantity === 0) return
 
-    dispatch({
-      type: 'REMOVE_FROM_CARD',
-      payload: food.id
-    })
+    // Trouver l'item dans le panier pour obtenir sa uniqueKey
+    const cartItems = useSelector(state => state.cartReducer || [])
+    const cartItem = cartItems.find(item => item.id === food.id)
+
+    if (cartItem && cartItem.uniqueKey) {
+      // Supprimer du state Redux local
+      dispatch({
+        type: 'REMOVE_FROM_CARD',
+        payload: food.id
+      })
+
+      // Synchroniser avec le backend (sans bloquer l'UI)
+      try {
+        const { removeFromCart } = await import('../api')
+        await removeFromCart(cartItem.uniqueKey)
+      } catch (error) {
+        console.error('Error syncing remove from cart:', error)
+      }
+    }
   }
 
   const handleIncrease = () => {

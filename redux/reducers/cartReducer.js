@@ -15,8 +15,10 @@ let cartReducer = (state = [], action) =>{
             return state.filter(item => item.restaurantName !== action.payload)
         case 'CLEAR':
             return []
+        case 'LOAD_CART':
+            return action.payload || []
         default:
             return state
-    } 
+    }
 };
 export default cartReducer; 
