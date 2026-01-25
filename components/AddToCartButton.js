@@ -83,12 +83,16 @@ export default function AddToCartButton({ food, restaurant, style }) {
     })
 
     animatePress()
+    const itemId = food.id || `item_${Date.now()}_${Math.random()}`;
+    const uniqueKey = `${itemId}_${Date.now()}_${Math.random()}`;
+
     const cartItem = {
       ...food,
+      id: itemId,
       restaurantName: restaurant.name,
       restaurantImage: restaurant.image,
       restaurant: restaurant,
-      uniqueKey: `${food.id}_${Date.now()}_${Math.random()}` // Ajout d'une clé unique pour éviter les conflits
+      uniqueKey: uniqueKey // Ajout d'une clé unique pour éviter les conflits
     }
 
     // Ajouter au state Redux local
@@ -99,6 +103,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
 
     // Synchroniser avec le backend (sans bloquer l'UI)
     try {
+      console.log('📤 Sending to backend:', JSON.stringify(cartItem, null, 2));
       await addToCartAPI(cartItem)
     } catch (error) {
       console.error('Error syncing add to cart:', error)
@@ -122,7 +127,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
       // Synchroniser avec le backend (sans bloquer l'UI)
       try {
         const { removeFromCart } = await import('../api')
-        await removeFromCart(cartItem.uniqueKey)
+        await removeFromCart(food.id)
       } catch (error) {
         console.error('Error syncing remove from cart:', error)
       }

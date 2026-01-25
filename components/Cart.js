@@ -82,9 +82,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                 // Synchroniser avec le backend
                 try {
                     const { removeFromCart } = await import('../api')
-                    if (item.uniqueKey) {
-                        await removeFromCart(item.uniqueKey)
-                    }
+                    await removeFromCart(itemId)
                 } catch (error) {
                     console.error('Error syncing remove from cart:', error)
                 }
@@ -98,9 +96,11 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                 if (itemToAdd) {
                     for (let i = currentQuantity; i < newQuantity; i++) {
                         // Créer un nouvel item avec une uniqueKey différente
+                        const newItemId = itemToAdd.id || `item_${Date.now()}_${Math.random()}`;
                         const newItem = {
                             ...itemToAdd,
-                            uniqueKey: `${itemToAdd.id}_${Date.now()}_${Math.random()}`
+                            id: newItemId,
+                            uniqueKey: `${newItemId}_${Date.now()}_${Math.random()}`
                         }
 
                         dispatch({
@@ -129,9 +129,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                     // Synchroniser avec le backend
                     try {
                         const { removeFromCart } = await import('../api')
-                        if (item.uniqueKey) {
-                            await removeFromCart(item.uniqueKey)
-                        }
+                        await removeFromCart(itemId)
                     } catch (error) {
                         console.error('Error syncing remove from cart:', error)
                     }

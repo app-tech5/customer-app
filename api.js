@@ -544,14 +544,14 @@ class ApiClient {
     });
   }
 
-  async removeFromCart(uniqueKey) {
-    return await this.apiCall(`/cart/items/${uniqueKey}`, {
+  async removeFromCart(itemId) {
+    return await this.apiCall(`/cart/items/${itemId}`, {
       method: 'DELETE',
     });
   }
 
-  async updateCartItem(uniqueKey, itemData) {
-    return await this.apiCall(`/cart/items/${uniqueKey}`, {
+  async updateCartItem(itemId, itemData) {
+    return await this.apiCall(`/cart/items/${itemId}`, {
       method: 'PUT',
       body: JSON.stringify(itemData),
     });

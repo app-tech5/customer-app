@@ -43,27 +43,40 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
         setViewCartButton(false)
 
         try {
+            // Transformer les items du panier Redux au format attendu par le modèle Order
+            const orderItems = items.map(cartItem => ({
+                type: cartItem.itemType || 'Menu', // Type d'item (Menu, Product)
+                item: cartItem.item || cartItem.id, // Référence à l'item
+                name: cartItem.name,
+                image: cartItem.image,
+                price: cartItem.price,
+                currency: cartItem.currency || 'EUR',
+                quantity: 1, // Chaque item du panier Redux représente une quantité de 1
+                total: cartItem.totalPrice || cartItem.price,
+                extras: cartItem.extras || [],
+                variants: cartItem.variants || []
+            }));
+
             const orderData = {
-                orderId: generateUID(),
-                restaurantId: items[0].restaurant.restaurantId,
-                restaurant: {
-                    lat: items[0].restaurant.lat,
-                    lng: items[0].restaurant.lng,
-                    address: items[0].restaurant.address,
-                    phone: items[0].restaurant.phone,
-                    name: items[0].restaurant.name,
-                },
-                user: {
-                    id: id,
-                    name: name,
-                    lat,
-                    lng,
-                    phone: phone,
-                    address,
-                    items: items,
+                user: id, // ObjectId de l'utilisateur
+                restaurant: items[0].restaurant._id || items[0].restaurant.id, // ObjectId du restaurant
+                items: orderItems,
+                totalPrice: total,
+                subtotal: totals.subtotal,
+                tax: {
+                    rate: restaurant?.taxRate || 0.08,
+                    amount: totals.taxAmount
                 },
                 status: "pending",
-                createdAt: new Date().toISOString(),
+                payment: {
+                    method: "cash", // Par défaut, pourra être changé
+                    status: "pending"
+                },
+                delivery: {
+                    type: "delivery",
+                    address: address,
+                    deliveryFee: totals.deliveryFee
+                }
             };
 
             await api.createOrder(orderData);
