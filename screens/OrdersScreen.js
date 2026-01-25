@@ -1,8 +1,7 @@
-import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native'
+import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { useDispatch } from 'react-redux'
-import { getOrders, cancelOrder } from '../api'
+import { getOrders } from '../api'
 import i18n from '../i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
@@ -14,13 +13,10 @@ export default function OrdersScreen({ navigation }) {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState(null)
-  const [sortBy, setSortBy] = useState('date_desc') // date_desc, date_asc, amount_desc, amount_asc, restaurant, status
-  const [showSortMenu, setShowSortMenu] = useState(false)
   const { currency } = useSettings()
-  const dispatch = useDispatch()
 
   useEffect(() => {
-    // loadOrders()
+    loadOrders()
 
     // Configurer le header avec le bouton retour
     navigation.setOptions({
@@ -45,8 +41,10 @@ export default function OrdersScreen({ navigation }) {
 
       const ordersData = await getOrders()
 
-      // Appliquer le tri sélectionné
-      const sortedOrders = sortOrders(ordersData, sortBy)
+      // Trier par date décroissante (plus récent en premier)
+      const sortedOrders = ordersData.sort((a, b) =>
+        new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
+      )
 
       setOrders(sortedOrders)
     } catch (err) {
@@ -242,43 +240,6 @@ export default function OrdersScreen({ navigation }) {
     }
   }
 
-  const sortOrders = (orders, sortType) => {
-    const sorted = [...orders]
-
-    switch (sortType) {
-      case 'date_desc':
-        return sorted.sort((a, b) =>
-          new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
-        )
-      case 'date_asc':
-        return sorted.sort((a, b) =>
-          new Date(a.createdAt || a.date) - new Date(b.createdAt || b.date)
-        )
-      case 'amount_desc':
-        return sorted.sort((a, b) =>
-          (b.totalPrice || 0) - (a.totalPrice || 0)
-        )
-      case 'amount_asc':
-        return sorted.sort((a, b) =>
-          (a.totalPrice || 0) - (b.totalPrice || 0)
-        )
-      case 'restaurant':
-        return sorted.sort((a, b) => {
-          const restaurantA = (a.restaurant?.name || a.restaurantName || '').toLowerCase()
-          const restaurantB = (b.restaurant?.name || b.restaurantName || '').toLowerCase()
-          return restaurantA.localeCompare(restaurantB)
-        })
-      case 'status':
-        const statusOrder = { pending: 1, preparing: 2, out_for_delivery: 3, delivered: 4, cancelled: 5 }
-        return sorted.sort((a, b) => {
-          const statusA = statusOrder[a.status?.toLowerCase()] || 6
-          const statusB = statusOrder[b.status?.toLowerCase()] || 6
-          return statusA - statusB
-        })
-      default:
-        return sorted
-    }
-  }
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -329,12 +290,17 @@ export default function OrdersScreen({ navigation }) {
     return `${diffInWeeks}w ${i18n.t('order.ago', 'ago')}`
   }
 
-  const isNewOrder = (dateString) => {
-    if (!dateString) return false
-    const now = new Date()
+  const formatEstimatedTime = (dateString) => {
+    if (!dateString) return null
     const date = new Date(dateString)
-    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
-    return diffInHours < 24 // Considérer comme nouvelle si moins de 24h
+    const now = new Date()
+    const diff = date - now
+    const minutes = Math.floor(diff / 60000)
+
+    if (minutes < 0) return i18n.t('order.delivered', 'Delivered')
+    if (minutes < 60) return `${minutes}min`
+    const hours = Math.floor(minutes / 60)
+    return `${hours}h ${minutes % 60}min`
   }
 
   // Statistiques des commandes
@@ -379,9 +345,8 @@ export default function OrdersScreen({ navigation }) {
       })
     }
 
-    // Appliquer le tri sur les résultats filtrés
-    return sortOrders(filtered, sortBy)
-  }, [orders, searchQuery, selectedStatus, sortBy])
+    return filtered
+  }, [orders, searchQuery, selectedStatus])
 
   const statusFilters = [
     { label: i18n.t('order.all', 'All'), value: null, count: orderStats.total },
@@ -391,20 +356,6 @@ export default function OrdersScreen({ navigation }) {
     { label: i18n.t('order.status.delivered', 'Delivered'), value: 'delivered', count: orderStats.delivered },
     { label: i18n.t('order.status.cancelled', 'Cancelled'), value: 'cancelled', count: orderStats.cancelled },
   ]
-
-  const sortOptions = [
-    { label: i18n.t('order.sort.dateDesc', 'Newest First'), value: 'date_desc' },
-    { label: i18n.t('order.sort.dateAsc', 'Oldest First'), value: 'date_asc' },
-    { label: i18n.t('order.sort.amountDesc', 'Highest Amount'), value: 'amount_desc' },
-    { label: i18n.t('order.sort.amountAsc', 'Lowest Amount'), value: 'amount_asc' },
-    { label: i18n.t('order.sort.restaurant', 'Restaurant A-Z'), value: 'restaurant' },
-    { label: i18n.t('order.sort.status', 'By Status'), value: 'status' },
-  ]
-
-  const getCurrentSortLabel = () => {
-    const option = sortOptions.find(opt => opt.value === sortBy)
-    return option ? option.label : i18n.t('order.sort.dateDesc', 'Newest First')
-  }
 
   const renderOrderItem = ({ item, index }) => (
     <View style={styles.orderItemContainer}>
@@ -424,18 +375,9 @@ export default function OrdersScreen({ navigation }) {
         {/* Header avec statut et date */}
         <View style={styles.orderHeader}>
           <View style={styles.orderLeft}>
-            <View style={styles.orderIdContainer}>
-              <Text style={styles.orderId}>
-                {i18n.t('order.orderId', 'Order')} #{item.id || item._id}
-              </Text>
-              {isNewOrder(item.createdAt || item.date) && (
-                <View style={styles.newBadge}>
-                  <Text style={styles.newBadgeText}>
-                    {i18n.t('order.new', 'NEW')}
-                  </Text>
-                </View>
-              )}
-            </View>
+            <Text style={styles.orderId}>
+              {i18n.t('order.orderId', 'Order')} #{item.id || item._id}
+            </Text>
             <Text style={styles.orderTime}>
               {formatTimeAgo(item.createdAt || item.date)}
             </Text>
@@ -484,6 +426,53 @@ export default function OrdersScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Informations supplémentaires */}
+        <View style={styles.additionalInfo}>
+          {/* Mode de paiement */}
+          {item.payment?.method && (
+            <View style={styles.infoItem}>
+              <Ionicons name="card-outline" size={14} color={colors.text.secondary} />
+              <Text style={styles.infoText}>
+                {i18n.t(`payment.${item.payment.method}`, item.payment.method)}
+              </Text>
+            </View>
+          )}
+
+          {/* Type de livraison */}
+          {item.delivery?.type && (
+            <View style={styles.infoItem}>
+              <Ionicons
+                name={item.delivery.type === 'delivery' ? "bicycle-outline" : "storefront-outline"}
+                size={14}
+                color={colors.text.secondary}
+              />
+              <Text style={styles.infoText}>
+                {i18n.t(`delivery.${item.delivery.type}`, item.delivery.type)}
+              </Text>
+            </View>
+          )}
+
+          {/* Heure estimée pour les livraisons en cours */}
+          {item.status?.toLowerCase() === 'out_for_delivery' && item.delivery?.estimatedTime && (
+            <View style={styles.infoItem}>
+              <Ionicons name="time-outline" size={14} color={colors.primary} />
+              <Text style={styles.estimatedTimeText}>
+                {i18n.t('order.estimatedArrival', 'ETA')}: {formatEstimatedTime(item.delivery.estimatedTime)}
+              </Text>
+            </View>
+          )}
+
+          {/* Informations du livreur pour les livraisons en cours */}
+          {item.status?.toLowerCase() === 'out_for_delivery' && item.driver?.userId && (
+            <View style={styles.infoItem}>
+              <Ionicons name="person-outline" size={14} color={colors.primary} />
+              <Text style={styles.driverText}>
+                {item.driver.userId?.name || i18n.t('order.driverName', 'Driver')}
+              </Text>
+            </View>
+          )}
+        </View>
+
         {/* Actions */}
         <View style={styles.orderActions}>
           {item.status?.toLowerCase() === 'pending' && (
@@ -507,15 +496,6 @@ export default function OrdersScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.reorderButton}
-            onPress={() => handleReorder(item)}
-          >
-            <Ionicons name="refresh" size={16} color={colors.primary} />
-            <Text style={styles.reorderButtonText}>
-              {i18n.t('order.reorder', 'Reorder')}
-            </Text>
-          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     </View>
@@ -608,68 +588,22 @@ export default function OrdersScreen({ navigation }) {
           {/* Statistiques */}
           <StatsHeader />
 
-          {/* Barre de recherche et tri */}
-          <View style={styles.searchSortContainer}>
-            <View style={styles.searchContainer}>
-              <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder={i18n.t('order.searchPlaceholder', 'Search by restaurant or order ID...')}
-                placeholderTextColor={colors.text.secondary}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-                  <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <TouchableOpacity
-              style={styles.sortButton}
-              onPress={() => setShowSortMenu(!showSortMenu)}
-            >
-              <Ionicons name="swap-vertical" size={20} color={colors.primary} />
-              <Text style={styles.sortButtonText}>
-                {getCurrentSortLabel()}
-              </Text>
-              <Ionicons
-                name={showSortMenu ? "chevron-up" : "chevron-down"}
-                size={16}
-                color={colors.primary}
-              />
-            </TouchableOpacity>
+          {/* Barre de recherche */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={i18n.t('order.searchPlaceholder', 'Search by restaurant or order ID...')}
+              placeholderTextColor={colors.text.secondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+              </TouchableOpacity>
+            )}
           </View>
-
-          {/* Menu de tri */}
-          {showSortMenu && (
-            <View style={styles.sortMenu}>
-              {sortOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.sortMenuItem,
-                    sortBy === option.value && styles.sortMenuItemActive
-                  ]}
-                  onPress={() => {
-                    setSortBy(option.value)
-                    setShowSortMenu(false)
-                  }}
-                >
-                  <Text style={[
-                    styles.sortMenuItemText,
-                    sortBy === option.value && styles.sortMenuItemTextActive
-                  ]}>
-                    {option.label}
-                  </Text>
-                  {sortBy === option.value && (
-                    <Ionicons name="checkmark" size={16} color={colors.primary} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
 
           {/* Filtres par statut */}
           <ScrollView
@@ -777,10 +711,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   searchContainer: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.primary,
+    marginHorizontal: 20,
+    marginBottom: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
@@ -803,68 +738,6 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
-  },
-  searchSortContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 16,
-  },
-  sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    marginLeft: 12,
-  },
-  sortButtonText: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '600',
-    marginHorizontal: 8,
-  },
-  sortMenu: {
-    backgroundColor: colors.background.primary,
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  sortMenuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  sortMenuItemActive: {
-    backgroundColor: colors.primary + '10',
-  },
-  sortMenuItemText: {
-    fontSize: 14,
-    color: colors.text.primary,
-    fontWeight: '500',
-  },
-  sortMenuItemTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
   },
   filtersContainer: {
     marginBottom: 16,
@@ -993,24 +866,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 16,
   },
-  orderIdContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  newBadge: {
-    backgroundColor: colors.success,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  newBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.text.white,
-    letterSpacing: 0.5,
-  },
   orderLeft: {
     flex: 1,
   },
@@ -1094,6 +949,34 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.primary,
   },
+  additionalInfo: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+    gap: 12,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginLeft: 4,
+    fontWeight: '500',
+  },
+  estimatedTimeText: {
+    fontSize: 12,
+    color: colors.primary,
+    marginLeft: 4,
+    fontWeight: '600',
+  },
+  driverText: {
+    fontSize: 12,
+    color: colors.primary,
+    marginLeft: 4,
+    fontWeight: '600',
+  },
   orderActions: {
     flexDirection: 'row',
     // justifyContent: 'space-between',
@@ -1117,24 +1000,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
-    marginLeft: 6,
-  },
-  reorderButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  reorderButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.white,
     marginLeft: 6,
   },
   cancelButton: {

@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Clipboard, Alert, Linking } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
@@ -132,101 +132,7 @@ export default function OrderTracking() {
     return `${hours}h ${minutes % 60}${i18n.t('order.minutes', 'min')}`
   }
 
-  const generateOrderDetailsText = (order) => {
-    if (!order) return ''
 
-    const lines = [
-      `🏪 ${i18n.t('order.orderId', 'Order')} #${order.id || order._id}`,
-      `📅 ${formatDate(order.createdAt || order.date)}`,
-      `📍 ${i18n.t('order.status.title', 'Order Status')}: ${getStatusText(order.status)}`,
-      '',
-      `🏬 ${i18n.t('order.restaurant', 'Restaurant')}: ${order.restaurant?.name || order.restaurantName || 'Unknown'}`,
-    ]
-
-    if (order.restaurant?.phone) {
-      lines.push(`📞 ${order.restaurant.phone}`)
-    }
-
-    if (order.restaurant?.address) {
-      lines.push(`📍 ${order.restaurant.address}`)
-    }
-
-    lines.push('')
-    lines.push(`🛒 ${i18n.t('order.details', 'Order Details')}:`)
-
-    if (order.items && order.items.length > 0) {
-      order.items.forEach((item, index) => {
-        lines.push(`  ${index + 1}. ${item.name || 'Unknown Item'} x${item.quantity || 1}`)
-        if (item.extras && item.extras.length > 0) {
-          item.extras.forEach(extra => {
-            lines.push(`     + ${extra.name} (${extra.price?.toFixed(2)}€ x${extra.quantity})`)
-          })
-        }
-      })
-    }
-
-    lines.push('')
-    lines.push(`💰 ${i18n.t('order.subtotal', 'Subtotal')}: ${(order.subtotal || 0).toFixed(2)}${currency.symbol}`)
-    if (order.delivery?.deliveryFee) {
-      lines.push(`🚚 ${i18n.t('order.deliveryFee', 'Delivery Fee')}: ${order.delivery.deliveryFee.toFixed(2)}${currency.symbol}`)
-    }
-    if (order.tax?.amount) {
-      lines.push(`📊 ${i18n.t('order.tax', 'Tax')}: ${order.tax.amount.toFixed(2)}${currency.symbol}`)
-    }
-    lines.push(`💵 ${i18n.t('order.total', 'Total')}: ${(order.totalPrice || 0).toFixed(2)}${currency.symbol}`)
-
-    if (order.delivery?.address) {
-      lines.push('')
-      lines.push(`🏠 ${i18n.t('order.deliveryAddress', 'Delivery Address')}: ${order.delivery.address}`)
-    }
-
-    return lines.join('\n')
-  }
-
-  const copyOrderDetails = async () => {
-    try {
-      const orderText = generateOrderDetailsText(order)
-      await Clipboard.setString(orderText)
-      Alert.alert(
-        i18n.t('order.copied', 'Copied'),
-        i18n.t('order.detailsCopied', 'Order details copied to clipboard')
-      )
-    } catch (error) {
-      console.error('Error copying order details:', error)
-      Alert.alert(
-        i18n.t('order.error', 'Error'),
-        i18n.t('order.copyFailed', 'Failed to copy order details')
-      )
-    }
-  }
-
-  const contactSupport = () => {
-    const supportPhone = '+33123456789' // Numéro de support générique
-    const orderInfo = `Order #${order.id || order._id} - ${getStatusText(order.status)}`
-
-    Alert.alert(
-      i18n.t('order.contactSupport', 'Contact Support'),
-      i18n.t('order.supportMessage', 'How would you like to contact support?'),
-      [
-        {
-          text: i18n.t('order.call', 'Call'),
-          onPress: () => {
-            Linking.openURL(`tel:${supportPhone}`)
-          }
-        },
-        {
-          text: i18n.t('order.message', 'Message'),
-          onPress: () => {
-            Linking.openURL(`sms:${supportPhone}?body=${encodeURIComponent(`Hello, I need help with ${orderInfo}`)}`)
-          }
-        },
-        {
-          text: i18n.t('common.cancel', 'Cancel'),
-          style: 'cancel'
-        }
-      ]
-    )
-  }
 
   if (loader) return <Loader />
 
@@ -462,40 +368,16 @@ export default function OrderTracking() {
           </View>
         </View>
 
-        {/* Boutons d'action */}
-        <View style={styles.actionButtonsContainer}>
-          <View style={styles.actionButtonsRow}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={copyOrderDetails}
-            >
-              <Ionicons name="copy" size={20} color={colors.primary} />
-              <Text style={styles.actionButtonText}>
-                {i18n.t('order.copyDetails', 'Copy Details')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={contactSupport}
-            >
-              <Ionicons name="help-circle" size={20} color={colors.primary} />
-              <Text style={styles.actionButtonText}>
-                {i18n.t('order.support', 'Support')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={styles.refreshButton}
-            onPress={loadOrder}
-          >
-            <Ionicons name="refresh" size={20} color={colors.primary} />
-            <Text style={styles.refreshButtonText}>
-              {i18n.t('order.refresh', 'Refresh Status')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Bouton de rafraîchissement */}
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={loadOrder}
+        >
+          <Ionicons name="refresh" size={20} color={colors.primary} />
+          <Text style={styles.refreshButtonText}>
+            {i18n.t('order.refresh', 'Refresh Status')}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   )
@@ -657,30 +539,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.primary,
-  },
-  actionButtonsContainer: {
-    gap: 12,
-  },
-  actionButtonsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background.primary,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.primary,
-    marginLeft: 8,
   },
   refreshButton: {
     flexDirection: 'row',

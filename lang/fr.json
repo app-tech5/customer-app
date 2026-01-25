@@ -218,7 +218,6 @@
     "orderFailed": "Échec de la commande",
     "tracking": "Suivre la commande",
     "track": "Suivre commande",
-    "reorder": "Recommander",
     "confirmReorder": "Confirmer la recommandation",
     "reorderMessage": "Cela ajoutera tous les articles de cette commande à votre panier. Continuer ?",
     "reorderSuccess": "Articles ajoutés",
@@ -228,23 +227,6 @@
     "reorderFailed": "Échec de l'ajout des articles",
     "viewCart": "Voir le panier",
     "continueShopping": "Continuer",
-    "cancel": "Annuler",
-    "confirmCancel": "Confirmer l'annulation",
-    "cancelMessage": "Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible.",
-    "confirmCancelButton": "Annuler la commande",
-    "cancelSuccess": "Commande annulée",
-    "cancelSuccessMessage": "Votre commande a été annulée avec succès",
-    "cancelError": "Erreur d'annulation",
-    "cannotCancel": "Cette commande ne peut pas être annulée",
-    "cancelFailed": "Échec de l'annulation de la commande",
-    "sort": {
-      "dateDesc": "Plus récent",
-      "dateAsc": "Plus ancien",
-      "amountDesc": "Montant élevé",
-      "amountAsc": "Montant faible",
-      "restaurant": "Restaurant A-Z",
-      "status": "Par statut"
-    },
     "viewAll": "Voir tout",
     "allOrders": "Toutes les commandes",
     "all": "Tout",
@@ -287,15 +269,6 @@
     "total": "Total",
     "estimatedArrival": "Arrivée estimée",
     "refresh": "Actualiser le statut",
-    "copyDetails": "Copier détails",
-    "copied": "Copié",
-    "detailsCopied": "Détails de la commande copiés",
-    "copyFailed": "Échec de la copie",
-    "support": "Support",
-    "contactSupport": "Contacter le support",
-    "supportMessage": "Comment souhaitez-vous contacter le support ?",
-    "call": "Appeler",
-    "message": "Message",
     "notFound": "Commande introuvable",
     "title": "Mes Commandes",
     "auth_required": "Connexion requise",
@@ -331,6 +304,15 @@
     "ago": "",
     "new": "NOUVEAU",
     "unknown_restaurant": "Restaurant inconnu"
+  },
+  "payment": {
+    "credit_card": "Carte",
+    "mobile_money": "Mobile",
+    "cash": "Espèces"
+  },
+  "delivery": {
+    "delivery": "Livraison",
+    "pickup": "Retrait"
   },
   "profile": {
     "title": "Profil",
