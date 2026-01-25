@@ -20,7 +20,7 @@ export default function OrdersScreen({ navigation }) {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    loadOrders()
+    // loadOrders()
 
     // Configurer le header avec le bouton retour
     navigation.setOptions({
@@ -1096,8 +1096,9 @@ const styles = StyleSheet.create({
   },
   orderActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
+    // justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   trackButton: {
     flexDirection: 'row',
@@ -1107,7 +1108,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 12,
-    flex: 1,
+    // flex: 1,
+    width: '48%',
     borderWidth: 1,
     borderColor: colors.border.light,
   },
@@ -1143,10 +1145,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: 'rgba(244, 67, 54, 0.1)',
     borderRadius: 12,
-    flex: 1,
+    // flex: 1,
+    width: '48%',
     borderWidth: 1,
     borderColor: colors.error,
-    marginRight: 6,
+    // marginRight: 6,
   },
   cancelButtonText: {
     fontSize: 14,
