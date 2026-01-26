@@ -317,7 +317,9 @@
     "paymentMethod": "Payment Method",
     "paymentStatus": "Payment Status",
     "transactionId": "Transaction ID",
-    "reorder": "Reorder"
+    "reorder": "Reorder",
+    "delivered": "Delivered",
+    "cancel": "Cancel"
   },
   "payment": {
     "credit_card": "Card",

@@ -302,7 +302,9 @@
     "paymentMethod": "Mode de paiement",
     "paymentStatus": "Statut du paiement",
     "transactionId": "ID de transaction",
-    "reorder": "Commander à nouveau"
+    "reorder": "Commander à nouveau",
+    "delivered": "Livrée",
+    "cancel": "Annuler"
   },
   "payment": {
     "credit_card": "Carte",

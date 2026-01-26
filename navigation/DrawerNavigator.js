@@ -133,6 +133,7 @@ export default function DrawerNavigator() {
             component={OrdersScreen}
             options={{
                 title: i18n.t('drawer.orderHistory'),
+                headerShown: true,
                 drawerIcon: ({focused, size}) => (
                     <Feather
                         name="clock"

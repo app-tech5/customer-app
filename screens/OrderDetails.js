@@ -27,7 +27,22 @@ export default function OrderDetails() {
       // Sinon, récupérer via API avec l'ID
       loadOrderDetails()
     }
-  }, [orderData])
+
+    // Configurer le header avec le bouton retour
+    navigation.setOptions({
+      title: i18n.t('order.details', 'Order Details'),
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ padding: 10, marginLeft: 5 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+      ),
+    })
+  }, [navigation, orderData])
 
   const loadOrderDetails = async () => {
     try {
@@ -589,9 +604,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   summaryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 20,
   },
   summaryTitle: {
@@ -603,6 +615,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.primary,
+    textAlign: 'center',
+    marginTop: 8,
   },
   summaryGrid: {
     flexDirection: 'row',

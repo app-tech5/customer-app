@@ -381,9 +381,9 @@ export default function OrdersScreen({ navigation }) {
 
   const StatsHeader = () => (
     <View style={styles.statsContainer}>
-      <Text style={styles.statsTitle}>
+      {/* <Text style={styles.statsTitle}>
         {i18n.t('order.yourOrders', 'Your Orders')}
-      </Text>
+      </Text> */}
       <View style={styles.statsGrid}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{orderStats.total}</Text>
