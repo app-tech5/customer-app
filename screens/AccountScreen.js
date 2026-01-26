@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useEffect, useState } from 'react'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
-import { userInfos, updateUser } from '../api'
+import { userInfos, updateUser, getOrders } from '../api'
 import i18n from '../i18n'
 import { colors } from '../global'
 import Loader from './Loader'
@@ -10,6 +10,7 @@ import Loader from './Loader'
 export default function AccountScreen({ navigation }) {
   const user = useSelector((state) => state.userReducer)
   const [userData, setUserData] = useState(null)
+  const [totalOrders, setTotalOrders] = useState(0)
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
 
@@ -37,13 +38,20 @@ export default function AccountScreen({ navigation }) {
       setLoader(true)
       setError(null)
 
-      const data = await userInfos(user.id || user.userId)
-      setUserData(data)
+      // Charger les informations utilisateur et les commandes en parallèle
+      const [userInfo, ordersData] = await Promise.all([
+        userInfos(user.id || user.userId).catch(() => user), // Fallback to Redux store
+        getOrders().catch(() => []) // Fallback to empty array
+      ])
+
+      setUserData(userInfo)
+      setTotalOrders(ordersData?.length || 0)
     } catch (err) {
       console.error('Error loading user data:', err)
       setError(i18n.t('profile.loadError', 'Error loading profile'))
       // Utiliser les données du Redux store comme fallback
       setUserData(user)
+      setTotalOrders(0)
     } finally {
       setLoader(false)
     }
@@ -119,7 +127,7 @@ export default function AccountScreen({ navigation }) {
             <Ionicons name="receipt" size={24} color={colors.primary} />
           </View>
           <Text style={styles.statNumber}>
-            {userData?.orders?.length || 0}
+            {totalOrders}
           </Text>
           <Text style={styles.statLabel}>
             {i18n.t('profile.totalOrders', 'Total Orders')}
