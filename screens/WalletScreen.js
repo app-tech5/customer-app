@@ -22,12 +22,12 @@ export default function WalletScreen({ navigation }) {
       title: i18n.t('wallet.title', 'Wallet'),
       headerLeft: () => (
         <TouchableOpacity
-          onPress={() => navigation.toggleDrawer()}
+          onPress={() => navigation.goBack()}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Open menu"
+          accessibilityLabel="Go back"
         >
-          <Ionicons name="menu" size={24} color={colors.text.primary} />
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
       ),
     })
