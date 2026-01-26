@@ -18,6 +18,7 @@ import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
 import RestaurantSearchResults from '../screens/RestaurantSearchResults'
 import AccountScreen from '../screens/AccountScreen'
 import EditProfileScreen from '../screens/EditProfileScreen'
+import AddressesScreen from '../screens/AddressesScreen'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 
 const  HomeStack = createStackNavigator()
@@ -116,6 +117,15 @@ export function AccountNavigator() {
         component={EditProfileScreen}
         options={{
           title: 'Edit Profile',
+          headerShown: true
+        }}
+      />
+
+      <AccountStack.Screen
+        name="AddressesScreen"
+        component={AddressesScreen}
+        options={{
+          title: 'Addresses',
           headerShown: true
         }}
       />

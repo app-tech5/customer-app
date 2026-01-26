@@ -211,12 +211,9 @@ export default function AccountScreen({ navigation }) {
 
       <MenuItem
         icon="location"
-        title={i18n.t('profile.addresses', 'Addresses')}
+        title={i18n.t('addresses.title', 'Addresses')}
         subtitle={i18n.t('profile.manageAddresses', 'Manage delivery addresses')}
-        onPress={() => {
-          // TODO: Navigate to addresses screen
-          Alert.alert('Not implemented', 'Addresses screen will be implemented')
-        }}
+        onPress={() => navigation.navigate('AddressesScreen')}
       />
 
       <MenuItem
