@@ -16,6 +16,8 @@ import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
 import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
 import RestaurantSearchResults from '../screens/RestaurantSearchResults'
+import AccountScreen from '../screens/AccountScreen'
+import EditProfileScreen from '../screens/EditProfileScreen'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 
 const  HomeStack = createStackNavigator()
@@ -96,6 +98,29 @@ export function OrderNavigator() {
     </OrderStack.Navigator>
   )
 
+}
+
+const AccountStack = createStackNavigator()
+
+export function AccountNavigator() {
+  return (
+    <AccountStack.Navigator>
+      <AccountStack.Screen
+        name="AccountScreen"
+        component={AccountScreen}
+        options={{ headerShown: false }}
+      />
+
+      <AccountStack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: 'Edit Profile',
+          headerShown: true
+        }}
+      />
+    </AccountStack.Navigator>
+  )
 }
 
 const  SearchStack = createStackNavigator()

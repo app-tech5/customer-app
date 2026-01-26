@@ -3,13 +3,12 @@ import {createDrawerNavigator} from '@react-navigation/drawer'
 import BottomTabs from './BottomTabs'
 import BusinessConsoleScreen from '../screens/BusinessConsoleScreen';
 import DrawerContent from '../components/DrawerContent';
-import { SearchNavigator } from './Stacks';
+import { SearchNavigator, AccountNavigator } from './Stacks';
 import SearchResults from '../screens/SearchResults';
 import NearMeScreen from '../screens/NearMeScreen';
 // import RestaurantsMapScreen from '../screens/RestaurantsMapScreen';
 import Offers from '../screens/Offers'
 import Settings from '../screens/Settings';
-import AccountScreen from '../screens/AccountScreen';
 import Wallet from '../screens/Wallet';
 import OrdersScreen from '../screens/OrdersScreen';
 import MyOrdersScreen from '../screens/MyOrdersScreen';
@@ -164,10 +163,11 @@ export default function DrawerNavigator() {
             }}
         />
 
+
         {/* 👤 COMPTE UTILISATEUR */}
         <Drawer.Screen
             name = "Account"
-            component={AccountScreen}
+            component={AccountNavigator}
             options={{
                 title: i18n.t('drawer.account'),
                 drawerIcon: ({focused, size}) => (
@@ -197,7 +197,7 @@ export default function DrawerNavigator() {
         />
 
         {/* ❤️ FAVORIS */}
-        <Drawer.Screen
+        {/* <Drawer.Screen
             name = "Favorites"
             component={AccountScreen} // Temporaire - à remplacer par écran favoris dédié
             options={{
@@ -210,10 +210,10 @@ export default function DrawerNavigator() {
                     />
                 )
             }}
-        />
+        /> */}
 
         {/* 🔔 NOTIFICATIONS */}
-        <Drawer.Screen
+        {/* <Drawer.Screen
             name = "Notifications"
             component={AccountScreen} // Temporaire - à remplacer par écran notifications
             options={{
@@ -226,7 +226,7 @@ export default function DrawerNavigator() {
                     />
                 )
             }}
-        />
+        /> */}
 
         {/* ⚙️ PARAMÈTRES */}
         <Drawer.Screen

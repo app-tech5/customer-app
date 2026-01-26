@@ -97,7 +97,7 @@ export default function AccountScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.editButton}
-        onPress={() => navigation.navigate('Settings')}
+        onPress={() => navigation.navigate('EditProfile')}
       >
         <Ionicons name="pencil" size={16} color={colors.primary} />
         <Text style={styles.editButtonText}>
