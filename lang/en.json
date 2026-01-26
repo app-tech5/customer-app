@@ -397,6 +397,7 @@
     "logoutConfirm": "Are you sure you want to logout?"
   },
   "common": {
+    "save":"Save",
     "yes": "Yes",
     "no": "No",
     "ok": "OK",

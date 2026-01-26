@@ -108,7 +108,7 @@ export function AccountNavigator() {
       <AccountStack.Screen
         name="AccountScreen"
         component={AccountScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: true }}
       />
 
       <AccountStack.Screen
