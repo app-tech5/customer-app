@@ -44,33 +44,61 @@ export default function AddressesScreen({ navigation }) {
       // TODO: Replace with real API call
       // const addressesData = await getUserAddresses(user.id || user.userId)
 
-      // Mock data for now
+      let userAddresses = []
+
+      // If user has an address in their profile, create a default address
+      if (user.address && user.address.trim()) {
+        // Try to parse the address if it contains structured data
+        let addressParts = user.address.split(',')
+        let address = user.address
+        let city = ''
+        let postalCode = ''
+        let country = 'France' // Default country
+
+        if (addressParts.length >= 2) {
+          address = addressParts[0].trim()
+          city = addressParts[1].trim()
+
+          if (addressParts.length >= 3) {
+            postalCode = addressParts[2].trim()
+          }
+        }
+
+        userAddresses.push({
+          id: 'user_default',
+          type: 'home',
+          name: 'My Address',
+          address: address,
+          city: city,
+          postalCode: postalCode,
+          country: country,
+          isDefault: true,
+          coordinates: user.location ? {
+            lat: user.location.latitude,
+            lng: user.location.longitude
+          } : null
+        })
+      }
+
+      // Mock additional addresses for now
       const mockAddresses = [
         {
           id: '1',
-          type: 'home',
-          name: 'Home',
-          address: '123 Main Street, Apt 4B',
-          city: 'Paris',
-          postalCode: '75001',
-          country: 'France',
-          isDefault: true,
-          coordinates: { lat: 48.8566, lng: 2.3522 }
-        },
-        {
-          id: '2',
           type: 'work',
           name: 'Work',
           address: '456 Business Avenue, Floor 15',
           city: 'Paris',
           postalCode: '75002',
           country: 'France',
-          isDefault: false,
+          isDefault: !user.address || !user.address.trim(),
           coordinates: { lat: 48.8584, lng: 2.2945 }
         }
       ]
 
-      setAddresses(mockAddresses)
+      // Combine user address with mock addresses
+      const allAddresses = [...userAddresses, ...mockAddresses]
+
+      setAddresses(allAddresses)
     } catch (error) {
       console.error('Error loading addresses:', error)
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('addresses.loadError', 'Failed to load addresses'))
@@ -257,9 +285,12 @@ export default function AddressesScreen({ navigation }) {
             <Text style={styles.emptyStateTitle}>
               {i18n.t('addresses.noAddresses', 'No addresses yet')}
             </Text>
-            <Text style={styles.emptyStateText}>
-              {i18n.t('addresses.addFirstAddress', 'Add your first delivery address to get started')}
-            </Text>
+          <Text style={styles.emptyStateText}>
+            {user.address && user.address.trim()
+              ? i18n.t('addresses.addressFromProfile', 'Your profile address will be automatically added as your first delivery address')
+              : i18n.t('addresses.addFirstAddress', 'Add your first delivery address to get started')
+            }
+          </Text>
 
             <TouchableOpacity
               style={styles.addFirstButton}

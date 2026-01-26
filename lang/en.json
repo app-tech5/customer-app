@@ -417,6 +417,7 @@
       "description": "Manage your delivery addresses for faster ordering",
       "noAddresses": "No addresses yet",
       "addFirstAddress": "Add your first delivery address to get started",
+      "addressFromProfile": "Your profile address will be automatically added as your first delivery address",
       "addAddress": "Add Address",
       "addNewAddress": "Add New Address",
       "default": "Default",
