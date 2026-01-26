@@ -159,6 +159,61 @@ class ApiClient {
     });
   }
 
+  // GESTION DU PORTEFEUILLE
+
+  // Récupérer les méthodes de paiement de l'utilisateur
+  async getUserPaymentMethods(userId) {
+    return await this.apiCall(`/users/${userId}/payment-methods`);
+  }
+
+  // Ajouter une méthode de paiement
+  async addPaymentMethod(userId, paymentMethodData) {
+    return await this.apiCall(`/users/${userId}/payment-methods`, {
+      method: 'POST',
+      body: JSON.stringify(paymentMethodData),
+    });
+  }
+
+  // Supprimer une méthode de paiement
+  async removePaymentMethod(userId, paymentMethodId) {
+    return await this.apiCall(`/users/${userId}/payment-methods/${paymentMethodId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Définir une méthode de paiement par défaut
+  async setDefaultPaymentMethod(userId, paymentMethodId) {
+    return await this.apiCall(`/users/${userId}/payment-methods/${paymentMethodId}/default`, {
+      method: 'PUT',
+    });
+  }
+
+  // Récupérer l'historique des transactions
+  async getUserTransactions(userId, page = 1, limit = 20) {
+    return await this.apiCall(`/users/${userId}/transactions?page=${page}&limit=${limit}`);
+  }
+
+  // Récupérer le solde du portefeuille
+  async getWalletBalance(userId) {
+    return await this.apiCall(`/users/${userId}/wallet/balance`);
+  }
+
+  // Ajouter de l'argent au portefeuille
+  async addMoneyToWallet(userId, amount, paymentMethodId) {
+    return await this.apiCall(`/users/${userId}/wallet/add-money`, {
+      method: 'POST',
+      body: JSON.stringify({ amount, paymentMethodId }),
+    });
+  }
+
+  // Retirer de l'argent du portefeuille
+  async withdrawFromWallet(userId, amount, paymentMethodId) {
+    return await this.apiCall(`/users/${userId}/wallet/withdraw`, {
+      method: 'POST',
+      body: JSON.stringify({ amount, paymentMethodId }),
+    });
+  }
+
   // // Restaurants
   // async getRestaurants() {
   //   const response = await this.apiCall('/resource/restaurants');
@@ -841,6 +896,16 @@ export const getAllMenuItems = async () => {
 export const getRestaurantById = (id) => api.getRestaurantById(id);
 export const addToFavorites = (restaurantId) => api.addToFavorites(restaurantId);
 export const removeFromFavorites = (restaurantId) => api.removeFromFavorites(restaurantId);
+
+// Wallet APIs
+export const getUserPaymentMethods = (userId) => api.getUserPaymentMethods(userId);
+export const addPaymentMethod = (userId, paymentMethodData) => api.addPaymentMethod(userId, paymentMethodData);
+export const removePaymentMethod = (userId, paymentMethodId) => api.removePaymentMethod(userId, paymentMethodId);
+export const setDefaultPaymentMethod = (userId, paymentMethodId) => api.setDefaultPaymentMethod(userId, paymentMethodId);
+export const getUserTransactions = (userId, page, limit) => api.getUserTransactions(userId, page, limit);
+export const getWalletBalance = (userId) => api.getWalletBalance(userId);
+export const addMoneyToWallet = (userId, amount, paymentMethodId) => api.addMoneyToWallet(userId, amount, paymentMethodId);
+export const withdrawFromWallet = (userId, amount, paymentMethodId) => api.withdrawFromWallet(userId, amount, paymentMethodId);
 
 // Collections (placeholders)
 export const restaurantsCol = 'restaurants';

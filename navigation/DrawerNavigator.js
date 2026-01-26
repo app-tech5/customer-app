@@ -186,6 +186,7 @@ export default function DrawerNavigator() {
             component={Wallet}
             options={{
                 title: i18n.t('drawer.wallet'),
+                headerShown: true,
                 drawerIcon: ({focused, size}) => (
                     <Entypo
                         name="wallet"

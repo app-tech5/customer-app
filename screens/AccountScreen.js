@@ -206,7 +206,7 @@ export default function AccountScreen({ navigation }) {
         iconType="MaterialIcons"
         title={i18n.t('drawer.wallet', 'Wallet')}
         subtitle={i18n.t('profile.managePayments', 'Manage payment methods')}
-        onPress={() => navigation.navigate('Wallet')}
+        onPress={() => navigation.navigate('WalletScreen')}
       />
 
       <MenuItem
