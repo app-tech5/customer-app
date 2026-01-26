@@ -235,6 +235,7 @@ export default function DrawerNavigator() {
             component={Settings}
             options={{
                 title: i18n.t('drawer.settings'),
+                headerShown: true,
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="settings-outline"
