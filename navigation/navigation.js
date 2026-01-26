@@ -29,6 +29,7 @@ import { SettingProvider } from '../contexts/SettingContext'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import SearchResults from '../screens/SearchResults'
+import CheckoutScreen from '../screens/CheckoutScreen'
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
     const Stack = createStackNavigator();
@@ -60,6 +61,7 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="Wallet" component={Wallet}/>
               <Stack.Screen name="AddCard" component={AddCard}/>
               <Stack.Screen name="Settings" component={Settings}/>
+              {/* <Stack.Screen name="CheckoutScreen" component={CheckoutScreen}/> */}
           </Stack.Navigator>
               </CategoriesContextProvider>
             </RestaurantsContext.Provider>

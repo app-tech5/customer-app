@@ -111,7 +111,7 @@ export default function DrawerNavigator() {
         />
 
         {/* 📦 COMMANDES */}
-        <Drawer.Screen
+        {/* <Drawer.Screen
             name = "MyOrders"
             component={MyOrdersScreen}
             options={{
@@ -125,7 +125,7 @@ export default function DrawerNavigator() {
                     />
                 )
             }}
-        />
+        /> */}
 
         <Drawer.Screen
             name = "Orders"
@@ -247,7 +247,7 @@ export default function DrawerNavigator() {
         />
 
         {/* 🏢 BUSINESS (optionnel) */}
-        <Drawer.Screen
+        {/* <Drawer.Screen
             name = "BusinessConsole"
             component={BusinessConsoleScreen}
             options={{
@@ -260,7 +260,7 @@ export default function DrawerNavigator() {
                     />
                 )
             }}
-        />
+        /> */}
     </Drawer.Navigator>
   )
 }

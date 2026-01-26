@@ -83,7 +83,8 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
 
             dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName })
             setLoading(false)
-            navigation.navigate('OrderRequest',{
+            // navigation.navigate('OrderRequest',{
+                navigation.navigate('CheckoutScreen',{
                 lat,
                 lng
             })
@@ -104,9 +105,13 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                   <TouchableOpacity
                       style={styles.checkoutButton}
                       onPress={() => {
-                        setLoading(true)
+                        // setLoading(true)
                         closeModal ? closeModal() : setModalVisible(false);
-                        addOrderToFirebase()
+                        // addOrderToFirebase()
+                        navigation.navigate('CheckoutScreen',{
+                            lat,
+                            lng
+                        })
                       }}
                       activeOpacity={0.9}
                   >
