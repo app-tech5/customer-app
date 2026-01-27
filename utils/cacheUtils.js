@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Cache keys
 const CACHE_KEYS = {
   RESTAURANT_FOODS: 'restaurant_foods_',
+  USER_SIGNIN_DATA: 'user_signin_data',
   CACHE_TIMESTAMP: '_timestamp',
   CACHE_VERSION: 'cache_version'
 };
@@ -269,3 +270,103 @@ export const cleanupExpiredCache = async () => {
     console.error('❌ Erreur lors du nettoyage du cache:', error);
   }
 };
+
+// ==================== FONCTIONS POUR LE CACHE DES INFOS DE CONNEXION ====================
+
+/**
+ * Sauvegarde les informations de connexion (email uniquement pour sécurité)
+ * @param {string} email - Email de l'utilisateur
+ * @param {boolean} rememberMe - Si l'utilisateur veut être mémorisé
+ */
+export const saveSignInData = async (email, rememberMe = true) => {
+  try {
+    if (!email || !rememberMe) {
+      console.log('🔒 Pas de sauvegarde des données de connexion');
+      return;
+    }
+
+    const signInData = {
+      email: email.trim().toLowerCase(),
+      rememberMe: true,
+      timestamp: Date.now(),
+      version: CACHE_CONFIG.VERSION
+    };
+
+    await AsyncStorage.setItem(CACHE_KEYS.USER_SIGNIN_DATA, JSON.stringify(signInData));
+    console.log('💾 Données de connexion sauvegardées pour:', email);
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde des données de connexion:', error);
+  }
+};
+
+/**
+ * Récupère les informations de connexion sauvegardées
+ * @returns {Object|null} Données de connexion ou null
+ */
+export const getSignInData = async () => {
+  try {
+    const cachedData = await AsyncStorage.getItem(CACHE_KEYS.USER_SIGNIN_DATA);
+
+    if (!cachedData) {
+      console.log('📭 Aucune donnée de connexion en cache');
+      return null;
+    }
+
+    const parsedData = JSON.parse(cachedData);
+
+    // Vérifier la version du cache
+    if (parsedData.version !== CACHE_CONFIG.VERSION) {
+      console.log('🔄 Version du cache de connexion obsolète, suppression');
+      await clearSignInData();
+      return null;
+    }
+
+    console.log('📖 Données de connexion chargées depuis le cache');
+    return {
+      email: parsedData.email,
+      rememberMe: parsedData.rememberMe,
+      timestamp: parsedData.timestamp
+    };
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la lecture des données de connexion:', error);
+    return null;
+  }
+};
+
+/**
+ * Supprime les données de connexion sauvegardées
+ */
+export const clearSignInData = async () => {
+  try {
+    await AsyncStorage.removeItem(CACHE_KEYS.USER_SIGNIN_DATA);
+    console.log('🗑️ Données de connexion supprimées');
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression des données de connexion:', error);
+  }
+};
+
+/**
+ * Met à jour l'email dans les données de connexion sauvegardées
+ * @param {string} newEmail - Nouveau email
+ */
+export const updateSignInEmail = async (newEmail) => {
+  try {
+    if (!newEmail) return;
+
+    const existingData = await getSignInData();
+
+    if (existingData) {
+      await saveSignInData(newEmail, existingData.rememberMe);
+    } else {
+      // Si pas de données existantes, créer avec rememberMe par défaut
+      await saveSignInData(newEmail, true);
+    }
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la mise à jour de l\'email:', error);
+  }
+};
+
+ 

@@ -10,6 +10,7 @@ import * as Animatable from "react-native-animatable"
 import { useDispatch } from 'react-redux'
 import { location } from '../global'
 import Loader from './Loader'
+import { saveSignInData, getSignInData } from '../utils/cacheUtils'
 
 
 
@@ -19,6 +20,17 @@ export default function SignIn({ navigation }) {
   const [password, setPassword] = useState(config.DEMO_MODE ? config.DEMO_PASSWORD : '')
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
+
+  // Charger l'email sauvegardé au montage
+  useEffect(() => {
+    const loadSavedEmail = async () => {
+      const savedData = await getSignInData();
+      if (savedData && savedData.email && !config.DEMO_MODE) {
+        setEmail(savedData.email);
+      }
+    };
+    loadSavedEmail();
+  }, [])
 
 
   const SignInUser = async () => {
@@ -44,6 +56,9 @@ export default function SignIn({ navigation }) {
 
       // Sauvegarder les données utilisateur localement
       await AsyncStorage.setItem('userData', JSON.stringify(userInfo))
+
+      // Sauvegarder l'email pour le cache intelligent
+      await saveSignInData(email, true);
 
       navigation.navigate('DrawerNavigator')
 
