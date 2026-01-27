@@ -161,6 +161,41 @@ class ApiClient {
 
   // GESTION DU PORTEFEUILLE
 
+  // Récupérer les adresses de l'utilisateur
+  async getUserAddresses(userId) {
+    return await this.apiCall(`/users/${userId}/addresses`);
+  }
+
+  // Ajouter une adresse
+  async addUserAddress(userId, addressData) {
+    return await this.apiCall(`/users/${userId}/addresses`, {
+      method: 'POST',
+      body: JSON.stringify(addressData),
+    });
+  }
+
+  // Modifier une adresse
+  async updateUserAddress(userId, addressId, addressData) {
+    return await this.apiCall(`/users/${userId}/addresses/${addressId}`, {
+      method: 'PUT',
+      body: JSON.stringify(addressData),
+    });
+  }
+
+  // Supprimer une adresse
+  async deleteUserAddress(userId, addressId) {
+    return await this.apiCall(`/users/${userId}/addresses/${addressId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Définir une adresse par défaut
+  async setDefaultAddress(userId, addressId) {
+    return await this.apiCall(`/users/${userId}/addresses/${addressId}/default`, {
+      method: 'PUT',
+    });
+  }
+
   // Récupérer les méthodes de paiement de l'utilisateur
   async getUserPaymentMethods(userId) {
     return await this.apiCall(`/users/${userId}/payment-methods`);
@@ -896,6 +931,13 @@ export const getAllMenuItems = async () => {
 export const getRestaurantById = (id) => api.getRestaurantById(id);
 export const addToFavorites = (restaurantId) => api.addToFavorites(restaurantId);
 export const removeFromFavorites = (restaurantId) => api.removeFromFavorites(restaurantId);
+
+// Address APIs
+export const getUserAddresses = (userId) => api.getUserAddresses(userId);
+export const addUserAddress = (userId, addressData) => api.addUserAddress(userId, addressData);
+export const updateUserAddress = (userId, addressId, addressData) => api.updateUserAddress(userId, addressId, addressData);
+export const deleteUserAddress = (userId, addressId) => api.deleteUserAddress(userId, addressId);
+export const setDefaultAddress = (userId, addressId) => api.setDefaultAddress(userId, addressId);
 
 // Wallet APIs
 export const getUserPaymentMethods = (userId) => api.getUserPaymentMethods(userId);

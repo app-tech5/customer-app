@@ -41,64 +41,70 @@ export default function AddressesScreen({ navigation }) {
   const loadAddresses = async () => {
     try {
       setLoading(true)
-      // TODO: Replace with real API call
-      // const addressesData = await getUserAddresses(user.id || user.userId)
+      // Try to get addresses from API, fallback to mock data
+      let addressesData = []
 
-      let userAddresses = []
+      try {
+        addressesData = await getUserAddresses(user.id || user.userId)
+      } catch (error) {
+        console.warn('Addresses API not available, using mock data:', error)
 
-      // If user has an address in their profile, create a default address
-      if (user.address && user.address.trim()) {
-        // Try to parse the address if it contains structured data
-        let addressParts = user.address.split(',')
-        let address = user.address
-        let city = ''
-        let postalCode = ''
-        let country = 'France' // Default country
+        // Create mock addresses based on user data
+        let userAddresses = []
 
-        if (addressParts.length >= 2) {
-          address = addressParts[0].trim()
-          city = addressParts[1].trim()
+        // If user has an address in their profile, create a default address
+        if (user.address && user.address.trim()) {
+          // Try to parse the address if it contains structured data
+          let addressParts = user.address.split(',')
+          let address = user.address
+          let city = ''
+          let postalCode = ''
+          let country = 'France' // Default country
 
-          if (addressParts.length >= 3) {
-            postalCode = addressParts[2].trim()
+          if (addressParts.length >= 2) {
+            address = addressParts[0].trim()
+            city = addressParts[1].trim()
+
+            if (addressParts.length >= 3) {
+              postalCode = addressParts[2].trim()
+            }
           }
+
+          userAddresses.push({
+            id: 'user_default',
+            type: 'home',
+            name: 'My Address',
+            address: address,
+            city: city,
+            postalCode: postalCode,
+            country: country,
+            isDefault: true,
+            coordinates: user.location ? {
+              lat: user.location.latitude,
+              lng: user.location.longitude
+            } : null
+          })
         }
 
-        userAddresses.push({
-          id: 'user_default',
-          type: 'home',
-          name: 'My Address',
-          address: address,
-          city: city,
-          postalCode: postalCode,
-          country: country,
-          isDefault: true,
-          coordinates: user.location ? {
-            lat: user.location.latitude,
-            lng: user.location.longitude
-          } : null
-        })
+        // Mock additional addresses
+        const mockAddresses = [
+          {
+            id: '1',
+            type: 'work',
+            name: 'Work',
+            address: '456 Business Avenue, Floor 15',
+            city: 'Paris',
+            postalCode: '75002',
+            country: 'France',
+            isDefault: !user.address || !user.address.trim(),
+            coordinates: { lat: 48.8584, lng: 2.2945 }
+          }
+        ]
+
+        addressesData = [...userAddresses, ...mockAddresses]
       }
 
-      // Mock additional addresses for now
-      const mockAddresses = [
-        {
-          id: '1',
-          type: 'work',
-          name: 'Work',
-          address: '456 Business Avenue, Floor 15',
-          city: 'Paris',
-          postalCode: '75002',
-          country: 'France',
-          isDefault: !user.address || !user.address.trim(),
-          coordinates: { lat: 48.8584, lng: 2.2945 }
-        }
-      ]
-
-      // Combine user address with mock addresses
-      const allAddresses = [...userAddresses, ...mockAddresses]
-
-      setAddresses(allAddresses)
+      setAddresses(addressesData)
     } catch (error) {
       console.error('Error loading addresses:', error)
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('addresses.loadError', 'Failed to load addresses'))

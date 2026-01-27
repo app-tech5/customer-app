@@ -10,10 +10,11 @@ import Loader from './Loader'
 export default function CheckoutScreen({ navigation, route }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
-  const cartItems = useSelector((state) => state.cartReducer)
 
-  const [restaurantName, setRestaurantName] = useState('')
-  const [restaurant, setRestaurant] = useState(null)
+  // Récupération des données depuis les paramètres de navigation
+  const cartItems = route.params?.items || []
+  const restaurant = route.params?.restaurant || null
+  const restaurantName = route.params?.restaurantName || restaurant?.name || ''
   const [addresses, setAddresses] = useState([])
   const [paymentMethods, setPaymentMethods] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
@@ -50,27 +51,53 @@ export default function CheckoutScreen({ navigation, route }) {
     try {
       setLoading(true)
 
-      // Récupérer les données du restaurant depuis les paramètres ou le panier
-      const restaurantParam = route.params?.restaurant
-      const restaurantNameParam = route.params?.restaurantName
+      // Les données du restaurant viennent déjà de route.params
 
-      if (restaurantParam) {
-        setRestaurant(restaurantParam)
-        setRestaurantName(restaurantParam.name)
-      } else if (restaurantNameParam) {
-        setRestaurantName(restaurantNameParam)
-        // Trouver le restaurant dans les items du panier
-        const restaurantFromCart = cartItems.find(item => item.restaurantName === restaurantNameParam)
-        if (restaurantFromCart) {
-          setRestaurant(restaurantFromCart.restaurant || { name: restaurantNameParam })
+      // Charger les adresses et méthodes de paiement en parallèle
+      // Avec fallback vers des données mockées si l'API n'existe pas encore
+      let addressesData = []
+      let paymentData = []
+
+      try {
+        addressesData = await getUserAddresses(user.id || user.userId)
+      } catch (error) {
+        console.warn('Addresses API not available, using mock data:', error)
+        // Mock data for addresses
+        if (user.address && user.address.trim()) {
+          addressesData = [{
+            id: 'user_default',
+            type: 'home',
+            name: 'My Address',
+            address: user.address,
+            city: '',
+            postalCode: '',
+            country: 'France',
+            isDefault: true
+          }]
+        } else {
+          addressesData = []
         }
       }
 
-      // Charger les adresses et méthodes de paiement en parallèle
-      const [addressesData, paymentData] = await Promise.all([
-        getUserAddresses(user.id || user.userId).catch(() => []),
-        getUserPaymentMethods(user.id || user.userId).catch(() => [])
-      ])
+      try {
+        paymentData = await getUserPaymentMethods(user.id || user.userId)
+      } catch (error) {
+        console.warn('Payment methods API not available, using mock data:', error)
+        // Mock data for payment methods
+        paymentData = [{
+          id: 'mock_card',
+          methodType: 'credit_card',
+          cardDetails: {
+            cardNumberLast4: '4242',
+            cardBrand: 'visa',
+            expiryMonth: 12,
+            expiryYear: 2025,
+            cardholderName: user.name || 'User'
+          },
+          isDefault: true,
+          isActive: true
+        }]
+      }
 
       setAddresses(addressesData || [])
 

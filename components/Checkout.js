@@ -83,8 +83,10 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
 
             dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName })
             setLoading(false)
-            // navigation.navigate('OrderRequest',{
-                navigation.navigate('CheckoutScreen',{
+            navigation.navigate('CheckoutScreen',{
+                restaurantName,
+                restaurant,
+                items,
                 lat,
                 lng
             })
