@@ -7,6 +7,7 @@ import { colors, currency, language } from '../global'
 import Loader from './Loader'
 import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
+import { config } from '../config'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
@@ -44,8 +45,11 @@ export default function OrderRequest({ route, navigation }) {
   }, [navigation])
 
   const handleConfirmOrder = async () => {
+    let createdOrder = null;
+
     try {
-      setLoading(true)
+      setLoading(true);
+      console.log('🍽️ Starting order confirmation process...');
 
       // Transformer les items du panier au format attendu par le modèle Order
       const orderItems = items.map(cartItem => ({
@@ -84,27 +88,60 @@ export default function OrderRequest({ route, navigation }) {
         }
       };
 
-      const createdOrder = await api.createOrder(orderData);
+      console.log('📦 Order data prepared:', orderData);
+
+      // Gérer le mode demo : ne pas sauvegarder en base
+      if (config.DEMO_MODE) {
+        console.log('🎭 DEMO MODE: Simulating order creation without database save');
+
+        // Simuler une commande créée pour le mode demo
+        createdOrder = {
+          _id: `demo_order_${Date.now()}`,
+          id: `demo_order_${Date.now()}`,
+          ...orderData,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          orderId: `DEMO-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+        };
+
+        // Attendre un peu pour simuler le traitement
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        console.log('✅ Demo order created successfully:', createdOrder);
+      } else {
+        console.log('🌐 Creating order in database...');
+        // Créer la commande en base pour le mode normal
+        createdOrder = await api.createOrder(orderData);
+        console.log('✅ Order created in database:', createdOrder);
+      }
 
       // Vider le panier pour ce restaurant
-      dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName })
+      console.log('🗑️ Clearing restaurant cart...');
+      dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName });
 
       // Naviguer vers OrderTracking avec la commande créée
-      navigation.replace('OrderTracking', {
+      console.log('🧭 Navigating to OrderTracking...');
+      navigation.navigate('OrderTracking', {
         order: createdOrder,
         lat,
         lng
-      })
+      });
+
+      console.log('🎉 Order confirmation process completed successfully!');
 
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('❌ Error in handleConfirmOrder:', error);
+
+      // Afficher une alerte d'erreur
       Alert.alert(
         i18n.t('common.error', 'Error'),
-        i18n.t('order.createError', 'Failed to create order. Please try again.'),
+        error.message || i18n.t('order.createError', 'Failed to create order. Please try again.'),
         [{ text: i18n.t('common.ok', 'OK') }]
       );
     } finally {
-      setLoading(false)
+      // S'assurer que le loading est toujours arrêté
+      console.log('🔄 Setting loading to false');
+      setLoading(false);
     }
   }
 
