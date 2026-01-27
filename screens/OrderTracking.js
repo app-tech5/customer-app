@@ -36,8 +36,15 @@ export default function OrderTracking() {
     // Si on a déjà l'order en paramètre, on l'utilise directement
     // Sinon on charge depuis l'API
     if (orderParam && (orderParam.id || orderParam._id)) {
-      // Rafraîchir les données de la commande depuis l'API
-      loadOrder()
+      // Pour les commandes demo, on n'essaie pas de rafraîchir depuis l'API
+      const orderId = orderParam.id || orderParam._id
+      if (!orderId.startsWith('demo_order_')) {
+        // Rafraîchir les données de la commande depuis l'API seulement pour les vraies commandes
+        loadOrder()
+      } else {
+        console.log('🎭 Demo order detected in useEffect, skipping API refresh')
+        setLoader(false)
+      }
     }
   }, [navigation])
 
@@ -49,6 +56,13 @@ export default function OrderTracking() {
       const orderId = orderParam?.id || orderParam?._id || order?.id || order?._id
       if (!orderId) {
         throw new Error('Order ID is required')
+      }
+
+      // Pour les commandes demo (mode demo), on n'essaie pas de charger depuis l'API
+      if (orderId.startsWith('demo_order_')) {
+        console.log('🎭 Demo order detected, skipping API call');
+        setOrder(orderParam)
+        return
       }
 
       const orderData = await getOrderById(orderId)
@@ -114,22 +128,36 @@ export default function OrderTracking() {
   }
 
   const formatDate = (dateString) => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    if (!dateString) return i18n.t('common.unknown', 'Unknown')
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return i18n.t('common.unknown', 'Unknown')
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    } catch (error) {
+      console.error('Error formatting date:', error)
+      return i18n.t('common.unknown', 'Unknown')
+    }
   }
 
   const formatEstimatedTime = (dateString) => {
-    if (!dateString) return null
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = date - now
-    const minutes = Math.floor(diff / 60000)
+    if (!dateString) return i18n.t('common.unknown', 'Unknown')
 
-    if (minutes < 0) return i18n.t('order.delivered', 'Delivered')
-    if (minutes < 60) return `${minutes} ${i18n.t('order.minutes', 'minutes')}`
-    const hours = Math.floor(minutes / 60)
-    return `${hours}h ${minutes % 60}${i18n.t('order.minutes', 'min')}`
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return i18n.t('common.unknown', 'Unknown')
+
+      const now = new Date()
+      const diff = date - now
+      const minutes = Math.floor(diff / 60000)
+
+      if (minutes < 0) return i18n.t('order.delivered', 'Delivered')
+      if (minutes < 60) return `${minutes} ${i18n.t('order.minutes', 'minutes')}`
+      const hours = Math.floor(minutes / 60)
+      return `${hours}h ${minutes % 60}${i18n.t('order.minutes', 'min')}`
+    } catch (error) {
+      console.error('Error formatting estimated time:', error)
+      return i18n.t('common.unknown', 'Unknown')
+    }
   }
 
 
@@ -173,7 +201,7 @@ export default function OrderTracking() {
         {/* Header avec numéro de commande */}
         <View style={styles.header}>
           <Text style={styles.orderId}>
-            {i18n.t('order.orderId', 'Order')} #{order.id || order._id}
+            {i18n.t('order.orderId', 'Order')} #{String(order.id || order._id || 'Unknown')}
           </Text>
           <Text style={styles.orderDate}>
             {formatDate(order.createdAt || order.date)}
