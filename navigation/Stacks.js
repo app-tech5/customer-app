@@ -14,6 +14,7 @@ import OrdersScreen from '../screens/OrdersScreen'
 import OrderTracking from '../screens/OrderTracking'
 import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
+import CartDetailsScreen from '../screens/CartDetailsScreen'
 import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
 import RestaurantSearchResults from '../screens/RestaurantSearchResults'
 import AccountScreen from '../screens/AccountScreen'
@@ -21,7 +22,7 @@ import EditProfileScreen from '../screens/EditProfileScreen'
 import AddressesScreen from '../screens/AddressesScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
-import Wallet from '../screens/Wallet';
+import Wallet from '../screens/Wallet'
 
 
 const  HomeStack = createStackNavigator()
@@ -46,12 +47,20 @@ export function HomeNavigator() {
           options={{ headerShown: false }} />
       
 
-      <HomeStack.Screen 
+      <HomeStack.Screen
           name="MenuDetailScreen"
           component={MenuDetailScreen}
           options={{headerShown: false}}/>
 
-      <HomeStack.Screen 
+      <HomeStack.Screen
+          name="CartDetails"
+          component={CartDetailsScreen}
+          options={{
+            title: 'Détails du panier',
+            headerShown: true
+          }}/>
+
+      <HomeStack.Screen
           name="PreferenceScreen"
           component={PreferenceScreen}
           options={{headerShown: false}}/>
@@ -79,22 +88,22 @@ export function OrderNavigator() {
 
   return (
     <OrderStack.Navigator>
-       <OrderStack.Screen 
+       <OrderStack.Screen
           name="Carts"
           component={CartScreen}
           options={{headerShown: true, headerLeft: null}}/>
 
-       <OrderStack.Screen 
+       <OrderStack.Screen
           name="OrderDetails"
           component={OrderDetails}
           options={{headerShown: false}}/>
 
-       <OrderStack.Screen 
+       <OrderStack.Screen
           name="OrderTracking"
           component={OrderTracking}
           options={{headerShown: true}}/>
 
-       <OrderStack.Screen 
+       <OrderStack.Screen
           name="Orders"
           component={OrdersScreen}
           options={{}}/>

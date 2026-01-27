@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Animated, Image} from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { useNavigation } from '@react-navigation/native'
 import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -9,6 +10,7 @@ import i18n from '../i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=>{
+    const navigation = useNavigation()
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const total = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
     const [loader, setLoader] = useState(false)
@@ -156,6 +158,14 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
         closeModal()
     }
 
+    const viewCartDetails = () => {
+        closeModal()
+        navigation.navigate('CartDetails', {
+            restaurantName,
+            restaurant
+        })
+    }
+
     return (
         <TouchableOpacity
             style={styles.modalContainer}
@@ -279,6 +289,14 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                             </View>
 
                             <View style={styles.actionButtons}>
+                                <TouchableOpacity
+                                    onPress={viewCartDetails}
+                                    style={styles.detailsButton}
+                                >
+                                    <Ionicons name="expand-outline" size={20} color={colors.primary} />
+                                    <Text style={styles.detailsButtonText}>{i18n.t('cart.viewDetails')}</Text>
+                                </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={removeAllItems}
                                     style={styles.clearButton}
@@ -494,6 +512,21 @@ const styles = StyleSheet.create({
     actionButtons: {
         padding: 20,
         gap: 12,
+    },
+    detailsButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        backgroundColor: colors.primary,
+        borderRadius: 12,
+    },
+    detailsButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+        marginLeft: 8,
     },
     clearButton: {
         flexDirection: 'row',
