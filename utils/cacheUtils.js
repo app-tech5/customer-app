@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Cache keys
 const CACHE_KEYS = {
   RESTAURANT_FOODS: 'restaurant_foods_',
+  RESTAURANTS: 'restaurants_list',
   USER_SIGNIN_DATA: 'user_signin_data',
   CACHE_TIMESTAMP: '_timestamp',
   CACHE_VERSION: 'cache_version'
@@ -239,6 +240,173 @@ export const loadFoodsWithSmartCache = async (
 };
 
 /**
+ * Sauvegarde la liste des restaurants en cache
+ * @param {Array} restaurants - Liste des restaurants à sauvegarder
+ */
+export const saveRestaurantsToCache = async (restaurants) => {
+  try {
+    if (!restaurants || !Array.isArray(restaurants)) {
+      console.warn('⚠️ Tentative de sauvegarde de restaurants invalides en cache');
+      return;
+    }
+
+    const cacheKey = CACHE_KEYS.RESTAURANTS;
+    const timestampKey = CACHE_KEYS.RESTAURANTS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    const cacheData = {
+      data: restaurants,
+      version: CACHE_CONFIG.VERSION,
+      timestamp: Date.now()
+    };
+
+    await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
+
+    console.log(`💾 Liste des restaurants sauvegardée en cache: ${restaurants.length} restaurants`);
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde des restaurants en cache:', error);
+  }
+};
+
+/**
+ * Récupère la liste des restaurants depuis le cache
+ * @returns {Object|null} Données du cache ou null
+ */
+export const getRestaurantsFromCache = async () => {
+  try {
+    const cacheKey = CACHE_KEYS.RESTAURANTS;
+    const timestampKey = CACHE_KEYS.RESTAURANTS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    const cachedData = await AsyncStorage.getItem(cacheKey);
+    const timestamp = await AsyncStorage.getItem(timestampKey);
+
+    if (!cachedData) {
+      console.log(`📭 Pas de restaurants en cache`);
+      return null;
+    }
+
+    const parsedData = JSON.parse(cachedData);
+
+    // Vérifier la version du cache
+    if (parsedData.version !== CACHE_CONFIG.VERSION) {
+      console.log(`🔄 Version du cache des restaurants obsolète, suppression`);
+      await clearRestaurantsCache();
+      return null;
+    }
+
+    // Vérifier l'expiration (même durée que les produits)
+    if (isCacheExpired(parsedData.timestamp)) {
+      console.log(`⏰ Cache des restaurants expiré, suppression`);
+      await clearRestaurantsCache();
+      return null;
+    }
+
+    console.log(`📖 Restaurants chargés depuis le cache: ${parsedData.data.length} restaurants`);
+    return {
+      data: parsedData.data,
+      timestamp: parsedData.timestamp,
+      fromCache: true
+    };
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la lecture du cache des restaurants:', error);
+    return null;
+  }
+};
+
+/**
+ * Supprime le cache des restaurants
+ */
+export const clearRestaurantsCache = async () => {
+  try {
+    const cacheKey = CACHE_KEYS.RESTAURANTS;
+    const timestampKey = CACHE_KEYS.RESTAURANTS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    await AsyncStorage.removeItem(cacheKey);
+    await AsyncStorage.removeItem(timestampKey);
+
+    console.log(`🗑️ Cache des restaurants supprimé`);
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression du cache des restaurants:', error);
+  }
+};
+
+/**
+ * Charge les restaurants avec un cache intelligent
+ * 1. Lit d'abord le cache AsyncStorage
+ * 2. Affiche immédiatement si disponible
+ * 3. Fetch l'API en arrière-plan
+ * 4. Met à jour si les données ont changé
+ *
+ * @param {Function} apiFetcher - Fonction pour fetch l'API (getRestaurantsFromFirebase)
+ * @param {Function} onDataLoaded - Callback quand les données sont prêtes (cache ou API)
+ * @param {Function} onDataUpdated - Callback quand les données sont mises à jour depuis l'API
+ * @param {Function} onLoadingStateChange - Callback pour l'état de chargement
+ */
+export const loadRestaurantsWithSmartCache = async (
+  apiFetcher,
+  onDataLoaded,
+  onDataUpdated,
+  onLoadingStateChange
+) => {
+  try {
+    console.log(`🚀 Démarrage du chargement intelligent des restaurants`);
+
+    // 1. Essayer de charger depuis le cache
+    onLoadingStateChange?.(true);
+    const cachedData = await getRestaurantsFromCache();
+
+    if (cachedData && cachedData.data) {
+      console.log('⚡ Restaurants affichés depuis le cache');
+      onDataLoaded(cachedData.data, true); // true = fromCache
+      onLoadingStateChange?.(false);
+    } else {
+      console.log('📭 Pas de cache disponible, attente des données API');
+      onLoadingStateChange?.(true);
+    }
+
+    // 2. Fetch l'API en arrière-plan (toujours, même si cache disponible)
+    console.log('🌐 Fetch API en arrière-plan pour les restaurants...');
+    const freshData = await apiFetcher();
+
+    if (freshData && Array.isArray(freshData)) {
+      console.log(`📡 Restaurants API reçus: ${freshData.length} restaurants`);
+
+      // 3. Vérifier si les données ont changé
+      const hasChanged = !cachedData || hasDataChanged(cachedData.data, freshData);
+
+      if (hasChanged) {
+        console.log('🔄 Restaurants mis à jour, sauvegarde en cache et affichage');
+
+        // Sauvegarder en cache
+        await saveRestaurantsToCache(freshData);
+
+        // Mettre à jour l'affichage
+        onDataUpdated(freshData);
+      } else {
+        console.log('✅ Restaurants identiques, pas de mise à jour nécessaire');
+      }
+    } else {
+      console.warn('⚠️ Données restaurants API invalides ou vides');
+    }
+
+    // Fin du chargement
+    onLoadingStateChange?.(false);
+
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement intelligent des restaurants:', error);
+    onLoadingStateChange?.(false);
+
+    // En cas d'erreur, essayer quand même d'utiliser le cache si disponible
+    const fallbackCache = await getRestaurantsFromCache();
+    if (fallbackCache && fallbackCache.data) {
+      console.log('🔄 Erreur API, utilisation du cache comme fallback');
+      onDataLoaded(fallbackCache.data, true);
+    }
+  }
+};
+
+/**
  * Nettoie tous les caches expirés (fonction de maintenance)
  */
 export const cleanupExpiredCache = async () => {
@@ -254,8 +422,13 @@ export const cleanupExpiredCache = async () => {
       const timestamp = await AsyncStorage.getItem(timestampKey);
 
       if (isCacheExpired(parseInt(timestamp))) {
-        const restaurantId = timestampKey.replace(CACHE_KEYS.RESTAURANT_FOODS, '').replace(CACHE_KEYS.CACHE_TIMESTAMP, '');
-        await clearFoodsCache(restaurantId);
+        // Déterminer le type de cache et nettoyer
+        if (timestampKey.includes(CACHE_KEYS.RESTAURANT_FOODS)) {
+          const restaurantId = timestampKey.replace(CACHE_KEYS.RESTAURANT_FOODS, '').replace(CACHE_KEYS.CACHE_TIMESTAMP, '');
+          await clearFoodsCache(restaurantId);
+        } else if (timestampKey === CACHE_KEYS.RESTAURANTS + CACHE_KEYS.CACHE_TIMESTAMP) {
+          await clearRestaurantsCache();
+        }
         cleanedCount++;
       }
     }

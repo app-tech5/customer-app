@@ -11,6 +11,7 @@ import { colors, getDistanceFromLatLonInKm } from '../global'
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurantsFromFirebase, getAllPromotions, getAllMenuItems } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { loadRestaurantsWithSmartCache } from '../utils/cacheUtils'
 import { AntDesign } from '@expo/vector-icons'
 import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
@@ -75,12 +76,47 @@ export default function Home({navigation}) {
     // Charger la position utilisateur
     getUserLocation()
 
-    // Charger les restaurants directement depuis l'API (pas de cache)
-    getRestaurantsFromFirebase()
-      .then(async (restaurants)=>{
-        setRestaurantData(restaurants)
+    // Charger les restaurants avec cache intelligent
+    loadRestaurantsWithSmartCache(
+      // Fonction API fetcher
+      async () => {
+        console.log('🌐 Fetching restaurants from API');
+        return await getRestaurantsFromFirebase();
+      },
+      // Callback quand les données sont prêtes (cache ou API)
+      async (restaurants, fromCache) => {
+        setRestaurantData(restaurants);
 
-        // Charger TOUTES les promotions et menus en parallèle
+        if (fromCache) {
+          console.log('⚡ Restaurants affichés depuis le cache');
+        } else {
+          console.log('📡 Restaurants affichés depuis l\'API');
+        }
+
+        // Charger TOUTES les promotions et menus en parallèle (seulement si pas fromCache pour éviter les appels multiples)
+        if (!fromCache) {
+          try {
+            const [promotions, menus] = await Promise.all([
+              getAllPromotions(),
+              getAllMenuItems()
+            ]);
+            setAllPromotions(promotions || []);
+            setAllMenus(menus || []);
+            console.log('🏷️ All promotions loaded:', promotions?.length || 0);
+            console.log('🍽️ All menus loaded:', menus?.length || 0);
+          } catch (error) {
+            console.error('Error loading promotions and menus:', error);
+            setAllPromotions([]);
+            setAllMenus([]);
+          }
+        }
+      },
+      // Callback quand les données sont mises à jour depuis l'API
+      async (freshRestaurants) => {
+        console.log('🔄 Restaurants mis à jour depuis l\'API');
+        setRestaurantData(freshRestaurants);
+
+        // Charger les promotions et menus lors de la mise à jour
         try {
           const [promotions, menus] = await Promise.all([
             getAllPromotions(),
@@ -88,19 +124,17 @@ export default function Home({navigation}) {
           ]);
           setAllPromotions(promotions || []);
           setAllMenus(menus || []);
-          console.log('🏷️ All promotions loaded:', promotions?.length || 0);
-          console.log('🍽️ All menus loaded:', menus?.length || 0);
+          console.log('🏷️ Promotions rechargées:', promotions?.length || 0);
+          console.log('🍽️ Menus rechargés:', menus?.length || 0);
         } catch (error) {
-          console.error('Error loading promotions and menus:', error);
+          console.error('Error reloading promotions and menus:', error);
           setAllPromotions([]);
           setAllMenus([]);
         }
-      })
-      .catch(error => {
-        console.error('Error loading restaurants:', error);
-        setRestaurantData([]); // Liste vide par défaut
-        setAllPromotions([]);
-      });
+      },
+      // Callback pour l'état de chargement (non utilisé ici car on gère le loading différemment)
+      null
+    );
   },[])
 
   // Fonction pour appliquer les filtres aux restaurants
