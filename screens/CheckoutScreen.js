@@ -6,6 +6,7 @@ import { getUserPaymentMethods, getUserAddresses } from '../api'
 import i18n from '../i18n'
 import { colors } from '../global'
 import Loader from './Loader'
+import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 export default function CheckoutScreen({ navigation, route }) {
   const dispatch = useDispatch()
@@ -15,6 +16,7 @@ export default function CheckoutScreen({ navigation, route }) {
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
   const restaurantName = route.params?.restaurantName || restaurant?.name || ''
+  const totalsFromParams = route.params?.totals || null
   const [addresses, setAddresses] = useState([])
   const [paymentMethods, setPaymentMethods] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
@@ -22,12 +24,24 @@ export default function CheckoutScreen({ navigation, route }) {
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [loading, setLoading] = useState(true)
 
-  // Calculs des prix
-  const subtotal = cartItems.reduce((total, item) => total + (item.totalPrice || item.price), 0)
-  const deliveryFee = 2.99
+  // Utiliser les totaux passés en paramètre ou les calculer en fallback
+  const { deliverySettings, calculateTotal } = useDeliverySettings()
+  const cartTotal = cartItems.reduce((total, item) => total + (item.totalPrice || item.price), 0)
+
+  const totals = totalsFromParams || calculateTotal(cartTotal, restaurant?.taxRate) || {
+    subtotal: cartTotal,
+    deliveryFee: 2.99,
+    taxAmount: cartTotal * 0.08,
+    total: cartTotal + 2.99 + (cartTotal * 0.08),
+    isFreeDelivery: false
+  }
+
+  // Pour compatibilité avec l'ancien code
+  const subtotal = totals.subtotal
+  const deliveryFee = totals.deliveryFee
+  const taxAmount = totals.taxAmount
+  const total = totals.total
   const taxRate = restaurant?.taxRate || 0.08
-  const taxAmount = subtotal * taxRate
-  const total = subtotal + deliveryFee + taxAmount
 
   useEffect(() => {
     loadCheckoutData()

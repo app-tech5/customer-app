@@ -20,13 +20,15 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const { calculateTotal } = useDeliverySettings()
 
+    // Calcul correct du total en groupant les items
+    const cartTotal = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
+
     // Calculs centralisés via le contexte
-    const subtotal = items.reduce((prev, curr)=> prev + curr.price, 0)
-    const totals = calculateTotal(subtotal, restaurant?.taxRate) || {
-      subtotal,
+    const totals = calculateTotal(cartTotal, restaurant?.taxRate) || {
+      subtotal: cartTotal,
       deliveryFee: 2.99,
-      taxAmount: subtotal * 0.08,
-      total: subtotal + 2.99 + (subtotal * 0.08),
+      taxAmount: cartTotal * 0.08,
+      total: cartTotal + 2.99 + (cartTotal * 0.08),
       isFreeDelivery: false
     }
     const { total } = totals
@@ -115,6 +117,10 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                             params: {
                               screen: 'CheckoutScreen',
                               params: {
+                                items,
+                                restaurant,
+                                restaurantName,
+                                totals,
                                 lat,
                                 lng,
                               },
