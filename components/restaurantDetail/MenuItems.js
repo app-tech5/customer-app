@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { groupFoods } from '../../data';
 import { FlatList } from 'react-native-gesture-handler';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
+import { loadFoodsWithSmartCache } from '../../utils/cacheUtils';
 
 const styles = StyleSheet.create({
   menuItemStyle: { flex: 1, },
@@ -109,6 +110,57 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilters, setActiveFilters] = useState([])
 
+  // Fonction pour traiter et filtrer les données de l'API
+  const processFoodsData = (rawFoods) => {
+    if (!rawFoods || !Array.isArray(rawFoods) || rawFoods.length === 0) {
+      console.log('❌ No foods data to process');
+      return [];
+    }
+
+    console.log('=== API RESPONSE ===');
+    console.log('Foods fetched from API:', rawFoods.length);
+
+    // Debug: Afficher les premières données reçues
+    if (rawFoods.length > 0) {
+      console.log('🔍 Sample food data:', JSON.stringify(rawFoods[0], null, 2));
+      console.log('🔍 Image field check:', rawFoods.slice(0, 3).map(f => ({ id: f.id || f._id, image: f.image, hasImage: !!f.image })));
+    }
+
+    // Filtrer côté frontend : ignorer les produits sans image valide
+    const foodsWithValidImages = rawFoods.filter(food => {
+      const hasValidImage = food &&
+        food.image &&
+        typeof food.image === 'string' &&
+        food.image.trim() !== '' &&
+        food.image !== 'null' &&
+        food.image !== 'undefined';
+
+      // Debug: Log pourquoi chaque produit est filtré ou gardé
+      if (!hasValidImage) {
+        console.log('❌ Filtered out food:', { id: food.id || food._id, image: food.image, reason: !food.image ? 'no image field' : 'invalid image' });
+      }
+
+      return hasValidImage;
+    });
+
+    console.log(`📦 Received ${rawFoods.length} foods from backend`);
+    console.log(`✅ ${foodsWithValidImages.length} foods with valid images (filtered ${rawFoods.length - foodsWithValidImages.length} without images)`);
+
+    if (foodsWithValidImages.length === 0) {
+      console.log('❌ No foods with valid images available');
+      return [];
+    }
+
+    const processedFoods = foodsWithValidImages.map(food => ({
+      ...food,
+      id: food.id || food._id,
+      price: Number(food.price)
+    }));
+
+    console.log('🍽️ Final processed foods with images:', processedFoods.length);
+    return processedFoods;
+  };
+
   useEffect(() => {
     if (!restaurantData) {
       console.log('❌ No restaurant data available');
@@ -123,10 +175,9 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       dishesCount: restaurantData.dishes?.length || 0
     });
 
-    setLoader(true)
     const restaurantId = restaurantData.restaurantId || restaurantData.id;
 
-    // Fetch categories for this restaurant
+    // Charger les catégories (pas de cache pour le moment)
     getCategoriesFromRestaurant(restaurantId).then((restaurantCategories) => {
       console.log('Categories for restaurant:', restaurantCategories);
       // For now, just use all categories since the API returns all categories
@@ -135,65 +186,36 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       console.error('Error fetching categories:', error);
     });
 
-    getFoods(restaurantId).then((foods) => {
-      console.log('=== API RESPONSE ===');
-      console.log('Foods fetched from API:', foods?.length || 0);
+    // Utiliser le cache intelligent pour les produits
+    loadFoodsWithSmartCache(
+      restaurantId,
+      // Fonction API fetcher
+      async (id) => {
+        console.log(`🌐 Fetching foods from API for restaurant ${id}`);
+        return await getFoods(id);
+      },
+      // Callback quand les données sont prêtes (cache ou API)
+      (data, fromCache) => {
+        const processedData = processFoodsData(data);
+        setFoods(processedData);
 
-      // Debug: Afficher les premières données reçues
-      if (foods && Array.isArray(foods) && foods.length > 0) {
-        console.log('🔍 Sample food data:', JSON.stringify(foods[0], null, 2));
-        console.log('🔍 Image field check:', foods.slice(0, 3).map(f => ({ id: f.id || f._id, image: f.image, hasImage: !!f.image })));
-      }
-
-      if (foods && Array.isArray(foods) && foods.length > 0) {
-        // Filtrer côté frontend : ignorer les produits sans image valide
-        const foodsWithValidImages = foods.filter(food => {
-          const hasValidImage = food &&
-            food.image &&
-            typeof food.image === 'string' &&
-            food.image.trim() !== '' &&
-            food.image !== 'null' &&
-            food.image !== 'undefined';
-
-          // Debug: Log pourquoi chaque produit est filtré ou gardé
-          if (!hasValidImage) {
-            console.log('❌ Filtered out food:', { id: food.id || food._id, image: food.image, reason: !food.image ? 'no image field' : 'invalid image' });
-          }
-
-          return hasValidImage;
-        });
-
-        console.log(`📦 Received ${foods.length} foods from backend`);
-        console.log(`✅ ${foodsWithValidImages.length} foods with valid images (filtered ${foods.length - foodsWithValidImages.length} without images)`);
-
-        if (foodsWithValidImages.length === 0) {
-          console.log('❌ No foods with valid images available');
-          setFoods([]);
-          setLoader(false);
-          return;
+        if (fromCache) {
+          console.log('⚡ Données affichées depuis le cache');
+        } else {
+          console.log('📡 Données affichées depuis l\'API');
         }
-
-        const processedFoods = foodsWithValidImages.map(food => ({
-          ...food,
-          id: food.id || food._id,
-          price: Number(food.price)
-        }));
-
-        console.log('🍽️ Final processed foods with images:', processedFoods.length);
-        setFoods(processedFoods);
-        setLoader(false);
-        return;
+      },
+      // Callback quand les données sont mises à jour depuis l'API
+      (freshData) => {
+        console.log('🔄 Mise à jour des données depuis l\'API');
+        const processedData = processFoodsData(freshData);
+        setFoods(processedData);
+      },
+      // Callback pour l'état de chargement
+      (isLoading) => {
+        setLoader(isLoading);
       }
-
-      // Si pas de données de l'API
-      console.log('❌ No foods available from backend');
-      setFoods([]);
-      setLoader(false)
-    }).catch(error => {
-      console.error('❌ Error fetching foods from database:', error);
-      setFoods([]);
-      setLoader(false);
-    })
+    );
 
   }, [activeTab, restaurantData])
 

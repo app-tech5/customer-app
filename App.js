@@ -1,6 +1,7 @@
 import RootNavigation from "./navigation/navigation";
 import { SafeAreaView, StatusBar} from "react-native";
 import {useFonts} from 'expo-font'
+import { useEffect } from 'react';
 
 
 import { 
@@ -18,7 +19,8 @@ import {
   Roboto_900Black_Italic 
 } from '@expo-google-fonts/roboto'
 import Loader from "./screens/Loader";
- 
+import { cleanupExpiredCache } from "./utils/cacheUtils";
+
 
 export default function App() {
 
@@ -38,6 +40,13 @@ export default function App() {
     Roboto_900Black_Italic
 
   })
+
+  // Nettoyer les caches expirés au démarrage
+  useEffect(() => {
+    if (fontsLoaded) {
+      cleanupExpiredCache().catch(console.error);
+    }
+  }, [fontsLoaded]);
 
    if(!fontsLoaded)
    return <Loader />
