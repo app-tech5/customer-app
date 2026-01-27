@@ -50,29 +50,69 @@ export default function WalletScreen({ navigation, route}) {
     });
   }, [navigation])
 
-  const loadWalletData = async () => {
+  const loadWalletData = () => {
     try {
       setLoader(true)
       setError(null)
 
-      // Charger les méthodes de paiement et transactions en parallèle
-      const [methodsData, transactionsData] = await Promise.all([
-        getUserPaymentMethods(user.id || user.userId).catch(() => []),
-        getUserTransactions(user.id || user.userId).catch(() => [])
-      ])
+      // Utiliser les données utilisateur locales depuis Redux/AsyncStorage
+      let methodsData = []
+      let transactionsData = []
 
-      setPaymentMethods(methodsData || [])
-      setTransactions(transactionsData?.slice(0, 5) || []) // Afficher seulement les 5 dernières transactions
+      // Utiliser les méthodes de paiement depuis user.paymentMethods (du modèle User)
+      methodsData = user.paymentMethods && user.paymentMethods.length > 0
+        ? user.paymentMethods.map((method, index) => ({
+            id: method._id || `method_${index}`,
+            methodType: method.type === 'card' ? 'credit_card' : method.type,
+            cardDetails: method.details || {},
+            isDefault: index === 0, // Premier comme défaut par défaut
+            isActive: true
+          }))
+        : [{
+            id: 'mock_card',
+            methodType: 'credit_card',
+            cardDetails: {
+              cardNumberLast4: '4242',
+              cardBrand: 'visa',
+              expiryMonth: 12,
+              expiryYear: 2025,
+              cardholderName: user.name || 'User'
+            },
+            isDefault: true,
+            isActive: true
+          }]
 
-      // Calculer le solde (simplifié - en réalité il faudrait une API dédiée)
-      const calculatedBalance = transactionsData?.reduce((acc, transaction) => {
+      // Pour les transactions, on pourrait utiliser user.orders si disponible
+      // Pour l'instant, mock des transactions
+      transactionsData = [
+        {
+          id: '1',
+          transaction_type: 'customer_payment',
+          amount: 25.99,
+          createdAt: new Date(Date.now() - 86400000), // 1 jour ago
+          description: 'Order payment'
+        },
+        {
+          id: '2',
+          transaction_type: 'refund',
+          amount: 15.50,
+          createdAt: new Date(Date.now() - 172800000), // 2 jours ago
+          description: 'Order refund'
+        }
+      ]
+
+      setPaymentMethods(methodsData)
+      setTransactions(transactionsData.slice(0, 5)) // Afficher seulement les 5 dernières transactions
+
+      // Calculer le solde depuis les transactions mockées
+      const calculatedBalance = transactionsData.reduce((acc, transaction) => {
         if (transaction.transaction_type === 'refund' || transaction.transaction_type === 'adjustment') {
           return acc + transaction.amount
         } else if (transaction.transaction_type === 'customer_payment') {
           return acc - transaction.amount
         }
         return acc
-      }, 0) || 0
+      }, 0)
 
       setBalance(calculatedBalance)
     } catch (err) {

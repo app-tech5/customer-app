@@ -47,59 +47,74 @@ export default function CheckoutScreen({ navigation, route }) {
     })
   }, [navigation])
 
-  const loadCheckoutData = async () => {
+  const loadCheckoutData = () => {
     try {
       setLoading(true)
 
       // Les données du restaurant viennent déjà de route.params
 
-      // Charger les adresses et méthodes de paiement en parallèle
-      // Avec fallback vers des données mockées si l'API n'existe pas encore
+      // Utiliser les données utilisateur locales depuis Redux/AsyncStorage
       let addressesData = []
       let paymentData = []
 
-      // try {
-      //   addressesData = await getUserAddresses(user.id || user.userId)
-      // } catch (error) {
-      //   console.warn('Addresses API not available, using mock data:', error)
-      //   // Mock data for addresses
-      //   if (user.address && user.address.trim()) {
-      //     addressesData = [{
-      //       id: 'user_default',
-      //       type: 'home',
-      //       name: 'My Address',
-      //       address: user.address,
-      //       city: '',
-      //       postalCode: '',
-      //       country: 'France',
-      //       isDefault: true
-      //     }]
-      //   } else {
-      //     addressesData = []
-      //   }
-      // }
+      // Créer l'adresse depuis les données utilisateur (user.address du modèle User)
+      if (user.address && user.address.trim()) {
+        // Parser l'adresse utilisateur
+        let addressParts = user.address.split(',')
+        let address = user.address
+        let city = ''
+        let postalCode = ''
+        let country = 'France'
 
-      // try {
-      //   paymentData = await getUserPaymentMethods(user.id || user.userId)
-      // } catch (error) {
-      //   console.warn('Payment methods API not available, using mock data:', error)
-      //   // Mock data for payment methods
-      //   paymentData = [{
-      //     id: 'mock_card',
-      //     methodType: 'credit_card',
-      //     cardDetails: {
-      //       cardNumberLast4: '4242',
-      //       cardBrand: 'visa',
-      //       expiryMonth: 12,
-      //       expiryYear: 2025,
-      //       cardholderName: user.name || 'User'
-      //     },
-      //     isDefault: true,
-      //     isActive: true
-      //   }]
-      // }
+        if (addressParts.length >= 2) {
+          address = addressParts[0].trim()
+          city = addressParts[1].trim()
 
-      setAddresses(addressesData || [])
+          if (addressParts.length >= 3) {
+            postalCode = addressParts[2].trim()
+          }
+        }
+
+        addressesData = [{
+          id: 'user_default',
+          type: 'home',
+          name: 'My Address',
+          address: address,
+          city: city,
+          postalCode: postalCode,
+          country: country,
+          isDefault: true,
+          coordinates: user.location ? {
+            lat: user.location.latitude,
+            lng: user.location.longitude
+          } : null
+        }]
+      }
+
+      // Utiliser les méthodes de paiement depuis user.paymentMethods (du modèle User)
+      paymentData = user.paymentMethods && user.paymentMethods.length > 0
+        ? user.paymentMethods.map((method, index) => ({
+            id: method._id || `method_${index}`,
+            methodType: method.type === 'card' ? 'credit_card' : method.type,
+            cardDetails: method.details || {},
+            isDefault: index === 0, // Premier comme défaut par défaut
+            isActive: true
+          }))
+        : [{
+            id: 'mock_card',
+            methodType: 'credit_card',
+            cardDetails: {
+              cardNumberLast4: '4242',
+              cardBrand: 'visa',
+              expiryMonth: 12,
+              expiryYear: 2025,
+              cardholderName: user.name || 'User'
+            },
+            isDefault: true,
+            isActive: true
+          }]
+
+      setAddresses(addressesData)
 
       // Sélectionner automatiquement la première adresse par défaut si disponible
       const defaultAddress = addressesData?.find(addr => addr.isDefault)
@@ -107,7 +122,7 @@ export default function CheckoutScreen({ navigation, route }) {
         setSelectedAddress(defaultAddress)
       }
 
-      setPaymentMethods(paymentData || [])
+      setPaymentMethods(paymentData)
 
       // Sélectionner automatiquement la méthode de paiement par défaut
       const defaultPayment = paymentData?.find(method => method.isDefault)
