@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const CACHE_KEYS = {
   RESTAURANT_FOODS: 'restaurant_foods_',
   RESTAURANTS: 'restaurants_list',
+  PROMOTIONS: 'promotions_list',
+  MENUS: 'menus_list',
   USER_SIGNIN_DATA: 'user_signin_data',
   CACHE_TIMESTAMP: '_timestamp',
   CACHE_VERSION: 'cache_version'
@@ -407,6 +409,330 @@ export const loadRestaurantsWithSmartCache = async (
 };
 
 /**
+ * Sauvegarde les promotions en cache
+ * @param {Array} promotions - Liste des promotions à sauvegarder
+ */
+export const savePromotionsToCache = async (promotions) => {
+  try {
+    if (!promotions || !Array.isArray(promotions)) {
+      console.warn('⚠️ Tentative de sauvegarde de promotions invalides en cache');
+      return;
+    }
+
+    const cacheKey = CACHE_KEYS.PROMOTIONS;
+    const timestampKey = CACHE_KEYS.PROMOTIONS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    const cacheData = {
+      data: promotions,
+      version: CACHE_CONFIG.VERSION,
+      timestamp: Date.now()
+    };
+
+    await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
+
+    console.log(`💾 Promotions sauvegardées en cache: ${promotions.length} promotions`);
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde des promotions en cache:', error);
+  }
+};
+
+/**
+ * Récupère les promotions depuis le cache
+ * @returns {Object|null} Données du cache ou null
+ */
+export const getPromotionsFromCache = async () => {
+  try {
+    const cacheKey = CACHE_KEYS.PROMOTIONS;
+    const timestampKey = CACHE_KEYS.PROMOTIONS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    const cachedData = await AsyncStorage.getItem(cacheKey);
+    const timestamp = await AsyncStorage.getItem(timestampKey);
+
+    if (!cachedData) {
+      console.log(`📭 Pas de promotions en cache`);
+      return null;
+    }
+
+    const parsedData = JSON.parse(cachedData);
+
+    // Vérifier la version du cache
+    if (parsedData.version !== CACHE_CONFIG.VERSION) {
+      console.log(`🔄 Version du cache des promotions obsolète, suppression`);
+      await clearPromotionsCache();
+      return null;
+    }
+
+    // Vérifier l'expiration
+    if (isCacheExpired(parsedData.timestamp)) {
+      console.log(`⏰ Cache des promotions expiré, suppression`);
+      await clearPromotionsCache();
+      return null;
+    }
+
+    console.log(`📖 Promotions chargées depuis le cache: ${parsedData.data.length} promotions`);
+    return {
+      data: parsedData.data,
+      timestamp: parsedData.timestamp,
+      fromCache: true
+    };
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la lecture du cache des promotions:', error);
+    return null;
+  }
+};
+
+/**
+ * Sauvegarde les menus en cache
+ * @param {Array} menus - Liste des menus à sauvegarder
+ */
+export const saveMenusToCache = async (menus) => {
+  try {
+    if (!menus || !Array.isArray(menus)) {
+      console.warn('⚠️ Tentative de sauvegarde de menus invalides en cache');
+      return;
+    }
+
+    const cacheKey = CACHE_KEYS.MENUS;
+    const timestampKey = CACHE_KEYS.MENUS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    const cacheData = {
+      data: menus,
+      version: CACHE_CONFIG.VERSION,
+      timestamp: Date.now()
+    };
+
+    await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
+
+    console.log(`💾 Menus sauvegardés en cache: ${menus.length} menus`);
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde des menus en cache:', error);
+  }
+};
+
+/**
+ * Récupère les menus depuis le cache
+ * @returns {Object|null} Données du cache ou null
+ */
+export const getMenusFromCache = async () => {
+  try {
+    const cacheKey = CACHE_KEYS.MENUS;
+    const timestampKey = CACHE_KEYS.MENUS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    const cachedData = await AsyncStorage.getItem(cacheKey);
+    const timestamp = await AsyncStorage.getItem(timestampKey);
+
+    if (!cachedData) {
+      console.log(`📭 Pas de menus en cache`);
+      return null;
+    }
+
+    const parsedData = JSON.parse(cachedData);
+
+    // Vérifier la version du cache
+    if (parsedData.version !== CACHE_CONFIG.VERSION) {
+      console.log(`🔄 Version du cache des menus obsolète, suppression`);
+      await clearMenusCache();
+      return null;
+    }
+
+    // Vérifier l'expiration
+    if (isCacheExpired(parsedData.timestamp)) {
+      console.log(`⏰ Cache des menus expiré, suppression`);
+      await clearMenusCache();
+      return null;
+    }
+
+    console.log(`📖 Menus chargés depuis le cache: ${parsedData.data.length} menus`);
+    return {
+      data: parsedData.data,
+      timestamp: parsedData.timestamp,
+      fromCache: true
+    };
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la lecture du cache des menus:', error);
+    return null;
+  }
+};
+
+/**
+ * Charge les promotions avec un cache intelligent
+ * @param {Function} apiFetcher - Fonction pour fetch l'API
+ * @param {Function} onDataLoaded - Callback quand les données sont prêtes
+ * @param {Function} onDataUpdated - Callback quand les données sont mises à jour
+ * @param {Function} onLoadingStateChange - Callback pour l'état de chargement
+ */
+export const loadPromotionsWithSmartCache = async (
+  apiFetcher,
+  onDataLoaded,
+  onDataUpdated,
+  onLoadingStateChange
+) => {
+  try {
+    console.log(`🚀 Démarrage du chargement intelligent des promotions`);
+
+    // 1. Essayer de charger depuis le cache
+    onLoadingStateChange?.(true);
+    const cachedData = await getPromotionsFromCache();
+
+    if (cachedData && cachedData.data) {
+      console.log('⚡ Promotions affichées depuis le cache');
+      onDataLoaded(cachedData.data, true);
+      onLoadingStateChange?.(false);
+    } else {
+      console.log('📭 Pas de cache disponible pour les promotions, attente des données API');
+      onLoadingStateChange?.(true);
+    }
+
+    // 2. Fetch l'API en arrière-plan
+    console.log('🌐 Fetch API en arrière-plan pour les promotions...');
+    const freshData = await apiFetcher();
+
+    if (freshData && Array.isArray(freshData)) {
+      console.log(`📡 Promotions API reçues: ${freshData.length} promotions`);
+
+      // 3. Vérifier si les données ont changé
+      const hasChanged = !cachedData || hasDataChanged(cachedData.data, freshData);
+
+      if (hasChanged) {
+        console.log('🔄 Promotions mises à jour, sauvegarde en cache');
+
+        // Sauvegarder en cache
+        await savePromotionsToCache(freshData);
+
+        // Mettre à jour l'affichage
+        onDataUpdated(freshData);
+      } else {
+        console.log('✅ Promotions identiques, pas de mise à jour nécessaire');
+      }
+    } else {
+      console.warn('⚠️ Données promotions API invalides ou vides');
+    }
+
+    // Fin du chargement
+    onLoadingStateChange?.(false);
+
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement intelligent des promotions:', error);
+    onLoadingStateChange?.(false);
+
+    // En cas d'erreur, essayer le cache comme fallback
+    const fallbackCache = await getPromotionsFromCache();
+    if (fallbackCache && fallbackCache.data) {
+      console.log('🔄 Erreur API promotions, utilisation du cache comme fallback');
+      onDataLoaded(fallbackCache.data, true);
+    }
+  }
+};
+
+/**
+ * Charge les menus avec un cache intelligent
+ * @param {Function} apiFetcher - Fonction pour fetch l'API
+ * @param {Function} onDataLoaded - Callback quand les données sont prêtes
+ * @param {Function} onDataUpdated - Callback quand les données sont mises à jour
+ * @param {Function} onLoadingStateChange - Callback pour l'état de chargement
+ */
+export const loadMenusWithSmartCache = async (
+  apiFetcher,
+  onDataLoaded,
+  onDataUpdated,
+  onLoadingStateChange
+) => {
+  try {
+    console.log(`🚀 Démarrage du chargement intelligent des menus`);
+
+    // 1. Essayer de charger depuis le cache
+    onLoadingStateChange?.(true);
+    const cachedData = await getMenusFromCache();
+
+    if (cachedData && cachedData.data) {
+      console.log('⚡ Menus affichés depuis le cache');
+      onDataLoaded(cachedData.data, true);
+      onLoadingStateChange?.(false);
+    } else {
+      console.log('📭 Pas de cache disponible pour les menus, attente des données API');
+      onLoadingStateChange?.(true);
+    }
+
+    // 2. Fetch l'API en arrière-plan
+    console.log('🌐 Fetch API en arrière-plan pour les menus...');
+    const freshData = await apiFetcher();
+
+    if (freshData && Array.isArray(freshData)) {
+      console.log(`📡 Menus API reçus: ${freshData.length} menus`);
+
+      // 3. Vérifier si les données ont changé
+      const hasChanged = !cachedData || hasDataChanged(cachedData.data, freshData);
+
+      if (hasChanged) {
+        console.log('🔄 Menus mis à jour, sauvegarde en cache');
+
+        // Sauvegarder en cache
+        await saveMenusToCache(freshData);
+
+        // Mettre à jour l'affichage
+        onDataUpdated(freshData);
+      } else {
+        console.log('✅ Menus identiques, pas de mise à jour nécessaire');
+      }
+    } else {
+      console.warn('⚠️ Données menus API invalides ou vides');
+    }
+
+    // Fin du chargement
+    onLoadingStateChange?.(false);
+
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement intelligent des menus:', error);
+    onLoadingStateChange?.(false);
+
+    // En cas d'erreur, essayer le cache comme fallback
+    const fallbackCache = await getMenusFromCache();
+    if (fallbackCache && fallbackCache.data) {
+      console.log('🔄 Erreur API menus, utilisation du cache comme fallback');
+      onDataLoaded(fallbackCache.data, true);
+    }
+  }
+};
+
+/**
+ * Supprime le cache des promotions
+ */
+export const clearPromotionsCache = async () => {
+  try {
+    const cacheKey = CACHE_KEYS.PROMOTIONS;
+    const timestampKey = CACHE_KEYS.PROMOTIONS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    await AsyncStorage.removeItem(cacheKey);
+    await AsyncStorage.removeItem(timestampKey);
+
+    console.log(`🗑️ Cache des promotions supprimé`);
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression du cache des promotions:', error);
+  }
+};
+
+/**
+ * Supprime le cache des menus
+ */
+export const clearMenusCache = async () => {
+  try {
+    const cacheKey = CACHE_KEYS.MENUS;
+    const timestampKey = CACHE_KEYS.MENUS + CACHE_KEYS.CACHE_TIMESTAMP;
+
+    await AsyncStorage.removeItem(cacheKey);
+    await AsyncStorage.removeItem(timestampKey);
+
+    console.log(`🗑️ Cache des menus supprimé`);
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression du cache des menus:', error);
+  }
+};
+
+/**
  * Nettoie tous les caches expirés (fonction de maintenance)
  */
 export const cleanupExpiredCache = async () => {
@@ -428,6 +754,10 @@ export const cleanupExpiredCache = async () => {
           await clearFoodsCache(restaurantId);
         } else if (timestampKey === CACHE_KEYS.RESTAURANTS + CACHE_KEYS.CACHE_TIMESTAMP) {
           await clearRestaurantsCache();
+        } else if (timestampKey === CACHE_KEYS.PROMOTIONS + CACHE_KEYS.CACHE_TIMESTAMP) {
+          await clearPromotionsCache();
+        } else if (timestampKey === CACHE_KEYS.MENUS + CACHE_KEYS.CACHE_TIMESTAMP) {
+          await clearMenusCache();
         }
         cleanedCount++;
       }

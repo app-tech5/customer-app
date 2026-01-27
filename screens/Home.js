@@ -11,7 +11,7 @@ import { colors, getDistanceFromLatLonInKm } from '../global'
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurantsFromFirebase, getAllPromotions, getAllMenuItems } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { loadRestaurantsWithSmartCache } from '../utils/cacheUtils'
+import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusWithSmartCache } from '../utils/cacheUtils'
 import { AntDesign } from '@expo/vector-icons'
 import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
@@ -84,7 +84,7 @@ export default function Home({navigation}) {
         return await getRestaurantsFromFirebase();
       },
       // Callback quand les données sont prêtes (cache ou API)
-      async (restaurants, fromCache) => {
+      (restaurants, fromCache) => {
         setRestaurantData(restaurants);
 
         if (fromCache) {
@@ -92,47 +92,65 @@ export default function Home({navigation}) {
         } else {
           console.log('📡 Restaurants affichés depuis l\'API');
         }
+      },
+      // Callback quand les données sont mises à jour depuis l'API
+      (freshRestaurants) => {
+        console.log('🔄 Restaurants mis à jour depuis l\'API');
+        setRestaurantData(freshRestaurants);
+      },
+      // Callback pour l'état de chargement
+      null
+    );
 
-        // Charger TOUTES les promotions et menus en parallèle (seulement si pas fromCache pour éviter les appels multiples)
-        if (!fromCache) {
-          try {
-            const [promotions, menus] = await Promise.all([
-              getAllPromotions(),
-              getAllMenuItems()
-            ]);
-            setAllPromotions(promotions || []);
-            setAllMenus(menus || []);
-            console.log('🏷️ All promotions loaded:', promotions?.length || 0);
-            console.log('🍽️ All menus loaded:', menus?.length || 0);
-          } catch (error) {
-            console.error('Error loading promotions and menus:', error);
-            setAllPromotions([]);
-            setAllMenus([]);
-          }
+    // Charger les promotions avec cache intelligent
+    loadPromotionsWithSmartCache(
+      // Fonction API fetcher
+      async () => {
+        console.log('🌐 Fetching promotions from API');
+        return await getAllPromotions();
+      },
+      // Callback quand les données sont prêtes (cache ou API)
+      (promotions, fromCache) => {
+        setAllPromotions(promotions || []);
+
+        if (fromCache) {
+          console.log('⚡ Promotions affichées depuis le cache');
+        } else {
+          console.log('📡 Promotions affichées depuis l\'API');
         }
       },
       // Callback quand les données sont mises à jour depuis l'API
-      async (freshRestaurants) => {
-        console.log('🔄 Restaurants mis à jour depuis l\'API');
-        setRestaurantData(freshRestaurants);
+      (freshPromotions) => {
+        console.log('🔄 Promotions mises à jour depuis l\'API');
+        setAllPromotions(freshPromotions || []);
+      },
+      // Callback pour l'état de chargement
+      null
+    );
 
-        // Charger les promotions et menus lors de la mise à jour
-        try {
-          const [promotions, menus] = await Promise.all([
-            getAllPromotions(),
-            getAllMenuItems()
-          ]);
-          setAllPromotions(promotions || []);
-          setAllMenus(menus || []);
-          console.log('🏷️ Promotions rechargées:', promotions?.length || 0);
-          console.log('🍽️ Menus rechargés:', menus?.length || 0);
-        } catch (error) {
-          console.error('Error reloading promotions and menus:', error);
-          setAllPromotions([]);
-          setAllMenus([]);
+    // Charger les menus avec cache intelligent
+    loadMenusWithSmartCache(
+      // Fonction API fetcher
+      async () => {
+        console.log('🌐 Fetching menus from API');
+        return await getAllMenuItems();
+      },
+      // Callback quand les données sont prêtes (cache ou API)
+      (menus, fromCache) => {
+        setAllMenus(menus || []);
+
+        if (fromCache) {
+          console.log('⚡ Menus affichés depuis le cache');
+        } else {
+          console.log('📡 Menus affichés depuis l\'API');
         }
       },
-      // Callback pour l'état de chargement (non utilisé ici car on gère le loading différemment)
+      // Callback quand les données sont mises à jour depuis l'API
+      (freshMenus) => {
+        console.log('🔄 Menus mis à jour depuis l\'API');
+        setAllMenus(freshMenus || []);
+      },
+      // Callback pour l'état de chargement
       null
     );
   },[])
