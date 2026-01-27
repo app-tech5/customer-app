@@ -58,46 +58,46 @@ export default function CheckoutScreen({ navigation, route }) {
       let addressesData = []
       let paymentData = []
 
-      try {
-        addressesData = await getUserAddresses(user.id || user.userId)
-      } catch (error) {
-        console.warn('Addresses API not available, using mock data:', error)
-        // Mock data for addresses
-        if (user.address && user.address.trim()) {
-          addressesData = [{
-            id: 'user_default',
-            type: 'home',
-            name: 'My Address',
-            address: user.address,
-            city: '',
-            postalCode: '',
-            country: 'France',
-            isDefault: true
-          }]
-        } else {
-          addressesData = []
-        }
-      }
+      // try {
+      //   addressesData = await getUserAddresses(user.id || user.userId)
+      // } catch (error) {
+      //   console.warn('Addresses API not available, using mock data:', error)
+      //   // Mock data for addresses
+      //   if (user.address && user.address.trim()) {
+      //     addressesData = [{
+      //       id: 'user_default',
+      //       type: 'home',
+      //       name: 'My Address',
+      //       address: user.address,
+      //       city: '',
+      //       postalCode: '',
+      //       country: 'France',
+      //       isDefault: true
+      //     }]
+      //   } else {
+      //     addressesData = []
+      //   }
+      // }
 
-      try {
-        paymentData = await getUserPaymentMethods(user.id || user.userId)
-      } catch (error) {
-        console.warn('Payment methods API not available, using mock data:', error)
-        // Mock data for payment methods
-        paymentData = [{
-          id: 'mock_card',
-          methodType: 'credit_card',
-          cardDetails: {
-            cardNumberLast4: '4242',
-            cardBrand: 'visa',
-            expiryMonth: 12,
-            expiryYear: 2025,
-            cardholderName: user.name || 'User'
-          },
-          isDefault: true,
-          isActive: true
-        }]
-      }
+      // try {
+      //   paymentData = await getUserPaymentMethods(user.id || user.userId)
+      // } catch (error) {
+      //   console.warn('Payment methods API not available, using mock data:', error)
+      //   // Mock data for payment methods
+      //   paymentData = [{
+      //     id: 'mock_card',
+      //     methodType: 'credit_card',
+      //     cardDetails: {
+      //       cardNumberLast4: '4242',
+      //       cardBrand: 'visa',
+      //       expiryMonth: 12,
+      //       expiryYear: 2025,
+      //       cardholderName: user.name || 'User'
+      //     },
+      //     isDefault: true,
+      //     isActive: true
+      //   }]
+      // }
 
       setAddresses(addressesData || [])
 
