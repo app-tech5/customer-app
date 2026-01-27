@@ -1,338 +1,529 @@
-import { View, Text, StyleSheet, useWindowDimensions, Image, Animated} from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
-import { getDriverInfos } from '../api'
-import BottomSheet from '@gorhom/bottom-sheet'
-import { Icon} from 'react-native-elements'
-import LottieView from 'lottie-react-native';
-import MapViewDirections from 'react-native-maps-directions';
-import { apikey } from '../global'
-import ProgressComponent from '../components/ProgressComponent'
+import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList, Image } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Ionicons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons'
+import { useSelector, useDispatch } from 'react-redux'
+import i18n from '../i18n'
+import { colors, currency, language } from '../global'
+import Loader from './Loader'
+import { api } from '../api'
+import { useNavigation } from '@react-navigation/native'
 
-import { sin } from 'react-native-reanimated'
-import OrderCountDown from '../components/OrderCountDown'
-import { Polyline } from 'react-native-maps'
-import { bearing } from '../utils'
+export default function OrderRequest({ route, navigation }) {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.userReducer)
 
- 
+  // Récupération des paramètres de navigation
+  const {
+    restaurantName,
+    restaurant,
+    items,
+    address,
+    paymentMethod,
+    specialInstructions,
+    totals,
+    lat,
+    lng
+  } = route.params || {}
 
- 
+  const [loading, setLoading] = useState(false)
 
-export default function OrderRequest({navigation, route}) {
-  
-
-
-
-  const {lat, lng} = route.params
-  const { width, height } = useWindowDimensions();
-  const [driver, setDriver] = useState()
-  const [driverName, setDriverName] = useState()
-  const [car, setCar] = useState()
-  const [driverImage, setDriverImage] = useState()
-  const [driverLat, setDriverLat] = useState()
-  
-  const [driverLng, setDriverLng] = useState()
-
-  const [regionLat, setRegionLat] = useState(lat)
-  const [regionLng, setRegionLng] = useState(lng)
-  
-  const bottomSheet = useRef(null)
-  const mapRef = useRef(null)
-  const [local, setLocal] = useState(false)  
-  const [totalMinutes, setTotalMinutes]=useState(21)    
-  const [timeLeft, setTimeLeft] = useState(Math.round(21/4)) 
-  const [status, setStatus] = useState("Your order has been accepted")
-
-
-
-   
-
-   const angleValue = useState(new Animated.Value(1))[0]
-   const angle = angleValue.interpolate({
-     inputRange: [0, 1],
-     outputRange: ['0deg', '360deg']
-   })
-   
-   useEffect(()=>{
-     
-
-    
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-      
-    
-
-
-
-    if(status === "Driver is on the way for pickup")
-    getDriverInfos(setDriverName, setCar, setDriverImage, bottomSheet, setDriverLat, setDriverLng, mapRef)
-    .then(()=>{
-      if(driverLat  && driverLng){
- 
-      }
-       console.log(lat + (driverLat - lat)*0.5, lng + (driverLng - lng)*0.5, "fff")
+  useEffect(() => {
+    navigation.setOptions({
+      title: i18n.t('order.confirmOrder', 'Confirm Order'),
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ padding: 10, marginLeft: 5 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+      ),
     })
-    
-   }, [status])
+  }, [navigation])
+
+  const handleConfirmOrder = async () => {
+    try {
+      setLoading(true)
+
+      // Transformer les items du panier au format attendu par le modèle Order
+      const orderItems = items.map(cartItem => ({
+        type: cartItem.itemType || 'Menu',
+        item: cartItem.item || cartItem.id,
+        name: cartItem.name,
+        image: cartItem.image,
+        price: cartItem.price,
+        currency: cartItem.currency || 'EUR',
+        quantity: 1,
+        total: cartItem.totalPrice || cartItem.price,
+        extras: cartItem.extras || [],
+        variants: cartItem.variants || []
+      }));
+
+      const orderData = {
+        user: user.id,
+        restaurant: restaurant?._id || restaurant?.id,
+        items: orderItems,
+        totalPrice: totals.total,
+        subtotal: totals.subtotal,
+        tax: {
+          rate: restaurant?.taxRate || 0.08,
+          amount: totals.taxAmount
+        },
+        status: "pending",
+        payment: {
+          method: paymentMethod.methodType || "cash",
+          status: "pending"
+        },
+        delivery: {
+          type: "delivery",
+          address: address.address,
+          deliveryFee: totals.deliveryFee,
+          specialInstructions: specialInstructions || ""
+        }
+      };
+
+      const createdOrder = await api.createOrder(orderData);
+
+      // Vider le panier pour ce restaurant
+      dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName })
+
+      // Naviguer vers OrderTracking avec la commande créée
+      navigation.replace('OrderTracking', {
+        order: createdOrder,
+        lat,
+        lng
+      })
+
+    } catch (error) {
+      console.error('Error creating order:', error);
+      Alert.alert(
+        i18n.t('common.error', 'Error'),
+        i18n.t('order.createError', 'Failed to create order. Please try again.'),
+        [{ text: i18n.t('common.ok', 'OK') }]
+      );
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const OrderItem = ({ item, index }) => (
+    <View style={styles.orderItem}>
+      <View style={styles.itemImage}>
+        {item.image ? (
+          <Image source={{ uri: item.image }} style={styles.itemImageContent} />
+        ) : (
+          <View style={styles.itemImagePlaceholder}>
+            <Ionicons name="fast-food" size={24} color={colors.text.secondary} />
+          </View>
+        )}
+      </View>
+      <View style={styles.itemDetails}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemPrice}>
+          {item.price ? item.price.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+        </Text>
+        {item.extras && item.extras.length > 0 && (
+          <Text style={styles.itemExtras}>
+            {item.extras.map(extra => extra.name).join(', ')}
+          </Text>
+        )}
+      </View>
+    </View>
+  )
+
+  if (loading) return <Loader />
+
   return (
-    <View style={{}}>
-      <MapView
-        provider={PROVIDER_GOOGLE}
-        ref={mapRef}
-       
-       region={{latitude: regionLat,longitude: regionLng,latitudeDelta: 0.1122,longitudeDelta: 0.0621 }}
-       style={{height: height, width: width}} showsUserLocation={true}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-        
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Restaurant Header */}
+        <View style={styles.restaurantHeader}>
+          <Text style={styles.restaurantName}>{restaurant?.name || restaurantName}</Text>
+          <Text style={styles.orderItems}>
+            {items?.length || 0} {items?.length === 1 ? i18n.t('cart.item', 'item') : i18n.t('cart.items', 'items')}
+          </Text>
+        </View>
 
+        {/* Order Items */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {i18n.t('order.yourOrder', 'Your Order')}
+          </Text>
+          <FlatList
+            data={items || []}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item, index }) => <OrderItem item={item} index={index} />}
+            scrollEnabled={false}
+          />
+        </View>
 
-        <CustomMarker subject="user" lat={lat} lng={lng}/>
+        {/* Delivery Address */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {i18n.t('checkout.deliveryAddress', 'Delivery Address')}
+          </Text>
+          <View style={styles.addressCard}>
+            <View style={styles.addressIcon}>
+              <Ionicons
+                name={address?.type === 'home' ? 'home' : address?.type === 'work' ? 'briefcase' : 'location'}
+                size={20}
+                color={colors.primary}
+              />
+            </View>
+            <View style={styles.addressInfo}>
+              <Text style={styles.addressName}>{address?.name || 'Delivery Address'}</Text>
+              <Text style={styles.addressDetails}>
+                {address?.address}
+              </Text>
+              <Text style={styles.addressDetails}>
+                {address?.city}, {address?.postalCode}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-        { driverLat && driverLng ?<CustomMarker subject="driver" lat={driverLat} lng={driverLng} angle={angle} />:<></>}
+        {/* Payment Method */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {i18n.t('checkout.paymentMethod', 'Payment Method')}
+          </Text>
+          <View style={styles.paymentCard}>
+            <View style={styles.paymentIcon}>
+              {paymentMethod?.methodType?.includes('card') && (
+                <Ionicons name="card" size={20} color={colors.primary} />
+              )}
+              {paymentMethod?.methodType?.includes('paypal') && (
+                <FontAwesome name="paypal" size={20} color={colors.primary} />
+              )}
+              {paymentMethod?.methodType?.includes('cash') && (
+                <Ionicons name="cash" size={20} color={colors.primary} />
+              )}
+            </View>
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentName}>
+                {paymentMethod?.cardDetails?.cardBrand ?
+                  `${paymentMethod.cardDetails.cardBrand.toUpperCase()} **** ${paymentMethod.cardDetails.cardNumberLast4}` :
+                  paymentMethod?.methodType || 'Cash'
+                }
+              </Text>
+              {paymentMethod?.cardDetails?.cardholderName && (
+                <Text style={styles.paymentDetails}>
+                  {paymentMethod.cardDetails.cardholderName}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
 
-       { driverLat && driverLng && !local ?<DisplayMapviewDirections apikey={apikey} toLat={lat} toLng={lng} fromLat={driverLat} fromLng={driverLng} 
-       setTotalMinutes={setTotalMinutes} setTimeLeft={setTimeLeft}/>:<></>}
-      </MapView>
-      <NavigationMenu navigation={navigation} />
+        {/* Special Instructions */}
+        {specialInstructions && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {i18n.t('checkout.specialInstructions', 'Special Instructions')}
+            </Text>
+            <View style={styles.instructionsCard}>
+              <Text style={styles.instructionsText}>{specialInstructions}</Text>
+            </View>
+          </View>
+        )}
 
- 
-      <BottomSheet ref={bottomSheet} index={1} snapPoints={["12%", "95%"]}
-          handleIndicatorStyle={{backgroundColor: "grey", width: 100}}>
-     {!driverImage?
-     <View>
-       <AnimationCooking status={status}/>
-         
-    </View> :<></>}
+        {/* Order Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            {i18n.t('checkout.orderSummary', 'Order Summary')}
+          </Text>
 
-     {driverImage?( <View style={styles.container}>
-          <View style={styles.name_image_car}>
-
-
-           <Text style={styles.driverName}>John</Text>
-
-            <View style={styles.driverImageContainer}>
-              <Image
-                source={driverImage}
-                style={styles.driverImage} />
+          <View style={styles.orderSummary}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>
+                {i18n.t('cart.subtotal', 'Subtotal')}
+              </Text>
+              <Text style={styles.summaryValue}>
+                {totals?.subtotal ? totals.subtotal.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+              </Text>
             </View>
 
-            <Text style={styles.car}>Ford</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>
+                {i18n.t('cart.deliveryFee', 'Delivery fee')}
+              </Text>
+              <Text style={styles.summaryValue}>
+                {totals?.deliveryFee ? totals.deliveryFee.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+              </Text>
+            </View>
 
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>
+                {i18n.t('cart.tax', 'Tax')}
+              </Text>
+              <Text style={styles.summaryValue}>
+                {totals?.taxAmount ? totals.taxAmount.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+              </Text>
+            </View>
 
-
+            <View style={[styles.summaryRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>
+                {i18n.t('cart.total', 'Total')}
+              </Text>
+              <Text style={styles.totalValue}>
+                {totals?.total ? totals.total.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+              </Text>
+            </View>
           </View>
-             
-         </View>):(<></>)}
+        </View>
+      </ScrollView>
 
-         {/* <CarIsHeading lat={lat} lng={lng}/> */}
-    </BottomSheet>
+      {/* Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalAmount}>
+            {totals?.total ? totals.total.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+          </Text>
+          <Text style={styles.totalLabel}>{i18n.t('cart.total', 'Total')}</Text>
+        </View>
 
-    <TimeLeft totalMinutes={totalMinutes} timeLeft={timeLeft} setTimeLeft={setTimeLeft} height={height} driverImage={driverImage} setStatus={setStatus}/>
-
-
-         
-    </View>
+        <TouchableOpacity
+          style={styles.confirmButton}
+          onPress={handleConfirmOrder}
+          disabled={loading}
+        >
+          <Text style={styles.confirmText}>
+            {i18n.t('order.confirmOrder', 'Confirm Order')}
+          </Text>
+          <Ionicons name="checkmark-circle" size={20} color={colors.text.white} />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   )
 }
-
-export const CustomMarker = ({subject, lat, lng, angle, })=>{
-
-  return (<Marker.Animated  title="nass" description="nasso"
-  coordinate={{latitude: lat,longitude: lng}}
-  >
-    {subject === "user"?
-    
-    <Image source={require('../assets/images/logo512.png')} style={styles.homeMarkerImage}
-
-    resizeMode="contain"/>
-    :
-     <Animated.View  style={
-        
-       {
-      transform: [
-        {
-        
-        rotate: angle,
-         
-      },
-      ]
-    }
-    
-    }>
-      {/* <Image source={require('../assets/images/car2.png') */}
-      <Image source={require('../assets/images/logo512.png')} 
-     
-    style={styles.carMarkerImage}
-    resizeMode="contain"/>
-    </Animated.View>
-     }
-
-    
-      </Marker.Animated>)
-}
- 
-export const DisplayMapviewDirections = ({fromLat, fromLng, toLat, toLng, apikey, setTotalMinutes, setTimeLeft})=>{
-  
-  
- return(
- 
- <MapViewDirections 
-         
- origin={{latitude: fromLat,longitude: fromLng,}}
-
- 
- 
- destination={{latitude: toLat,longitude: toLng}}
- 
- strokeWidth={5} strokeColor="green" 
-   
- apikey={apikey}
-
- onReady={(result)=>{
-
-  
-   setTotalMinutes(parseInt(parseInt(result.duration)))
-   setTimeLeft(parseInt(parseInt(result.duration)))
-   
- }}
-
- 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-   
- />
-)}
-
-
-const AnimationCooking = ({status})=>{
-  return (
-    <View>
-      <LottieView style={{
-        height: 206,
-        alignSelf: "center",
-       
-      }}
-      source={require("../assets/animations/cooking.json")}
-      autoPlay
-      speed={0.5}
-      
-      />
-      <Text style={{
-        textAlign: "center",
-        marginTop: 40,
-        fontFamily: "Roboto_500Medium",
-        fontSize: 15}}>{status}</Text>
-    </View>
-  )
-}
-const NavigationMenu = ({ navigation }) => (
-  
-  <View style={styles.menu}>
-   <Icon type="material-community" name='menu' color="black" size={32} 
-   onPress={() => navigation.navigate('Home')} />
-</View>
-)
-
-const TimeLeft = ({totalMinutes, timeLeft, setTimeLeft, height, driverImage, setStatus})=>{
-
-  const styles = StyleSheet.create({
-    container: {
-      position: "absolute",
-      alignSelf: "center",
-      
-      top: driverImage?20:height/2
-    },
-     
-    
-  })
-  return (
-    <View style={styles.container}>
-      <OrderCountDown totalMinutes={totalMinutes} timeLeft={timeLeft} setTimeLeft={setTimeLeft} setStatus={setStatus}/>
-    </View>
-    
-    
-    
-    
-    
-    
-    
-  )
-}
-
-const CarIsHeading = ({lat, lng})=>{
-  return (
-    <View style={{alignItems: "center", marginTop: 40}}>
-      <MapView
-          provider={PROVIDER_GOOGLE}
-          initialRegion={{latitude: lat,longitude: lng,latitudeDelta: 0.002522,longitudeDelta: 0.001721 }}
-         style={{height: 400, width: "90%"}} >
-         </MapView>
-    </View>
-  )
-}
-
- 
-
 
 const styles = StyleSheet.create({
-  
-  container: { 
-   
-   
-    bottom: 0,
-    width: "100%"
-},
-  carMarkerImage:{
-    width: 30,
-    height: 30,
-     
-     
-   
-    
-    
-    
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.secondary,
   },
-
-  homeMarkerImage: {
-    width: 55,
+  restaurantHeader: {
+    backgroundColor: colors.background.primary,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  restaurantName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  orderItems: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  section: {
+    backgroundColor: colors.background.primary,
+    margin: 20,
+    marginTop: 0,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 16,
+  },
+  orderItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  itemImage: {
+    width: 50,
     height: 50,
-     
-
+    borderRadius: 8,
+    marginRight: 12,
   },
-
-  timeContainer: {padding: 10,
-    borderRadius: 20, backgroundColor: "white"},
-    
-  time :{fontWeight: "bold", fontSize: 15},
-  name_image_car: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center"
+  itemImageContent: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
-  driverName:{color: "black", fontSize: 20, fontWeight: "bold"},
-
-  driverImageContainer:{
-    backgroundColor: "#e6e6e6",
-    
-    borderRadius: 50
+  itemImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    backgroundColor: colors.background.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  driverImage: {width: 60, height: 60},
-  car: {color: "black", fontSize: 20, fontWeight: "bold"}
-
+  itemDetails: {
+    flex: 1,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  itemExtras: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+  addressCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 16,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+  },
+  addressIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  addressInfo: {
+    flex: 1,
+  },
+  addressName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  addressDetails: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    lineHeight: 20,
+  },
+  paymentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+  },
+  paymentIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  paymentInfo: {
+    flex: 1,
+  },
+  paymentName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  paymentDetails: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  instructionsCard: {
+    padding: 16,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+  },
+  instructionsText: {
+    fontSize: 14,
+    color: colors.text.primary,
+    lineHeight: 20,
+  },
+  orderSummary: {
+    gap: 12,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  summaryValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  totalRow: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: colors.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  totalContainer: {
+    flex: 1,
+  },
+  totalAmount: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  totalLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+  },
+  confirmButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.success,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  confirmText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text.white,
+    marginRight: 8,
+  },
 })

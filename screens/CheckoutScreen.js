@@ -171,7 +171,9 @@ export default function CheckoutScreen({ navigation, route }) {
         deliveryFee,
         taxAmount,
         total
-      }
+      },
+      lat: user.location?.latitude || 48.8566, // Paris par défaut
+      lng: user.location?.longitude || 2.3522
     })
   }
 

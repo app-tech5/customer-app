@@ -142,6 +142,14 @@ export function AccountNavigator() {
         }}
       />
       <AccountStack.Screen
+        name="OrderRequest"
+        component={OrderRequest}
+        options={{
+          title: 'Confirm Order',
+          headerShown: true
+        }}
+      />
+      <AccountStack.Screen
         name="Wallet"
         component={Wallet}
         options={{
