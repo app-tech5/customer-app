@@ -207,7 +207,6 @@
     "confirmClear": "Clear all items from cart?",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "checkout": "Checkout",
     "viewCart": "View Cart",
     "item": "item",
     "itemsSuffix": "s",
@@ -384,11 +383,6 @@
     "notifications": "Notifications",
     "notificationSettings": "Configure notifications",
     "appSettings": "App preferences and settings",
-    "help": "Help & Support",
-    "getHelp": "Get help and contact support",
-    "about": "About",
-    "appInfo": "App version and information",
-    "logoutMessage": "Are you sure you want to logout?",
     "loadError": "Error loading profile",
     "errorTitle": "Unable to load profile",
     "updateSuccessMessage": "Profile updated successfully",
@@ -429,6 +423,10 @@
       "setDefaultError": "Failed to set default address",
     "loadError": "Failed to load addresses",
     "tips": "Tips",
+      "tip1": "Set a default address for faster checkout",
+      "tip2": "Add work and home addresses for convenience",
+      "tip3": "Keep addresses up to date for accurate delivery"
+    },
     "checkout": {
       "title": "Checkout",
       "deliveryAddress": "Delivery Address",
@@ -442,10 +440,6 @@
       "managePayment": "Manage",
       "instructionsPlaceholder": "Any special instructions for delivery...",
       "loadError": "Failed to load checkout data"
-    },
-      "tip1": "Set a default address for faster checkout",
-      "tip2": "Add work and home addresses for convenience",
-      "tip3": "Keep addresses up to date for accurate delivery"
     },
   "settings": {
     "title": "Settings",

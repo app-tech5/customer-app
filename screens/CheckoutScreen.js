@@ -291,7 +291,7 @@ export default function CheckoutScreen({ navigation, route }) {
             <Text style={styles.sectionTitle}>
               {i18n.t('checkout.paymentMethod', 'Payment Method')}
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Wallet')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Wallet', { fromAccount: true })}>
               <Text style={styles.manageLink}>
                 {i18n.t('checkout.managePayment', 'Manage')}
               </Text>
@@ -303,7 +303,7 @@ export default function CheckoutScreen({ navigation, route }) {
           ) : (
             <TouchableOpacity
               style={styles.emptyPayment}
-              onPress={() => navigation.navigate('Wallet')}
+              onPress={() => navigation.navigate('Wallet', { fromAccount: true })}
             >
               <Ionicons name="card-outline" size={48} color={colors.text.secondary} />
               <Text style={styles.emptyPaymentText}>

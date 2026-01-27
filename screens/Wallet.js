@@ -7,7 +7,7 @@ import i18n from '../i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 
-export default function WalletScreen({ navigation }) {
+export default function WalletScreen({ navigation, route}) {
   const user = useSelector((state) => state.userReducer)
   const [paymentMethods, setPaymentMethods] = useState([])
   const [transactions, setTransactions] = useState([])
@@ -18,19 +18,36 @@ export default function WalletScreen({ navigation }) {
   useEffect(() => {
     loadWalletData()
 
+    // navigation.setOptions({
+    //   title: i18n.t('wallet.title', 'Wallet'),
+    //   headerLeft: () => (
+    //     <TouchableOpacity
+    //       onPress={() => navigation.toggleDrawer()}
+    //       style={{ padding: 10, marginLeft: 5 }}
+    //       accessibilityRole="button"
+    //       accessibilityLabel="Open menu"
+    //     >
+    //       <Ionicons name="menu" size={24} color={colors.text.primary} />
+    //     </TouchableOpacity>
+    //   ),
+    // })
+    const fromAccount = route.params?.fromAccount;
+
     navigation.setOptions({
       title: i18n.t('wallet.title', 'Wallet'),
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.toggleDrawer()}
-          style={{ padding: 10, marginLeft: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Open menu"
-        >
-          <Ionicons name="menu" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-      ),
-    })
+      headerLeft: () =>
+        fromAccount ? (
+          <TouchableOpacity onPress={() => navigation.goBack()}
+          style={{ padding: 10, marginLeft: 5 }}>
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => navigation.toggleDrawer()}
+          style={{ padding: 10, marginLeft: 5 }}>
+            <Ionicons name="menu" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+        ),
+    });
   }, [navigation])
 
   const loadWalletData = async () => {

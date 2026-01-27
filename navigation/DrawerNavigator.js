@@ -164,6 +164,7 @@ export default function DrawerNavigator() {
         />
 
 
+
         {/* 👤 COMPTE UTILISATEUR */}
         <Drawer.Screen
             name = "Account"

@@ -108,10 +108,21 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                         // setLoading(true)
                         closeModal ? closeModal() : setModalVisible(false);
                         // addOrderToFirebase()
-                        navigation.navigate('CheckoutScreen',{
-                            lat,
-                            lng
-                        })
+                        navigation.navigate('DrawerNavigator', {
+                            screen: 'Account',
+                            params: {
+                              screen: 'CheckoutScreen',
+                              params: {
+                                lat,
+                                lng,
+                              },
+                            },
+                          });
+                          
+                        // navigation.navigate('AccountNavigator',{ screen: 'CheckoutScreen',
+                        //     lat,
+                        //     lng
+                        // })
                       }}
                       activeOpacity={0.9}
                   >

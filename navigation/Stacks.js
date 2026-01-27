@@ -21,6 +21,8 @@ import EditProfileScreen from '../screens/EditProfileScreen'
 import AddressesScreen from '../screens/AddressesScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
+import Wallet from '../screens/Wallet';
+
 
 const  HomeStack = createStackNavigator()
 
@@ -139,6 +141,14 @@ export function AccountNavigator() {
           headerShown: true
         }}
       />
+      <AccountStack.Screen
+        name="Wallet"
+        component={Wallet}
+        options={{
+          title: 'Wallet',
+          headerShown: true
+        }}
+      />
     </AccountStack.Navigator>
   )
 }
@@ -149,7 +159,7 @@ export function SearchNavigator() {
 
   return (
     <SearchStack.Navigator>
-       <SearchStack.Screen 
+       <SearchStack.Screen
           name="SearchScreen"
           component={SearchScreen}
           options={{headerShown: false}}/>
