@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native'
-import React, {useState} from 'react'
+import React from 'react'
 import { grey1 } from '../../global'
 import i18n from '../../i18n'
 

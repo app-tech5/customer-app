@@ -1,16 +1,15 @@
-import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity, Platform} from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, Platform} from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { Icon } from 'react-native-elements';
 import RestaurantDetailComponent from '../RestaurantDetailComponent';
-import { apikey } from '../../global';
 import { getCategoriesFromRestaurant } from '../../api';
-import { CategoriesContext } from '../../contexts/CategoriesContext';
+import i18n from '../../i18n';
 
 export default function About(props) {
   const {restaurant} = props.route.params
-  const {name, image_url, price, review_count, rating, collectTime} = restaurant;
+  const {name, price, review_count, rating, collectTime} = restaurant;
   const [restaurantDetail, setRestaurantDetail] = useState(false)
-  // const {categories, setCategories} = useContext(CategoriesContext)
+  
   const [categories, setCategories] = useState()
 let description;
  if(categories)
@@ -30,7 +29,7 @@ return (
       collectTime={collectTime}
       />
       <View style={styles.open}>
-        <Text style={styles.openText}>Open until 2:00 AM</Text>
+        <Text style={styles.openText}>{i18n.t('restaurant.openUntil', { time: '2:00 AM' })}</Text>
         </View>
       </TouchableOpacity>
        <RestaurantDetailComponent restaurant={restaurant} 
@@ -39,13 +38,6 @@ return (
     </View>
   )
 }
-const RestaurantImage = (props)=>(
-  <ImageBackground
-    style={styles.container}
-    source={{uri: props.image }}
-  >
-  </ImageBackground>
-);
 export const ArrowBack = (props)=>{
   return (
     <View style={styles.view2}>

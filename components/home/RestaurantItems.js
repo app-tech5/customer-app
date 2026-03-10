@@ -1,14 +1,13 @@
 import { View, Text,Image, TouchableOpacity, FlatList, useWindowDimensions, StyleSheet} from 'react-native'
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState} from 'react'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import Categories from './Categories';
 import PromotionBadge from '../PromotionBadge';
 import { colors } from '../../global';
 import i18n from '../../i18n';
 
 export default function RestaurantItems({navigation,...props}) {
-    const { width, height } = useWindowDimensions();
+    const { width } = useWindowDimensions();
   return (
       <View style={{
           }}>

@@ -102,15 +102,14 @@ const styles = StyleSheet.create({
 export default function MenuItems({ route, restaurant, activeTab, marginLeft, navigation, foodsRef,
   pickup, delivery, setActiveTab, userLocation, mapRef, apikey, scrollEnabled, setScrollEnabled,
   opacity, setCategoriesFood, hideHeader }) {
-  // Get restaurant from props or route.params
+  
   const restaurantData = restaurant || route?.params?.restaurant
   const { categories, setCategories } = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
   const [loader, setLoader] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilters, setActiveFilters] = useState([])
-
-  // Fonction pour traiter et filtrer les données de l'API
+  
   const processFoodsData = (rawFoods) => {
     if (!rawFoods || !Array.isArray(rawFoods) || rawFoods.length === 0) {
       console.log('❌ No foods data to process');
@@ -119,14 +118,12 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
 
     console.log('=== API RESPONSE ===');
     console.log('Foods fetched from API:', rawFoods.length);
-
-    // Debug: Afficher les premières données reçues
+    
     if (rawFoods.length > 0) {
       console.log('🔍 Sample food data:', JSON.stringify(rawFoods[0], null, 2));
       console.log('🔍 Image field check:', rawFoods.slice(0, 3).map(f => ({ id: f.id || f._id, image: f.image, hasImage: !!f.image })));
     }
-
-    // Filtrer côté frontend : ignorer les produits sans image valide
+    
     const foodsWithValidImages = rawFoods.filter(food => {
       const hasValidImage = food &&
         food.image &&
@@ -134,8 +131,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         food.image.trim() !== '' &&
         food.image !== 'null' &&
         food.image !== 'undefined';
-
-      // Debug: Log pourquoi chaque produit est filtré ou gardé
+      
       if (!hasValidImage) {
         console.log('❌ Filtered out food:', { id: food.id || food._id, image: food.image, reason: !food.image ? 'no image field' : 'invalid image' });
       }
@@ -176,25 +172,22 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
     });
 
     const restaurantId = restaurantData.restaurantId || restaurantData.id;
-
-    // Charger les catégories (pas de cache pour le moment)
+    
     getCategoriesFromRestaurant(restaurantId).then((restaurantCategories) => {
       console.log('Categories for restaurant:', restaurantCategories);
-      // For now, just use all categories since the API returns all categories
-      // In a real implementation, this should return categories specific to the restaurant
+      
     }).catch(error => {
       console.error('Error fetching categories:', error);
     });
-
-    // Utiliser le cache intelligent pour les produits
+    
     loadFoodsWithSmartCache(
       restaurantId,
-      // Fonction API fetcher
+      
       async (id) => {
         console.log(`🌐 Fetching foods from API for restaurant ${id}`);
         return await getFoods(id);
       },
-      // Callback quand les données sont prêtes (cache ou API)
+      
       (data, fromCache) => {
         const processedData = processFoodsData(data);
         setFoods(processedData);
@@ -205,33 +198,30 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
           console.log('📡 Données affichées depuis l\'API');
         }
       },
-      // Callback quand les données sont mises à jour depuis l'API
+      
       (freshData) => {
         console.log('🔄 Mise à jour des données depuis l\'API');
         const processedData = processFoodsData(freshData);
         setFoods(processedData);
       },
-      // Callback pour l'état de chargement
+      
       (isLoading) => {
         setLoader(isLoading);
       }
     );
 
   }, [activeTab, restaurantData])
-
-  // Filtres disponibles (peut être étendu avec des données du backend)
+  
   const availableFilters = [
     { id: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
     { id: 'vegan', label: 'Vegan', icon: 'leaf-circle' },
     { id: 'spicy', label: 'Spicy', icon: 'fire' },
     { id: 'popular', label: 'Popular', icon: 'star' },
   ]
-
-  // Filtrer les produits selon la recherche et les filtres
+  
   const filteredFoods = useMemo(() => {
     let result = foods;
-
-    // Filtre par recherche
+    
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(food =>
@@ -239,8 +229,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         food.description?.toLowerCase().includes(query)
       );
     }
-
-    // Filtres basés sur les tags du produit (stockés dans la DB)
+    
     if (activeFilters.length > 0) {
       result = result.filter(food => {
         if (activeFilters.includes('vegetarian') && !food.tags?.includes('végétarien')) return false;
@@ -268,12 +257,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       color={colors.primary}
       style={styles.indicator}
     />
-  // return <View>
-  //   <View style={{marginBottom: 100}}></View>
-  //   <Loader />
-  // </View>
-
-  // If no foods loaded yet, show empty state
+  
   console.log('Total foods loaded:', foods.length)
   if (foods.length === 0) {
     return (
@@ -285,7 +269,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
 
   return (
     <View style={{ flex: 1, }} >
-      {/* Barre de recherche */}
+      {}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={20} />
@@ -304,7 +288,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         </View>
       </View>
 
-      {/* Filtres */}
+      {}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -336,7 +320,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         ))}
       </ScrollView>
 
-      {/* Message si aucun résultat */}
+      {}
       {filteredFoods.length === 0 && foods.length > 0 && (
         <View style={styles.noResultsContainer}>
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={48} />
@@ -345,7 +329,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         </View>
       )}
 
-      {/* If categories exist and have foods, group by categories */}
+      {}
       {filteredFoods.length > 0 && categories && categories.length > 0 ? (
         <FlatList
           ref={foodsRef}
@@ -358,7 +342,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
               <View >
                 {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
                 <FlatList
-                  data={data} // Le backend a déjà filtré les produits valides
+                  data={data} 
                   keyExtractor={(item, index) => `food-${item.id}`}
                   renderItem={({ item, index }) => {
                     return (
@@ -417,12 +401,12 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
           }}
         />
       ) : (
-        /* If no categories, show all foods in one list */
+        
         <View>
           <Text style={styles.groupTitle}>Menu</Text>
           <FlatList
             ref={foodsRef}
-            data={filteredFoods} // Produits filtrés selon recherche et filtres
+            data={filteredFoods} 
             keyExtractor={(item, index) => `food-${item.id || index}`}
             renderItem={({ item, index }) => {
               return (

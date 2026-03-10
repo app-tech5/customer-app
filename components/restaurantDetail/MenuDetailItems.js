@@ -1,13 +1,11 @@
-import { View, Text, StyleSheet,Image, ScrollView, Platform } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native'
+import React from 'react'
 import { Divider } from 'react-native-elements';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import {language, currency}  from '../../global'
 import {} from 'react-native-tab-view'
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
- 
 
   const styles = StyleSheet.create({
     menuItemStyle :{
@@ -24,8 +22,6 @@ import { NavigationContainer } from '@react-navigation/native';
 }) 
 
 export default function MenuDetailItems({restaurantName, foods, hideCheckbox, marginLeft, navigation}) {
-  console.log('🏗️ MenuDetailItems RENDERED with:', foods?.length || 0, 'foods');
-
   const dispatch = useDispatch();
 
   const selectItem = (item, checkboxValue)=> dispatch({
@@ -45,15 +41,12 @@ export default function MenuDetailItems({restaurantName, foods, hideCheckbox, ma
     <ScrollView >
 
     {foods.map((food, index)=>{
-      console.log('🔄 MAPPING FOOD:', index, food?.title || food?.name);
-
       return (
         <TouchableOpacity key={index}
           onPress={()=>navigation.navigate('MenuDetailScreen', {title: food.title})}
         >
         <View style={styles.menuItemStyle}>
             {hideCheckbox ? (<></>) :(
-
 
             <BouncyCheckbox
             iconStyle={{
@@ -82,7 +75,6 @@ export default function MenuDetailItems({restaurantName, foods, hideCheckbox, ma
   )
 }
 
-
 const FoodInfo = (props)=>(
 
     <View style={{
@@ -101,9 +93,6 @@ const FoodInfo = (props)=>(
 )
 
 const FoodImage = ({marginLeft,...props})=> {
-  console.log('🚨🚨🚨 FoodImage CALLED with:', props.food?.title || props.food?.name, 'image:', props.food?.image);
-
-  // Test simple d'abord
   return (
     <View style={{
       width: 100,

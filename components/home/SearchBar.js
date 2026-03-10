@@ -1,13 +1,11 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import AntDesign from 'react-native-vector-icons/AntDesign'
 import i18n from '../../i18n'
 
-export default function SearchBar({searchbar, cityHandler, style, setAddress, navigation, restaurantData}) {
+export default function SearchBar({searchbar, cityHandler: _cityHandler, style, setAddress: _setAddress, navigation, restaurantData}) {
   const [searchText, setSearchText] = useState('')
-
-  // Exposer la méthode setAddressText via la ref passée en prop
+  
   useEffect(() => {
     if (searchbar && searchbar.current) {
       searchbar.current.setAddressText = (text) => {
@@ -17,34 +15,18 @@ export default function SearchBar({searchbar, cityHandler, style, setAddress, na
   }, [searchbar])
 
   const handleSearch = () => {
-    console.log('🔍 SearchBar handleSearch called with:', searchText)
-
     if (!searchText.trim()) {
-      console.log('❌ Search text is empty')
       return
     }
 
-    // Vérification que restaurantData existe
     if (!restaurantData || !Array.isArray(restaurantData)) {
-      console.warn('❌ SearchBar: restaurantData is not available', restaurantData)
       return
     }
 
-    console.log('📊 Searching in', restaurantData.length, 'restaurants')
-
-    // Recherche locale dans les restaurants par nom ou ville
     const filteredRestaurants = restaurantData.filter(restaurant =>
       restaurant?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
       restaurant?.city?.toLowerCase().includes(searchText.toLowerCase())
     )
-
-    console.log('✅ Found', filteredRestaurants.length, 'matching restaurants')
-
-    // Navigation vers les résultats de recherche
-    console.log('🚀 Navigating to SearchResults with:', {
-      searchTerm: searchText,
-      totalResults: filteredRestaurants.length
-    })
 
     navigation.navigate('SearchResults', {
       searchTerm: searchText,
