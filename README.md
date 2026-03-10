@@ -177,9 +177,9 @@ GET    /api/categories       // Liste catégories
 
 ### Commandes
 ```javascript
-POST   /api/orders           // Créer commande
-GET    /api/orders           // Liste commandes utilisateur
-GET    /api/orders/:id       // Détail commande
+POST   /api/resource/orders        // Créer commande
+GET    /api/resource/orders        // Liste commandes utilisateur
+GET    /api/resource/orders/:id    // Détail commande
 ```
 
 ### Drivers
