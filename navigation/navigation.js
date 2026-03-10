@@ -30,6 +30,7 @@ import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import SearchResults from '../screens/SearchResults'
 import CheckoutScreen from '../screens/CheckoutScreen'
+import { SignInContextProvider } from '../contexts/authContext'
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
     const Stack = createStackNavigator();
@@ -39,13 +40,14 @@ export default function RootNavigation({statusBarColor}) {
         headerShown: false,
     }
   return (
-    <ReduxProvider store={store}>
-      <NavigationContainer>
-      <LoaderContext.Provider value={{loading, setLoading}}>
-        <SettingProvider>
-          <DeliverySettingsProvider>
-            <RestaurantsContext.Provider value={{restaurantData, setRestaurantData}}>
-              <CategoriesContextProvider> 
+    <SignInContextProvider>
+      <ReduxProvider store={store}>
+        <NavigationContainer>
+        <LoaderContext.Provider value={{loading, setLoading}}>
+          <SettingProvider>
+            <DeliverySettingsProvider>
+              <RestaurantsContext.Provider value={{restaurantData, setRestaurantData}}>
+                <CategoriesContextProvider> 
           <Stack.Navigator screenOptions={screenOptions}>
               <Stack.Screen name="Onboarding" component={OnboardingScreen}/>
               <Stack.Screen name="Splash" component={Splash}/>
@@ -70,5 +72,6 @@ export default function RootNavigation({statusBarColor}) {
       </LoaderContext.Provider>
       </NavigationContainer>
     </ReduxProvider>
+    </SignInContextProvider>
   )
 }

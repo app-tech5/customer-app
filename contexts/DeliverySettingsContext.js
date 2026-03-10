@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { getDeliverySettings } from '../api'
+import { SignInContext } from './authContext'
 
 // Créer le contexte
 const DeliverySettingsContext = createContext()
@@ -9,11 +10,14 @@ export function DeliverySettingsProvider({ children }) {
   const [deliverySettings, setDeliverySettings] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { signedIn } = useContext(SignInContext)
 
   useEffect(() => {
-    // Charger les delivery settings au montage du provider
-    loadDeliverySettings()
-  }, [])
+    if (signedIn.userToken) {
+      // Charger les delivery settings au montage du provider seulement si connecté
+      loadDeliverySettings()
+    }
+  }, [signedIn.userToken])
 
   const loadDeliverySettings = async () => {
     try {

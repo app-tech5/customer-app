@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
 import { api, userInfos } from '../api'
 import { config } from '../config'
@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux'
 import { location } from '../global'
 import Loader from './Loader'
 import { saveSignInData, getSignInData } from '../utils/cacheUtils'
+import { SignInContext } from '../contexts/authContext'
 
 
 
@@ -20,6 +21,7 @@ export default function SignIn({ navigation }) {
   const [password, setPassword] = useState(config.DEMO_MODE ? config.DEMO_PASSWORD : '')
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
+  const { dispatchSignedIn } = useContext(SignInContext)
 
   // Charger l'email sauvegardé au montage
   useEffect(() => {
@@ -59,6 +61,11 @@ export default function SignIn({ navigation }) {
 
       // Sauvegarder l'email pour le cache intelligent
       await saveSignInData(email, true);
+
+      // Mettre à jour l'état d'authentification dans le SignInContext
+      dispatchSignedIn({
+        userToken: result.token
+      });
 
       navigation.navigate('DrawerNavigator')
 

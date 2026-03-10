@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { getSettings } from '../api'
+import { SignInContext } from './authContext'
 
 // Créer le contexte
 const SettingContext = createContext()
@@ -9,11 +10,14 @@ export function SettingProvider({ children }) {
   const [settings, setSettings] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { signedIn } = useContext(SignInContext)
 
   useEffect(() => {
-    // Charger les settings au montage du provider
-    loadSettings()
-  }, [])
+    if (signedIn.userToken) {
+      // Charger les settings au montage du provider seulement si connecté
+      loadSettings()
+    }
+  }, [signedIn.userToken])
 
   const loadSettings = async () => {
     try {
