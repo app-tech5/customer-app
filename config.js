@@ -3,7 +3,8 @@ export const config = {
   // URL de votre serveur Express/MongoDB
   // API_BASE_URL: 'http://192.168.43.197:5000/api', // ✅ IP réseau local
 
-  API_BASE_URL: 'https://deshawn-athermanous-indefensibly.ngrok-free.dev/api', // ✅ IP réseau local avec ngrok
+  API_BASE_URL: 'http://localhost:5000/api',
+  // API_BASE_URL: 'https://deshawn-athermanous-indefensibly.ngrok-free.dev/api', // ✅ IP réseau local avec ngrok
 
   // Autres configurations
   APP_NAME: 'Good Food',

@@ -54,16 +54,16 @@ module.exports = [
       "max-lines-per-function": "off",
       "complexity": ["warn", 10],
       "react/jsx-max-depth": ["warn", { "max": 4 }],
-      "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": [
-        "warn",
-        {
-          vars: "all",
-          varsIgnorePattern: "^_",
-          args: "after-used",
-          argsIgnorePattern: "^_",
-        },
-      ],
+      // Remplacement des règles unused-imports défaillantes
+      "no-unused-vars": ["warn", {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "none"
+      }],
+      "react/jsx-uses-vars": "error",
+      "react/jsx-uses-react": "error",
   
       'i18next/no-literal-string': [
         'error',

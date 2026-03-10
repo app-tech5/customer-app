@@ -1,7 +1,7 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Platform } from 'react-native'
+import { View, Text, Image, TouchableOpacity, Platform } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { FlatList } from 'react-native-gesture-handler';
-import { getCategories, getCategoriesRestaurants } from '../../api';
+import { getCategories } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 
 const defaultImage = require('../../assets/images/category-placeholder.jpg');
@@ -10,7 +10,6 @@ export default function Categories({navigation}) {
   
   const {categories, setCategories} = useContext(CategoriesContext)
 
-  const [categoriesRestaurants, setCategoriesRestaurants] = useState()
   const [imageErrors, setImageErrors] = useState({})
 
   useEffect(()=> {
@@ -34,7 +33,7 @@ export default function Categories({navigation}) {
         horizontal
         data={categories.filter(category => category.type !== "food")}
         keyExtractor={(item, index) => index}
-        renderItem={({ item, index }) => {
+        renderItem={({ item, index: _index }) => {
           return (
             <TouchableOpacity
             onPress={()=>navigation.navigate("Search",{
