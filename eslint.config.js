@@ -51,9 +51,20 @@ module.exports = [
       "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       'no-comments/disallowComments': 'error',
-      "max-lines-per-function": ["warn", 50],
+      "max-lines-per-function": "off",
       "complexity": ["warn", 10],
       "react/jsx-max-depth": ["warn", { "max": 4 }],
+      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
+  
       'i18next/no-literal-string': [
         'error',
         {
@@ -109,6 +120,14 @@ module.exports = [
           ],
         },
       ],
+
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector: "FunctionDeclaration[id.name=/^[a-z]/]",
+          message: "Fonction trop longue, respectez 50 lignes max"
+        }
+      ]
     },
   },
   {

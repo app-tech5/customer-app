@@ -4,11 +4,10 @@ import { FlatList } from 'react-native-gesture-handler';
 import { getCategories, getCategoriesRestaurants } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 
-// Image par défaut locale
 const defaultImage = require('../../assets/images/category-placeholder.jpg');
 
 export default function Categories({navigation}) {
-  // const [categories, setCategories] = useState([])
+  
   const {categories, setCategories} = useContext(CategoriesContext)
 
   const [categoriesRestaurants, setCategoriesRestaurants] = useState()
