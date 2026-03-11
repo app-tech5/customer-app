@@ -1,11 +1,9 @@
-import { View, Text, StyleSheet, StatusBar, Platform} from 'react-native'
+import { View, StyleSheet, StatusBar, Platform} from 'react-native'
 import React from 'react'
 import GroupFoodHeader from '../GroupFoodHeader'
-import { ArrowBack } from './About'
 
-export default function RestaurantDetailHeader({foodsRef, navigation, route}) {
+export default function RestaurantDetailHeader({foodsRef, navigation: _navigation}) {
   
-    const {restaurant} = route.params
     return (
     <View style={styles.container}>
      

@@ -1,7 +1,8 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, Image, StyleSheet } from 'react-native'
 import React from 'react'
 import { Icon } from 'react-native-elements'
 import { colors } from '../../global'
+import i18n from '../../i18n'
 
 export default function ReviewCard({ review }) {
   if (!review) return null;
@@ -60,31 +61,31 @@ export default function ReviewCard({ review }) {
         </Text>
       )}
 
-      {/* Détails supplémentaires si disponibles */}
+      {}
       {(review.foodQuality || review.deliveryTime || review.packaging) && (
         <View style={styles.detailsRow}>
           {review.foodQuality && (
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Food</Text>
+              <Text style={styles.detailLabel}>{i18n.t('restaurant.food')}</Text>
               <Text style={styles.detailValue}>{review.foodQuality}/5</Text>
             </View>
           )}
           {review.deliveryTime && (
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Delivery</Text>
+              <Text style={styles.detailLabel}>{i18n.t('restaurant.delivery')}</Text>
               <Text style={styles.detailValue}>{review.deliveryTime}/5</Text>
             </View>
           )}
           {review.packaging && (
             <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>Packaging</Text>
+              <Text style={styles.detailLabel}>{i18n.t('restaurant.packaging')}</Text>
               <Text style={styles.detailValue}>{review.packaging}/5</Text>
             </View>
           )}
         </View>
       )}
 
-      {/* Photos si disponibles */}
+      {}
       {review.photos && review.photos.length > 0 && (
         <View style={styles.photosRow}>
           {review.photos.slice(0, 3).map((photo, index) => (
@@ -102,10 +103,10 @@ export default function ReviewCard({ review }) {
         </View>
       )}
 
-      {/* Réponse du restaurant si disponible */}
+      {}
       {review.reply && review.reply.text && (
         <View style={styles.replyContainer}>
-          <Text style={styles.replyLabel}>Restaurant reply:</Text>
+          <Text style={styles.replyLabel}>{i18n.t('restaurant.reply')}</Text>
           <Text style={styles.replyText}>{review.reply.text}</Text>
         </View>
       )}

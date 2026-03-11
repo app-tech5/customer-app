@@ -172,7 +172,10 @@
     "distanceFee": "Distance: {distance}km × {rate}/km",
     "freeDelivery": "Free delivery available",
     "totalDeliveryFee": "Total delivery fee:",
-    "noDeliveryOptions": "Delivery options not available"
+    "noDeliveryOptions": "Delivery options not available",
+    "food": "Food",
+    "packaging": "Packaging",
+    "reply": "Restaurant reply:"
   },
   "menu": {
     "product": "Product",
