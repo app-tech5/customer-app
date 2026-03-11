@@ -3,7 +3,6 @@ import React from 'react'
 import {language, currency} from '../../global'
 import { MaterialIcons} from '@expo/vector-icons';
 
-
   export default function OrderItem({name, quantity, items}) {
    
   return (
@@ -29,7 +28,6 @@ const styles = StyleSheet.create({
      
 },
 title_icon_quantity: {
-   
    
    flexDirection: "row",
    alignItems: "center"

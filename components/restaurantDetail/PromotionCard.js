@@ -2,9 +2,10 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Icon } from 'react-native-elements'
 import { colors, currency } from '../../global'
+import i18n from '../../i18n'
 
 export default function PromotionCard({ promotion }) {
-  // Fonction pour formater les prix selon la monnaie
+  
   const formatPrice = (amount) => {
     if (!amount) return '';
     const numAmount = parseFloat(amount);
@@ -16,17 +17,13 @@ export default function PromotionCard({ promotion }) {
       return `${numAmount.toFixed(2)} ${currency}`;
     }
   };
-
-  // Utiliser UNIQUEMENT les données de la base de données
-  // Le titre et description viennent directement du champ 'name' et 'description'
+  
   const getPromotionDisplay = () => {
     const baseConfig = {
-      title: promotion.name, // VIENT DE LA DB
-      subtitle: promotion.description, // VIENT DE LA DB
+      title: promotion.name, 
+      subtitle: promotion.description, 
       color: colors.accent
     }
-    console.log("promotion.promotionType", promotion.promotionType);
-    // Icônes raffinées selon la charte Material Design
     switch (promotion.promotionType) {
       case 'percentage_discount':
         return { ...baseConfig, icon: 'percent-outline', color: colors.accent }
@@ -48,8 +45,7 @@ export default function PromotionCard({ promotion }) {
   }
 
   const display = getPromotionDisplay()
-
-  // Formater la date de fin
+  
   const formatEndDate = (endDate) => {
     if (!endDate) return ''
     const date = new Date(endDate)
@@ -57,10 +53,10 @@ export default function PromotionCard({ promotion }) {
     const diffTime = date - now
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-    if (diffDays <= 0) return 'Expired'
-    if (diffDays === 1) return 'Expires today'
-    if (diffDays <= 7) return `Expires in ${diffDays} days`
-    return `Until ${date.toLocaleDateString()}`
+    if (diffDays <= 0) return i18n.t('promotion.expired')
+    if (diffDays === 1) return i18n.t('promotion.expiresToday')
+    if (diffDays <= 7) return i18n.t('promotion.expiresInDays', { days: diffDays })
+    return i18n.t('promotion.untilDate', { date: date.toLocaleDateString() })
   }
 
   return (
@@ -78,14 +74,14 @@ export default function PromotionCard({ promotion }) {
         <Text style={[styles.title, { color: display.color }]}>{display.title}</Text>
         <Text style={styles.subtitle}>{display.subtitle}</Text>
 
-        {/* Conditions supplémentaires si elles existent */}
+        {}
         {promotion.minOrderAmount && (
           <Text style={styles.condition}>
-            Min. order: {formatPrice(promotion.minOrderAmount)}
+            {i18n.t('promotion.minOrder', { price: formatPrice(promotion.minOrderAmount) })}
           </Text>
         )}
 
-        {/* Date d'expiration */}
+        {}
         <Text style={styles.expiry}>
           {formatEndDate(promotion.endDate)}
         </Text>

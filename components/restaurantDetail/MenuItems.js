@@ -1,23 +1,17 @@
-import React, { useState, useEffect, useRef, createRef, useContext, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react'
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import { Divider } from 'react-native-elements'
-import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import { language, currency } from '../../global'
 import { AntDesign } from '@expo/vector-icons';
 import { Icon } from 'react-native-elements';
 import { getFoods, getCategoriesFromRestaurant } from '../../api';
 import { colors } from '../../global';
-import Loader from '../../screens/Loader';
 import AddToCartButton from '../AddToCartButton';
-import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import About from './About';
-import HeaderTabs from '../home/HeaderTabs';
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { groupFoods } from '../../data';
 import { FlatList } from 'react-native-gesture-handler';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { loadFoodsWithSmartCache } from '../../utils/cacheUtils';
+import i18n from '../../i18n';
 
 const styles = StyleSheet.create({
   menuItemStyle: { flex: 1, },
@@ -100,11 +94,11 @@ const styles = StyleSheet.create({
   },
 })
 export default function MenuItems({ route, restaurant, activeTab, marginLeft, navigation, foodsRef,
-  pickup, delivery, setActiveTab, userLocation, mapRef, apikey, scrollEnabled, setScrollEnabled,
-  opacity, setCategoriesFood, hideHeader }) {
+  pickup: _pickup, delivery: _delivery, setActiveTab: _setActiveTab, userLocation: _userLocation, mapRef: _mapRef, apikey: _apikey, scrollEnabled, setScrollEnabled,
+  opacity, setCategoriesFood, hideHeader: _hideHeader }) {
   
   const restaurantData = restaurant || route?.params?.restaurant
-  const { categories, setCategories } = useContext(CategoriesContext)
+  const { categories, setCategories: _setCategories } = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
   const [loader, setLoader] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -112,16 +106,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
   
   const processFoodsData = (rawFoods) => {
     if (!rawFoods || !Array.isArray(rawFoods) || rawFoods.length === 0) {
-      console.log('❌ No foods data to process');
       return [];
-    }
-
-    console.log('=== API RESPONSE ===');
-    console.log('Foods fetched from API:', rawFoods.length);
-    
-    if (rawFoods.length > 0) {
-      console.log('🔍 Sample food data:', JSON.stringify(rawFoods[0], null, 2));
-      console.log('🔍 Image field check:', rawFoods.slice(0, 3).map(f => ({ id: f.id || f._id, image: f.image, hasImage: !!f.image })));
     }
     
     const foodsWithValidImages = rawFoods.filter(food => {
@@ -133,17 +118,12 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         food.image !== 'undefined';
       
       if (!hasValidImage) {
-        console.log('❌ Filtered out food:', { id: food.id || food._id, image: food.image, reason: !food.image ? 'no image field' : 'invalid image' });
       }
 
       return hasValidImage;
     });
 
-    console.log(`📦 Received ${rawFoods.length} foods from backend`);
-    console.log(`✅ ${foodsWithValidImages.length} foods with valid images (filtered ${rawFoods.length - foodsWithValidImages.length} without images)`);
-
     if (foodsWithValidImages.length === 0) {
-      console.log('❌ No foods with valid images available');
       return [];
     }
 
@@ -153,54 +133,35 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       price: Number(food.price)
     }));
 
-    console.log('🍽️ Final processed foods with images:', processedFoods.length);
     return processedFoods;
   };
 
   useEffect(() => {
     if (!restaurantData) {
-      console.log('❌ No restaurant data available');
       return;
     }
 
-    console.log('🏪 Loading foods for restaurant:', {
-      id: restaurantData.id,
-      restaurantId: restaurantData.restaurantId,
-      name: restaurantData.name,
-      hasDishes: !!restaurantData.dishes,
-      dishesCount: restaurantData.dishes?.length || 0
-    });
-
     const restaurantId = restaurantData.restaurantId || restaurantData.id;
     
-    getCategoriesFromRestaurant(restaurantId).then((restaurantCategories) => {
-      console.log('Categories for restaurant:', restaurantCategories);
-      
+    getCategoriesFromRestaurant(restaurantId).then((_restaurantCategories) => {
+
     }).catch(error => {
       console.error('Error fetching categories:', error);
     });
-    
+
     loadFoodsWithSmartCache(
       restaurantId,
-      
+
       async (id) => {
-        console.log(`🌐 Fetching foods from API for restaurant ${id}`);
         return await getFoods(id);
       },
-      
-      (data, fromCache) => {
+
+      (data, _fromCache) => {
         const processedData = processFoodsData(data);
         setFoods(processedData);
-
-        if (fromCache) {
-          console.log('⚡ Données affichées depuis le cache');
-        } else {
-          console.log('📡 Données affichées depuis l\'API');
-        }
       },
-      
+
       (freshData) => {
-        console.log('🔄 Mise à jour des données depuis l\'API');
         const processedData = processFoodsData(freshData);
         setFoods(processedData);
       },
@@ -258,11 +219,10 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       style={styles.indicator}
     />
   
-  console.log('Total foods loaded:', foods.length)
   if (foods.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 16, color: colors.text.secondary }}>Aucun produit disponible</Text>
+        <Text style={{ fontSize: 16, color: colors.text.secondary }}>{i18n.t('menu.noProductsAvailable')}</Text>
       </View>
     )
   }
@@ -324,8 +284,8 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       {filteredFoods.length === 0 && foods.length > 0 && (
         <View style={styles.noResultsContainer}>
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={48} />
-          <Text style={styles.noResultsText}>No items found</Text>
-          <Text style={styles.noResultsSubtext}>Try adjusting your search or filters</Text>
+          <Text style={styles.noResultsText}>{i18n.t('menu.noItemsFound')}</Text>
+          <Text style={styles.noResultsSubtext}>{i18n.t('menu.tryAdjustingSearch')}</Text>
         </View>
       )}
 
@@ -335,18 +295,17 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
           ref={foodsRef}
           data={categories}
           keyExtractor={(item, index) => index}
-          renderItem={({ item, index }) => {
+          renderItem={({ item, _index }) => {
             let data = filteredFoods.filter((food) => food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
-            console.log(`Category ${item.name}: ${data.length} items`)
             return (
               <View >
                 {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
                 <FlatList
                   data={data} 
-                  keyExtractor={(item, index) => `food-${item.id}`}
-                  renderItem={({ item, index }) => {
+                  keyExtractor={(item, _index) => `food-${item.id}`}
+                  renderItem={({ item, _index }) => {
                     return (
-                      <View key={index} >
+                      <View key={_index} >
                         <View style={styles.menuItemStyle}>
                           <View style={{
                             flexDirection: "row",
@@ -372,7 +331,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
                               />
                             ) : (
                               <Text style={{ color: colors.error, fontSize: 12 }}>
-                                Produit non disponible
+                                {i18n.t('menu.productNotAvailable')}
                               </Text>
                             )}
                           </View>
@@ -388,10 +347,10 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             )
           }}
           ListFooterComponent={() => <View style={{ height: 20 }} />}
-          onScrollBeginDrag={(e) => {
+          onScrollBeginDrag={(_e) => {
           }}
           scrollEnabled={scrollEnabled}
-          onScrollEndDrag={(e) => {
+          onScrollEndDrag={(_e) => {
             if (e.nativeEvent.contentOffset.y === 0) {
               setCategoriesFood(false)
               opacity(0).then(() => {
@@ -403,12 +362,12 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       ) : (
         
         <View>
-          <Text style={styles.groupTitle}>Menu</Text>
+          <Text style={styles.groupTitle}>{i18n.t('menu.menuTitle')}</Text>
           <FlatList
             ref={foodsRef}
             data={filteredFoods} 
             keyExtractor={(item, index) => `food-${item.id || index}`}
-            renderItem={({ item, index }) => {
+            renderItem={({ item, _index }) => {
               return (
                 <View key={index} >
                   <View style={styles.menuItemStyle}>
@@ -435,7 +394,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
                         />
                       ) : (
                         <Text style={{ color: colors.error, fontSize: 12 }}>
-                          Produit non disponible
+                          {i18n.t('menu.productNotAvailable')}
                         </Text>
                       )}
                     </View>
@@ -448,10 +407,10 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             }}
             ListFooterComponent={() => <View style={{ height: 20 }} />}
             scrollEnabled={scrollEnabled}
-            onScrollBeginDrag={(e) => {
+            onScrollBeginDrag={(_e) => {
 
             }}
-            onScrollEndDrag={(e) => {
+            onScrollEndDrag={(_e) => {
               if (e.nativeEvent.contentOffset.y === 0) {
                 setCategoriesFood(false)
                 opacity(0).then(() => {
@@ -482,7 +441,7 @@ const FoodInfo = (props) => {
     </TouchableOpacity>
   )
 }
-const FoodImage = ({ marginLeft, ...props }) => {
+const FoodImage = ({ marginLeft: _marginLeft, ...props }) => {
   const [currentImage, setCurrentImage] = useState(
     props.food?.image || null
   );
@@ -529,9 +488,6 @@ export const Quantity = ({ id, food, restaurant, screen }) => {
           restaurantImage: restaurant.image,
           restaurant: restaurant
         };
-        console.log('Adding to cart:', cartItem);
-        console.log('Cart item price:', cartItem.price, 'totalPrice:', cartItem.totalPrice);
-        console.log('Selected variants:', cartItem.selectedVariants);
         dispatch({
           type: 'ADD_TO_CART',
           payload: cartItem

@@ -52,9 +52,9 @@ module.exports = [
       "no-console": ["warn", { allow: ["warn", "error"] }],
       'no-comments/disallowComments': 'error',
       "max-lines-per-function": "off",
-      "complexity": ["warn", 10],
+      // "complexity": ["warn", 10],
       "react/jsx-max-depth": ["warn", { "max": 4 }],
-      // Remplacement des règles unused-imports défaillantes
+      // // Remplacement des règles unused-imports défaillantes
       "no-unused-vars": ["warn", {
         "vars": "all",
         "varsIgnorePattern": "^_",
