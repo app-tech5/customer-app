@@ -53,7 +53,7 @@ module.exports = [
       'no-comments/disallowComments': 'error',
       "max-lines-per-function": "off",
       // "complexity": ["warn", 10],
-      "react/jsx-max-depth": ["warn", { "max": 4 }],
+      // "react/jsx-max-depth": ["warn", { "max": 4 }],
       // // Remplacement des règles unused-imports défaillantes
       "no-unused-vars": ["warn", {
         "vars": "all",

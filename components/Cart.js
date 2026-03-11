@@ -1,10 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Animated, Image} from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Image } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
 import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
-import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
@@ -13,7 +12,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
     const navigation = useNavigation()
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const total = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
-    const [loader, setLoader] = useState(false)
+    const [_loader, setLoader] = useState(false)
     const slideAnim = useRef(new Animated.Value(500)).current
     const dispatch = useDispatch()
     const { deliverySettings, calculateTotal } = useDeliverySettings()
@@ -34,10 +33,9 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
             useNativeDriver: true,
         }).start(() => setModalVisible(false))
     }
-
-    // Grouper les items par ID et calculer les quantités
+    
     const groupedItems = items.reduce((acc, item) => {
-        // Utiliser totalPrice si disponible (avec variants), sinon price
+        
         const itemPrice = item.totalPrice || item.price
 
         const existingItem = acc.find(i => i.id === item.id)
@@ -54,8 +52,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
         }
         return acc
     }, [])
-
-    // Calculs centralisés via le contexte
+    
     const totals = calculateTotal(total, restaurant?.taxRate) || {
       subtotal: total,
       deliveryFee: 2.99,
@@ -73,15 +70,14 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
 
     const updateItemQuantity = async (itemId, newQuantity) => {
         if (newQuantity <= 0) {
-            // Supprimer tous les items de cet ID
+            
             const itemsToRemove = items.filter(item => item.id === itemId)
-            for (const item of itemsToRemove) {
+            for (const _item of itemsToRemove) {
                 dispatch({
                     type: 'REMOVE_FROM_CARD',
                     payload: itemId
                 })
-
-                // Synchroniser avec le backend
+                
                 try {
                     const { removeFromCart } = await import('../api')
                     await removeFromCart(itemId)
@@ -90,14 +86,14 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                 }
             }
         } else {
-            // Mettre à jour la quantité
+            
             const currentQuantity = items.filter(item => item.id === itemId).length
             if (newQuantity > currentQuantity) {
-                // Ajouter des items
+                
                 const itemToAdd = items.find(item => item.id === itemId)
                 if (itemToAdd) {
                     for (let i = currentQuantity; i < newQuantity; i++) {
-                        // Créer un nouvel item avec une uniqueKey différente
+                        
                         const newItemId = itemToAdd.id || `item_${Date.now()}_${Math.random()}`;
                         const newItem = {
                             ...itemToAdd,
@@ -109,8 +105,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                             type: 'ADD_TO_CART',
                             payload: newItem
                         })
-
-                        // Synchroniser avec le backend
+                        
                         try {
                             const { addToCart } = await import('../api')
                             await addToCart(newItem)
@@ -120,15 +115,14 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                     }
                 }
             } else {
-                // Supprimer des items (garder seulement newQuantity items)
+                
                 const itemsToRemove = items.filter(item => item.id === itemId).slice(newQuantity)
-                for (const item of itemsToRemove) {
+                for (const _item of itemsToRemove) {
                     dispatch({
                         type: 'REMOVE_FROM_CARD',
                         payload: itemId
                     })
-
-                    // Synchroniser avec le backend
+                    
                     try {
                         const { removeFromCart } = await import('../api')
                         await removeFromCart(itemId)
@@ -141,13 +135,12 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
     }
 
     const removeAllItems = async () => {
-        // Vider le panier pour ce restaurant
+        
         dispatch({
             type: 'CLEAR_RESTAURANT',
             payload: restaurantName
         })
-
-        // Synchroniser avec le backend
+        
         try {
             const { clearRestaurantFromCart } = await import('../api')
             await clearRestaurantFromCart(restaurantName)
@@ -179,7 +172,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                 ]}
             >
                 <TouchableOpacity activeOpacity={1} onPress={() => {}} style={{flex: 1}}>
-                    {/* Header avec nom du restaurant et bouton fermer */}
+                    {}
                     <View style={styles.header}>
                         <View style={styles.headerLeft}>
                             <Ionicons name="basket" size={24} color={colors.primary} />
@@ -190,7 +183,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                         </TouchableOpacity>
                     </View>
 
-                    {/* Liste des items */}
+                    {}
                     <ScrollView
                         style={styles.itemsContainer}
                         showsVerticalScrollIndicator={false}
@@ -203,9 +196,9 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                                 <Text style={styles.emptySubtext}>{i18n.t('cart.addItems')}</Text>
                             </View>
                         ) : (
-                            groupedItems.map((item, index) => (
+                            groupedItems.map((item, _index) => (
                                 <View key={item.id} style={styles.itemContainer}>
-                                    {/* Image du produit si disponible */}
+                                    {}
                                     {item.image && (
                                         <View style={styles.itemImageContainer}>
                                             <Image
@@ -245,7 +238,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                                         </TouchableOpacity>
                                     </View>
 
-                                    {/* Bouton supprimer */}
+                                    {}
                                     <TouchableOpacity
                                         onPress={() => updateItemQuantity(item.id, 0)}
                                         style={styles.removeButton}
@@ -257,10 +250,10 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                         )}
                     </ScrollView>
 
-                    {/* Total détaillé et actions */}
+                    {}
                     {groupedItems.length > 0 && (
                         <View style={styles.footer}>
-                            {/* Détail des coûts */}
+                            {}
                             <View style={styles.costBreakdown}>
                                 <View style={styles.costRow}>
                                     <Text style={styles.costLabel}>{i18n.t('cart.subtotal')}</Text>
@@ -327,14 +320,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "flex-end",
         backgroundColor: "rgba(0,0,0,0.7)",
-        paddingBottom: 120, // Plus d'espace pour les bottom tabs et le bouton
+        paddingBottom: 120, 
     },
     modalCheckoutContainer: {
         backgroundColor: "white",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        maxHeight: '70%', // Encore plus réduit
-        minHeight: 350, // Légèrement augmenté pour le contenu
+        maxHeight: '70%', 
+        minHeight: 350, 
         marginHorizontal: 15,
         marginBottom: 15,
     },

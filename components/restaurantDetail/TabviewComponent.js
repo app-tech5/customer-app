@@ -1,6 +1,6 @@
-import { View, Text, useWindowDimensions} from 'react-native'
+import { View, useWindowDimensions} from 'react-native'
 import React, { useState } from 'react'
-import {TabBar, TabView, SceneMap} from 'react-native-tab-view'
+import {TabView, SceneMap} from 'react-native-tab-view'
 
 const FirstRoute = ()=>(
     <View style={{flex: 1, backgroundColor: "red"}}></View>

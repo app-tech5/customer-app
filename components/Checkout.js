@@ -1,29 +1,23 @@
 import { View, Text, TouchableOpacity, StyleSheet} from 'react-native'
-import React, { useState, useContext} from 'react'
+import React, { useContext } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
-import {language, currency, colors}  from '../global'
-import { generateUID } from '../global'
-import Loading from './Loading'
+import { language, currency, colors } from '../global'
 import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
-import Loader from '../screens/Loader'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LoaderContext } from '../contexts/LoaderContext'
 import i18n from '../i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
-export default function Checkout({restaurantName, setLoader, setViewCartButton, setModalVisible, closeModal, restaurant}) {
-    const {setLoading} = useContext(LoaderContext)
-    const {name, phone, address, id, lat, lng} = useSelector((state)=>state.userReducer)
+export default function Checkout({ restaurantName, setLoader: _setLoader, setViewCartButton, setModalVisible, closeModal, restaurant }) {
+    const { setLoading } = useContext(LoaderContext)
+    const { name: _name, phone: _phone, address, id, lat, lng } = useSelector((state) => state.userReducer)
      const navigation = useNavigation()
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const { calculateTotal } = useDeliverySettings()
-
-    // Calcul correct du total en groupant les items
+    
     const cartTotal = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
-
-    // Calculs centralisés via le contexte
+    
     const totals = calculateTotal(cartTotal, restaurant?.taxRate) || {
       subtotal: cartTotal,
       deliveryFee: 2.99,
@@ -32,36 +26,34 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
       isFreeDelivery: false
     }
     const { total } = totals
-
-    // Formater le nombre d'articles avec pluriel
+    
     const formatItemCount = (count) => {
         const itemText = i18n.t('cart.item')
         return `${count} ${itemText}${count > 1 ? i18n.t('cart.itemsSuffix') : ''}`
     }
 
-    console.log("IMAGE : ",items[0].restaurantImage)
-    const dispatch = useDispatch();   
-    const addOrderToFirebase = async () => {
+    const dispatch = useDispatch()
+    const _addOrderToFirebase = async () => {
         setViewCartButton(false)
 
         try {
-            // Transformer les items du panier Redux au format attendu par le modèle Order
+            
             const orderItems = items.map(cartItem => ({
-                type: cartItem.itemType || 'Menu', // Type d'item (Menu, Product)
-                item: cartItem.item || cartItem.id, // Référence à l'item
+                type: cartItem.itemType || 'Menu', 
+                item: cartItem.item || cartItem.id, 
                 name: cartItem.name,
                 image: cartItem.image,
                 price: cartItem.price,
                 currency: cartItem.currency || 'EUR',
-                quantity: 1, // Chaque item du panier Redux représente une quantité de 1
+                quantity: 1, 
                 total: cartItem.totalPrice || cartItem.price,
                 extras: cartItem.extras || [],
                 variants: cartItem.variants || []
             }));
 
             const orderData = {
-                user: id, // ObjectId de l'utilisateur
-                restaurant: items[0].restaurant._id || items[0].restaurant.id, // ObjectId du restaurant
+                user: id, 
+                restaurant: items[0].restaurant._id || items[0].restaurant.id, 
                 items: orderItems,
                 totalPrice: total,
                 subtotal: totals.subtotal,
@@ -71,7 +63,7 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                 },
                 status: "pending",
                 payment: {
-                    method: "cash", // Par défaut, pourra être changé
+                    method: "cash", 
                     status: "pending"
                 },
                 delivery: {
@@ -109,9 +101,9 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                   <TouchableOpacity
                       style={styles.checkoutButton}
                       onPress={() => {
-                        // setLoading(true)
+                        
                         closeModal ? closeModal() : setModalVisible(false);
-                        // addOrderToFirebase()
+                        
                         navigation.navigate('DrawerNavigator', {
                             screen: 'Account',
                             params: {
@@ -126,20 +118,16 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                               },
                             },
                           });
-                          
-                        // navigation.navigate('AccountNavigator',{ screen: 'CheckoutScreen',
-                        //     lat,
-                        //     lng
-                        // })
+                        
                       }}
                       activeOpacity={0.9}
                   >
-                      {/* Icône de carte de crédit */}
+                      {}
                       <View style={styles.iconContainer}>
                           <Ionicons name="card" size={24} color="white" />
                       </View>
 
-                      {/* Texte principal */}
+                      {}
                       <View style={styles.textContainer}>
                           <Text style={styles.checkoutTitle}>{i18n.t('cart.checkout')}</Text>
                           <Text style={styles.checkoutSubtitle}>
@@ -147,7 +135,7 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
                           </Text>
                       </View>
 
-                      {/* Prix total avec flèche */}
+                      {}
                       <View style={styles.priceContainer}>
                           <Text style={styles.checkoutTotal}>
                               {total ? total.toLocaleString(language, { style: "currency", currency: currency }) : ""}
@@ -162,7 +150,7 @@ export default function Checkout({restaurantName, setLoader, setViewCartButton, 
 }
 const styles = StyleSheet.create({
     container: {
-        // paddingHorizontal: 20,
+        
         paddingBottom: 20,
     },
     checkoutGradient: {

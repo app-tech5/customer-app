@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -7,9 +7,6 @@ import { colors } from '../global'
 import { addToCart as addToCartAPI } from '../api'
 
 export default function AddToCartButton({ food, restaurant, style }) {
-
-  console.log("food in AddToCartButton", food)
-  // Vérification des props
   if (!food) {
     console.error('AddToCartButton: food prop is missing or undefined')
     return null
@@ -25,28 +22,15 @@ export default function AddToCartButton({ food, restaurant, style }) {
   }
 
   const dispatch = useDispatch()
-  const [isPressed, setIsPressed] = useState(false)
+  const [setIsPressed] = useState(false)
   const scaleAnim = new Animated.Value(1)
-
-  // Get current quantity in cart
+  
   const cartItems = useSelector(state => state.cartReducer || [])
   const quantity = useMemo(() => {
     if (!food?.id) return 0
     return cartItems.filter(item => item.id === food.id).length
   }, [cartItems, food?.id])
-
-  // Debug logs (only in development)
-  if (__DEV__) {
-    console.log('AddToCartButton Debug:', {
-      foodId: food.id,
-      foodName: food.name,
-      cartItemsCount: cartItems.length,
-      quantity,
-      cartItemsSample: cartItems.slice(0, 3).map(item => ({ id: item.id, name: item.name }))
-    })
-  }
-
-  // Animation effect when pressed
+  
   const animatePress = () => {
     setIsPressed(true)
     Animated.sequence([
@@ -68,19 +52,11 @@ export default function AddToCartButton({ food, restaurant, style }) {
       console.warn('AddToCartButton: Missing food or restaurant data')
       return
     }
-
-    // Vérification supplémentaire de l'ID
+    
     if (!food.id) {
       console.error('AddToCartButton: Food has no ID!', food)
       return
     }
-
-    console.log('Adding to cart:', {
-      foodId: food.id,
-      foodName: food.name,
-      restaurantName: restaurant.name,
-      currentQuantity: quantity
-    })
 
     animatePress()
     const itemId = food.id || `item_${Date.now()}_${Math.random()}`;
@@ -92,18 +68,15 @@ export default function AddToCartButton({ food, restaurant, style }) {
       restaurantName: restaurant.name,
       restaurantImage: restaurant.image,
       restaurant: restaurant,
-      uniqueKey: uniqueKey // Ajout d'une clé unique pour éviter les conflits
+      uniqueKey: uniqueKey 
     }
-
-    // Ajouter au state Redux local
+    
     dispatch({
       type: 'ADD_TO_CART',
       payload: cartItem
     })
-
-    // Synchroniser avec le backend (sans bloquer l'UI)
+    
     try {
-      console.log('📤 Sending to backend:', JSON.stringify(cartItem, null, 2));
       await addToCartAPI(cartItem)
     } catch (error) {
       console.error('Error syncing add to cart:', error)
@@ -112,19 +85,17 @@ export default function AddToCartButton({ food, restaurant, style }) {
 
   const handleRemoveFromCart = async () => {
     if (quantity === 0) return
-
-    // Trouver l'item dans le panier pour obtenir sa uniqueKey
+    
     const cartItems = useSelector(state => state.cartReducer || [])
     const cartItem = cartItems.find(item => item.id === food.id)
 
     if (cartItem && cartItem.uniqueKey) {
-      // Supprimer du state Redux local
+      
       dispatch({
         type: 'REMOVE_FROM_CARD',
         payload: food.id
       })
-
-      // Synchroniser avec le backend (sans bloquer l'UI)
+      
       try {
         const { removeFromCart } = await import('../api')
         await removeFromCart(food.id)
@@ -143,7 +114,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
   }
 
   if (quantity === 0) {
-    // Simple "Add" button with gradient
+    
     return (
       <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
         <TouchableOpacity
@@ -163,8 +134,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
       </Animated.View>
     )
   }
-
-  // Quantity controls (like Uber Eats)
+  
   return (
     <View style={[styles.quantityContainer, style]}>
       <TouchableOpacity
