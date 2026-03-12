@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { View, Text, Image, Pressable, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons';
 import { language, currency, colors } from '../global';
@@ -7,8 +6,7 @@ import i18n from '../i18n';
 
 const OrderListItem = ({ order }) => {
   const navigation = useNavigation();
-
-  // Fonction pour obtenir la couleur du statut
+  
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return colors.warning;
@@ -19,8 +17,7 @@ const OrderListItem = ({ order }) => {
       default: return colors.grey[500];
     }
   };
-
-  // Fonction pour obtenir le texte du statut
+  
   const getStatusText = (status) => {
     switch (status) {
       case 'pending': return i18n.t('orders.status.pending');
@@ -31,8 +28,7 @@ const OrderListItem = ({ order }) => {
       default: return status;
     }
   };
-
-  // Fonction pour formater la date
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -45,11 +41,9 @@ const OrderListItem = ({ order }) => {
 
     return date.toLocaleDateString(language.replace('_', '-'));
   };
-
-  // Calculer le nombre total d'articles
+  
   const totalItems = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-
-  // Formater le prix
+  
   const formatPrice = (price) => {
     return Number(price).toLocaleString(language, {
       style: "currency",
@@ -68,7 +62,7 @@ const OrderListItem = ({ order }) => {
       activeOpacity={0.7}
     >
       <View style={styles.content}>
-        {/* Image du restaurant */}
+        {}
         <Image
           source={{ uri: order.restaurant?.image || 'https://via.placeholder.com/80' }}
           style={styles.restaurantImage}
@@ -76,12 +70,12 @@ const OrderListItem = ({ order }) => {
         />
 
         <View style={styles.orderInfo}>
-          {/* Nom du restaurant */}
+          {}
           <Text style={styles.restaurantName} numberOfLines={1}>
             {order.restaurant?.name || i18n.t('orders.unknown_restaurant')}
           </Text>
 
-          {/* Détails de la commande */}
+          {}
           <View style={styles.orderDetails}>
             <Text style={styles.itemsCount}>
               {totalItems} {totalItems > 1 ? i18n.t('orders.items') : i18n.t('orders.item')}
@@ -92,7 +86,7 @@ const OrderListItem = ({ order }) => {
             </Text>
           </View>
 
-          {/* Date et statut */}
+          {}
           <View style={styles.orderMeta}>
             <Text style={styles.orderDate}>
               {formatDate(order.createdAt)}
@@ -105,7 +99,7 @@ const OrderListItem = ({ order }) => {
           </View>
         </View>
 
-        {/* Icône de navigation */}
+        {}
         <Ionicons
           name="chevron-forward"
           size={20}
