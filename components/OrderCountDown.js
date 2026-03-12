@@ -1,37 +1,34 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, StyleSheet } from 'react-native'
+import React from 'react'
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
-import { MaterialIcons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native';
-import { APP_CONSTANT } from '../global';
+import { useNavigation } from '@react-navigation/native'
+import i18n from '../i18n'
 
 export default function OrderCountDown({
-  setBottomSheetHeight, setMapdirection, totalMinutes, timeLeft, setTimeLeft
+  setBottomSheetHeight: _setBottomSheetHeight,
+  setMapdirection: _setMapdirection,
+  totalMinutes,
+  timeLeft: _timeLeft,
+  setTimeLeft: _setTimeLeft
 }) {
-  const navigation = useNavigation()
-  let count = 0
+  const _navigation = useNavigation()
+  const _count = 0
   return (
     <CountdownCircleTimer
       isPlaying
       duration={totalMinutes}
       colors={['#348ac7', '#F7B801', '#A30000', '#A30000']}
       colorsTime={[23, 17, 8, 0]}
-      onUpdate={(remainingTime) => {
-        // if(remainingTime%4 === 0 && timeLeft >=1)
-        //   setTimeLeft(timeLeft-1)
-      }}
+      onUpdate={() => {}}
       onComplete={() => {
       }}
       size={100}
       strokeWidth={5}
     >
-      {/* {() => <View style={styles.container}>
-        <Text style={styles.text}>{timeLeft} </Text>
-        <Text style={styles.text1}>min </Text>
-      </View>} */}
+      {}
        {( {remainingTime} ) => <View style={styles.container}>
         <Text style={styles.text}>{remainingTime} </Text>
-        <Text style={styles.text1}>min </Text>
+        <Text style={styles.text1}>{i18n.t('menu.minutesAbbrev')} </Text>
       </View>}
     </CountdownCircleTimer>
   )
