@@ -1,12 +1,9 @@
 import React, { Component } from 'react'
-import { Text, StyleSheet, View,ScrollView,Image,Platform } from 'react-native'
-import {colors} from '../global'
-import {
-    Icon,
-    CheckBox
-  } from 'react-native-elements';
-
-  import { menuDetailedData } from '../data';
+import { Text, StyleSheet, View, ScrollView, Image, Platform } from 'react-native'
+import { colors } from '../global'
+import { Icon, CheckBox } from 'react-native-elements'
+import { menuDetailedData } from '../data'
+import i18n from '../i18n'
 
 export default class PreferenceScreen extends Component {
 
@@ -24,7 +21,6 @@ export default class PreferenceScreen extends Component {
         const index  = this.props.route.params.index
         const {meal,details,price} = menuDetailedData[index];
         
-        
         return (
             <View style ={styles.container}>
                 <ScrollView>
@@ -35,7 +31,7 @@ export default class PreferenceScreen extends Component {
                         />
                      </View>
                      <View style ={styles.bar}>
-                        <Text style ={styles.title}>Choose a preference</Text>
+                        <Text style={styles.title}>{i18n.t('preference.choosePreference')}</Text>
                      </View>
                      <View style ={styles.view12}>
                         <Icon 
@@ -51,7 +47,7 @@ export default class PreferenceScreen extends Component {
                         <Text style ={styles.text2}>{details}</Text>
                      </View>
                      <View style ={styles.view2}>
-                        <Text style ={styles.text3}>Choose a meal type</Text>
+                        <Text style={styles.text3}>{i18n.t('preference.chooseMealType')}</Text>
                         <View style = {styles.view3}>
                            <Text style ={styles.text4}>REQUIRED</Text>
                         </View>
@@ -67,7 +63,7 @@ export default class PreferenceScreen extends Component {
                                   checkedColor ={colors.buttons}
 
                                 />
-                                <Text style ={styles.text5}>- - - - -</Text>
+                                <Text style={styles.text5}>{i18n.t('preference.separator')}</Text>
                             </View>
                             <Text style ={styles.text6}>R{price.toFixed(2)}</Text>
                         </View>
@@ -109,7 +105,7 @@ export default class PreferenceScreen extends Component {
                      </View>
                 </ScrollView>
                 <View style ={styles.view13}>
-                    <Text style ={styles.text11}>Quantity</Text>
+                    <Text style={styles.text11}>{i18n.t('cart.quantity')}</Text>
                 </View>
                 <View style ={styles.view14}>
                    <View style ={styles.view15}>
