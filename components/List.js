@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-const Item = ({ name, details }) => {
+const Item = ({ name }) => {
   const navigation = useNavigation()
   return (
     <TouchableOpacity
@@ -22,15 +22,15 @@ const Item = ({ name, details }) => {
 )};
 const List = ({ searchPhrase, setCLicked, data }) => {
   const renderItem = ({ item }) => {
-    // Si pas de terme de recherche, afficher tous les items
+    
     if (searchPhrase === "") {
       return <Item name={item.name} details={item.details} />;
     }
-    // Sinon, filtrer par le terme de recherche
+    
     if (item.name.toUpperCase().includes(searchPhrase.toUpperCase().trim().replace(/\s/g, ""))) {
       return <Item name={item.name} details={item.details} />;
     }
-    return null; // Ne rien afficher pour les items qui ne correspondent pas
+    return null; 
   };
   return (
     <SafeAreaView style={styles.list__container}>
