@@ -98,7 +98,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
   opacity, setCategoriesFood, hideHeader: _hideHeader }) {
   
   const restaurantData = restaurant || route?.params?.restaurant
-  const { categories, setCategories: _setCategories } = useContext(CategoriesContext)
+  const { categories, setCategories } = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
   const [loader, setLoader] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -143,8 +143,8 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
 
     const restaurantId = restaurantData.restaurantId || restaurantData.id;
     
-    getCategoriesFromRestaurant(restaurantId).then((_restaurantCategories) => {
-
+    getCategoriesFromRestaurant(restaurantId).then((restaurantCategories) => {
+      setCategories(restaurantCategories)
     }).catch(error => {
       console.error('Error fetching categories:', error);
     });
@@ -295,17 +295,17 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
           ref={foodsRef}
           data={categories}
           keyExtractor={(item, index) => index}
-          renderItem={({ item, _index }) => {
+          renderItem={({ item, index }) => {
             let data = filteredFoods.filter((food) => food.category?.name === item.name || food.categoryId === item.id || food.category?._id === item.id || food.category === item.id)
             return (
               <View >
                 {data.length > 0 ? <Text style={styles.groupTitle}>{item.name}</Text> : null}
                 <FlatList
-                  data={data} 
-                  keyExtractor={(item, _index) => `food-${item.id}`}
-                  renderItem={({ item, _index }) => {
+                  data={data}
+                  keyExtractor={(foodItem) => `food-${foodItem.id}`}
+                  renderItem={({ item, index: itemIndex }) => {
                     return (
-                      <View key={_index} >
+                      <View key={itemIndex}>
                         <View style={styles.menuItemStyle}>
                           <View style={{
                             flexDirection: "row",
@@ -347,10 +347,9 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             )
           }}
           ListFooterComponent={() => <View style={{ height: 20 }} />}
-          onScrollBeginDrag={(_e) => {
-          }}
+          onScrollBeginDrag={() => {}}
           scrollEnabled={scrollEnabled}
-          onScrollEndDrag={(_e) => {
+          onScrollEndDrag={(e) => {
             if (e.nativeEvent.contentOffset.y === 0) {
               setCategoriesFood(false)
               opacity(0).then(() => {
@@ -367,9 +366,9 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             ref={foodsRef}
             data={filteredFoods} 
             keyExtractor={(item, index) => `food-${item.id || index}`}
-            renderItem={({ item, _index }) => {
+            renderItem={({ item, index }) => {
               return (
-                <View key={index} >
+                <View key={index}>
                   <View style={styles.menuItemStyle}>
                     <View style={{
                       flexDirection: "row",
@@ -407,10 +406,8 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             }}
             ListFooterComponent={() => <View style={{ height: 20 }} />}
             scrollEnabled={scrollEnabled}
-            onScrollBeginDrag={(_e) => {
-
-            }}
-            onScrollEndDrag={(_e) => {
+            onScrollBeginDrag={() => {}}
+            onScrollEndDrag={(e) => {
               if (e.nativeEvent.contentOffset.y === 0) {
                 setCategoriesFood(false)
                 opacity(0).then(() => {
