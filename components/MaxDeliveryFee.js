@@ -1,7 +1,5 @@
-import { View, Text, StyleSheet} from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
-import { Gesture, GestureDetector, PanGestureHandler } from 'react-native-gesture-handler'
-import Animated, { useAnimatedGestureHandler } from 'react-native-reanimated'
 import Slider from '@react-native-community/slider'
 
 export default function MaxDeliveryFee() {
