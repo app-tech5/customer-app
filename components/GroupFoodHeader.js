@@ -1,7 +1,6 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, FlatList, StatusBar} from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native'
 import React, { useState } from 'react'
 import { groupFoods } from '../data'
-import { BottomSheetFlatList } from '@gorhom/bottom-sheet'
 import { grey1 } from '../global'
 
 export default function GroupFoodHeader({foodsRef}) {
