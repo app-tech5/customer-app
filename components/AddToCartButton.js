@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -22,15 +22,28 @@ export default function AddToCartButton({ food, restaurant, style }) {
   }
 
   const dispatch = useDispatch()
-  const [setIsPressed] = useState(false)
-  const scaleAnim = new Animated.Value(1)
-  
+  const [, setIsPressed] = useState(false)
+  const scaleAnim = useRef(new Animated.Value(1)).current
+  const quantityScaleAnim = useRef(new Animated.Value(0)).current
+
   const cartItems = useSelector(state => state.cartReducer || [])
   const quantity = useMemo(() => {
     if (!food?.id) return 0
     return cartItems.filter(item => item.id === food.id).length
   }, [cartItems, food?.id])
-  
+
+  useEffect(() => {
+    if (quantity > 0) {
+      quantityScaleAnim.setValue(0)
+      Animated.spring(quantityScaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 10,
+      }).start()
+    }
+  }, [quantity])
+
   const animatePress = () => {
     setIsPressed(true)
     Animated.sequence([
@@ -136,7 +149,13 @@ export default function AddToCartButton({ food, restaurant, style }) {
   }
   
   return (
-    <View style={[styles.quantityContainer, style]}>
+    <Animated.View
+      style={[
+        styles.quantityContainer,
+        style,
+        { transform: [{ scale: quantityScaleAnim }] },
+      ]}
+    >
       <TouchableOpacity
         style={[styles.controlButton]}
         onPress={handleDecrease}
@@ -170,7 +189,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
           <Feather name="plus" size={12} color={colors.white} />
         </LinearGradient>
       </TouchableOpacity>
-    </View>
+    </Animated.View>
   )
 }
 
