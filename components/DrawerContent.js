@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native'
 import React, { useState } from 'react'
-import {Avatar, Icon, Divider} from 'react-native-elements'
+import { Avatar, Divider } from 'react-native-elements'
 import {
     DrawerContentScrollView,
     DrawerItemList,
@@ -9,15 +9,14 @@ import {
 import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { colors, grey1 } from '../global'
+import { MaterialIcons } from '@expo/vector-icons'
+import { colors } from '../global'
 import i18n from '../i18n'
 import { useSelector } from 'react-redux'
 
-
 export default function DrawerContent(props) {
 
-    const [isSignedIn, setIsSignedIn] = useState(true)
+    const [_isSignedIn, _setIsSignedIn] = useState(true)
     const { name, email, image } = useSelector((state) => state.userReducer)
 
     const navigation = useNavigation()
@@ -28,12 +27,12 @@ export default function DrawerContent(props) {
         api.logout();
         navigation.navigate('SignIn');
     })
-        .catch((err)=>console.log(err))
+        .catch((err) => console.error(err))
     }
   return (
     <SafeAreaView style={styles.container}>
         <DrawerContentScrollView {...props} contentContainerStyle={styles.scrollContainer}>
-            {/* Header avec profil utilisateur */}
+            {}
             <View style={styles.header}>
                 <View style={styles.profileContainer}>
                     <Avatar
@@ -49,19 +48,19 @@ export default function DrawerContent(props) {
                 <Divider style={styles.divider} />
             </View>
 
-            {/* Menu items */}
+            {}
             <View style={styles.menuContainer}>
                 <DrawerItemList {...props} />
             </View>
         </DrawerContentScrollView>
 
-        {/* Bouton de déconnexion en bas */}
+        {}
         <View style={styles.footer}>
             <Divider style={styles.divider} />
             <DrawerItem
                 label={i18n.t('drawer.logout')}
                 labelStyle={styles.logoutLabel}
-                icon={({color, size}) => (
+                icon={({ color: _color, size }) => (
                     <MaterialIcons
                         name="logout"
                         color={colors.error}
@@ -80,7 +79,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background.primary,
-        paddingBottom: 20, // Espace pour éviter les boutons Android
+        paddingBottom: 20, 
     },
     scrollContainer: {
         flexGrow: 1,
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: colors.border.light,
         backgroundColor: colors.background.primary,
-        paddingBottom: 30, // Espace supplémentaire pour le bouton logout
+        paddingBottom: 30, 
         paddingTop: 10,
     },
     logoutItem: {

@@ -1,13 +1,11 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import i18n from "../i18n";
 
 const DishListItem = ({ dish }) => {
   const navigation = useNavigation();
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  console.log('🍽️ DishListItem rendering for:', dish?.name, 'hasImage:', !!dish?.image, 'error:', imageError, 'loaded:', imageLoaded);
 
   return (
     <Pressable
@@ -29,23 +27,18 @@ const DishListItem = ({ dish }) => {
           }
           style={[styles.image, { backgroundColor: imageError ? '#f0f0f0' : 'transparent' }]}
           onError={() => {
-            console.log('❌ Image failed to load for dish:', dish.name, 'URL:', dish.image);
             setImageError(true);
             setImageLoaded(false);
           }}
           onLoad={() => {
-            console.log('✅ Image loaded successfully for dish:', dish.name);
             setImageError(false);
             setImageLoaded(true);
-          }}
-          onLoadStart={() => {
-            console.log('⏳ Image loading started for dish:', dish.name);
           }}
         />
       )}
       {!dish?.image && (
         <View style={[styles.image, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
-          <Text style={{ fontSize: 10, color: '#666' }}>No Image</Text>
+          <Text style={{ fontSize: 10, color: '#666' }}>{i18n.t('menu.noImage')}</Text>
         </View>
       )}
     </Pressable>

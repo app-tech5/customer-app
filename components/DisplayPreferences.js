@@ -10,7 +10,7 @@ export default function DisplayPreferences() {
                   <View key={index}>
                       <Text style={styles.title}>{preft.toUpperCase()}</Text>
                     {menuDetailedData[0].preferenceData[index].map((prfd, i, tab)=>{
-                            const [ptab, setPtab] = useState(tab)
+                            const [ptab] = useState(tab)
                             return (
                                 <CheckBox
                                 key={i}

@@ -188,7 +188,8 @@
     "availablePlural": "disponibles",
     "ctaText": "Ajoutez ce produit à votre commande et personnalisez-le selon vos goûts !",
     "minutesAbbrev": "min",
-    "uncategorized": "Non catégorisé"
+    "uncategorized": "Non catégorisé",
+    "noImage": "Pas d'image"
   },
   "cart": {
     "title": "Votre panier",

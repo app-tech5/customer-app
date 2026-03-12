@@ -193,7 +193,8 @@
     "availablePlural": "available",
     "ctaText": "Add this product to your order and customize it to your taste!",
     "minutesAbbrev": "min",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "noImage": "No Image"
   },
     "cart": {
     "title": "Your Cart",

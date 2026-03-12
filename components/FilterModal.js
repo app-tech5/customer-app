@@ -64,9 +64,9 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
     }
     setSelectedFilters(resetFilters)
     if (onApplyFilters) {
-      onApplyFilters(resetFilters)  // Appliquer les filtres remis à zéro
+      onApplyFilters(resetFilters)  
     }
-    setVisible(false)  // Fermer le modal après reset
+    setVisible(false)  
   }
 
   return (
@@ -83,7 +83,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
-                {/* Tri */}
+                {}
                 <SectionTitle text={i18n.t('filters.sortBy')} />
                 <View style={styles.filterGroup}>
                   <FilterOption
@@ -123,7 +123,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                   />
                 </View>
 
-                {/* Frais de livraison maximum */}
+                {}
                 <SectionTitle text={i18n.t('filters.maxDeliveryFee')} />
                 <View style={styles.deliveryFeeContainer}>
                   <View style={styles.deliveryFeeOptions}>
@@ -147,7 +147,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                   </View>
                 </View>
 
-                {/* Gamme de prix */}
+                {}
                 <SectionTitle text={i18n.t('filters.priceRange')} />
                 <View style={styles.priceRangeContainer}>
                   {[
@@ -174,7 +174,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                   ))}
                 </View>
 
-                {/* Type de cuisine */}
+                {}
                 <SectionTitle text={i18n.t('filters.cuisineType')} />
                 <View style={styles.filterGroup}>
                   {[
@@ -196,7 +196,7 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                   ))}
                 </View>
 
-                {/* Fonctionnalités */}
+                {}
                 <SectionTitle text={i18n.t('filters.features')} />
                 <View style={styles.filterGroup}>
                   <FilterOption
@@ -287,8 +287,6 @@ const FilterOption = ({icon, text, iconType, selected, onPress}) => {
         </TouchableOpacity>
     )
 }
-
- 
 
 const styles = StyleSheet.create({
     container: {
