@@ -98,23 +98,20 @@ export default function AddToCartButton({ food, restaurant, style }) {
 
   const handleRemoveFromCart = async () => {
     if (quantity === 0) return
-    
-    const cartItems = useSelector(state => state.cartReducer || [])
-    const cartItem = cartItems.find(item => item.id === food.id)
 
-    if (cartItem && cartItem.uniqueKey) {
-      
-      dispatch({
-        type: 'REMOVE_FROM_CARD',
-        payload: food.id
-      })
-      
-      try {
-        const { removeFromCart } = await import('../api')
-        await removeFromCart(food.id)
-      } catch (error) {
-        console.error('Error syncing remove from cart:', error)
-      }
+    const cartItem = cartItems.find(item => item.id === food.id)
+    if (!cartItem) return
+
+    dispatch({
+      type: 'REMOVE_FROM_CARD',
+      payload: food.id
+    })
+
+    try {
+      const { removeFromCart } = await import('../api')
+      await removeFromCart(food.id)
+    } catch (error) {
+      console.error('Error syncing remove from cart:', error)
     }
   }
 
