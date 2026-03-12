@@ -18,7 +18,7 @@ const getPromotionIcon = (promotionText) => {
   if (text.includes('delivery') || text.includes('livraison')) {
     return { name: 'truck-fast', type: 'MaterialCommunityIcons' };
   }
-  // Default icon
+  
   return { name: 'tag', type: 'FontAwesome' };
 };
 
@@ -27,19 +27,17 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Si allPromotions est disponible, utiliser la fonction utilitaire de filtrage
+    
     if (allPromotions && Array.isArray(allPromotions)) {
       const restaurantId = restaurant.restaurantId || restaurant.id;
-
-      // Utiliser la fonction utilitaire qui applique la même logique que getRestaurantPromotions
+      
       const restaurantPromotions = filterRestaurantPromotions(allPromotions, restaurantId, allMenus);
-
-      // Prendre la première promotion (la plus prioritaire)
+      
       const activePromotion = restaurantPromotions.length > 0 ? restaurantPromotions[0] : null;
       setPromotion(activePromotion || null);
       setLoading(false);
     } else {
-      // Fallback : appel API individuel si allPromotions n'est pas disponible
+      
       const fetchPromotion = async () => {
         try {
           if (!restaurant || !restaurant.restaurantId) {
@@ -48,8 +46,7 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
           }
 
           const promotions = await getRestaurantPromotions(restaurant.restaurantId);
-
-          // Prendre la première promotion (la plus prioritaire)
+          
           const activePromotion = promotions.length > 0 ? promotions[0] : null;
           setPromotion(activePromotion);
         } catch (error) {
@@ -64,11 +61,6 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
     }
   }, [restaurant, allPromotions, allMenus]);
 
-  // Si pas de promotion ou chargement en cours, ne rien afficher
-  // if (loading || !promotion) {
-  //   return null;
-  // }
-
   if (loading) {
     return (
       <View style={styles.promotionContainer}>
@@ -80,15 +72,13 @@ export default function PromotionBadge({restaurant, allPromotions, allMenus}) {
   if (!promotion) {
     return null;
   }
-
-  // Déterminer le texte à afficher selon le type de promotion
+  
   const getPromotionText = () => {
     if (typeof promotion === 'string') {
-      // Ancien format (propriété statique)
+      
       return promotion;
     }
-
-    // Utiliser directement le nom de la promotion depuis la base de données
+    
     return promotion.name || 'SPECIAL OFFER';
   };
 
@@ -128,7 +118,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         paddingHorizontal: 8,
         minHeight: 24,
-        // Ombre pour iOS
+        
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -136,9 +126,9 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         shadowRadius: 3,
-        // Ombre pour Android
+        
         elevation: 4,
-        // Effet de brillance
+        
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.2)',
     },
