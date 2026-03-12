@@ -513,6 +513,17 @@
     "clearAll": "Tout effacer",
     "retry": "Réessayer"
   },
+  "preference": {
+    "choosePreference": "Choisir une préférence",
+    "chooseMealType": "Choisir un type de plat",
+    "separator": "- - - - -"
+  },
+  "progress": {
+    "step1Content": "Voici le contenu de l'étape 1 !",
+    "step2Content": "Voici le contenu de l'étape 2 !",
+    "step3Content": "Voici le contenu de l'étape 3 !",
+    "press": "Appuie"
+  },
   "errors": {
     "network": "Erreur de connexion réseau",
     "timeout": "Délai d'attente dépassé",

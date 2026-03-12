@@ -522,6 +522,17 @@
     "clearAll": "Clear All",
     "retry": "Retry"
   },
+  "preference": {
+    "choosePreference": "Choose a preference",
+    "chooseMealType": "Choose a meal type",
+    "separator": "- - - - -"
+  },
+  "progress": {
+    "step1Content": "This is the content within step 1!",
+    "step2Content": "This is the content within step 2!",
+    "step3Content": "This is the content within step 3!",
+    "press": "Press"
+  },
   "errors": {
     "network": "Network connection error",
     "timeout": "Request timeout",
