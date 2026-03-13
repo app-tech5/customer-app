@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getFavorites, addToFavorites, removeFromFavorites } from '../api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 
 const FavoritesContext = createContext();
@@ -18,8 +17,7 @@ export const FavoritesProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const reduxFavorites = useSelector(state => state.user?.favorites || []);
-
-  // Charger les favoris depuis l'API
+  
   const loadFavorites = useCallback(async () => {
     try {
       setLoading(true);
@@ -27,7 +25,7 @@ export const FavoritesProvider = ({ children }) => {
       if (response.success && response.favorites) {
         const favoriteIds = response.favorites.map(fav => fav._id || fav.id);
         setFavorites(favoriteIds);
-        // Synchroniser avec Redux
+        
         dispatch({ type: 'SET_FAVORITES', payload: favoriteIds });
       } else {
         setFavorites([]);
@@ -41,22 +39,18 @@ export const FavoritesProvider = ({ children }) => {
       setLoading(false);
     }
   }, [dispatch]);
-
-  // Vérifier si un restaurant est dans les favoris
+  
   const isFavorite = useCallback((restaurantId) => {
     return favorites.includes(restaurantId);
   }, [favorites]);
-
-  // Ajouter aux favoris
+  
   const addToFavorite = useCallback(async (restaurantId) => {
     try {
       setLoading(true);
       await addToFavorites(restaurantId);
-
-      // Mettre à jour l'état local
+      
       setFavorites(prev => [...prev, restaurantId]);
-
-      // Synchroniser avec Redux
+      
       dispatch({ type: 'ADD_FAVORITE', payload: restaurantId });
 
       return { success: true };
@@ -67,17 +61,14 @@ export const FavoritesProvider = ({ children }) => {
       setLoading(false);
     }
   }, [dispatch]);
-
-  // Retirer des favoris
+  
   const removeFromFavorite = useCallback(async (restaurantId) => {
     try {
       setLoading(true);
       await removeFromFavorites(restaurantId);
-
-      // Mettre à jour l'état local
+      
       setFavorites(prev => prev.filter(id => id !== restaurantId));
-
-      // Synchroniser avec Redux
+      
       dispatch({ type: 'REMOVE_FAVORITE', payload: restaurantId });
 
       return { success: true };
@@ -88,8 +79,7 @@ export const FavoritesProvider = ({ children }) => {
       setLoading(false);
     }
   }, [dispatch]);
-
-  // Basculer l'état favoris
+  
   const toggleFavorite = useCallback(async (restaurantId) => {
     if (isFavorite(restaurantId)) {
       return await removeFromFavorite(restaurantId);
@@ -97,15 +87,13 @@ export const FavoritesProvider = ({ children }) => {
       return await addToFavorite(restaurantId);
     }
   }, [isFavorite, addToFavorite, removeFromFavorite]);
-
-  // Synchroniser avec Redux au montage et quand Redux change
+  
   useEffect(() => {
     if (reduxFavorites.length > 0 && favorites.length === 0) {
       setFavorites(reduxFavorites);
     }
   }, [reduxFavorites, favorites.length]);
-
-  // Charger les favoris au montage du contexte
+  
   useEffect(() => {
     loadFavorites();
   }, [loadFavorites]);
@@ -126,7 +114,4 @@ export const FavoritesProvider = ({ children }) => {
     </FavoritesContext.Provider>
   );
 };
-
-
-
 
