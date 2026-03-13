@@ -12,8 +12,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const suggestionsOpacity = useRef(new Animated.Value(0)).current;
   const suggestionsTranslateY = useRef(new Animated.Value(-10)).current;
-
-  // Masquer les suggestions quand du texte est saisi
+  
   useEffect(() => {
     if (searchPhrase.trim() && showSuggestions) {
       animateSuggestions(false);
@@ -50,8 +49,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
       useNativeDriver: true,
       friction: 8,
     }).start();
-
-    // Montrer les suggestions après un court délai
+    
     setTimeout(() => {
       if (!searchPhrase.trim()) {
         animateSuggestions(true);
@@ -69,8 +67,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
       useNativeDriver: true,
       friction: 8,
     }).start();
-
-    // Cacher les suggestions
+    
     animateSuggestions(false);
   };
 
@@ -102,7 +99,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
           }
         ]}
       >
-        {/* Icône de recherche */}
+        {}
         <View style={styles.iconContainer}>
           <Ionicons
             name="search"
@@ -111,7 +108,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
           />
         </View>
 
-        {/* Champ de saisie */}
+        {}
         <TextInput
           style={styles.input}
           placeholder={i18n.t('home.searchPlaceholder')}
@@ -128,9 +125,9 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
           maxLength={50}
         />
 
-        {/* Actions à droite */}
+        {}
         <View style={styles.actionsContainer}>
-          {/* Bouton clear si il y a du texte */}
+          {}
           {searchPhrase.length > 0 && (
             <TouchableOpacity
               style={styles.actionButton}
@@ -145,14 +142,14 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             </TouchableOpacity>
           )}
 
-          {/* Indicateur de focus */}
+          {}
           {isFocused && (
             <View style={[styles.focusIndicator, { backgroundColor: colors.primary }]} />
           )}
         </View>
       </Animated.View>
 
-      {/* Suggestions rapides (quand vide et focus) */}
+      {}
       {showSuggestions && (
         <Animated.View
           style={[
@@ -177,7 +174,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             style={styles.suggestionItem}
             onPress={() => {
               animateSuggestions(false);
-              // "Top rated" → Recherche spéciale pour les mieux notés
+              
               onSubmit?.('TOP_RATED_SPECIAL');
             }}
           >
@@ -191,10 +188,9 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
 };
 export default SearchComponent;
 
-
 const styles = StyleSheet.create({
   container: {
-    width: SCREEN_WIDTH - 80, // Largeur adaptative
+    width: SCREEN_WIDTH - 80, 
     position: 'relative',
   },
   searchContainer: {
@@ -227,7 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: colors.text.primary,
-    paddingVertical: 0, // Évite le padding double
+    paddingVertical: 0, 
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -274,129 +270,4 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
