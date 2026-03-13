@@ -9,8 +9,7 @@ export const SignInContextProvider = (props)=>{
     const [signedIn, dispatchSignedIn] = useReducer(SignInReducer, {
         userToken: null
     })
-
-    // Initialiser l'état d'authentification depuis AsyncStorage au démarrage
+    
     useEffect(() => {
         const initializeAuthState = async () => {
             try {
@@ -37,5 +36,4 @@ export const SignInContextProvider = (props)=>{
 
     )
 }
-
   
