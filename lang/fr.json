@@ -529,7 +529,11 @@
     "timeout": "Délai d'attente dépassé",
     "unknown": "Une erreur inconnue s'est produite",
     "location": "Accès à la localisation refusé",
-    "permission": "Autorisation requise"
+    "permission": "Autorisation requise",
+    "deliverySettingsLoad": "Erreur chargement delivery settings :",
+    "deliverySettingsContext": "useDeliverySettings doit être utilisé dans un DeliverySettingsProvider",
+    "settingsLoad": "Erreur chargement settings :",
+    "settingsContext": "useSettings doit être utilisé dans un SettingProvider"
   },
   "promotion": {
     "untilDate": "Valable jusqu'au {{date}}",

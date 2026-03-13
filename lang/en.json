@@ -538,7 +538,11 @@
     "timeout": "Request timeout",
     "unknown": "An unknown error occurred",
     "location": "Location access denied",
-    "permission": "Permission required"
+    "permission": "Permission required",
+    "deliverySettingsLoad": "Error loading delivery settings:",
+    "deliverySettingsContext": "useDeliverySettings must be used within a DeliverySettingsProvider",
+    "settingsLoad": "Error loading settings:",
+    "settingsContext": "useSettings must be used within a SettingProvider"
   },
   "promotion": {
     "untilDate": "Valid until {{date}}",
