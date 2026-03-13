@@ -539,5 +539,12 @@
     "unknown": "An unknown error occurred",
     "location": "Location access denied",
     "permission": "Permission required"
+  },
+  "promotion": {
+    "untilDate": "Valid until {{date}}",
+    "specialOffer": "Special Offer",
+    "limitedTime": "Limited Time",
+    "freeDelivery": "Free Delivery",
+    "discount": "{{value}}% OFF"
   }
 }

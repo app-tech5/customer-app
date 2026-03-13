@@ -530,5 +530,12 @@
     "unknown": "Une erreur inconnue s'est produite",
     "location": "Accès à la localisation refusé",
     "permission": "Autorisation requise"
+  },
+  "promotion": {
+    "untilDate": "Valable jusqu'au {{date}}",
+    "specialOffer": "Offre spéciale",
+    "limitedTime": "Durée limitée",
+    "freeDelivery": "Livraison gratuite",
+    "discount": "{{value}}% de réduction"
   }
 }
