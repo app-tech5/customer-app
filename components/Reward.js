@@ -18,7 +18,7 @@ const getRewardIcon = (rewardText) => {
   if (text.includes('delivery') || text.includes('livraison')) {
     return { name: 'truck-fast', type: 'MaterialCommunityIcons' };
   }
-  // Default icon
+  
   return { name: 'tag', type: 'FontAwesome' };
 };
 
@@ -35,13 +35,12 @@ export default function Reward({restaurant}) {
         }
 
         const promotions = await getRestaurantPromotions(restaurant.restaurantId);
-
-        // Prendre la première promotion (la plus prioritaire) ou utiliser la propriété reward statique comme fallback
+        
         const activePromotion = promotions.length > 0 ? promotions[0] : null;
         setPromotion(activePromotion);
       } catch (error) {
         console.error('Error fetching restaurant promotion:', error);
-        // Fallback à la propriété statique si l'API échoue
+        
         setPromotion(restaurant.reward ? { name: restaurant.reward } : null);
       } finally {
         setLoading(false);
@@ -50,20 +49,17 @@ export default function Reward({restaurant}) {
 
     fetchPromotion();
   }, [restaurant]);
-
-  // Si pas de promotion ou chargement en cours, ne rien afficher
+  
   if (loading || !promotion) {
     return null;
   }
-
-  // Déterminer le texte à afficher selon le type de promotion
+  
   const getPromotionText = () => {
     if (typeof promotion === 'string') {
-      // Ancien format (propriété statique)
+      
       return promotion;
     }
-
-    // Nouveau format depuis l'API
+    
     if (promotion.promotionType === 'percentage_discount' && promotion.discountValue) {
       return `${promotion.discountValue}% OFF`;
     }
@@ -76,8 +72,7 @@ export default function Reward({restaurant}) {
     if (promotion.promotionType === 'flash_sale') {
       return 'FLASH DEAL';
     }
-
-    // Fallback au nom de la promotion
+    
     return promotion.name || 'SPECIAL OFFER';
   };
 
@@ -117,7 +112,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         paddingHorizontal: 8,
         minHeight: 24,
-        // Ombre pour iOS
+        
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -125,9 +120,9 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         shadowRadius: 3,
-        // Ombre pour Android
+        
         elevation: 4,
-        // Effet de brillance
+        
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.2)',
     },
