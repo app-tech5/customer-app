@@ -14,7 +14,6 @@ export const LanguageContextProvider = (props)=>{
     const [selectedLanguage, setSelectedLanguage] = useState('en');
 
     useEffect(()=>{
-        console.log(RNLocalize.getLocales())
         const currentLanguage = RNLocalize.findBestAvailableLanguage(Object.keys(languageObj));
         setSelectedLanguage(currentLanguage?.languageTag)
 
@@ -35,5 +34,4 @@ export const LanguageContextProvider = (props)=>{
 }
 
 export const useTranslation = ()=> useContext(LanguageContext)
-
   
