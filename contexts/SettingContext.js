@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { getSettings } from '../api'
 import { SignInContext } from './authContext'
+import i18n from '../i18n'
 
-// Créer le contexte
 const SettingContext = createContext()
 
-// Provider du contexte
 export function SettingProvider({ children }) {
   const [settings, setSettings] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -14,7 +13,7 @@ export function SettingProvider({ children }) {
 
   useEffect(() => {
     if (signedIn.userToken) {
-      // Charger les settings au montage du provider seulement si connecté
+      
       loadSettings()
     }
   }, [signedIn.userToken])
@@ -23,17 +22,15 @@ export function SettingProvider({ children }) {
     try {
       setLoading(true)
       const settingsData = await getSettings()
-
-      // Si c'est un tableau, prendre le premier élément (settings principaux)
+      
       const appSettings = Array.isArray(settingsData) ? settingsData[0] : settingsData
 
       setSettings(appSettings)
       setError(null)
     } catch (err) {
-      console.error('Erreur chargement settings:', err)
+      console.error(i18n.t('errors.settingsLoad'), err)
       setError(err.message)
-
-      // Valeurs par défaut en cas d'erreur
+      
       setSettings({
         appName: 'Good Food',
         currency: {
@@ -56,8 +53,7 @@ export function SettingProvider({ children }) {
   const refreshSettings = () => {
     loadSettings()
   }
-
-  // Valeurs par défaut si pas encore chargé
+  
   const defaultCurrency = settings?.currency || { symbol: '€', code: 'EUR' }
   const defaultLanguage = settings?.language || { code: 'fr', name: 'Français' }
 
@@ -78,16 +74,13 @@ export function SettingProvider({ children }) {
   )
 }
 
-// Hook pour utiliser le contexte
 export function useSettings() {
   const context = useContext(SettingContext)
   if (!context) {
-    throw new Error('useSettings doit être utilisé dans un SettingProvider')
+    throw new Error(i18n.t('errors.settingsContext'))
   }
   return context
 }
 
 export default SettingContext
-
-
 
