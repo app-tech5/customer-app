@@ -1,11 +1,13 @@
-# Migration Firebase → API REST
+# Firebase → REST API Migration
 
-## ✅ Migration majeure
-- Suppression complète de Firebase (auth, firestore, storage)
-- Implémentation API REST personnalisée avec Express.js + MongoDB
-- Authentification JWT + Bcrypt
-- Persistance AsyncStorage
-- Corrections bugs navigation
+## ✅ Major Migration
 
-## 🎯 Résultat
-Application indépendante, performante, sans coûts Firebase, entièrement contrôlée.
+* Complete removal of Firebase (Auth, Firestore, Storage)
+* Implementation of a custom REST API with Express.js + MongoDB
+* JWT authentication + Bcrypt
+* AsyncStorage persistence
+* Navigation bug fixes
+
+## 🎯 Result
+
+Independent, high-performance application with no Firebase costs and full control. 🚀
