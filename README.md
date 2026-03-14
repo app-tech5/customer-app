@@ -1,486 +1,413 @@
-# 🍔 Good Food - Application Client
+# Good Food Pro - Customer App
 
-Application mobile React Native pour la commande de nourriture en ligne, migrée de Firebase vers une architecture API personnalisée avec Express.js et MongoDB.
+React Native mobile application for online food ordering with custom REST API backend (Express.js + MongoDB).
 
-## 📋 Table des Matières
+**Good Food Pro** is a complete food delivery ecosystem including 4 apps + backend.
 
-- [🚀 Fonctionnalités](#-fonctionnalités)
-- [🛠️ Technologies](#️-technologies)
-- [📦 Installation](#-installation)
-- [⚙️ Configuration](#️-configuration)
-- [🔄 Migration Firebase → API](#-migration-firebase--api)
-- [🗄️ Structure du Projet](#️-structure-du-projet)
-- [🌐 API Endpoints](#-api-endpoints)
-- [🎭 Mode Démo](#-mode-démo)
-- [🌍 Internationalisation](#-internationalisation)
-- [📚 Documentation Détaillée](#-documentation-détaillée)
-- [📱 Utilisation](#-utilisation)
-- [🐛 Dépannage](#-dépannage)
+---
 
-## 🚀 Fonctionnalités
+## Table of Contents
 
-- ✅ Authentification utilisateur (inscription/connexion)
-- ✅ Recherche et découverte de restaurants
-- ✅ Consultation des menus et plats
-- ✅ Gestion du panier
-- ✅ Passation de commandes
-- ✅ Suivi des commandes
-- ✅ Géolocalisation et cartes
-- ✅ Paiement et portefeuille
-- ✅ Interface multilingue (FR/EN)
-- ✅ **Mode démonstration** (connexion automatique)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Demo Mode](#demo-mode)
+- [Internationalization](#internationalization)
+- [Scripts](#scripts)
+- [Troubleshooting](#troubleshooting)
+- [Documentation](#documentation)
 
-## 🛠️ Technologies
+---
 
-### Frontend (React Native)
-- **React Native** 0.81.5
-- **Expo** ~54.0.0
-- **React Navigation** v6+ (Stack, Tab, Drawer)
-- **React Native Reanimated** ~4.1.1 (v3+)
-- **Redux** (gestion d'état)
-- **AsyncStorage** (persistance locale)
+## Features
 
-### Backend (Express.js + MongoDB)
-- **Node.js** + Express
-- **MongoDB** (base de données)
-- **JWT** (authentification)
-- **Bcrypt** (hashage mots de passe)
+- User authentication (sign up / sign in)
+- Restaurant discovery and search
+- Menu browsing with categories
+- Shopping cart management
+- Order placement and tracking
+- Geolocation and maps
+- Wallet and payment methods
+- Favorites management
+- Multilingual interface (EN/FR)
+- Demo mode (auto-login)
+- Promotions and offers
 
-### Autres
-- **Firebase** → **REMPLACÉ** par API REST
-- **Axios/Fetch** (requêtes HTTP)
-- **Expo Location** (géolocalisation)
-- **Expo Linear Gradient** (dégradés)
+---
 
-## 📦 Installation
+## Tech Stack
 
-### Prérequis
+### Core
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React Native | 0.81.5 | Mobile framework |
+| Expo | ~54.0.0 | Development platform |
+| React | 19.1.0 | UI library |
+
+### Navigation
+| Package | Version |
+|---------|---------|
+| @react-navigation/native | ^7.1.26 |
+| @react-navigation/stack | ^7.6.13 |
+| @react-navigation/drawer | ^7.7.10 |
+| @react-navigation/bottom-tabs | ^7.9.0 |
+
+### State Management
+| Package | Version | Purpose |
+|---------|---------|---------|
+| Redux | ^5.0.0 | Global state |
+| React-Redux | ^9.0.0 | React bindings |
+| React Context | - | Local state |
+| AsyncStorage | 2.2.0 | Persistence |
+
+### Maps & Location
+| Package | Version |
+|---------|---------|
+| react-native-maps | 1.20.1 |
+| @rnmapbox/maps | ^10.2.10 |
+| expo-location | ~19.0.0 |
+
+### UI & Animations
+| Package | Version |
+|---------|---------|
+| react-native-reanimated | ~4.1.1 |
+| @gorhom/bottom-sheet | ^4.6.4 |
+| lottie-react-native | ~7.3.1 |
+| react-native-elements | ^3.4.3 |
+
+### Internationalization
+| Package | Version |
+|---------|---------|
+| i18n-js | ^4.3.0 |
+| expo-localization | ~17.0.0 |
+
+---
+
+## Installation
+
+### Prerequisites
 - Node.js ≥ 16
-- npm ou yarn
+- npm or yarn
 - Expo CLI
-- Android Studio (pour Android) ou Xcode (pour iOS)
+- Android Studio (Android) or Xcode (iOS)
 
-### Installation des dépendances
+### Setup
 ```bash
-# Cloner le projet
+# Clone the project
 git clone <repository-url>
 cd customer-app
 
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Installer les dépendances supplémentaires si nécessaire
-npm install @react-native-async-storage/async-storage
+# Start development server
+npm start
 ```
 
-### Configuration du Backend
-1. **Installer et configurer votre serveur Express + MongoDB**
-2. **Créer la base de données MongoDB** avec les collections :
-   - `users`
-   - `restaurants`
-   - `categories`
-   - `orders`
-   - `drivers`
+### Backend Setup
+This app requires the **my-backend** server running:
+```bash
+cd ../my-backend
+npm install
+npm run migrate:up
+npm start
+```
 
-## ⚙️ Configuration
+---
 
-### Configuration de l'API
-Modifiez le fichier `config.js` :
+## Configuration
+
+### API Configuration
+Edit `config.js`:
 
 ```javascript
 export const config = {
-  // URL de votre serveur Express/MongoDB
-  API_BASE_URL: 'http://localhost:3000/api', // ⚠️ À MODIFIER !
-
+  API_BASE_URL: 'http://localhost:5000/api',
   APP_NAME: 'Good Food',
   VERSION: '1.0.0',
+  DEMO_MODE: true,
+  DEMO_EMAIL: 'demo@customer.com',
+  DEMO_PASSWORD: 'demo123',
   API_TIMEOUT: 10000,
 };
 ```
 
-### Variables d'environnement (optionnel)
-Créer un fichier `.env` :
-```env
-API_BASE_URL=http://your-server-url:port/api
-```
+### Environment Options
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `API_BASE_URL` | Backend API URL | `http://localhost:5000/api` |
+| `DEMO_MODE` | Enable demo credentials | `true` |
+| `API_TIMEOUT` | Request timeout (ms) | `10000` |
 
-## 🔄 Migration Firebase → API
+---
 
-### ❌ Ce qui a été supprimé :
-- **firebase.js** - Fichier Firebase complet supprimé
-- Toutes les références à `firebase/auth`, `firebase/firestore`, `firebase/storage`
-- Dépendance `react-navigation` v4 (conflits)
-
-### ✅ Ce qui a été ajouté/créé :
-- **`api.js`** - Client API REST complet
-- **`config.js`** - Configuration centralisée
-- Architecture API propre avec gestion d'erreurs
-
-### 🔄 Ce qui a été migré :
-| Fonctionnalité | Avant (Firebase) | Après (API) |
-|---|---|---|
-| Authentification | `signInWithEmailAndPassword` | `api.login(email, password)` |
-| Utilisateurs | `userInfos(uid)` | `api.getUserInfo(userId)` |
-| Restaurants | `getRestaurantsFromFirebase()` | `api.getRestaurants()` |
-| Commandes | `addDoc(ordersCol, {...})` | `api.createOrder(orderData)` |
-| Catégories | `getCategories()` | `api.getCategories()` |
-
-## 🗄️ Structure du Projet
+## Project Structure
 
 ```
 customer-app/
-├── 📁 android/           # Configuration Android
-├── 📁 ios/              # Configuration iOS
-├── 📁 assets/           # Images, animations, polices
-├── 📁 components/       # Composants réutilisables
-│   ├── 📁 home/        # Composants page d'accueil
-│   └── 📁 restaurantDetail/ # Composants détail restaurant
-├── 📁 contexts/         # Contextes React (Auth, Loader, etc.)
-├── 📁 lang/            # Fichiers de traduction
-├── 📁 navigation/      # Configuration React Navigation
-├── 📁 redux/           # Store Redux et reducers
-├── 📁 screens/         # Écrans de l'application
-├── 📁 storybook/       # Configuration Storybook
-├── 📄 api.js           # Client API REST (NOUVEAU)
-├── 📄 config.js        # Configuration (NOUVEAU)
-├── 📄 App.js           # Point d'entrée
-└── 📄 package.json     # Dépendances
+├── App.js                    # Entry point
+├── api.js                    # REST API client
+├── config.js                 # App configuration
+├── i18n.js                   # Internationalization
+├── global.js                 # Global constants
+│
+├── components/               # 41 reusable components
+│   ├── home/                 # Home screen components
+│   │   ├── HomeHeader.js
+│   │   ├── SearchBar.js
+│   │   ├── Categories.js
+│   │   └── RestaurantItems.js
+│   │
+│   ├── restaurantDetail/     # Restaurant detail components
+│   │   ├── MenuItems.js
+│   │   ├── ReviewCard.js
+│   │   ├── PromotionCard.js
+│   │   └── ViewCart.js
+│   │
+│   ├── Cart.js
+│   ├── Checkout.js
+│   ├── FilterModal.js
+│   └── ...
+│
+├── screens/                  # 34 screens
+│   ├── Home.js
+│   ├── RestaurantDetail.js
+│   ├── MenuDetailScreen.js
+│   ├── CartScreen.js
+│   ├── CheckoutScreen.js
+│   ├── OrderTracking.js
+│   ├── MyOrdersScreen.js
+│   ├── SearchScreen.js
+│   ├── WalletScreen.js
+│   ├── AccountScreen.js
+│   ├── Settings.js
+│   ├── SignIn.js
+│   ├── SignUp.js
+│   └── ...
+│
+├── navigation/
+│   ├── navigation.js         # Root navigation
+│   ├── DrawerNavigator.js
+│   ├── BottomTabs.js
+│   └── Stacks.js
+│
+├── contexts/                 # 8 React contexts
+│   ├── authContext.js
+│   ├── SettingContext.js
+│   ├── DeliverySettingsContext.js
+│   ├── FavoritesContext.js
+│   ├── CategoriesContext.js
+│   └── ...
+│
+├── redux/
+│   ├── store.js
+│   └── reducers/
+│       ├── cartReducer.js
+│       ├── userReducer.js
+│       └── ...
+│
+├── lang/
+│   ├── en.json               # English translations
+│   └── fr.json               # French translations
+│
+├── utils/
+│   └── cacheUtils.js
+│
+└── doc/                      # Documentation
+    ├── README.md
+    ├── architecture.md
+    ├── api-reference.md
+    └── ...
 ```
 
-## 🌐 API Endpoints
+---
 
-Votre serveur Express doit implémenter ces endpoints :
-
-### Authentification
-```javascript
-POST   /api/auth/login       // Connexion
-POST   /api/auth/register    // Inscription
-```
-
-### Utilisateurs
-```javascript
-GET    /api/users/:id        // Infos utilisateur
-PUT    /api/users/:id        // Mise à jour utilisateur
-```
-
-### Restaurants & Menus
-```javascript
-GET    /api/restaurants      // Liste restaurants
-GET    /api/restaurants/:id  // Détail restaurant
-GET    /api/restaurants/:id/foods // Menu du restaurant
-```
-
-### Catégories
-```javascript
-GET    /api/categories       // Liste catégories
-```
-
-### Commandes
-```javascript
-POST   /api/resource/orders        // Créer commande
-GET    /api/resource/orders        // Liste commandes utilisateur
-GET    /api/resource/orders/:id    // Détail commande
-```
-
-### Drivers
-```javascript
-GET    /api/drivers/:id      // Infos driver
-```
-
-### Format des données
-
-#### Utilisateur
-```json
-{
-  "_id": "string",
-  "email": "string",
-  "name": "string",
-  "phone": "string",
-  "address": "string",
-  "lat": "number",
-  "lng": "number"
-}
-```
-
-#### Restaurant
-```json
-{
-  "_id": "string",
-  "name": "string",
-  "address": "string",
-  "lat": "number",
-  "lng": "number",
-  "phone": "string",
-  "categories": ["string"],
-  "dishes": [{
-    "title": "string",
-    "price": "number",
-    "description": "string",
-    "image": "string"
-  }]
-}
-```
-
-#### Commande
-```json
-{
-  "_id": "string",
-  "orderId": "string",
-  "user": {
-    "id": "string",
-    "name": "string",
-    "phone": "string",
-    "address": "string",
-    "lat": "number",
-    "lng": "number"
-  },
-  "restaurant": {
-    "id": "string",
-    "name": "string",
-    "address": "string",
-    "lat": "number",
-    "lng": "number",
-    "phone": "string"
-  },
-  "items": [{
-    "name": "string",
-    "price": "number",
-    "quantity": "number"
-  }],
-  "status": "pending|accepted|preparing|ready|delivered",
-  "total": "number",
-  "createdAt": "ISO string"
-}
-```
-
-## 🎭 Mode Démo
+## Demo Mode
 
 ### Configuration
-Le mode démonstration permet de préremplir automatiquement les identifiants de connexion pour faciliter les démonstrations.
+Demo mode pre-fills login credentials for easy testing.
 
-**Activation** : Dans `config.js`, mettez `DEMO_MODE: true`
+**Enable:** Set `DEMO_MODE: true` in `config.js`
 
-**Identifiants de démo** :
-- **Email** : `demo@customer.com`
-- **Mot de passe** : `demo123`
+**Demo Credentials:**
+- **Email:** `demo@customer.com`
+- **Password:** `demo123`
 
-### Fonctionnement
-- ✅ Champs de connexion préremplis automatiquement
-- ✅ Indicateur visuel "Mode Démo - Identifiants préremplis"
-- ✅ Connexion en un clic
-- ✅ Utilisateur de démo créé automatiquement dans la base de données
+### Features
+- Auto-filled login fields
+- Visual indicator "Demo Mode - Pre-filled credentials"
+- One-click login
+- Demo user auto-created in database
 
-### Création de l'utilisateur de démo
-```bash
-# Dans le backend
-npm run migrate:up -- 20250303223322-add-user.js
-# ou
-./run-migrations-ordered.sh
-```
+---
 
-## 🌍 Internationalisation
+## Internationalization
 
-L'application supporte plusieurs langues avec un système d'internationalisation complet.
+### Supported Languages
+- English (default)
+- French
 
-### Configuration
-- **Langue par défaut :** Anglais 🇬🇧
-- **Détection automatique :** Langue du device
-- **Support :** Français 🇫🇷, Anglais 🇬🇧
+### Auto-Detection
+The app automatically detects device language using `expo-localization`.
 
-### Structure
-```
-lang/
-├── en.json    # Traductions anglaises
-└── fr.json    # Traductions françaises
-```
-
-### Utilisation dans le code
+### Usage
 ```javascript
 import i18n from '../i18n';
 
-// Texte simple
+// Simple text
 <Text>{i18n.t('auth.welcome')}</Text>
 
-// Avec paramètres
+// With parameters
 <Text>{i18n.t('order.estimatedTime', { minutes: 25 })}</Text>
 ```
 
-### Changement de langue
+### Change Language
 ```javascript
 import { changeLanguage } from '../i18n';
-changeLanguage('en'); // Anglais
-changeLanguage('fr'); // Français
+changeLanguage('en'); // English
+changeLanguage('fr'); // French
 ```
 
-### Écrans internationalisés
-- ✅ **SignIn** - Connexion avec mode démo
-- 🔄 **SignUp** - Inscription (à faire)
-- 🔄 **Home** - Accueil (à faire)
-- 🔄 **RestaurantDetail** - Détails (à faire)
-- 🔄 **Cart** - Panier (à faire)
-- 🔄 **Profile** - Profil (à faire)
-- 🔄 **Settings** - Paramètres (à faire)
+### Translation Keys
+| Category | Example Keys |
+|----------|--------------|
+| `auth` | welcome, signIn, signUp, email, password |
+| `home` | title, searchPlaceholder, categories |
+| `restaurant` | menu, reviews, addToCart, viewCart |
+| `cart` | title, empty, checkout, total |
+| `order` | tracking, status, estimatedTime |
+| `wallet` | balance, addMoney, paymentMethods |
+| `settings` | language, notifications, logout |
+| `common` | save, cancel, loading, error |
 
-## 📚 Documentation Détaillée
+---
 
-Pour consulter l'historique complet des mises à jour et les guides détaillés :
+## Scripts
 
-📁 **[`/doc`](./doc/)** - Documentation organized by date
-
-### Available files:
-- **[2025-01-updates.md](./doc/2025-01-updates.md)** - All January 2025 updates
-- **[migration-api-firebase.md](./doc/migration-api-firebase.md)** - Firebase → REST API migration
-
-Chaque fichier contient :
-- ✅ Modifications détaillées
-- 🐛 Problèmes résolus
-- 📋 Instructions complètes
-- 🔍 Vérifications post-déploiement
-
-## 📱 Utilisation
-
-### Démarrage de l'application
 ```bash
-# Mode développement
-npm start
-
-# Android
-npm run android
-
-# iOS
-npm run ios
-
-# Web
-npm run web
+npm start          # Start Expo dev server
+npm run android    # Build and run on Android
+npm run ios        # Build and run on iOS
+npm run web        # Run in web browser
+npm run lint       # Check code quality
+npm run lint-fix   # Auto-fix lint errors
 ```
 
-### Flux utilisateur
-1. **Onboarding** → Écran d'accueil
-2. **SignIn/SignUp** → Authentification
-3. **Home** → Découverte restaurants
-4. **RestaurantDetail** → Consultation menu
-5. **Cart/Checkout** → Validation commande
-6. **OrderTracking** → Suivi commande
+---
 
-## 🐛 Dépannage
+## Troubleshooting
 
-### Erreur "component auth has not been registered"
-**Cause** : Références Firebase restantes
-**Solution** : Vérifiez que `firebase.js` est supprimé et tous les imports Firebase nettoyés
+### Common Errors
 
-### Erreur "Network request failed"
-**Cause** : Serveur API non accessible
-**Solution** : Vérifiez l'URL dans `config.js` et que votre serveur tourne
+| Error | Cause | Solution |
+|-------|-------|----------|
+| "Network request failed" | API server not running | Start backend with `npm start` |
+| "User not found" | Demo user missing | Run `npm run migrate:up` on backend |
+| "component auth has not been registered" | Firebase references | Clean Firebase imports |
+| "useLegacyImplementation prop" | Navigation/Reanimated conflict | Update React Navigation to v7 |
+| "cannot read property split of undefined" | i18n locale issue | Already fixed with fallback |
 
-### Bouton "Continue" ne fonctionne pas
-**Cause** : Ancien code avec setTimeout
-**Solution** : Vérifiez que `Onboarding.js` n'a plus de splash state
-
-### AsyncStorage dupliqué
-**Cause** : Imports multiples
-**Solution** : Supprimer les imports dupliqués dans SignIn.js
-
-### Erreur "useLegacyImplementation" prop
-**Cause** : Conflit entre React Navigation v6 et Reanimated v3+
-**Solution** :
+### Cache Issues
 ```bash
-# Option 1 : Upgrade React Navigation (recommandé)
-npm uninstall @react-navigation/native @react-navigation/stack @react-navigation/bottom-tabs @react-navigation/drawer
-npm install @react-navigation/native@^7.0.0 @react-navigation/stack@^7.0.0 @react-navigation/bottom-tabs@^7.0.0 @react-navigation/drawer@^7.0.0
-
-# Option 2 : Downgrade Reanimated (temporaire)
-npm install react-native-reanimated@~2.14.0
-
-# Nettoyer le cache
+# Clear Expo cache
 npx expo start --clear
+
+# Clear npm cache
+npm cache clean --force
+rm -rf node_modules
+npm install
 ```
 
-### Erreur 404 sur /users/:id
-**Cause** : Route utilisateur manquante dans l'API
-**Solution** : Ajouter la route dans `src/routes/userRoutes.js` :
-```javascript
-router.get('/:id', async (req, res) => {
-    const user = await User.findById(req.params.id).select('-password');
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-});
-```
-
-### Mode démo non fonctionnel
-**Cause** : Utilisateur de démo non créé ou identifiants incorrects
-**Solution** :
-1. Vérifier que les migrations ont été exécutées
-2. Vérifier `config.js` : `DEMO_MODE: true`
-3. Vérifier les identifiants dans `config.js`
-4. Redémarrer l'app avec `npx expo start --clear`
-
-### Erreur "cannot read property split of undefined"
-**Cause** : `Localization.locale` undefined dans i18n.js
-**Solution** : Gestion d'erreur ajoutée dans `i18n.js` :
-```javascript
-let deviceLanguage = 'fr'; // Défaut français
-try {
-  if (Localization && Localization.locale) {
-    deviceLanguage = Localization.locale.split('-')[0];
-  }
-} catch (error) {
-  console.warn('Erreur lors de la détection de langue:', error.message);
-}
-```
-
-## 📝 Scripts Disponibles
-
-```bash
-npm start          # Démarre Expo DevTools
-npm run android    # Build et lance sur Android
-npm run ios        # Build et lance sur iOS
-npm run web        # Lance en mode web
-```
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/nouvelle-fonctionnalite`)
-3. Commit les changements (`git commit -am 'Ajout nouvelle fonctionnalité'`)
-4. Push la branche (`git push origin feature/nouvelle-fonctionnalite`)
-5. Créer une Pull Request
-
-## 📄 Licence
-
-Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
+### API Connection Issues
+1. Check `config.js` has correct `API_BASE_URL`
+2. Ensure backend server is running
+3. Check network/firewall settings
+4. For physical device, use local IP instead of `localhost`
 
 ---
 
-## 🔄 Historique des Changements
+## Documentation
 
-📁 **Documentation détaillée disponible dans** [`/doc`](./doc/)
+### Detailed Documentation
+See the [`/doc`](./doc/) folder for complete documentation:
 
-### v2.2.0 (2025-01-10) - Internationalisation + Corrections
-- ✅ **Système d'internationalisation complet** (i18n-js + expo-localization)
-- ✅ **Support multilingue** Français 🇫🇷 et Anglais 🇬🇧
-- ✅ **Détection automatique** de la langue du device
-- ✅ **Écran SignIn internationalisé** (premier écran terminé)
-- ✅ **Langue par défaut** changée à Anglais 🇬🇧
-- ✅ **Correction erreur** `cannot read property split of undefined`
-- ✅ **Gestion robuste** de la détection de langue avec fallback
-- ✅ **Structure de traductions** organisée et extensible
-
-### v2.1.0 (2025-01-09) - Mode Démo + Corrections
-- ✅ Mode démonstration avec connexion automatique
-- ✅ Résolution conflits React Navigation / Reanimated
-- ✅ Utilisateur de démo et route API ajoutés
-
-### v2.0.0 - Migration Firebase → API
-- ✅ Migration complète vers API REST personnalisée
-- ✅ Suppression dépendances Firebase
-- ✅ Authentification JWT + MongoDB
-
-### v1.0.0 (Original)
-- Application avec Firebase (Auth + Firestore)
-- Fonctionnalités complètes de livraison
+| File | Description |
+|------|-------------|
+| [README.md](./doc/README.md) | Documentation index |
+| [architecture.md](./doc/architecture.md) | Technical architecture |
+| [api-reference.md](./doc/api-reference.md) | API endpoints reference |
+| [2025-01-updates.md](./doc/2025-01-updates.md) | January 2025 updates |
+| [migration-api-firebase.md](./doc/migration-api-firebase.md) | Firebase migration guide |
 
 ---
 
-**Besoin d'aide ?** Ouvrez une issue ou contactez l'équipe de développement.
+## User Flow
 
-🍔 **Bon appétit avec Good Food !** 🍕
+```
+Onboarding → SignIn/SignUp → Home → RestaurantDetail → Cart → Checkout → OrderTracking
+```
+
+### Navigation Structure
+```
+RootNavigation (Stack)
+├── Onboarding
+├── SignIn / SignUp
+├── DrawerNavigator
+│   ├── Home (BottomTabs)
+│   ├── Search
+│   ├── MyOrders
+│   ├── Account
+│   ├── Wallet
+│   ├── Favorites
+│   └── Settings
+├── RestaurantDetail
+├── MenuDetailScreen
+├── CheckoutScreen
+├── OrderTracking
+└── ...
+```
+
+---
+
+## Related Product
+
+**Good Food Pro** is the advanced multi-app edition of [Good Food](https://codecanyon.net/).
+
+| Feature | Good Food | Good Food Pro |
+|---------|-----------|---------------|
+| Backend | Firebase | Custom REST API (Express.js + MongoDB) |
+| Database | Firestore | MongoDB |
+| Apps included | Customer only | Customer + Restaurant + Delivery + Admin |
+| Backend source code | ❌ | ✅ Included |
+| Internationalization | ❌ | ✅ EN/FR |
+| Monthly costs | Firebase fees | Self-hosted (free) |
+| Demo mode | ❌ | ✅ |
+| Full customization | Limited | ✅ Full control |
+
+---
+
+## Version
+
+**v1.0.0** - Initial release (March 2026)
+
+---
+
+## Contributing
+
+1. Fork the project
+2. Create feature branch (`git checkout -b feature/new-feature`)
+3. Commit changes (`git commit -am 'Add new feature'`)
+4. Push branch (`git push origin feature/new-feature`)
+5. Create Pull Request
+
+---
+
+## License
+
+This project is under MIT License.
+
+---
+
+*Last updated: March 2026*
