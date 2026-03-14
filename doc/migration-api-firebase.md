@@ -8,6 +8,6 @@
 * AsyncStorage persistence
 * Navigation bug fixes
 
-## 🎯 Result
+## Result
 
-Independent, high-performance application with no Firebase costs and full control. 🚀
+Independent, high-performance application with no Firebase costs and full control.
