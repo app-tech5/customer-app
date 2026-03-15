@@ -17,8 +17,7 @@ export default function OrdersScreen({ navigation }) {
 
   useEffect(() => {
     loadOrders()
-
-    // Configurer le header avec le menu hamburger
+    
     navigation.setOptions({
       title: i18n.t('order.allOrders', 'All Orders'),
       headerLeft: () => (
@@ -40,8 +39,7 @@ export default function OrdersScreen({ navigation }) {
       setError(null)
 
       const ordersData = await getOrders()
-
-      // Trier par date décroissante (plus récent en premier)
+      
       const sortedOrders = ordersData.sort((a, b) =>
         new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
       )
@@ -57,7 +55,7 @@ export default function OrdersScreen({ navigation }) {
 
   const handleCancelOrder = async (order) => {
     try {
-      // Vérifier que la commande peut être annulée
+      
       if (order.status?.toLowerCase() !== 'pending') {
         Alert.alert(
           i18n.t('order.cancelError', 'Cancel Error'),
@@ -65,8 +63,7 @@ export default function OrdersScreen({ navigation }) {
         )
         return
       }
-
-      // Demander confirmation
+      
       Alert.alert(
         i18n.t('order.confirmCancel', 'Confirm Cancellation'),
         i18n.t('order.cancelMessage', 'Are you sure you want to cancel this order? This action cannot be undone.'),
@@ -95,8 +92,7 @@ export default function OrdersScreen({ navigation }) {
     try {
       const orderId = order.id || order._id
       await cancelOrder(orderId)
-
-      // Mettre à jour la commande localement
+      
       setOrders(prevOrders =>
         prevOrders.map(o =>
           (o.id || o._id) === orderId
@@ -117,7 +113,6 @@ export default function OrdersScreen({ navigation }) {
       )
     }
   }
-
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -180,8 +175,7 @@ export default function OrdersScreen({ navigation }) {
     const hours = Math.floor(minutes / 60)
     return `${hours}h ${minutes % 60}min`
   }
-
-  // Statistiques des commandes
+  
   const orderStats = useMemo(() => {
     const stats = {
       total: orders.length,
@@ -201,19 +195,16 @@ export default function OrdersScreen({ navigation }) {
 
     return stats
   }, [orders])
-
-  // Filtrer les commandes selon la recherche et le statut
+  
   const filteredOrders = useMemo(() => {
     let filtered = orders
-
-    // Filtre par statut
+    
     if (selectedStatus) {
       filtered = filtered.filter(order =>
         order.status?.toLowerCase() === selectedStatus.toLowerCase()
       )
     }
-
-    // Filtre par recherche (nom du restaurant ou ID de commande)
+    
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(order => {
@@ -237,7 +228,7 @@ export default function OrdersScreen({ navigation }) {
 
   const renderOrderItem = ({ item, index }) => (
     <View style={styles.orderItemContainer}>
-      {/* Timeline indicator */}
+      
       <View style={styles.timelineContainer}>
         <View style={styles.timelineLine} />
         <View style={[styles.timelineDot, { backgroundColor: getStatusColor(item.status) }]}>
@@ -250,7 +241,7 @@ export default function OrdersScreen({ navigation }) {
         onPress={() => navigation.navigate('OrderDetails', { order: item })}
         activeOpacity={0.7}
       >
-        {/* Header avec statut et date */}
+        
         <View style={styles.orderHeader}>
           <View style={styles.orderLeft}>
             <Text style={styles.orderId}>
@@ -268,7 +259,7 @@ export default function OrdersScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Informations restaurant */}
+        
         <View style={styles.restaurantSection}>
           <View style={styles.restaurantIcon}>
             <Ionicons name="restaurant" size={20} color={colors.primary} />
@@ -283,7 +274,7 @@ export default function OrdersScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Détails commande */}
+        
         <View style={styles.orderDetails}>
           <View style={styles.detailItem}>
             <Ionicons name="bag-outline" size={16} color={colors.text.secondary} />
@@ -304,9 +295,9 @@ export default function OrdersScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Informations supplémentaires */}
+        
         <View style={styles.additionalInfo}>
-          {/* Mode de paiement */}
+          
           {item.payment?.method && (
             <View style={styles.infoItem}>
               <Ionicons name="card-outline" size={14} color={colors.text.secondary} />
@@ -316,7 +307,7 @@ export default function OrdersScreen({ navigation }) {
             </View>
           )}
 
-          {/* Type de livraison */}
+          
           {item.delivery?.type && (
             <View style={styles.infoItem}>
               <Ionicons
@@ -330,7 +321,7 @@ export default function OrdersScreen({ navigation }) {
             </View>
           )}
 
-          {/* Heure estimée pour les livraisons en cours */}
+          
           {item.status?.toLowerCase() === 'out_for_delivery' && item.delivery?.estimatedTime && (
             <View style={styles.infoItem}>
               <Ionicons name="time-outline" size={14} color={colors.primary} />
@@ -340,7 +331,7 @@ export default function OrdersScreen({ navigation }) {
             </View>
           )}
 
-          {/* Informations du livreur pour les livraisons en cours */}
+          
           {item.status?.toLowerCase() === 'out_for_delivery' && item.driver?.userId && (
             <View style={styles.infoItem}>
               <Ionicons name="person-outline" size={14} color={colors.primary} />
@@ -351,7 +342,7 @@ export default function OrdersScreen({ navigation }) {
           )}
         </View>
 
-        {/* Actions */}
+        
         <View style={styles.orderActions}>
           {item.status?.toLowerCase() === 'pending' && (
             <TouchableOpacity
@@ -381,9 +372,7 @@ export default function OrdersScreen({ navigation }) {
 
   const StatsHeader = () => (
     <View style={styles.statsContainer}>
-      {/* <Text style={styles.statsTitle}>
-        {i18n.t('order.yourOrders', 'Your Orders')}
-      </Text> */}
+      
       <View style={styles.statsGrid}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{orderStats.total}</Text>
@@ -463,10 +452,10 @@ export default function OrdersScreen({ navigation }) {
         <EmptyState />
       ) : (
         <>
-          {/* Statistiques */}
+          
           <StatsHeader />
 
-          {/* Barre de recherche */}
+          
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
             <TextInput
@@ -483,7 +472,7 @@ export default function OrdersScreen({ navigation }) {
             )}
           </View>
 
-          {/* Filtres par statut */}
+          
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -522,7 +511,7 @@ export default function OrdersScreen({ navigation }) {
             ))}
           </ScrollView>
 
-          {/* Liste des commandes */}
+          
           {filteredOrders.length === 0 ? (
             <View style={styles.noResultsContainer}>
               <Ionicons name="search-outline" size={64} color={colors.grey[400]} />
@@ -857,7 +846,7 @@ const styles = StyleSheet.create({
   },
   orderActions: {
     flexDirection: 'row',
-    // justifyContent: 'space-between',
+    
     flexWrap: 'wrap',
     gap: 10,
   },
@@ -869,7 +858,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 12,
-    // flex: 1,
+    
     width: '48%',
     borderWidth: 1,
     borderColor: colors.border.light,
@@ -888,11 +877,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: 'rgba(244, 67, 54, 0.1)',
     borderRadius: 12,
-    // flex: 1,
+    
     width: '48%',
     borderWidth: 1,
     borderColor: colors.error,
-    // marginRight: 6,
+    
   },
   cancelButtonText: {
     fontSize: 14,
