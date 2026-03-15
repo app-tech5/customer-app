@@ -1,8 +1,35 @@
-# 📚 Documentation - Updates History
+# 📚 Documentation - Good Food Pro Customer App
 
-This folder contains the detailed history of all updates for the **Good Food Customer App** project.
+This folder contains technical documentation for the **Good Food Pro** customer application.
 
-## 📋 Updates List
+---
+
+## 📖 Documentation Index
+
+### 🏗️ Architecture & Technical Reference
+
+#### [Architecture Overview](./architecture.md)
+Complete technical documentation including:
+- ✅ **Tech Stack**: React Native 0.81.5, Expo SDK 54, Redux 5
+- ✅ **Project Structure**: Components, screens, navigation, contexts
+- ✅ **API Client**: REST API methods, authentication, endpoints
+- ✅ **State Management**: Redux + React Context
+- ✅ **Internationalization**: i18n setup (EN/FR)
+- ✅ **Key Features**: Ordering, payments, tracking, promotions
+
+#### [API Reference](./api-reference.md)
+Complete REST API documentation:
+- ✅ **Authentication**: Login, register, JWT tokens
+- ✅ **Users**: Profile, addresses, favorites
+- ✅ **Restaurants**: Listing, details, categories
+- ✅ **Orders**: Create, track, history
+- ✅ **Cart**: Server-side cart management
+- ✅ **Payments**: Wallet, payment methods
+- ✅ **Promotions**: Offers, discounts
+
+---
+
+## 📋 Updates History
 
 ### 📅 By Month
 
@@ -22,19 +49,59 @@ This folder contains the detailed history of all updates for the **Good Food Cus
 - ✅ JWT + MongoDB implementation
 - ✅ Navigation bugs and imports fixes
 
+---
+
+## 🚀 Quick Start
+
+### Current Stack
+| Component | Version |
+|-----------|---------|
+| React Native | 0.81.5 |
+| Expo SDK | 54.0.0 |
+| React | 19.1.0 |
+| Redux | 5.0.0 |
+
+### Demo Credentials
+```
+Email: demo@customer.com
+Password: demo123
+```
+
+### Scripts
+```bash
+npm start          # Start dev server
+npm run ios        # Run on iOS
+npm run android    # Run on Android
+npm run lint       # Check code quality
+```
+
+---
+
 ## 📖 How to Use This Documentation
 
 ### For Developers
-1. **Before an update:** Check recent changes
-2. **Troubleshooting:** Verify resolved issues in updates
-3. **Migration:** Follow detailed migration guides
+1. **Start here:** Read [`architecture.md`](./architecture.md) for project overview
+2. **Before an update:** Check recent changes in monthly files
+3. **Troubleshooting:** Verify resolved issues in updates
+4. **Migration:** Follow detailed migration guides
 
 ### For Testers
 1. **New features:** Test recent additions
 2. **Regressions:** Verify applied fixes
 3. **Compatibility:** Check dependency changes
 
+---
+
 ## 🏗️ Files Structure
+
+```
+doc/
+├── README.md                    # This file - Documentation index
+├── architecture.md              # Technical architecture reference
+├── api-reference.md             # REST API endpoints documentation
+├── 2025-01-updates.md          # Monthly updates (January 2025)
+└── migration-api-firebase.md   # Firebase → REST API migration
+```
 
 ### Monthly files:
 Group all updates of the month with:
@@ -43,8 +110,11 @@ Group all updates of the month with:
 - **Metrics and impact** of the month
 
 ### Reference files:
-- Major versions and important migrations
+- Architecture documentation
+- Major versions and migrations
 - Permanent technical guides
+
+---
 
 ## 📝 Naming Convention
 
@@ -52,12 +122,13 @@ Group all updates of the month with:
 ```
 YYYY-MM-updates.md
 ```
-
-Example:
-- `2025-01-updates.md` (all January 2025 updates)
+Example: `2025-01-updates.md` (all January 2025 updates)
 
 ### Reference files:
-- `migration-api-firebase.md` (major versions)
+- `architecture.md` (technical reference)
+- `migration-*.md` (migration guides)
+
+---
 
 ## 🤝 Contribution
 
@@ -67,9 +138,16 @@ Example:
 3. **Update** this `README.md` file
 4. **Archive** technical details in the monthly file
 
+### Architecture updates:
+1. **After major changes**: Update `architecture.md`
+2. **Document** new features, APIs, or patterns
+3. **Keep** dependency versions current
+
 ### Daily files:
 - Reserved for urgent fixes only
 - Format: `YYYY-MM-DD-urgent-fix.md`
+
+---
 
 ## 📞 Support
 
@@ -79,4 +157,4 @@ If you have problems with an update:
 3. Open an issue if necessary
 
 ---
-*Last update: 2025-01-09 (monthly format)*
+*Last update: 2026-03-14*

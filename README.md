@@ -95,8 +95,6 @@ React Native mobile application for online food ordering with custom REST API ba
 
 ### Setup
 ```bash
-# Clone the project
-git clone <repository-url>
 cd customer-app
 
 # Install dependencies
@@ -391,16 +389,6 @@ RootNavigation (Stack)
 ## Version
 
 **v1.0.0** - Initial release (March 2026)
-
----
-
-## Contributing
-
-1. Fork the project
-2. Create feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -am 'Add new feature'`)
-4. Push branch (`git push origin feature/new-feature`)
-5. Create Pull Request
 
 ---
 
