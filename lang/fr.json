@@ -444,7 +444,13 @@
     "emailPlaceholder": "Entrez votre adresse email",
     "phonePlaceholder": "Entrez votre numéro de téléphone",
     "addressPlaceholder": "Entrez votre adresse de livraison",
-    "tapToChangePhoto": "Appuyez pour changer la photo de profil"
+    "tapToChangePhoto": "Appuyez pour changer la photo de profil",
+    "defaultUserName": "Utilisateur",
+    "avatarChangeMessage": "Changement de photo à venir",
+    "favoritesScreenMessage": "Écran Favoris à venir",
+    "notificationsScreenMessage": "Écran Notifications à venir",
+    "helpScreenMessage": "Écran Aide à venir",
+    "logoutNotImplementedMessage": "Déconnexion à venir"
   },
   "settings": {
     "title": "Paramètres",
@@ -490,6 +496,9 @@
     "openSourceDescription": "Voir notre code open source"
   },
   "common": {
+    "save": "Enregistrer",
+    "openMenu": "Ouvrir le menu",
+    "notImplemented": "Non implémenté",
     "yes": "Oui",
     "no": "Non",
     "ok": "OK",

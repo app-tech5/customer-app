@@ -416,7 +416,13 @@
     "emailPlaceholder": "Enter your email address",
     "phonePlaceholder": "Enter your phone number",
     "addressPlaceholder": "Enter your delivery address",
-    "tapToChangePhoto": "Tap to change profile photo"
+    "tapToChangePhoto": "Tap to change profile photo",
+    "defaultUserName": "User",
+    "avatarChangeMessage": "Avatar change will be implemented",
+    "favoritesScreenMessage": "Favorites screen will be implemented",
+    "notificationsScreenMessage": "Notifications screen will be implemented",
+    "helpScreenMessage": "Help screen will be implemented",
+    "logoutNotImplementedMessage": "Logout functionality will be implemented"
   },
   "addresses": {
       "title": "Addresses",
@@ -498,8 +504,10 @@
     "logoutMessage": "Are you sure you want to logout?"
   },
   "common": {
-    "save":"Save",
+    "save": "Save",
     "yes": "Yes",
+    "openMenu": "Open menu",
+    "notImplemented": "Not implemented",
     "no": "No",
     "ok": "OK",
     "cancel": "Cancel",
