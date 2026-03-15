@@ -1,19 +1,20 @@
-import { View, Text, Image, ImageBackground, StyleSheet, TouchableOpacity} from 'react-native'
+import { View, Text, ImageBackground, StyleSheet, TouchableOpacity} from 'react-native'
 import React from 'react'
-import Onboarding from 'react-native-onboarding-swiper'
 import * as Animatable from "react-native-animatable"
+import i18n from '../i18n'
+
 export default function OnboardingScreen({navigation}) {
   return (
     <ImageBackground style={{ width: "100%", height: "100%" }}
       source={require("../assets/images/onboarding.jpg")}>
-      <Text style={styles.title}>Good{'\n'}Foods</Text>
+      <Text style={styles.title}>{i18n.t('onboarding.title')}</Text>
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
       <View style={styles.box}>
-        <Text style={styles.discoverText}>Discover Foods</Text>
+        <Text style={styles.discoverText}>{i18n.t('onboarding.discover')}</Text>
         <TouchableOpacity style={styles.button} onPress={()=>{
           navigation.navigate("SignIn")
         }}>
-          <Text style={styles.buttonText}>Continue</Text>
+          <Text style={styles.buttonText}>{i18n.t('onboarding.continue')}</Text>
         </TouchableOpacity>
       </View>
       </Animatable.View>
