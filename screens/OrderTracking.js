@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
@@ -32,17 +32,15 @@ export default function OrderTracking() {
         </TouchableOpacity>
       ),
     })
-
-    // Si on a déjà l'order en paramètre, on l'utilise directement
-    // Sinon on charge depuis l'API
+    
     if (orderParam && (orderParam.id || orderParam._id)) {
-      // Pour les commandes demo, on n'essaie pas de rafraîchir depuis l'API
+      
       const orderId = orderParam.id || orderParam._id
       if (!orderId.startsWith('demo_order_')) {
-        // Rafraîchir les données de la commande depuis l'API seulement pour les vraies commandes
+        
         loadOrder()
       } else {
-        console.log('🎭 Demo order detected in useEffect, skipping API refresh')
+        console.warn('🎭 Demo order detected in useEffect, skipping API refresh')
         setLoader(false)
       }
     }
@@ -57,10 +55,9 @@ export default function OrderTracking() {
       if (!orderId) {
         throw new Error('Order ID is required')
       }
-
-      // Pour les commandes demo (mode demo), on n'essaie pas de charger depuis l'API
+      
       if (orderId.startsWith('demo_order_')) {
-        console.log('🎭 Demo order detected, skipping API call');
+        console.warn('🎭 Demo order detected, skipping API call');
         setOrder(orderParam)
         return
       }
@@ -70,7 +67,7 @@ export default function OrderTracking() {
     } catch (err) {
       console.error('Error loading order:', err)
       setError(i18n.t('order.loadingError', 'Error loading order'))
-      // En cas d'erreur, on garde l'order passé en paramètre si disponible
+      
       if (orderParam) {
         setOrder(orderParam)
       }
@@ -160,8 +157,6 @@ export default function OrderTracking() {
     }
   }
 
-
-
   if (loader) return <Loader />
 
   if (error || !order) {
@@ -198,7 +193,7 @@ export default function OrderTracking() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header avec numéro de commande */}
+        
         <View style={styles.header}>
           <Text style={styles.orderId}>
             {i18n.t('order.orderId', 'Order')} #{String(order.id || order._id || 'Unknown')}
@@ -208,7 +203,7 @@ export default function OrderTracking() {
           </Text>
         </View>
 
-        {/* Timeline du statut */}
+        
         <View style={styles.timelineContainer}>
           <Text style={styles.sectionTitle}>
             {i18n.t('order.status.title', 'Order Status')}
@@ -262,7 +257,7 @@ export default function OrderTracking() {
           )}
         </View>
 
-        {/* Informations du restaurant */}
+        
         {order.restaurant && (
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>
@@ -289,7 +284,7 @@ export default function OrderTracking() {
           </View>
         )}
 
-        {/* Informations du driver */}
+        
         {order.driver && order.status?.toLowerCase() === 'out_for_delivery' && (
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>
@@ -308,8 +303,8 @@ export default function OrderTracking() {
                     <TouchableOpacity 
                       style={styles.phoneButton}
                       onPress={() => {
-                        // TODO: Implémenter l'appel téléphonique
-                        console.log('Call driver:', order.driver.userId.phone)
+                        
+                        console.warn('Call driver:', order.driver.userId.phone)
                       }}
                     >
                       <Ionicons name="call" size={20} color={colors.primary} />
@@ -328,7 +323,7 @@ export default function OrderTracking() {
           </View>
         )}
 
-        {/* Adresse de livraison */}
+        
         {order.delivery?.address && (
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>
@@ -341,7 +336,7 @@ export default function OrderTracking() {
           </View>
         )}
 
-        {/* Détails de la commande */}
+        
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>
             {i18n.t('order.details', 'Order Details')}
@@ -396,7 +391,7 @@ export default function OrderTracking() {
           </View>
         </View>
 
-        {/* Bouton de rafraîchissement */}
+        
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={loadOrder}
