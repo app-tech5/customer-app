@@ -10,21 +10,18 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import ReviewCard from '../components/restaurantDetail/ReviewCard'
 import PromotionCard from '../components/restaurantDetail/PromotionCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
-import { colors, currency, language } from '../global'
+import { colors } from '../global'
 import { config } from '../config'
-import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime, location } from '../utils'
+import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime } from '../utils'
 import * as Location from 'expo-location'
 import { getRestaurantReviews, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
+import i18n from '../i18n'
 
 const { width, height } = Dimensions.get('window')
 
 export default function RestaurantDetail({ route, navigation }) {
   const { restaurant } = route.params
   const { image } = restaurant
-
-  // console.log('🔍 DEBUG RestaurantDetail - CONFIG:', config)
-  // console.log('🔍 DEBUG RestaurantDetail - DEMO_MODE:', config?.DEMO_MODE)
-  // console.log('🔍 DEBUG RestaurantDetail - restaurant:', restaurant)
 
   const scrollViewRef = useRef(null)
 
@@ -43,11 +40,10 @@ export default function RestaurantDetail({ route, navigation }) {
   const { loading, setLoading } = useContext(LoaderContext)
 
   useEffect(() => {
-    // Charger les données utilisateur depuis l'API (pas de cache)
+    
     const loadUserData = async () => {
       try {
-        // Pour l'instant on garde AsyncStorage pour userData car c'est pour la session
-        // TODO: Remplacer par un vrai système de session/token
+        
         const userData = await AsyncStorage.getItem("userData");
         if (userData) {
           const user = JSON.parse(userData);
@@ -62,11 +58,7 @@ export default function RestaurantDetail({ route, navigation }) {
     };
 
     loadUserData();
-
-    // Charger les paramètres de livraison directement depuis l'API
-    // console.log('🔥 LOADING DELIVERY SETTINGS from API...')
-
-    // Charger les favoris de l'utilisateur directement depuis l'API
+    
     getFavorites().then(response => {
       if (response.success && response.favorites) {
         const favoriteIds = response.favorites.map(fav => fav._id || fav.id);
@@ -74,11 +66,10 @@ export default function RestaurantDetail({ route, navigation }) {
       }
     }).catch(error => {
       console.error('Error loading favorites:', error);
-      setUserFavorites([]); // Favoris vides par défaut
+      setUserFavorites([]); 
     });
   }, [])
-
-  // Charger les avis du restaurant
+  
   useEffect(() => {
     const loadReviews = async () => {
       const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
@@ -87,7 +78,7 @@ export default function RestaurantDetail({ route, navigation }) {
       setLoadingReviews(true);
       try {
         const reviewsData = await getRestaurantReviews(restaurantId);
-        // Limiter à 3 avis récents pour l'affichage
+        
         setReviews(reviewsData.slice(0, 3) || []);
       } catch (error) {
         console.error('Error loading reviews:', error);
@@ -99,8 +90,7 @@ export default function RestaurantDetail({ route, navigation }) {
 
     loadReviews();
   }, [restaurant])
-
-  // Charger les promotions du restaurant
+  
   useEffect(() => {
     const loadPromotions = async () => {
       const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
@@ -109,7 +99,7 @@ export default function RestaurantDetail({ route, navigation }) {
       setLoadingPromotions(true);
       try {
         const promotionsData = await getRestaurantPromotions(restaurantId);
-        console.log('🔥 PROMOTIONS LOADED for restaurant', restaurantId, ':', promotionsData.length);
+        console.warn('🔥 PROMOTIONS LOADED for restaurant', restaurantId, ':', promotionsData.length);
         setPromotions(promotionsData);
       } catch (error) {
         console.error('Error loading promotions:', error);
@@ -121,10 +111,9 @@ export default function RestaurantDetail({ route, navigation }) {
 
     loadPromotions();
   }, [restaurant])
-
-  // Obtenir la position GPS de l'utilisateur (uniquement en mode normal)
+  
   useEffect(() => {
-    // En mode démo, pas besoin de GPS - utiliser les valeurs statiques
+    
     if (config.DEMO_MODE) {
       return;
     }
@@ -133,7 +122,7 @@ export default function RestaurantDetail({ route, navigation }) {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          // console.log('Permission de localisation refusée');
+          
           return;
         }
 
@@ -144,14 +133,13 @@ export default function RestaurantDetail({ route, navigation }) {
         });
       } catch (error) {
         console.warn('Erreur obtention position GPS:', error);
-        // Garder la valeur par défaut
+        
       }
     };
 
     getUserLocation();
   }, [])
-
-  // Calcul de la distance
+  
   const distance = useMemo(() => {
     if (!userLocation || !restaurant.latitude || !restaurant.longitude) return null;
     const lat1 = parseFloat(userLocation.latitude);
@@ -163,44 +151,36 @@ export default function RestaurantDetail({ route, navigation }) {
 
     return getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2);
   }, [userLocation, restaurant.latitude, restaurant.longitude]);
-
-  // Calcul du temps de livraison estimé basé sur la distance
+  
   const deliveryTime = useMemo(() => {
-    // console.log('🔥 DELIVERY TIME - DEMO_MODE:', config.DEMO_MODE)
-    // console.log('🔥 DELIVERY TIME - userLocation:', !!userLocation)
-
-    // MODE DÉMO : valeurs basées sur le temps de préparation du restaurant
+    
     if (config.DEMO_MODE) {
       const prepTime = parseInt(restaurant.collectTime) || 25;
       const result = {
-        min: prepTime + 10,  // 10 min supplémentaires pour la livraison
-        max: prepTime + 20,  // 20 min max pour la livraison
-        distance: 0  // Pas de distance en mode démo
+        min: prepTime + 10,  
+        max: prepTime + 20,  
+        distance: 0  
       };
-      // console.log('🔥 DELIVERY TIME - RESULT (DEMO):', result)
+      
       return result;
     }
-
-    // MODE NORMAL : calcul basé sur la distance GPS
+    
     if (userLocation) {
       const result = getRestaurantDeliveryTime(restaurant, userLocation);
-      // console.log('🔥 DELIVERY TIME - RESULT (GPS):', result)
+      
       return result;
     }
-
-    // Valeur par défaut si pas de position utilisateur
+    
     const result = { min: 25, max: 35, distance: 0 };
-    // console.log('🔥 DELIVERY TIME - RESULT (DEFAULT):', result)
+    
     return result;
   }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
-
-
-  // Fonction pour vérifier si le restaurant est ouvert
+  
   const getRestaurantStatus = useMemo(() => {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
-    const currentTime = currentHour * 60 + currentMinute; // Minutes depuis minuit
+    const currentTime = currentHour * 60 + currentMinute; 
 
     const openingTime = restaurant.openingTime || "09:00";
     const closingTime = restaurant.closingTime || "21:00";
@@ -212,8 +192,7 @@ export default function RestaurantDetail({ route, navigation }) {
     const closeTimeMinutes = closeHour * 60 + closeMin;
 
     const isOpen = currentTime >= openTimeMinutes && currentTime < closeTimeMinutes;
-
-    // Formater l'heure de fermeture
+    
     const formatTime = (hour, min) => {
       const period = hour >= 12 ? 'PM' : 'AM';
       const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
@@ -231,21 +210,17 @@ export default function RestaurantDetail({ route, navigation }) {
   }, [restaurant.openingTime, restaurant.closingTime]);
 
   if (!userLocation) return <Loader />
-
-  // Nettoyage des données pour l'affichage
+  
   const formattedRating = restaurant.rating ? parseFloat(restaurant.rating).toFixed(1) : "4.5";
   const price = restaurant.price || "$$";
-
-  // Extraire les catégories du restaurant
+  
   const categoriesText = restaurant.categories && restaurant.categories.length > 0
     ? restaurant.categories.map(cat => cat.title || cat.name).join(' • ')
     : 'Restaurant';
-
-  // Logique des favoris
+  
   const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
   const isFavorite = userFavorites.includes(restaurantId);
-
-  // Fonction pour basculer les favoris
+  
   const toggleFavorite = async () => {
     try {
       if (isFavorite) {
@@ -259,8 +234,7 @@ export default function RestaurantDetail({ route, navigation }) {
       console.error('Error toggling favorite:', error);
     }
   };
-
-  // Fonction pour ouvrir les directions
+  
   const openDirections = () => {
     const lat = restaurant.latitude;
     const lng = restaurant.longitude;
@@ -270,8 +244,7 @@ export default function RestaurantDetail({ route, navigation }) {
     });
     Linking.openURL(url).catch(err => console.error('Error opening directions:', err));
   };
-
-  // Fonction pour appeler le restaurant
+  
   const callRestaurant = () => {
     const phoneNumber = restaurant.phone || restaurant.display_phone;
     if (phoneNumber) {
@@ -283,7 +256,7 @@ export default function RestaurantDetail({ route, navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      {/* 1. Header Image Section */}
+      
       <ImageBackground
         source={{ uri: image }}
         style={styles.headerImage}
@@ -311,14 +284,14 @@ export default function RestaurantDetail({ route, navigation }) {
         </View>
       </ImageBackground>
 
-      {/* 2. Main Content Card */}
+      
       <View style={styles.contentCard}>
         <ScrollView
           ref={scrollViewRef}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 120 }}
         >
-          {/* Restaurant Basic Info */}
+          
           <TouchableOpacity style={styles.infoSection} onPress={() => setRestaurantDetailVisible(true)} activeOpacity={0.7}>
             <Text style={styles.restaurantTitle}>{restaurant.name}</Text>
             
@@ -343,8 +316,7 @@ export default function RestaurantDetail({ route, navigation }) {
               </Text>
             </View>
 
-
-            {/* Informations restaurant (adresse et téléphone) */}
+            
             {(restaurant.address || restaurant.phone) && (
               <View style={styles.restaurantInfoRow}>
                 {restaurant.address && (
@@ -374,11 +346,11 @@ export default function RestaurantDetail({ route, navigation }) {
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20 }} />
 
-          {/* Section Promotions */}
+          
           {promotions.length > 0 && (
             <View style={styles.promotionsSection}>
               <View style={styles.promotionsHeader}>
-                <Text style={styles.promotionsTitle}>Available Offers</Text>
+                <Text style={styles.promotionsTitle}>{i18n.t('restaurant.availableOffers')}</Text>
                 <Icon name="local-offer" type="material" color={colors.primary} size={20} />
               </View>
               {promotions.map((promotion, index) => (
@@ -389,12 +361,12 @@ export default function RestaurantDetail({ route, navigation }) {
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: promotions.length > 0 ? 10 : 0 }} />
 
-          {/* Section Avis */}
+          
           {reviews.length > 0 && (
             <View style={styles.reviewsSection}>
               <View style={styles.reviewsHeader}>
-                <Text style={styles.reviewsTitle}>Recent Reviews</Text>
-                {/* TODO: Implement ReviewsScreen - See all button disabled */}
+                <Text style={styles.reviewsTitle}>{i18n.t('restaurant.recentReviews')}</Text>
+                
               </View>
               {reviews.map((review, index) => (
                 <ReviewCard key={review._id || review.id || index} review={review} />
@@ -404,7 +376,7 @@ export default function RestaurantDetail({ route, navigation }) {
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: reviews.length > 0 ? 10 : 0 }} />
 
-          {/* Service Mode Tabs */}
+          
           <View style={styles.tabsWrapper}>
             <HeaderTabs
               activeTab={activeTab}
@@ -418,8 +390,7 @@ export default function RestaurantDetail({ route, navigation }) {
             />
           </View>
 
-
-          {/* Menu Items List */}
+          
           <View style={styles.menuList}>
             <MenuItems
               foodsRef={foodsRef}
@@ -441,19 +412,19 @@ export default function RestaurantDetail({ route, navigation }) {
         </ScrollView>
       </View>
 
-      {/* 3. Sticky Bottom Cart Button */}
+      
       <View style={styles.cartContainer}>
         <ViewCart navigation={navigation} route={route} restaurant={restaurant} />
       </View>
 
-      {/* Loading Overlay */}
+      
       {loading && (
         <View style={styles.loaderOverlay}>
           <Loader transparent/>
         </View>
       )}
 
-      {/* Restaurant Detail Modal */}
+      
       <RestaurantDetailComponent
         restaurant={restaurant}
         visible={restaurantDetailVisible}
@@ -468,7 +439,7 @@ export default function RestaurantDetail({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // Pour que l'image soit bien détourée
+    backgroundColor: '#000', 
   },
   headerImage: {
     width: '100%',
