@@ -6,7 +6,7 @@ import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../i18n'
 import { colors, getDistanceFromLatLonInKm } from '../global'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
 const { width } = Dimensions.get('window')
@@ -17,7 +17,7 @@ export default function NearMeScreen({ route, navigation }) {
   const [error, setError] = useState(null)
   const [userLocation, setUserLocation] = useState(null)
   const [distanceFilter, setDistanceFilter] = useState(10)
-  const [viewMode, setViewMode] = useState('list') // 'list' uniquement pour le moment
+  const [viewMode, setViewMode] = useState('list') 
 
   useEffect(() => {
     loadNearbyRestaurants()
@@ -27,11 +27,9 @@ export default function NearMeScreen({ route, navigation }) {
     try {
       setLoader(true)
       setError(null)
-
-      // Récupérer la position utilisateur
+      
       let userLat, userLon;
-
-      // D'abord essayer depuis AsyncStorage
+      
       const userData = await AsyncStorage.getItem('userData');
       if (userData) {
         const user = JSON.parse(userData);
@@ -40,8 +38,7 @@ export default function NearMeScreen({ route, navigation }) {
           userLon = user.location.longitude;
         }
       }
-
-      // Si pas de coordonnées utilisateur, demander géolocalisation
+      
       if (!userLat || !userLon) {
         const { status } = await Location.requestForegroundPermissionsAsync()
         if (status !== 'granted') {
@@ -56,8 +53,7 @@ export default function NearMeScreen({ route, navigation }) {
       }
 
       setUserLocation({ latitude: userLat, longitude: userLon })
-
-      // Récupérer et filtrer les restaurants
+      
       const allRestaurants = await getRestaurants()
 
       const nearbyRestaurants = allRestaurants
@@ -108,11 +104,11 @@ export default function NearMeScreen({ route, navigation }) {
           {restaurantData.length} {restaurantData.length === 1 ? i18n.t('search.result') : i18n.t('search.results')}
         </Text>
         <Text style={styles.locationText}>
-          {i18n.t('search.within', 'Within')} {distanceFilter}km
+          {i18n.t('search.within')} {distanceFilter}{i18n.t('search.km')}
         </Text>
       </View>
 
-      {/* Contrôles de distance */}
+      {}
       <View style={styles.distanceControls}>
         <Text style={styles.distanceLabel}>{i18n.t('search.distance', 'Distance')}:</Text>
         <View style={styles.distanceButtons}>
@@ -129,14 +125,14 @@ export default function NearMeScreen({ route, navigation }) {
                 styles.distanceButtonText,
                 distanceFilter === distance && styles.distanceButtonTextActive
               ]}>
-                {distance}km
+                {distance}{i18n.t('search.km')}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Indicateur de position */}
+      {}
       {userLocation && (
         <View style={styles.locationIndicator}>
           <Ionicons name="location" size={16} color={colors.primary} />
@@ -194,11 +190,11 @@ export default function NearMeScreen({ route, navigation }) {
                 city={item.city}
                 distance={item.distance}
               />
-              {/* Badge de distance */}
+              {}
               <View style={styles.distanceBadge}>
                 <Ionicons name="location" size={12} color="#4CAF50" />
                 <Text style={styles.distanceBadgeText}>
-                  {item.distance.toFixed(1)} km
+                  {item.distance.toFixed(1)} {i18n.t('search.km')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -210,9 +206,9 @@ export default function NearMeScreen({ route, navigation }) {
       ) : (
         <View style={styles.mapContainer}>
           <Text style={styles.mapPlaceholder}>
-            🗺️ Vue carte à implémenter{'\n'}
-            Position: {userLocation?.latitude.toFixed(4)}, {userLocation?.longitude.toFixed(4)}{'\n'}
-            {restaurantData.length} restaurants trouvés
+            {i18n.t('search.mapPlaceholder')}{'\n'}
+            {i18n.t('search.position')}: {userLocation?.latitude?.toFixed(4)}, {userLocation?.longitude?.toFixed(4)}{'\n'}
+            {i18n.t('search.restaurantsFound', { count: restaurantData.length })}
           </Text>
         </View>
       )}
@@ -296,7 +292,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: 'rgba(61, 92, 92, 0.1)', // colors.success avec transparence
+    backgroundColor: 'rgba(61, 92, 92, 0.1)', 
     borderRadius: 8,
   },
   locationText: {
