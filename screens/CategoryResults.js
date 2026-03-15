@@ -5,7 +5,6 @@ import { colors } from '../global'
 import i18n from '../i18n'
 import { getCategories } from '../api'
 
-
 export default function CategoryResults({route, navigation}) {
   const [categoryData, setCategoryData] = useState([])
   const [loader, setLoader] = useState(true)
@@ -15,62 +14,36 @@ export default function CategoryResults({route, navigation}) {
 
   useEffect(()=>{
     const { applicableCategories, name, fromOffers, promotionName } = route.params
-
-    // Vérifier si on vient de l'écran Offers
+    
     setCameFromOffers(fromOffers === true)
-
-    // Réinitialiser les états
+    
     setLoader(true)
     setError(null)
     setCategoryData([])
-
-    // Fonction de chargement des données
+    
     const loadData = async () => {
       try {
-        // Récupérer les catégories depuis la base de données
         const categories = await getCategories()
-
-        console.log('🎯 CategoryResults - Loading data from DB:', {
-          applicableCategories,
-          promotionName,
-          name,
-          totalCategories: categories.length
-        })
-
-        console.log('📋 Sample categories from DB:', categories.slice(0, 5).map(c => ({ name: c.name, _id: c._id })))
-        console.log('🔍 All category names from DB:', categories.map(c => c.name))
-
         let categoriesResult = []
 
         if (applicableCategories && applicableCategories.length > 0) {
-          console.log('🔍 Filtering categories with:', applicableCategories)
-
-          // Filtrer les catégories applicables à la promotion
           categoriesResult = categories.filter(cat => {
             const isMatch = applicableCategories.some(promoCat => {
-              // Essayer différentes correspondances avec les données de la DB
               const match =
                 cat.name === promoCat ||
                 cat.name?.toLowerCase() === promoCat?.toLowerCase() ||
                 cat._id === promoCat ||
                 cat.id === promoCat ||
                 cat === promoCat ||
-                // Correspondance partielle
                 cat.name?.toLowerCase().includes(promoCat?.toLowerCase())
-
-              if (match) console.log('✅ Match found:', cat.name, 'with', promoCat)
               return match
             })
             return isMatch
           })
-
-          console.log('🎯 Filtered result:', categoriesResult.length, 'categories')
           setSearchQuery(promotionName || name || `Categories (${applicableCategories.length})`)
         } else {
-          console.log('📂 No filter, showing all categories')
-          // Si pas de filtre, afficher toutes les catégories
           categoriesResult = categories
-          setSearchQuery(name || 'All Categories')
+          setSearchQuery(name || i18n.t('search.allCategories'))
         }
 
         setCategoryData(categoriesResult)
@@ -84,23 +57,19 @@ export default function CategoryResults({route, navigation}) {
     }
 
     loadData()
+    
+    const title = promotionName ? i18n.t('search.categoriesFor', { name: promotionName }) : (name || i18n.t('search.categories'))
 
-    // Définir le titre
-    const title = promotionName ? `Categories for ${promotionName}` : (name || 'Categories')
-
-    console.log('🎯 CategoryResults - Navigation setup:', { cameFromOffers, promotionName, name })
-
-    // Ajouter arrow back qui revient toujours à Offers pour les promotions
     navigation.setOptions({
       title,
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
-            // Pour les promotions, revenir toujours à Offers
+            
             if (cameFromOffers || promotionName) {
               navigation.navigate('Offers')
             } else {
-              // Sinon, comportement normal
+              
               navigation.goBack()
             }
           }}
@@ -114,8 +83,7 @@ export default function CategoryResults({route, navigation}) {
     })
 
   }, [route.params])
-
-  // Composant pour l'état vide
+  
   const EmptyState = ({ query, isError }) => (
     <View style={styles.emptyContainer}>
       <Ionicons
@@ -134,16 +102,15 @@ export default function CategoryResults({route, navigation}) {
       </Text>
     </View>
   )
-
-  // Header avec info de recherche
+  
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       <View style={styles.resultInfo}>
         <Text style={styles.resultCount}>
-          {categoryData.length} categor{categoryData.length > 1 ? 'ies' : 'y'} found
+          {categoryData.length === 1 ? i18n.t('search.categoryFound') : i18n.t('search.categoriesFound', { count: categoryData.length })}
         </Text>
         {searchQuery && (
-          <Text style={styles.resultQuery}>for "{searchQuery}"</Text>
+          <Text style={styles.resultQuery}>{i18n.t('search.forQuery', { query: searchQuery })}</Text>
         )}
       </View>
     </View>
@@ -154,7 +121,7 @@ export default function CategoryResults({route, navigation}) {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <Ionicons name="restaurant-outline" size={48} color={colors.primary} />
-          <Text style={styles.loadingText}>Loading categories...</Text>
+          <Text style={styles.loadingText}>{i18n.t('search.loadingCategories')}</Text>
         </View>
       </SafeAreaView>
     )
@@ -191,7 +158,7 @@ export default function CategoryResults({route, navigation}) {
                       name: item.name,
                       type: 'restaurant',
                       fromCategoryResults: true,
-                      categoryResultsParams: route.params // Passer les params pour pouvoir revenir
+                      categoryResultsParams: route.params 
                     }
                   }
                 }
@@ -235,8 +202,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text.secondary,
   },
-
-  // Header
+  
   headerContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -257,8 +223,7 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontStyle: 'italic',
   },
-
-  // Liste
+  
   listContainer: {
     padding: 16,
   },
@@ -285,8 +250,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-
-  // État vide
+  
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
