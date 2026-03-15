@@ -1,12 +1,6 @@
-import { View, Text } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LottieView from 'lottie-react-native';
-import MenuItems from '../components/restaurantDetail/MenuItems';
-
-import { api } from '../api'
-
 
 export default function OrderCompleted() {
 
@@ -19,7 +13,6 @@ export default function OrderCompleted() {
         image: "https://cdn.pixabay.com/photo/2016/03/05/19/02/hamburger-1238246_960_720.jpg",
       },]
   })
-
 
   useEffect(() => {
   }, [])
