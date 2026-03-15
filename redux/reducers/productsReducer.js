@@ -12,4 +12,4 @@ let productsReducer = (state=[], action)=>{
     }
 }
 
-export default userReducer;
+export default productsReducer;
