@@ -1,8 +1,7 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Ionicons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons'
+import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
-import { getUserPaymentMethods, getUserAddresses } from '../api'
 import i18n from '../i18n'
 import { colors } from '../global'
 import Loader from './Loader'
@@ -11,8 +10,7 @@ import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 export default function CheckoutScreen({ navigation, route }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
-
-  // Récupération des données depuis les paramètres de navigation
+  
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
   const restaurantName = route.params?.restaurantName || restaurant?.name || ''
@@ -23,8 +21,7 @@ export default function CheckoutScreen({ navigation, route }) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [loading, setLoading] = useState(true)
-
-  // Utiliser les totaux passés en paramètre ou les calculer en fallback
+  
   const { deliverySettings, calculateTotal } = useDeliverySettings()
   const cartTotal = cartItems.reduce((total, item) => total + (item.totalPrice || item.price), 0)
 
@@ -35,8 +32,7 @@ export default function CheckoutScreen({ navigation, route }) {
     total: cartTotal + 2.99 + (cartTotal * 0.08),
     isFreeDelivery: false
   }
-
-  // Pour compatibilité avec l'ancien code
+  
   const subtotal = totals.subtotal
   const deliveryFee = totals.deliveryFee
   const taxAmount = totals.taxAmount
@@ -64,16 +60,12 @@ export default function CheckoutScreen({ navigation, route }) {
   const loadCheckoutData = () => {
     try {
       setLoading(true)
-
-      // Les données du restaurant viennent déjà de route.params
-
-      // Utiliser les données utilisateur locales depuis Redux/AsyncStorage
+      
       let addressesData = []
       let paymentData = []
-
-      // Créer l'adresse depuis les données utilisateur (user.address du modèle User)
+      
       if (user.address && user.address.trim()) {
-        // Parser l'adresse utilisateur
+        
         let addressParts = user.address.split(',')
         let address = user.address
         let city = ''
@@ -104,14 +96,13 @@ export default function CheckoutScreen({ navigation, route }) {
           } : null
         }]
       }
-
-      // Utiliser les méthodes de paiement depuis user.paymentMethods (du modèle User)
+      
       paymentData = user.paymentMethods && user.paymentMethods.length > 0
         ? user.paymentMethods.map((method, index) => ({
             id: method._id || `method_${index}`,
             methodType: method.type === 'card' ? 'credit_card' : method.type,
             cardDetails: method.details || {},
-            isDefault: index === 0, // Premier comme défaut par défaut
+            isDefault: index === 0, 
             isActive: true
           }))
         : [{
@@ -129,16 +120,14 @@ export default function CheckoutScreen({ navigation, route }) {
           }]
 
       setAddresses(addressesData)
-
-      // Sélectionner automatiquement la première adresse par défaut si disponible
+      
       const defaultAddress = addressesData?.find(addr => addr.isDefault)
       if (defaultAddress) {
         setSelectedAddress(defaultAddress)
       }
 
       setPaymentMethods(paymentData)
-
-      // Sélectionner automatiquement la méthode de paiement par défaut
+      
       const defaultPayment = paymentData?.find(method => method.isDefault)
       if (defaultPayment) {
         setSelectedPaymentMethod(defaultPayment)
@@ -161,7 +150,7 @@ export default function CheckoutScreen({ navigation, route }) {
   }
 
   const handlePlaceOrder = () => {
-    // Validation
+    
     if (!selectedAddress) {
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('checkout.selectAddress', 'Please select a delivery address'))
       return
@@ -171,8 +160,7 @@ export default function CheckoutScreen({ navigation, route }) {
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('checkout.selectPayment', 'Please select a payment method'))
       return
     }
-
-    // Naviguer vers OrderRequest avec les données de commande
+    
     navigation.navigate('OrderRequest', {
       restaurantName,
       restaurant,
@@ -186,7 +174,7 @@ export default function CheckoutScreen({ navigation, route }) {
         taxAmount,
         total
       },
-      lat: user.location?.latitude || 48.8566, // Paris par défaut
+      lat: user.location?.latitude || 48.8566, 
       lng: user.location?.longitude || 2.3522
     })
   }
@@ -305,7 +293,7 @@ export default function CheckoutScreen({ navigation, route }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Restaurant Header */}
+        {}
         {restaurant && (
           <View style={styles.restaurantHeader}>
             <Text style={styles.restaurantName}>{restaurant.name}</Text>
@@ -315,7 +303,7 @@ export default function CheckoutScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Delivery Address */}
+        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -343,7 +331,7 @@ export default function CheckoutScreen({ navigation, route }) {
           )}
         </View>
 
-        {/* Payment Method */}
+        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -371,7 +359,7 @@ export default function CheckoutScreen({ navigation, route }) {
           )}
         </View>
 
-        {/* Order Summary */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.orderSummary', 'Order Summary')}
@@ -416,7 +404,7 @@ export default function CheckoutScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Special Instructions */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.specialInstructions', 'Special Instructions')}
@@ -429,7 +417,7 @@ export default function CheckoutScreen({ navigation, route }) {
         </View>
       </ScrollView>
 
-      {/* Bottom Action Bar */}
+      {}
       <View style={styles.bottomBar}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
