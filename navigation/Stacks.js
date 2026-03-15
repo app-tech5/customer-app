@@ -1,14 +1,11 @@
-import { View, Text } from 'react-native'
 import React from 'react'
 import {createStackNavigator} from '@react-navigation/stack'
 import Home from '../screens/Home'
 import RestaurantDetail from '../screens/RestaurantDetail'
 import MenuDetailScreen from '../screens/MenuDetailScreen'
-import MyOrdersScreen from '../screens/MyOrdersScreen'
 import OrderDetails from '../screens/OrderDetails'
 import PreferenceScreen from '../components/PreferenceScreen'
 import SearchResults from '../screens/SearchResults'
-import CategoryResults from '../screens/CategoryResults'
 import SearchScreen from '../screens/SearchScreen'
 import OrdersScreen from '../screens/OrdersScreen'
 import OrderTracking from '../screens/OrderTracking'
@@ -21,15 +18,13 @@ import AccountScreen from '../screens/AccountScreen'
 import EditProfileScreen from '../screens/EditProfileScreen'
 import AddressesScreen from '../screens/AddressesScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
-import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 import Wallet from '../screens/Wallet'
-
 
 const  HomeStack = createStackNavigator()
 
 export function HomeNavigator() {
   return (
-    // <CategoriesContextProvider> 
+    
       <HomeStack.Navigator>
         <HomeStack.Screen 
           name="HomeScreen"
@@ -45,7 +40,6 @@ export function HomeNavigator() {
           name="RestaurantDetail"
           component={RestaurantDetail}
           options={{ headerShown: false }} />
-      
 
       <HomeStack.Screen
           name="MenuDetailScreen"
@@ -71,13 +65,8 @@ export function HomeNavigator() {
           options={{headerShown: false}}/>
 
 
-{/* <HomeStack.Screen 
-          name="SearchResults"
-          component={SearchResults}
-          options={{headerShown: true}}/> */}
 
       </HomeStack.Navigator>
-      // </CategoriesContextProvider>
       
   )
 }
@@ -186,10 +175,7 @@ export function SearchNavigator() {
           component={SearchResults}
           options={{}}/>
 
-       {/* <SearchStack.Screen
-          name="CategoryResults"
-          component={CategoryResults}
-          options={{}}/> */}
+       
 
     </SearchStack.Navigator>
   )
