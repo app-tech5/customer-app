@@ -1,8 +1,9 @@
-import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, Image, TouchableOpacity} from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity} from "react-native";
 import { useSelector } from "react-redux";
 import {language, currency}  from '../global'
 import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
+import i18n from '../i18n';
 import CartModal from "../components/CartModal";
 
 const CartScreen = ({navigation}) => {
@@ -18,12 +19,12 @@ const CartScreen = ({navigation}) => {
     {items.length === 0 ?
       <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
        <Image style={{width: 150, height: 150, marginBottom: 20}} source={{uri: "https://img.icons8.com/fluency/344/shopping-cart.png"}} />
-       <Text style={{fontSize: 20}}>Add items to start a cart</Text>
-       <Text style={{fontSize: 10, marginBottom: 15}}>Once you add items from a restaurant or store, your card will appear here</Text>
+       <Text style={{fontSize: 20}}>{i18n.t('cart.addItemsToStartCart')}</Text>
+       <Text style={{fontSize: 10, marginBottom: 15}}>{i18n.t('cart.emptySubtitle')}</Text>
        <TouchableOpacity 
        onPress={()=>navigation.navigate("Home")}
             style={{backgroundColor: "black", borderRadius: 20}}>
-         <Text style={{color:"white", padding: 8, paddingHorizontal: 10 }}>Start shopping</Text>
+         <Text style={{color:"white", padding: 8, paddingHorizontal: 10 }}>{i18n.t('cart.startShopping')}</Text>
        </TouchableOpacity>
        </View> 
        :
@@ -41,8 +42,8 @@ const CartScreen = ({navigation}) => {
               </View>
                <View style={styles.name_quantity_price}>
                 <Text style={styles.name}>{restaurantName}</Text>
-                <Text style={styles.quantity_price}>{quantity} article{quantity>1?"s":""} • {items.reduce((a, v) => v.restaurantName === restaurantName ? a + v.price : a, 0).toLocaleString(language, {style: "currency", currency: currency})}</Text>
-                <Text style={styles.address}>deliver to {address.description}</Text>
+                <Text style={styles.quantity_price}>{quantity} {quantity > 1 ? i18n.t('cart.items') : i18n.t('cart.item')} • {items.reduce((a, v) => v.restaurantName === restaurantName ? a + v.price : a, 0).toLocaleString(language, {style: "currency", currency: currency})}</Text>
+                <Text style={styles.address}>{i18n.t('cart.deliverTo', { address: address?.description || '' })}</Text>
               </View>
                
               <AntDesign name="right" size={20} color="black" style={styles.icon}/>
@@ -54,8 +55,6 @@ const CartScreen = ({navigation}) => {
          </View>
   );
 };
-
-
  
 const styles = StyleSheet.create({
 
