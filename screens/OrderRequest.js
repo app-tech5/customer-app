@@ -1,19 +1,17 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Ionicons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons'
+import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import i18n from '../i18n'
 import { colors, currency, language } from '../global'
 import Loader from './Loader'
 import { api } from '../api'
-import { useNavigation } from '@react-navigation/native'
 import { config } from '../config'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
-
-  // Récupération des paramètres de navigation
+  
   const {
     restaurantName,
     restaurant,
@@ -49,9 +47,7 @@ export default function OrderRequest({ route, navigation }) {
 
     try {
       setLoading(true);
-      console.log('🍽️ Starting order confirmation process...');
 
-      // Transformer les items du panier au format attendu par le modèle Order
       const orderItems = items.map(cartItem => ({
         type: cartItem.itemType || 'Menu',
         item: cartItem.item || cartItem.id,
@@ -88,13 +84,7 @@ export default function OrderRequest({ route, navigation }) {
         }
       };
 
-      console.log('📦 Order data prepared:', orderData);
-
-      // Gérer le mode demo : ne pas sauvegarder en base
       if (config.DEMO_MODE) {
-        console.log('🎭 DEMO MODE: Simulating order creation without database save');
-
-        // Simuler une commande créée pour le mode demo
         createdOrder = {
           _id: `demo_order_${Date.now()}`,
           id: `demo_order_${Date.now()}`,
@@ -103,44 +93,29 @@ export default function OrderRequest({ route, navigation }) {
           updatedAt: new Date().toISOString(),
           orderId: `DEMO-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
         };
-
-        // Attendre un peu pour simuler le traitement
+        
         await new Promise(resolve => setTimeout(resolve, 1000));
-
-        console.log('✅ Demo order created successfully:', createdOrder);
       } else {
-        console.log('🌐 Creating order in database...');
-        // Créer la commande en base pour le mode normal
         createdOrder = await api.createOrder(orderData);
-        console.log('✅ Order created in database:', createdOrder);
       }
 
-      // Vider le panier pour ce restaurant
-      console.log('🗑️ Clearing restaurant cart...');
       dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName });
 
-      // Naviguer vers OrderTracking avec la commande créée
-      console.log('🧭 Navigating to OrderTracking...');
       navigation.navigate('OrderTracking', {
         order: createdOrder,
         lat,
         lng
       });
 
-      console.log('🎉 Order confirmation process completed successfully!');
-
     } catch (error) {
       console.error('❌ Error in handleConfirmOrder:', error);
-
-      // Afficher une alerte d'erreur
+      
       Alert.alert(
         i18n.t('common.error', 'Error'),
         error.message || i18n.t('order.createError', 'Failed to create order. Please try again.'),
         [{ text: i18n.t('common.ok', 'OK') }]
       );
     } finally {
-      // S'assurer que le loading est toujours arrêté
-      console.log('🔄 Setting loading to false');
       setLoading(false);
     }
   }
@@ -177,7 +152,7 @@ export default function OrderRequest({ route, navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Restaurant Header */}
+        {}
         <View style={styles.restaurantHeader}>
           <Text style={styles.restaurantName}>{restaurant?.name || restaurantName}</Text>
           <Text style={styles.orderItems}>
@@ -185,7 +160,7 @@ export default function OrderRequest({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Order Items */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('order.yourOrder', 'Your Order')}
@@ -198,7 +173,7 @@ export default function OrderRequest({ route, navigation }) {
           />
         </View>
 
-        {/* Delivery Address */}
+        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.deliveryAddress', 'Delivery Address')}
@@ -223,7 +198,7 @@ export default function OrderRequest({ route, navigation }) {
           </View>
         </View>
 
-        {/* Payment Method */}
+        
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.paymentMethod', 'Payment Method')}
@@ -256,7 +231,7 @@ export default function OrderRequest({ route, navigation }) {
           </View>
         </View>
 
-        {/* Special Instructions */}
+        
         {specialInstructions && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
@@ -268,7 +243,7 @@ export default function OrderRequest({ route, navigation }) {
           </View>
         )}
 
-        {/* Order Summary */}
+        
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.orderSummary', 'Order Summary')}
@@ -314,7 +289,7 @@ export default function OrderRequest({ route, navigation }) {
         </View>
       </ScrollView>
 
-      {/* Bottom Action Bar */}
+      
       <View style={styles.bottomBar}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>
