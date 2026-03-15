@@ -1,13 +1,12 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar} from 'react-native'
 import React, { useEffect, useState } from 'react'
  import { getRestaurants, searchRestaurantsByCategory, getFavorites } from '../api'
-import { categories } from '../data'
 import {RestaurantImage, RestaurantInfo} from '../components/home/RestaurantItems'
 import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../i18n'
-import { colors, location, getDistanceFromLatLonInKm } from '../global'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { colors, getDistanceFromLatLonInKm } from '../global'
+import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
 export default function SearchResults({route, navigation}) {
@@ -17,36 +16,29 @@ export default function SearchResults({route, navigation}) {
   const [searchQuery, setSearchQuery] = useState('')
   const [cameFromOffers, setCameFromOffers] = useState(false)
   const [displayMode, setDisplayMode] = useState('restaurants')
-  const [distanceFilter, setDistanceFilter] = useState(10) // Rayon par défaut en km
+  const [distanceFilter, setDistanceFilter] = useState(10) 
 
   useEffect(()=>{
     const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope, searchTerm, restaurantData: prefilteredData, totalResults } = route.params
-
-    // Vérifier si on vient de l'écran Offers
+    
     setCameFromOffers(fromOffers === true)
-
-    // Réinitialiser les états
+    
     setLoader(true)
     setError(null)
     setRestaurantData([])
-
-    // Fonction de chargement des données
+    
     const loadData = async () => {
       try {
         let restaurantsResult = []
-
-        // Cas spécial : promotion restaurant avec restaurants spécifiques
+        
         if (promotionScope === 'restaurant' && applicableRestaurants && applicableRestaurants.length > 0) {
-          console.log('🏪 Loading specific restaurants for promotion - IDs reçus:', applicableRestaurants)
-
-          // Récupérer tous les restaurants
+          console.warn('🏪 Loading specific restaurants for promotion - IDs reçus:', applicableRestaurants)
+          
           const allRestaurants = await getRestaurants()
-
-          // Log pour comparer les IDs
-          console.log('📋 IDs de tous les restaurants en DB:', allRestaurants.map(r => r._id || r.restaurantId))
-          console.log('🔍 IDs recherchés dans applicableRestaurants:', applicableRestaurants)
-
-          // Filtrer seulement les restaurants applicables à la promotion
+          
+          console.warn('📋 IDs de tous les restaurants en DB:', allRestaurants.map(r => r._id || r.restaurantId))
+          console.warn('🔍 IDs recherchés dans applicableRestaurants:', applicableRestaurants)
+          
           restaurantsResult = allRestaurants.filter(restaurant => {
             const restaurantId = restaurant._id || restaurant.restaurantId
             return applicableRestaurants.some(promoRestId => {
@@ -56,51 +48,45 @@ export default function SearchResults({route, navigation}) {
             })
           })
 
-          console.log('✅ Found', restaurantsResult.length, 'restaurants for promotion')
-          console.log('🏪 Restaurants filtrés:', restaurantsResult.map(r => ({ id: r._id, name: r.name })))
+          console.warn('✅ Found', restaurantsResult.length, 'restaurants for promotion')
+          console.warn('🏪 Restaurants filtrés:', restaurantsResult.map(r => ({ id: r._id, name: r.name })))
 
-          console.log('📱 Setting restaurant data - Count:', restaurantsResult.length, 'Mode: restaurants')
+          console.warn('📱 Setting restaurant data - Count:', restaurantsResult.length, 'Mode: restaurants')
           setRestaurantData(restaurantsResult)
           setDisplayMode('restaurants')
-          return // ← SORTIR DE LA FONCTION APRÈS LE FILTRAGE
+          return 
         }
-        // Si on a un categoryId (legacy) ou categoryAlias, c'est une recherche par catégorie
-        // if (categoryId) {
-        //   console.log('🔍 Recherche par catégorie:', categoryId)
-        //   restaurantsResult = await searchRestaurantsByCategory(categoryId)
-        // } else 
+        
         if (categoryName) {
           restaurantsResult = await searchRestaurantsByCategory(categoryName)
         }
-        // Si c'est une recherche "Top rated" spéciale
+        
         else if (name === 'TOP_RATED_SPECIAL') {
           const allRestaurants = await getRestaurants()
-          // Trier par rating décroissant (les mieux notés en premier)
+          
           restaurantsResult = allRestaurants
-            .filter(restaurant => restaurant.rating) // Uniquement ceux qui ont un rating
-            .sort((a, b) => (b.rating || 0) - (a.rating || 0)) // Tri décroissant
+            .filter(restaurant => restaurant.rating) 
+            .sort((a, b) => (b.rating || 0) - (a.rating || 0)) 
         }
-        // Si c'est une recherche "Favorites" spéciale
+        
         else if (name === 'FAVORITES_SPECIAL') {
           const favoritesResponse = await getFavorites()
           if (favoritesResponse.success && favoritesResponse.favorites) {
-            // Récupérer tous les restaurants pour matcher avec les favoris
+            
             const allRestaurants = await getRestaurants()
             const favoriteIds = favoritesResponse.favorites.map(fav => fav._id || fav.id)
-
-            // Filtrer seulement les restaurants favoris
+            
             restaurantsResult = allRestaurants.filter(restaurant =>
               favoriteIds.includes(restaurant._id || restaurant.id)
             )
           } else {
-            restaurantsResult = [] // Aucun favori trouvé
+            restaurantsResult = [] 
           }
         }
-        // Si c'est une recherche "Near me" par géolocalisation
+        
         else if (name === 'NEAR_ME_SPECIAL') {
           let userLat, userLon;
-
-          // D'abord essayer de récupérer les coordonnées depuis les données utilisateur
+          
           try {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
@@ -108,16 +94,15 @@ export default function SearchResults({route, navigation}) {
               if (user.location && user.location.latitude && user.location.longitude) {
                 userLat = user.location.latitude;
                 userLon = user.location.longitude;
-                console.log('📍 Utilisation des coordonnées utilisateur:', userLat, userLon);
+                console.warn('📍 Utilisation des coordonnées utilisateur:', userLat, userLon);
               }
             }
           } catch (error) {
-            console.log('Erreur récupération coordonnées utilisateur:', error);
+            console.error('Erreur récupération coordonnées utilisateur:', error);
           }
-
-          // Si pas de coordonnées utilisateur, demander la géolocalisation
+          
           if (!userLat || !userLon) {
-            console.log('📍 Aucune coordonnée utilisateur, demande géolocalisation...');
+            console.warn('📍 Aucune coordonnée utilisateur, demande géolocalisation...');
             const { status } = await Location.requestForegroundPermissionsAsync()
             if (status !== 'granted') {
               throw new Error('Location permission denied')
@@ -130,14 +115,12 @@ export default function SearchResults({route, navigation}) {
             userLat = userLocation.coords.latitude
             userLon = userLocation.coords.longitude
           }
-
-          // Récupérer tous les restaurants
+          
           const allRestaurants = await getRestaurants()
-          console.log(`🏪 ${allRestaurants.length} restaurants récupérés`);
-
-          // Calculer les distances et filtrer/trier
+          console.warn(`🏪 ${allRestaurants.length} restaurants récupérés`);
+          
           restaurantsResult = allRestaurants
-            .filter(restaurant => restaurant.latitude && restaurant.longitude) // Uniquement ceux avec coordonnées
+            .filter(restaurant => restaurant.latitude && restaurant.longitude) 
             .map(restaurant => ({
               ...restaurant,
               distance: getDistanceFromLatLonInKm(
@@ -145,22 +128,22 @@ export default function SearchResults({route, navigation}) {
                 restaurant.latitude, restaurant.longitude
               )
             }))
-            .filter(restaurant => restaurant.distance <= distanceFilter) // Rayon configurable
-            .sort((a, b) => a.distance - b.distance) // Tri par distance croissante
+            .filter(restaurant => restaurant.distance <= distanceFilter) 
+            .sort((a, b) => a.distance - b.distance) 
         }
-        // Cas spécial pour afficher tous les restaurants (promotions platform)
+        
         else if (name === 'ALL_RESTAURANTS') {
           restaurantsResult = await getRestaurants()
         }
-        // Cas spécial : données préfiltrées depuis SearchBar
+        
         else if (prefilteredData && Array.isArray(prefilteredData)) {
-          console.log('🔍 Using prefiltered data from SearchBar - Count:', prefilteredData.length)
+          console.warn('🔍 Using prefiltered data from SearchBar - Count:', prefilteredData.length)
           restaurantsResult = prefilteredData
         }
-        // Sinon c'est une recherche textuelle normale
+        
         else if (name) {
           const allRestaurants = await getRestaurants()
-          // Filtrage simple côté client (temporaire)
+          
           const filtered = allRestaurants.filter(restaurant =>
             restaurant.name?.toLowerCase().includes(name.toLowerCase()) ||
             restaurant.description?.toLowerCase().includes(name.toLowerCase()) ||
@@ -168,42 +151,40 @@ export default function SearchResults({route, navigation}) {
           )
           restaurantsResult = filtered.length > 0 ? filtered : allRestaurants
         }
-        // Si aucun name fourni, on pourrait afficher tous les restaurants ou rien
+        
         else {
-          // Pour l'instant, afficher tous les restaurants par défaut
+          
           restaurantsResult = await getRestaurants()
         }
 
-        console.log('📱 Setting restaurant data - Count:', restaurantsResult?.length || 0, 'Mode: restaurants')
+        console.warn('📱 Setting restaurant data - Count:', restaurantsResult?.length || 0, 'Mode: restaurants')
         setRestaurantData(restaurantsResult || [])
       } catch (err) {
         console.error('Error loading search results:', err)
-
-        // Gestion spécifique des erreurs de géolocalisation
+        
         if (name === 'NEAR_ME_SPECIAL' && err.message === 'Location permission denied') {
           setError(i18n.t('search.locationPermissionDenied'))
-          // Charger quand même tous les restaurants
+          
           const allRestaurants = await getRestaurants()
-          console.log('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
+          console.warn('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else if (name === 'NEAR_ME_SPECIAL') {
           setError(i18n.t('search.locationError'))
-          // Charger quand même tous les restaurants
+          
           const allRestaurants = await getRestaurants()
-          console.log('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
+          console.warn('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else {
           setError(i18n.t('search.errorSubtitle'))
           setRestaurantData([])
         }
       } finally {
-        setTimeout(() => setLoader(false), 800) // Délai minimum pour UX
+        setTimeout(() => setLoader(false), 800) 
       }
     }
 
     loadData()
-
-    // Définir le titre selon le type de recherche
+    
     let title = i18n.t ? i18n.t('search.results') : 'Search Results'
     let displayQuery = ''
 
@@ -231,20 +212,20 @@ export default function SearchResults({route, navigation}) {
     }
 
     setSearchQuery(displayQuery)
-    // Configurer le header avec bouton back personnalisé
+    
     navigation.setOptions({
       title,
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
             if (cameFromOffers) {
-              // Si on vient de Offers, retourner à Offers
+              
               navigation.navigate('Offers')
             } else if (fromCategoryResults) {
-              // Si on vient de CategoryResults, retourner à CategoryResults
+              
               navigation.navigate('CategoryResults', route.params?.categoryResultsParams || {})
             } else {
-              // Sinon, comportement normal
+              
               navigation.goBack()
             }
           }}
@@ -258,15 +239,14 @@ export default function SearchResults({route, navigation}) {
     })
 
   }, [route.params, cameFromOffers])
-
-  // Recharger les données quand le filtre de distance change (pour Near Me seulement)
+  
   useEffect(() => {
     if (route.params?.name === 'NEAR_ME_SPECIAL') {
       const reloadData = async () => {
         setLoader(true)
         setError(null)
         try {
-          // Récupérer la position utilisateur (depuis AsyncStorage ou géolocalisation)
+          
           let userLat, userLon;
 
           const userData = await AsyncStorage.getItem('userData');
@@ -315,8 +295,7 @@ export default function SearchResults({route, navigation}) {
       reloadData()
     }
   }, [distanceFilter])
-
-  // Composant pour l'état vide
+  
   const EmptyState = ({ query, isError }) => (
     <View style={styles.emptyContainer}>
       <Ionicons
@@ -346,8 +325,7 @@ export default function SearchResults({route, navigation}) {
       )}
     </View>
   )
-
-  // Header avec compteur de résultats
+  
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.resultInfo}>
@@ -362,7 +340,7 @@ export default function SearchResults({route, navigation}) {
         )}
       </View>
 
-      {/* Contrôles spécifiques pour Near Me */}
+      {}
       {route.params?.name === 'NEAR_ME_SPECIAL' && (
         <View style={styles.nearMeControls}>
           <Text style={styles.distanceLabel}>{i18n.t('search.distance', 'Distance')}:</Text>
@@ -380,7 +358,7 @@ export default function SearchResults({route, navigation}) {
                   styles.distanceButtonText,
                   distanceFilter === distance && styles.distanceButtonTextActive
                 ]}>
-                  {distance}km
+                  {distance}{i18n.t('search.km')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -413,8 +391,7 @@ export default function SearchResults({route, navigation}) {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={() => {
-                // Navigation vers RestaurantDetail depuis SearchNavigator
-                // On navigue vers BottomTabs d'abord, puis vers HomeNavigator, puis RestaurantDetail
+                
                 navigation.navigate('BottomTabs', {
                   screen: 'Home',
                   params: {
@@ -454,7 +431,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 32, // Espace supplémentaire en bas
+    paddingBottom: 32, 
   },
   header: {
     marginBottom: 16,
