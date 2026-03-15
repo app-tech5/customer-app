@@ -1,10 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Image, SafeAreaView, StatusBar } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, SafeAreaView, StatusBar } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { language, currency, colors } from '../global'
 import Checkout from '../components/Checkout'
-import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
@@ -21,7 +20,7 @@ const CartDetailsScreen = () => {
     const { deliverySettings, calculateTotal } = useDeliverySettings()
 
     useEffect(() => {
-        // Set header title
+        
         navigation.setOptions({
             title: restaurantName || i18n.t('cart.title'),
             headerLeft: () => (
@@ -34,10 +33,9 @@ const CartDetailsScreen = () => {
             ),
         })
     }, [navigation, restaurantName])
-
-    // Grouper les items par ID et calculer les quantités
+    
     const groupedItems = items.reduce((acc, item) => {
-        // Utiliser totalPrice si disponible (avec variants), sinon price
+        
         const itemPrice = item.totalPrice || item.price
 
         const existingItem = acc.find(i => i.id === item.id)
@@ -54,8 +52,7 @@ const CartDetailsScreen = () => {
         }
         return acc
     }, [])
-
-    // Calculs centralisés via le contexte
+    
     const totals = calculateTotal(total, restaurant?.taxRate) || {
         subtotal: total,
         deliveryFee: 2.99,
@@ -73,15 +70,14 @@ const CartDetailsScreen = () => {
 
     const updateItemQuantity = async (itemId, newQuantity) => {
         if (newQuantity <= 0) {
-            // Supprimer tous les items de cet ID
+            
             const itemsToRemove = items.filter(item => item.id === itemId)
             for (const item of itemsToRemove) {
                 dispatch({
                     type: 'REMOVE_FROM_CARD',
                     payload: itemId
                 })
-
-                // Synchroniser avec le backend
+                
                 try {
                     const { removeFromCart } = await import('../api')
                     await removeFromCart(itemId)
@@ -90,14 +86,14 @@ const CartDetailsScreen = () => {
                 }
             }
         } else {
-            // Mettre à jour la quantité
+            
             const currentQuantity = items.filter(item => item.id === itemId).length
             if (newQuantity > currentQuantity) {
-                // Ajouter des items
+                
                 const itemToAdd = items.find(item => item.id === itemId)
                 if (itemToAdd) {
                     for (let i = currentQuantity; i < newQuantity; i++) {
-                        // Créer un nouvel item avec une uniqueKey différente
+                        
                         const newItemId = itemToAdd.id || `item_${Date.now()}_${Math.random()}`;
                         const newItem = {
                             ...itemToAdd,
@@ -109,8 +105,7 @@ const CartDetailsScreen = () => {
                             type: 'ADD_TO_CART',
                             payload: newItem
                         })
-
-                        // Synchroniser avec le backend
+                        
                         try {
                             const { addToCart } = await import('../api')
                             await addToCart(newItem)
@@ -120,15 +115,14 @@ const CartDetailsScreen = () => {
                     }
                 }
             } else {
-                // Supprimer des items (garder seulement newQuantity items)
+                
                 const itemsToRemove = items.filter(item => item.id === itemId).slice(newQuantity)
                 for (const item of itemsToRemove) {
                     dispatch({
                         type: 'REMOVE_FROM_CARD',
                         payload: itemId
                     })
-
-                    // Synchroniser avec le backend
+                    
                     try {
                         const { removeFromCart } = await import('../api')
                         await removeFromCart(itemId)
@@ -141,13 +135,12 @@ const CartDetailsScreen = () => {
     }
 
     const removeAllItems = async () => {
-        // Vider le panier pour ce restaurant
+        
         dispatch({
             type: 'CLEAR_RESTAURANT',
             payload: restaurantName
         })
-
-        // Synchroniser avec le backend
+        
         try {
             const { clearRestaurantFromCart } = await import('../api')
             await clearRestaurantFromCart(restaurantName)
@@ -167,7 +160,7 @@ const CartDetailsScreen = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Header avec informations du restaurant */}
+                {}
                 <View style={styles.restaurantHeader}>
                     <View style={styles.restaurantInfo}>
                         <Ionicons name="restaurant" size={24} color={colors.primary} />
@@ -180,7 +173,7 @@ const CartDetailsScreen = () => {
                     )}
                 </View>
 
-                {/* Liste des items */}
+                {}
                 <View style={styles.itemsSection}>
                     <Text style={styles.sectionTitle}>{i18n.t('cart.items')}</Text>
 
@@ -199,7 +192,7 @@ const CartDetailsScreen = () => {
                     ) : (
                         groupedItems.map((item, index) => (
                             <View key={item.id} style={styles.itemContainer}>
-                                {/* Image du produit si disponible */}
+                                {}
                                 {item.image && (
                                     <View style={styles.itemImageContainer}>
                                         <Image
@@ -269,7 +262,7 @@ const CartDetailsScreen = () => {
                     )}
                 </View>
 
-                {/* Résumé de la commande */}
+                {}
                 {groupedItems.length > 0 && (
                     <View style={styles.summarySection}>
                         <Text style={styles.sectionTitle}>{i18n.t('cart.orderSummary')}</Text>
@@ -303,7 +296,7 @@ const CartDetailsScreen = () => {
                             </View>
                         </View>
 
-                        {/* Informations de livraison */}
+                        {}
                         {restaurant && (
                             <View style={styles.deliveryInfo}>
                                 <View style={styles.deliveryRow}>
@@ -321,7 +314,7 @@ const CartDetailsScreen = () => {
                             </View>
                         )}
 
-                        {/* Actions */}
+                        {}
                         <View style={styles.actionButtons}>
                             <TouchableOpacity
                                 onPress={removeAllItems}
