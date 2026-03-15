@@ -1,16 +1,14 @@
 import {
-  View, Text, StyleSheet, ScrollView, StatusBar, Platform,
+  View, Text, StyleSheet, ScrollView,
   TouchableOpacity, FlatList, Animated, ActivityIndicator,
   Image, Dimensions
 } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
-import { AntDesign, Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
-import { restaurants } from '../data'
-import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantItems'
-import Reward from '../components/Reward'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { colors } from '../global'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getAllActiveOffers } from '../api'
+import i18n from '../i18n'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -23,12 +21,10 @@ export default function Offers({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [selectedPromotion, setSelectedPromotion] = useState(null)
-
-  // Animation refs
+  
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(30)).current
-
-  // Catégories d'offres
+  
   const offerCategories = [
     { id: 'all', name: 'All Deals', icon: 'local-offer', color: colors.primary },
     { id: 'discount', name: 'Discount %', icon: 'percent', color: colors.success },
@@ -36,8 +32,7 @@ export default function Offers({ navigation }) {
     { id: 'buy_one_get_one', name: 'BOGO', icon: 'card-giftcard', color: colors.error },
     { id: 'flash', name: 'Flash Deals', icon: 'flash-on', color: '#FF6B6B' }
   ]
-
-  // Options de tri
+  
   const sortOptions = [
     { id: 'popularity', name: 'Most Popular', icon: 'trending-up' },
     { id: 'discount', name: 'Highest Discount', icon: 'trending-down' },
@@ -46,7 +41,7 @@ export default function Offers({ navigation }) {
   ]
 
   useEffect(() => {
-    // Animation d'entrée
+    
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -59,30 +54,19 @@ export default function Offers({ navigation }) {
         useNativeDriver: true,
       })
     ]).start()
-
-    // Simuler le chargement des offres
+    
     loadOffers()
   }, [])
 
   const loadOffers = async () => {
     setIsLoading(true)
     try {
-      console.log('🔥 LOADING PROMOTIONS FROM BACKEND...')
-
-      // Récupérer toutes les promotions actives depuis le backend
       const promotionsFromBackend = await getAllActiveOffers()
-
-      console.log('✅ PROMOTIONS RECEIVED:', promotionsFromBackend.length, 'promotions from backend')
-
-      // Stocker toutes les promotions pour les filtres
       setAllPromotions(promotionsFromBackend)
       setFilteredOffers(promotionsFromBackend)
-
-      console.log('🎯 PROMOTIONS LOADED SUCCESSFULLY:', promotionsFromBackend.length, 'promotions ready for display')
-
     } catch (error) {
       console.error('❌ Error loading promotions from backend:', error)
-      // En cas d'erreur, afficher un état vide au lieu de planter
+      
       setAllPromotions([])
       setFilteredOffers([])
     } finally {
@@ -92,8 +76,7 @@ export default function Offers({ navigation }) {
 
   const filterOffers = (category) => {
     setActiveCategory(category)
-
-    // Commencer avec toutes les promotions
+    
     let filtered = [...allPromotions]
 
     if (category !== 'all') {
@@ -112,8 +95,7 @@ export default function Offers({ navigation }) {
         }
       })
     }
-
-    // Appliquer la recherche si elle existe
+    
     if (searchQuery.trim()) {
       filtered = filtered.filter(offer =>
         offer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -121,8 +103,7 @@ export default function Offers({ navigation }) {
         offer.applicableRestaurants.some(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     }
-
-    // Appliquer le tri
+    
     filtered = sortOffers(filtered, sortBy)
     setFilteredOffers(filtered)
   }
@@ -133,14 +114,14 @@ export default function Offers({ navigation }) {
         case 'discount':
           return (b.discount_percentage || 0) - (a.discount_percentage || 0)
         case 'rating':
-          // Trier par priorité des promotions
+          
           return (b.priority || 1) - (a.priority || 1)
         case 'distance':
-          // Trier par date d'expiration (plus proche en premier)
+          
           return new Date(a.endDate) - new Date(b.endDate)
         case 'popularity':
         default:
-          // Trier par nombre d'éléments applicables (restaurants/catégories)
+          
           return (b.availabilityCount || 0) - (a.availabilityCount || 0)
       }
     })
@@ -154,8 +135,7 @@ export default function Offers({ navigation }) {
 
   const handleSearch = (query) => {
     setSearchQuery(query)
-
-    // Commencer avec toutes les promotions
+    
     let filtered = [...allPromotions]
 
     if (query.trim()) {
@@ -165,8 +145,7 @@ export default function Offers({ navigation }) {
         offer.applicableRestaurants.some(r => r.name.toLowerCase().includes(query.toLowerCase()))
       )
     }
-
-    // Appliquer les filtres actifs
+    
     if (activeCategory !== 'all') {
       filtered = filtered.filter(promotion => {
         switch (activeCategory) {
@@ -183,27 +162,24 @@ export default function Offers({ navigation }) {
         }
       })
     }
-
-    // Appliquer le tri
+    
     filtered = sortOffers(filtered, sortBy)
     setFilteredOffers(filtered)
   }
 
   const toggleFilters = () => {
     setShowFilters(!showFilters)
-    // Ici on pourrait afficher une modal de filtres avancés
+    
   }
 
   const handlePromotionPress = (promotion) => {
-    console.log('🎯 Promotion pressed:', promotion.name, 'Scope:', promotion.scope);
-
     if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length >= 1) {
-      // Tous les restaurants spécifiques : aller vers les restaurants de cette promotion
+      
       const restaurantIds = promotion.applicableRestaurants.map(rest => rest._id || rest.restaurantId || rest.id)
       navigation.navigate('Search', {
         screen: 'SearchResults',
         params: {
-          applicableRestaurants: restaurantIds, // ← Seulement les IDs
+          applicableRestaurants: restaurantIds, 
           name: promotion.name,
           type: 'restaurant',
           fromOffers: true,
@@ -211,7 +187,7 @@ export default function Offers({ navigation }) {
         }
       });
     } else if (promotion.scope === 'platform') {
-      // Promotion pour tous les restaurants : aller vers tous les restaurants
+      
       navigation.navigate('Search', {
         screen: 'SearchResults',
         params: {
@@ -221,7 +197,7 @@ export default function Offers({ navigation }) {
         }
       });
     } else if (promotion.scope === 'category') {
-      // Promotion par catégorie : afficher les catégories filtrées dans CategoryResults
+      
       navigation.navigate('CategoryResults', {
         applicableCategories: promotion.applicableCategories,
         name: promotion.name,
@@ -229,7 +205,7 @@ export default function Offers({ navigation }) {
         fromOffers: true
       });
     } else if (promotion.scope === 'item') {
-      // Promotion sur des items spécifiques : afficher les items filtrés dans ItemResults
+      
       navigation.navigate('ItemResults', {
         applicableItems: promotion.applicableItems,
         name: promotion.name,
@@ -237,8 +213,6 @@ export default function Offers({ navigation }) {
         fromOffers: true
       });
     } else {
-      console.log('❓ Unknown scope for promotion:', promotion.name, promotion.scope);
-      // Fallback : aller vers la recherche générale
       navigation.navigate('Search');
     }
   }
@@ -310,7 +284,7 @@ export default function Offers({ navigation }) {
             <View style={styles.restaurantsCount}>
               <Ionicons name="restaurant-outline" size={14} color={colors.grey[500]} />
               <Text style={styles.restaurantsCountText}>
-                Available at {item.availabilityText}
+                {i18n.t('offers.availableAt', { text: item.availabilityText })}
               </Text>
             </View>
 
@@ -327,7 +301,7 @@ export default function Offers({ navigation }) {
               <View style={styles.validityInfo}>
                 <Ionicons name="time-outline" size={14} color={colors.grey[500]} />
                 <Text style={styles.validityText}>
-                  Valid until {new Date(promotion.endDate).toLocaleDateString()}
+                  {i18n.t('offers.validUntil', { date: new Date(promotion.endDate).toLocaleDateString() })}
                 </Text>
               </View>
             )}
@@ -363,14 +337,14 @@ export default function Offers({ navigation }) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading amazing deals...</Text>
+        <Text style={styles.loadingText}>{i18n.t('offers.loadingDeals')}</Text>
       </SafeAreaView>
     )
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.headerButton}
@@ -380,7 +354,7 @@ export default function Offers({ navigation }) {
         >
           <Ionicons name="menu" size={24} color={colors.grey[600]} />
         </TouchableOpacity>
-        <Text style={styles.title}>Special Offers</Text>
+        <Text style={styles.title}>{i18n.t('offers.specialOffers')}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
@@ -403,7 +377,7 @@ export default function Offers({ navigation }) {
         </View>
       </View>
 
-      {/* Categories */}
+      {}
       <View style={styles.categoriesContainer}>
         <FlatList
           data={offerCategories}
@@ -415,9 +389,9 @@ export default function Offers({ navigation }) {
         />
                </View>
 
-      {/* Sort Options */}
+      {}
       <View style={styles.sortContainer}>
-        <Text style={styles.sortLabel}>Sort by:</Text>
+        <Text style={styles.sortLabel}>{i18n.t('offers.sortBy')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {sortOptions.map((option) => (
             <TouchableOpacity
@@ -444,7 +418,7 @@ export default function Offers({ navigation }) {
           </ScrollView>
     </View>
 
-      {/* Offers List */}
+      {}
       {filteredOffers.length > 0 ? (
         <FlatList
           data={filteredOffers}
@@ -473,7 +447,7 @@ export default function Offers({ navigation }) {
               accessibilityRole="button"
               accessibilityLabel="Clear search and show all promotions"
             >
-              <Text style={styles.clearSearchText}>Clear Search</Text>
+              <Text style={styles.clearSearchText}>{i18n.t('offers.clearSearch')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -481,7 +455,6 @@ export default function Offers({ navigation }) {
     </SafeAreaView>
   )
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -527,8 +500,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: colors.grey[100],
   },
-
-  // Categories
+  
   categoriesContainer: {
     paddingVertical: 16,
     borderBottomWidth: 1,
@@ -569,8 +541,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
-
-  // Sort
+  
   sortContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -606,8 +577,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-
-  // Offers List
+  
   offersList: {
     padding: 16,
   },
@@ -714,8 +684,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 8,
   },
-
-  // Empty State
+  
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -747,8 +716,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-
-  // Restaurants count and preview
+  
   restaurantsCount: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -767,8 +735,7 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontStyle: 'italic',
   },
-
-  // Validity info
+  
   validityInfo: {
     flexDirection: 'row',
     alignItems: 'center',
