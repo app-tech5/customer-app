@@ -15,8 +15,7 @@ export default function MyOrdersScreen({ navigation }) {
 
   useEffect(() => {
     loadOrders()
-
-    // Configurer le header avec le menu hamburger
+    
     navigation.setOptions({
       title: i18n.t('drawer.myOrders', 'My Orders'),
       headerLeft: () => (
@@ -49,8 +48,7 @@ export default function MyOrdersScreen({ navigation }) {
       setError(null)
 
       const ordersData = await getOrders()
-
-      // Trier par date décroissante (plus récent en premier)
+      
       const sortedOrders = ordersData.sort((a, b) =>
         new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
       )
@@ -80,7 +78,6 @@ export default function MyOrdersScreen({ navigation }) {
     return i18n.t(`order.status.${status.toLowerCase()}`, status)
   }
 
-
   const formatDate = (dateString) => {
     if (!dateString) return ''
     const date = new Date(dateString)
@@ -91,7 +88,7 @@ export default function MyOrdersScreen({ navigation }) {
     <TouchableOpacity
       style={styles.orderItem}
       onPress={() => {
-        // Navigation vers les détails de la commande
+        
         navigation.navigate('OrderDetails', { order: item })
       }}
       activeOpacity={0.7}
@@ -142,7 +139,7 @@ export default function MyOrdersScreen({ navigation }) {
         <TouchableOpacity
           style={styles.trackButton}
           onPress={() => {
-            // Navigation vers le suivi de commande
+            
             navigation.navigate('OrderTracking', { order: item })
           }}
         >
@@ -154,10 +151,7 @@ export default function MyOrdersScreen({ navigation }) {
 
         <TouchableOpacity
           style={styles.reorderButton}
-          onPress={() => {
-            // Logique de recommande
-            console.log('Reorder:', item.id)
-          }}
+          onPress={() => {}}
         >
           <Ionicons name="refresh" size={16} color={colors.primary} />
           <Text style={styles.reorderButtonText}>
@@ -234,7 +228,7 @@ export default function MyOrdersScreen({ navigation }) {
         <EmptyState />
       ) : (
         <FlatList
-          data={orders.slice(0, 10)} // Afficher seulement les 10 dernières commandes
+          data={orders.slice(0, 10)} 
           keyExtractor={(item, index) => String(item.id || item._id || index)}
           renderItem={renderOrderItem}
           showsVerticalScrollIndicator={false}
