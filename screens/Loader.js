@@ -3,6 +3,7 @@ import React from 'react'
 import LottieView from 'lottie-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors } from '../global'
+import i18n from '../i18n'
 
 export default function Loader({ checkout = false, transparent = false }) {
   return (
@@ -28,9 +29,9 @@ export default function Loader({ checkout = false, transparent = false }) {
             </View>
 
             <View style={styles.textContainer}>
-              <Text style={styles.title}>Preparing your experience</Text>
+              <Text style={styles.title}>{i18n.t('common.preparingExperience')}</Text>
               <Text style={styles.subtitle}>
-                Loading delicious options...
+                {i18n.t('common.loadingDeliciousOptions')}
               </Text>
             </View>
 
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
-    backgroundColor: colors.background.primary, // opaque par défaut
+    backgroundColor: colors.background.primary, 
   },
 
   transparentOverlay: {
