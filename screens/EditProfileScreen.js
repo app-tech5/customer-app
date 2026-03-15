@@ -61,8 +61,7 @@ export default function EditProfileScreen({ navigation }) {
     try {
       setLoader(true)
       setError(null)
-
-      // Essayer de récupérer les données depuis l'API, sinon utiliser Redux store
+      
       let data
       try {
         data = await userInfos(user.id || user.userId)
@@ -145,8 +144,7 @@ export default function EditProfileScreen({ navigation }) {
       if (!userId) {
         throw new Error('User ID not found')
       }
-
-      // Préparer les données à envoyer (seulement les champs modifiés)
+      
       const updateData = {}
       Object.keys(userData).forEach(key => {
         if (userData[key] !== originalData[key]) {
@@ -155,11 +153,9 @@ export default function EditProfileScreen({ navigation }) {
       })
 
       await updateUser(updateData, userId)
-
-      // Mettre à jour le store Redux
+      
       dispatch({ type: 'UPDATE_USER', payload: userData })
-
-      // Mettre à jour les données originales
+      
       setOriginalData({ ...userData })
 
       Alert.alert(
@@ -217,14 +213,14 @@ export default function EditProfileScreen({ navigation }) {
         {
           text: i18n.t('profile.takePhoto', 'Take Photo'),
           onPress: () => {
-            // TODO: Implement camera picker
+            
             Alert.alert('Not implemented', 'Camera functionality will be implemented')
           }
         },
         {
           text: i18n.t('profile.chooseFromGallery', 'Choose from Gallery'),
           onPress: () => {
-            // TODO: Implement image picker
+            
             Alert.alert('Not implemented', 'Gallery picker will be implemented')
           }
         },
@@ -303,7 +299,7 @@ export default function EditProfileScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Avatar Section */}
+          {}
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
               <Image
@@ -323,7 +319,7 @@ export default function EditProfileScreen({ navigation }) {
             </Text>
           </View>
 
-          {/* Form Fields */}
+          {}
           <View style={styles.formContainer}>
             <FormField
               icon="person"
@@ -363,7 +359,7 @@ export default function EditProfileScreen({ navigation }) {
             />
           </View>
 
-          {/* Save Button */}
+          {}
           {hasChanges() && (
             <View style={styles.saveButtonContainer}>
               <TouchableOpacity
@@ -552,6 +548,4 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 })
-
-
 
