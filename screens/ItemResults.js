@@ -14,80 +14,36 @@ export default function ItemResults({route, navigation}) {
 
   useEffect(()=>{
     const { applicableItems, name, fromOffers, promotionName } = route.params
-
-    // Vérifier si on vient de l'écran Offers
+    
     setCameFromOffers(fromOffers === true)
-
-    // Réinitialiser les états
+    
     setLoader(true)
     setError(null)
     setItemData([])
-
-    // Fonction de chargement des données
+    
     const loadData = async () => {
       try {
-        // Récupérer tous les items depuis la base de données
+        
         const allItems = await getAllMenuItems()
-
-        console.log('🎯 ItemResults - Loading data from DB:', {
-          applicableItems,
-          promotionName,
-          name,
-          totalItems: allItems.length
-        })
-
-        console.log('📋 Sample items from DB:', allItems.slice(0, 5).map(item => ({ name: item.name, _id: item._id })))
-
         let itemsResult = []
 
         if (applicableItems && applicableItems.length > 0) {
-          console.log('🔍 Filtering items with applicableItems:', applicableItems)
-          console.log('📊 Total items in DB:', allItems.length)
-
-          // Montrer quelques exemples d'items en DB
-          console.log('📋 Sample DB items:', allItems.slice(0, 3).map(item => ({
-            id: item._id || item.id,
-            name: item.name,
-            restaurantId: item.restaurantId
-          })))
-
-          // Filtrer les items applicables à la promotion
-          let matchCount = 0
           itemsResult = allItems.filter(item => {
             const itemId = item._id || item.id
             const itemName = item.name
-
             const isMatch = applicableItems.some(promoItem => {
-              // Essayer différentes correspondances avec les données de la DB
               const idMatch = itemId === promoItem
               const nameMatch = itemName === promoItem
               const nameLowerMatch = itemName?.toLowerCase() === promoItem?.toLowerCase()
               const partialMatch = itemName?.toLowerCase().includes(promoItem?.toLowerCase())
-
-              const match = idMatch || nameMatch || nameLowerMatch || partialMatch
-
-              if (match) {
-                console.log('✅ Match found:', {
-                  item: { id: itemId, name: itemName },
-                  promoItem: promoItem,
-                  matchType: idMatch ? 'ID' : nameMatch ? 'NAME' : nameLowerMatch ? 'NAME_LOWER' : 'PARTIAL'
-                })
-                matchCount++
-              }
-
-              return match
+              return idMatch || nameMatch || nameLowerMatch || partialMatch
             })
             return isMatch
           })
-
-          console.log('🎯 Filtered result:', itemsResult.length, 'items matched from', applicableItems.length, 'promo items')
-          console.log('📈 Total matches found:', matchCount)
           setSearchQuery(promotionName || name || `Items (${applicableItems.length})`)
         } else {
-          console.log('📂 No filter, showing all items')
-          // Si pas de filtre, afficher tous les items
           itemsResult = allItems
-          setSearchQuery(name || 'All Items')
+          setSearchQuery(name || i18n.t('search.allItems'))
         }
 
         setItemData(itemsResult)
@@ -101,13 +57,9 @@ export default function ItemResults({route, navigation}) {
     }
 
     loadData()
+    
+    const title = promotionName ? i18n.t('search.itemsFor', { name: promotionName }) : (name || i18n.t('search.items'))
 
-    // Définir le titre
-    const title = promotionName ? `Items for ${promotionName}` : (name || 'Items')
-
-    console.log('🎯 ItemResults - Navigation setup:', { cameFromOffers, promotionName, name })
-
-    // Ajouter arrow back standard au header
     navigation.setOptions({
       title,
       headerLeft: () => (
@@ -123,8 +75,7 @@ export default function ItemResults({route, navigation}) {
     })
 
   }, [route.params])
-
-  // Composant pour l'état vide
+  
   const EmptyState = ({ query, isError }) => (
     <View style={styles.emptyContainer}>
       <Ionicons
@@ -143,16 +94,15 @@ export default function ItemResults({route, navigation}) {
       </Text>
     </View>
   )
-
-  // Header avec info de recherche
+  
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       <View style={styles.resultInfo}>
         <Text style={styles.resultCount}>
-          {itemData.length} item{itemData.length > 1 ? 's' : ''} found
+          {itemData.length === 1 ? i18n.t('search.itemFound') : i18n.t('search.itemsFound', { count: itemData.length })}
         </Text>
         {searchQuery && (
-          <Text style={styles.resultQuery}>for "{searchQuery}"</Text>
+          <Text style={styles.resultQuery}>{i18n.t('search.forQuery', { query: searchQuery })}</Text>
         )}
       </View>
     </View>
@@ -163,7 +113,7 @@ export default function ItemResults({route, navigation}) {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <Ionicons name="fast-food-outline" size={48} color={colors.primary} />
-          <Text style={styles.loadingText}>Loading items...</Text>
+          <Text style={styles.loadingText}>{i18n.t('search.loadingItems')}</Text>
         </View>
       </SafeAreaView>
     )
@@ -190,14 +140,10 @@ export default function ItemResults({route, navigation}) {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={async () => {
-                // Navigation vers le restaurant qui contient cet item
+                
                 if (item.restaurantId) {
                   try {
-                    console.log('🏪 Item data:---->', item);
-                    console.log('🏪 Fetching restaurant data for ID:', item.restaurantId._id);
-                    // Récupérer les données complètes du restaurant
                     const restaurantData = await getRestaurantById(item.restaurantId._id);
-                    console.log('🏪 Restaurant data fetched:', restaurantData?.name);
 
                     navigation.navigate('DrawerNavigator', {
                       screen: 'BottomTabs',
@@ -214,7 +160,7 @@ export default function ItemResults({route, navigation}) {
                     });
                   } catch (error) {
                     console.error('❌ Error fetching restaurant:', error);
-                    // Fallback avec données minimales
+                    
                     navigation.navigate('DrawerNavigator', {
                       screen: 'BottomTabs',
                       params: {
@@ -253,7 +199,7 @@ export default function ItemResults({route, navigation}) {
                 </Text>
                 {item.restaurantName && (
                   <Text style={styles.restaurantName}>
-                    From: {item.restaurantName}
+                    {i18n.t('search.fromRestaurant', { name: item.restaurantName })}
                   </Text>
                 )}
               </View>
@@ -283,8 +229,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text.secondary,
   },
-
-  // Header
+  
   headerContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -305,8 +250,7 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontStyle: 'italic',
   },
-
-  // Liste
+  
   listContainer: {
     padding: 16,
   },
@@ -361,8 +305,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '500',
   },
-
-  // État vide
+  
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
