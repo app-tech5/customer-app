@@ -1,23 +1,19 @@
 import React from 'react'
 import {createDrawerNavigator} from '@react-navigation/drawer'
 import BottomTabs from './BottomTabs'
-import BusinessConsoleScreen from '../screens/BusinessConsoleScreen';
 import DrawerContent from '../components/DrawerContent';
 import { SearchNavigator, AccountNavigator } from './Stacks';
-import SearchResults from '../screens/SearchResults';
 import NearMeScreen from '../screens/NearMeScreen';
-// import RestaurantsMapScreen from '../screens/RestaurantsMapScreen';
+
 import Offers from '../screens/Offers'
 import Settings from '../screens/Settings';
 import Wallet from '../screens/Wallet';
 import OrdersScreen from '../screens/OrdersScreen';
-import MyOrdersScreen from '../screens/MyOrdersScreen';
 import OrderTracking from '../screens/OrderTracking'
 import OrderDetails from '../screens/OrderDetails'
-import { Ionicons, MaterialIcons, FontAwesome, Entypo, AntDesign, Feather } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons, Entypo, Feather } from '@expo/vector-icons'
 import i18n from '../i18n';
 import { colors } from '../global';
-
 
 const Drawer = createDrawerNavigator();
 
@@ -40,14 +36,14 @@ export default function DrawerNavigator() {
             marginHorizontal: 8,
             borderRadius: 8,
         },
-        drawerActiveTintColor: colors.primary, // Couleur primaire originale
-        drawerInactiveTintColor: colors.grey[700], // Gris cohérent
-        drawerActiveBackgroundColor: 'rgba(0, 0, 0, 0.08)', // Fond actif noir subtil
-        drawerInactiveBackgroundColor: 'transparent', // Fond inactif transparent
+        drawerActiveTintColor: colors.primary, 
+        drawerInactiveTintColor: colors.grey[700], 
+        drawerActiveBackgroundColor: 'rgba(0, 0, 0, 0.08)', 
+        drawerInactiveBackgroundColor: 'transparent', 
     }}
     drawerContent= {props => <DrawerContent {...props}/>}
     >
-        {/* 🍽️ ACCUEIL & NAVIGATION */}
+        
         <Drawer.Screen
             name = "BottomTabs"
             component={BottomTabs}
@@ -93,8 +89,7 @@ export default function DrawerNavigator() {
                 )
             }}
         />
-
-        {/* 🎯 OFFRES & PROMOTIONS */}
+        
         <Drawer.Screen
             name = "Offers"
             component={Offers}
@@ -109,23 +104,6 @@ export default function DrawerNavigator() {
                 )
             }}
         />
-
-        {/* 📦 COMMANDES */}
-        {/* <Drawer.Screen
-            name = "MyOrders"
-            component={MyOrdersScreen}
-            options={{
-                title: i18n.t('drawer.myOrders'),
-                headerShown: true,
-                drawerIcon: ({focused, size}) => (
-                    <Ionicons
-                        name="receipt"
-                        color={focused ? colors.primary : colors.grey[700]}
-                        size={size}
-                    />
-                )
-            }}
-        /> */}
 
         <Drawer.Screen
             name = "Orders"
@@ -149,7 +127,7 @@ export default function DrawerNavigator() {
             options={{
                 title: i18n.t('order.tracking', 'Track Order'),
                 headerShown: true,
-                drawerItemStyle: { display: 'none' } // Cacher du drawer mais accessible via navigation
+                drawerItemStyle: { display: 'none' } 
             }}
         />
 
@@ -159,13 +137,10 @@ export default function DrawerNavigator() {
             options={{
                 title: i18n.t('order.details', 'Order Details'),
                 headerShown: true,
-                drawerItemStyle: { display: 'none' } // Cacher du drawer mais accessible via navigation
+                drawerItemStyle: { display: 'none' } 
             }}
         />
-
-
-
-        {/* 👤 COMPTE UTILISATEUR */}
+        
         <Drawer.Screen
             name = "Account"
             component={AccountNavigator}
@@ -180,8 +155,7 @@ export default function DrawerNavigator() {
                 )
             }}
         />
-
-        {/* 💰 PORTEFEUILLE & PAIEMENTS */}
+        
         <Drawer.Screen
             name = "Wallet"
             component={Wallet}
@@ -197,40 +171,7 @@ export default function DrawerNavigator() {
                 )
             }}
         />
-
-        {/* ❤️ FAVORIS */}
-        {/* <Drawer.Screen
-            name = "Favorites"
-            component={AccountScreen} // Temporaire - à remplacer par écran favoris dédié
-            options={{
-                title: i18n.t('drawer.favorites'),
-                drawerIcon: ({focused, size}) => (
-                    <AntDesign
-                        name="heart"
-                        color={focused ? colors.primary : colors.grey[700]}
-                        size={size}
-                    />
-                )
-            }}
-        /> */}
-
-        {/* 🔔 NOTIFICATIONS */}
-        {/* <Drawer.Screen
-            name = "Notifications"
-            component={AccountScreen} // Temporaire - à remplacer par écran notifications
-            options={{
-                title: i18n.t('drawer.notifications'),
-                drawerIcon: ({focused, size}) => (
-                    <Ionicons
-                        name="notifications-outline"
-                        color={focused ? colors.primary : colors.grey[700]}
-                        size={size}
-                    />
-                )
-            }}
-        /> */}
-
-        {/* ⚙️ PARAMÈTRES */}
+        
         <Drawer.Screen
             name = "Settings"
             component={Settings}
@@ -246,22 +187,7 @@ export default function DrawerNavigator() {
                 )
             }}
         />
-
-        {/* 🏢 BUSINESS (optionnel) */}
-        {/* <Drawer.Screen
-            name = "BusinessConsole"
-            component={BusinessConsoleScreen}
-            options={{
-                title: i18n.t('drawer.business'),
-                drawerIcon: ({focused, size}) => (
-                    <MaterialIcons
-                        name="business-center"
-                        color={focused ? colors.primary : colors.grey[700]}
-                        size={size}
-                    />
-                )
-            }}
-        /> */}
+        
     </Drawer.Navigator>
   )
 }
