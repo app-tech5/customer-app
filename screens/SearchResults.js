@@ -1,6 +1,6 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar} from 'react-native'
 import React, { useEffect, useState } from 'react'
- import { getRestaurantsFromFirebase, searchRestaurantsByCategory, getFavorites } from '../api'
+ import { getRestaurants, searchRestaurantsByCategory, getFavorites } from '../api'
 import { categories } from '../data'
 import {RestaurantImage, RestaurantInfo} from '../components/home/RestaurantItems'
 import Loader from './Loader'
@@ -40,7 +40,7 @@ export default function SearchResults({route, navigation}) {
           console.log('🏪 Loading specific restaurants for promotion - IDs reçus:', applicableRestaurants)
 
           // Récupérer tous les restaurants
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
 
           // Log pour comparer les IDs
           console.log('📋 IDs de tous les restaurants en DB:', allRestaurants.map(r => r._id || r.restaurantId))
@@ -74,7 +74,7 @@ export default function SearchResults({route, navigation}) {
         }
         // Si c'est une recherche "Top rated" spéciale
         else if (name === 'TOP_RATED_SPECIAL') {
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
           // Trier par rating décroissant (les mieux notés en premier)
           restaurantsResult = allRestaurants
             .filter(restaurant => restaurant.rating) // Uniquement ceux qui ont un rating
@@ -85,7 +85,7 @@ export default function SearchResults({route, navigation}) {
           const favoritesResponse = await getFavorites()
           if (favoritesResponse.success && favoritesResponse.favorites) {
             // Récupérer tous les restaurants pour matcher avec les favoris
-            const allRestaurants = await getRestaurantsFromFirebase()
+            const allRestaurants = await getRestaurants()
             const favoriteIds = favoritesResponse.favorites.map(fav => fav._id || fav.id)
 
             // Filtrer seulement les restaurants favoris
@@ -132,7 +132,7 @@ export default function SearchResults({route, navigation}) {
           }
 
           // Récupérer tous les restaurants
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
           console.log(`🏪 ${allRestaurants.length} restaurants récupérés`);
 
           // Calculer les distances et filtrer/trier
@@ -150,7 +150,7 @@ export default function SearchResults({route, navigation}) {
         }
         // Cas spécial pour afficher tous les restaurants (promotions platform)
         else if (name === 'ALL_RESTAURANTS') {
-          restaurantsResult = await getRestaurantsFromFirebase()
+          restaurantsResult = await getRestaurants()
         }
         // Cas spécial : données préfiltrées depuis SearchBar
         else if (prefilteredData && Array.isArray(prefilteredData)) {
@@ -159,7 +159,7 @@ export default function SearchResults({route, navigation}) {
         }
         // Sinon c'est une recherche textuelle normale
         else if (name) {
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
           // Filtrage simple côté client (temporaire)
           const filtered = allRestaurants.filter(restaurant =>
             restaurant.name?.toLowerCase().includes(name.toLowerCase()) ||
@@ -171,7 +171,7 @@ export default function SearchResults({route, navigation}) {
         // Si aucun name fourni, on pourrait afficher tous les restaurants ou rien
         else {
           // Pour l'instant, afficher tous les restaurants par défaut
-          restaurantsResult = await getRestaurantsFromFirebase()
+          restaurantsResult = await getRestaurants()
         }
 
         console.log('📱 Setting restaurant data - Count:', restaurantsResult?.length || 0, 'Mode: restaurants')
@@ -183,13 +183,13 @@ export default function SearchResults({route, navigation}) {
         if (name === 'NEAR_ME_SPECIAL' && err.message === 'Location permission denied') {
           setError(i18n.t('search.locationPermissionDenied'))
           // Charger quand même tous les restaurants
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
           console.log('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else if (name === 'NEAR_ME_SPECIAL') {
           setError(i18n.t('search.locationError'))
           // Charger quand même tous les restaurants
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
           console.log('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else {
@@ -290,7 +290,7 @@ export default function SearchResults({route, navigation}) {
             userLon = userLocation.coords.longitude
           }
 
-          const allRestaurants = await getRestaurantsFromFirebase()
+          const allRestaurants = await getRestaurants()
 
           const filteredRestaurants = allRestaurants
             .filter(restaurant => restaurant.latitude && restaurant.longitude)

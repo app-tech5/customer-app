@@ -9,7 +9,7 @@ import { Divider } from 'react-native-elements'
 import { colors, getDistanceFromLatLonInKm } from '../global'
 // Données backend seulement - plus de données statiques
 import HomeHeader from '../components/home/HomeHeader'
-import { getRestaurantsFromFirebase, getAllPromotions, getAllMenuItems } from '../api'
+import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusWithSmartCache } from '../utils/cacheUtils'
 import { AntDesign } from '@expo/vector-icons'
@@ -81,7 +81,7 @@ export default function Home({navigation}) {
       // Fonction API fetcher
       async () => {
         console.log('🌐 Fetching restaurants from API');
-        return await getRestaurantsFromFirebase();
+        return await getRestaurants();
       },
       // Callback quand les données sont prêtes (cache ou API)
       (restaurants, fromCache) => {

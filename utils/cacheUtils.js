@@ -340,7 +340,7 @@ export const clearRestaurantsCache = async () => {
  * 3. Fetch l'API en arrière-plan
  * 4. Met à jour si les données ont changé
  *
- * @param {Function} apiFetcher - Fonction pour fetch l'API (getRestaurantsFromFirebase)
+ * @param {Function} apiFetcher - Fonction pour fetch l'API (getRestaurants)
  * @param {Function} onDataLoaded - Callback quand les données sont prêtes (cache ou API)
  * @param {Function} onDataUpdated - Callback quand les données sont mises à jour depuis l'API
  * @param {Function} onLoadingStateChange - Callback pour l'état de chargement

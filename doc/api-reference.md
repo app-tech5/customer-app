@@ -570,8 +570,8 @@ const restaurants = await api.getRestaurants();
 const order = await api.createOrder(orderData);
 
 // Using exported functions
-import { getRestaurantsFromFirebase, createOrder } from './api';
-const restaurants = await getRestaurantsFromFirebase();
+import { getRestaurants, createOrder } from './api';
+const restaurants = await getRestaurants();
 ```
 
 ---

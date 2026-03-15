@@ -712,7 +712,7 @@ export const onAuthStateChanged = (auth, callback) => {
 };
 
 // Fonctions pour les données (remplacement Firestore)
-export const getRestaurantsFromFirebase = () => api.getRestaurants();
+export const getRestaurants = () => api.getRestaurants();
 export const getCategories = () => api.getCategories();
 export const getCategoriesFromRestaurant = (restaurantId) => api.getCategoriesFromRestaurant(restaurantId);
 export const searchRestaurantsByCategory = (categoryId) => api.searchRestaurantsByCategory(categoryId);
