@@ -1,5 +1,5 @@
 import { View, Text, Image, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native'
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { getOrderById } from '../api'
@@ -20,15 +20,14 @@ export default function OrderDetails() {
 
   useEffect(() => {
     if (orderData) {
-      // Si les données sont passées directement via navigation
+      
       setOrder(orderData)
       setLoader(false)
     } else {
-      // Sinon, récupérer via API avec l'ID
+      
       loadOrderDetails()
     }
-
-    // Configurer le header avec le bouton retour
+    
     navigation.setOptions({
       title: i18n.t('order.details', 'Order Details'),
       headerLeft: () => (
@@ -202,11 +201,11 @@ export default function OrderDetails() {
           </Text>
         </View>
         <View style={styles.quantityContainer}>
-          <Text style={styles.quantityText}>x{item.quantity}</Text>
+          <Text style={styles.quantityText}>{i18n.t('order.quantityPrefix')}{item.quantity}</Text>
         </View>
       </View>
 
-      {/* Extras */}
+      
       {item.extras && item.extras.length > 0 && (
         <View style={styles.extrasContainer}>
           <Text style={styles.extrasTitle}>{i18n.t('order.extras', 'Extras')}:</Text>
@@ -216,14 +215,14 @@ export default function OrderDetails() {
               <Text style={styles.extraPrice}>
                 +{extra.price && !isNaN(extra.price) ?
                   `${extra.price.toFixed(2)}${currency.symbol}` : 'N/A'
-                } x{extra.quantity}
+                } {i18n.t('order.quantityPrefix')}{extra.quantity}
               </Text>
             </View>
           ))}
         </View>
       )}
 
-      {/* Variants */}
+      
       {item.variants && item.variants.length > 0 && (
         <View style={styles.variantsContainer}>
           <Text style={styles.variantsTitle}>{i18n.t('order.variants', 'Variants')}:</Text>
@@ -438,7 +437,7 @@ export default function OrderDetails() {
                   text: i18n.t('order.confirmCancelButton', 'Cancel Order'),
                   style: 'destructive',
                   onPress: () => {
-                    // TODO: Implement cancel order
+                    
                     Alert.alert('Not implemented', 'Cancel order functionality will be implemented')
                   }
                 }
@@ -469,7 +468,7 @@ export default function OrderDetails() {
         <TouchableOpacity
           style={styles.reorderButton}
           onPress={() => {
-            // TODO: Implement reorder
+            
             Alert.alert('Not implemented', 'Reorder functionality will be implemented')
           }}
         >
@@ -512,13 +511,13 @@ export default function OrderDetails() {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        
         <OrderHeader />
 
-        {/* Order Summary */}
+        
         <OrderSummary />
 
-        {/* Order Items */}
+        
         <View style={styles.itemsContainer}>
           <Text style={styles.sectionTitle}>
             {i18n.t('order.items', 'Items')}
@@ -532,16 +531,16 @@ export default function OrderDetails() {
           />
         </View>
 
-        {/* Delivery Information */}
+        
         <DeliveryInfo />
 
-        {/* Payment Information */}
+        
         <PaymentInfo />
 
-        {/* Order Total */}
+        
         <OrderTotal />
 
-        {/* Action Buttons */}
+        
         <ActionButtons />
       </ScrollView>
     </SafeAreaView>
