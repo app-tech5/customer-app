@@ -1,5 +1,5 @@
-import { View, Text, Image, StyleSheet, ScrollView, FlatList, TouchableOpacity} from 'react-native'
-import React, { useState, useEffect } from 'react'
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity} from 'react-native'
+import React from 'react'
 import { language, currency, colors } from '../global'
 import AddToCartButton from '../components/AddToCartButton'
 import ViewCart from '../components/restaurantDetail/ViewCart'
@@ -9,119 +9,40 @@ import BackButton from '../components/BackButton'
 import { getVariants } from '../api'
 import i18n from '../i18n'
 
-/**
- * GESTION DES VARIANTS/OPTIONS DANS MENU DETAIL SCREEN
- *
- * FLUX COMPLET :
- * 1. menu.variants[] = [{value: "id", label: "nom"}] (IDs des options disponibles)
- * 2. useEffect → getVariants() → récupère TOUS les variants de la DB
- * 3. variantDetails = mapping ID → détails complets {extra, price, name, etc.}
- * 4. Dans le rendu → variantDetails[variantId] → accès aux prix suppléments
- * 5. Calcul du prix total = prix_base + (extra_variants * quantités)
- *
- * PROBLÈME ACTUEL :
- * Les IDs dans menu.variants[].value ne correspondent pas aux vrais _id des variants en DB
- * → variantDetails[variantId] = undefined → prix non affiché
- */
-
 export default function MenuDetailScreen({route}) {
   const navigation = useNavigation()
-
-  // Utiliser directement les vraies données de la DB
+  
   const routeParams = route?.params || {}
   const menu = routeParams.food
   const restaurant = routeParams.restaurant
-
-  // État pour gérer les options sélectionnées
+  
   const [selectedVariants, setSelectedVariants] = React.useState({})
-  console.log('selectedVariants state:', selectedVariants)
-
-  /*******************************
-   * GESTION DES OPTIONS/VARIANTS
-   *******************************/
-
-  /**
-   * variantDetails : Objet qui stocke les détails complets des variants récupérés depuis la DB
-   * Clé = ID du variant (vient de menu.variants[].value)
-   * Valeur = objet complet du variant { _id, name, extra, price, etc. }
-   *
-   * Exemple:
-   * {
-   *   "695d17e1ed0284bc20edc6eb": {
-   *     _id: "695d17e1ed0284bc20edc6eb",
-   *     name: "Jalapeños",
-   *     extra: 2.50,  // ← PRIX SUPPLÉMENTAIRE utilisé pour le calcul
-   *     price: 10.99,
-   *     available: true
-   *   }
-   * }
-   */
+  
   const [variantDetails, setVariantDetails] = React.useState({})
-
-  /**
-   * RÉCUPÉRATION DES DÉTAILS DES VARIANTS
-   *
-   * 1. Récupère tous les variants depuis la collection 'variants'
-   * 2. Filtre seulement ceux utilisés par ce menu/produit
-   * 3. Stocke les détails dans variantDetails pour accès rapide
-   *
-   * Pourquoi ? Parce que menu.variants ne contient que {value: "id", label: "nom"}
-   * Mais pour afficher les prix, on a besoin des vrais détails (extra, price, etc.)
-   */
+  
   React.useEffect(() => {
     const fetchVariantDetails = async () => {
       if (menu?.variants && menu.variants.length > 0) {
-        console.log('🔍 FETCHING VARIANT DETAILS...')
-
-        // 1. Récupérer TOUS les variants depuis la DB
         const allVariants = await getVariants()
-        console.log(`📦 Retrieved ${allVariants.length} variants from DB`)
-
-        // 2. Extraire les IDs utilisés dans ce menu
-        // menu.variants = [{value: "id1", label: "Jalapeños"}, {value: "id2", label: "Cheese"}]
         const variantIds = menu.variants.map(v => v.value || v._id).filter(Boolean)
-        console.log(`🎯 This menu uses ${variantIds.length} variants:`, variantIds)
-
-        // 3. Garder seulement les variants pertinents
         const relevantVariants = allVariants.filter(variant =>
           variantIds.includes(variant._id.toString())
         )
-        console.log(`✅ Found ${relevantVariants.length} matching variants`)
-
-        // 4. Créer un mapping rapide : ID -> détails complets
         const detailsMap = {}
         relevantVariants.forEach(variant => {
           detailsMap[variant._id.toString()] = variant
         })
-
         setVariantDetails(detailsMap)
-        console.log('💾 Variant details stored:', Object.keys(detailsMap))
       }
     }
 
     fetchVariantDetails()
   }, [menu])
-
-  /**
-   * CALCUL DU PRIX AVEC LES OPTIONS SÉLECTIONNÉES
-   *
-   * foodForCart = version enrichie du menu avec :
-   * - selectedVariants : { "variantId": quantité_sélectionnée }
-   * - totalPrice : prix_base + suppléments_des_options
-   *
-   * Exemple:
-   * selectedVariants = { "695d17e1ed0284bc20edc6eb": 2 }  // 2x Jalapeños
-   * variantDetails["695d17e1ed0284bc20edc6eb"].extra = 2.50
-   * totalPrice = menu.price + (2.50 * 2) = menu.price + 5.00
-   */
+  
   const foodForCart = React.useMemo(() => {
     const safeSelectedVariants = selectedVariants || {}
     const hasVariants = Object.keys(safeSelectedVariants).length > 0
 
-    console.log('🧮 CALCULATING PRICE WITH OPTIONS...')
-    console.log('Selected variants:', safeSelectedVariants)
-
-    // Calculer le prix de base (avec discount si applicable)
     const basePrice = menu.price
     const isDiscountActive = menu.discount?.isActive
     const discountPercentage = menu.discount?.percentage || 0
@@ -130,30 +51,23 @@ export default function MenuDetailScreen({route}) {
     if (isDiscountActive && discountPercentage > 0) {
       const discountAmount = basePrice * (discountPercentage / 100)
       discountedPrice = basePrice - discountAmount
-      console.log(`💸 Discount: ${discountPercentage}% off ${basePrice}€ = ${discountedPrice}€`)
     }
-
-    // Calculer le total des suppléments
+    
     let totalExtra = 0
     if (hasVariants) {
       Object.entries(safeSelectedVariants).forEach(([variantId, quantity]) => {
-        // Récupérer les détails du variant depuis variantDetails
+        
         const variantDetail = variantDetails[variantId]
 
         if (variantDetail && variantDetail.extra) {
-          // Ajouter : prix_supplément * quantité
+          
           const extraForThisVariant = variantDetail.extra * quantity
           totalExtra += extraForThisVariant
-
-          console.log(`➕ ${variantDetail.name}: ${quantity}x ${variantDetail.extra}€ = +${extraForThisVariant}€`)
-        } else {
-          console.log(`⚠️  No details found for variant ${variantId}`)
         }
       })
     }
 
     const finalPrice = discountedPrice + totalExtra
-    console.log(`💰 Final price: ${discountedPrice}€ (base) + ${totalExtra}€ (extra) = ${finalPrice}€`)
 
     return {
       ...menu,
@@ -161,15 +75,13 @@ export default function MenuDetailScreen({route}) {
       totalPrice: finalPrice
     }
   }, [menu, selectedVariants, variantDetails])
-
-  // État pour gérer l'image actuelle
+  
   const [currentImage, setCurrentImage] = React.useState(
     menu?.image && menu.image.trim()
       ? { uri: menu.image.trim() }
       : require('../assets/images/default-food.jpg')
   )
-
-  // Informations de prix pour l'affichage (prix de base du menu)
+  
   const priceInfo = React.useMemo(() => {
     const basePrice = Number(menu.price) || 0
     const isDiscountActive = menu.discount?.isActive
@@ -185,13 +97,11 @@ export default function MenuDetailScreen({route}) {
     }
     return { originalPrice: basePrice, discountedPrice: basePrice, discountPercentage: 0 }
   }, [menu.price, menu.discount])
-
-  // Formater le prix
+  
   const formatPrice = (price) => {
     return price.toLocaleString(language, { style: "currency", currency: currency })
   }
-
-  // Gérer les options sélectionnées
+  
   const addVariant = (variantId) => {
     setSelectedVariants(prev => ({
       ...prev,
@@ -230,7 +140,7 @@ export default function MenuDetailScreen({route}) {
 
   return (
     <>
-      {/* Bouton de retour */}
+      {}
       <BackButton
         onPress={() => navigation.goBack()}
         backgroundColor="rgba(0, 0, 0, 0.6)"
@@ -238,19 +148,18 @@ export default function MenuDetailScreen({route}) {
       />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Image du menu avec overlay dégradé */}
+        {}
         <View style={styles.imageContainer}>
           <Image
             source={currentImage}
             style={styles.image}
             onError={() => {
-              console.log('Image failed to load, using default:', menu?.image)
               setCurrentImage(require('../assets/images/default-food.jpg'))
             }}
           />
           <View style={styles.imageOverlay} />
 
-          {/* Badge de disponibilité */}
+          {}
           <View style={[styles.availabilityBadge, { backgroundColor: menu.availability !== false ? colors.success : colors.error }]}>
             <MaterialIcons
               name={menu.availability !== false ? "check-circle" : "cancel"}
@@ -263,11 +172,11 @@ export default function MenuDetailScreen({route}) {
           </View>
         </View>
 
-        {/* Informations principales du menu */}
+        {}
         <View style={styles.section1}>
           <Text style={styles.title}>{menu.name}</Text>
 
-          {/* Prix avec discount si applicable */}
+          {}
           <View style={styles.priceContainer}>
             {priceInfo.discountPercentage > 0 ? (
               <>
@@ -290,13 +199,13 @@ export default function MenuDetailScreen({route}) {
             )}
           </View>
 
-          {/* Rating et préparation */}
+          {}
           <View style={styles.metaContainer}>
             {menu.rating && menu.rating.average > 0 && (
               <View style={styles.ratingContainer}>
                 <AntDesign name="star" size={16} color="#FFD700" />
                 <Text style={styles.ratingText}>
-                  {menu.rating.average.toFixed(1)} ({menu.rating.count} avis)
+                  {i18n.t('restaurant.ratingWithReviews', { rating: menu.rating.average.toFixed(1), count: menu.rating.count })}
                 </Text>
               </View>
             )}
@@ -314,7 +223,7 @@ export default function MenuDetailScreen({route}) {
 
         <View style={styles.divider1} />
 
-        {/* Ingrédients du produit */}
+        {}
         {menu.ingredients && menu.ingredients.length > 0 && (
           <View style={styles.section2}>
             <View style={styles.sectionHeader}>
@@ -328,7 +237,7 @@ export default function MenuDetailScreen({route}) {
           </View>
         )}
 
-        {/* Variants/options disponibles */}
+        {}
         {menu.variants && menu.variants.length > 0 && (
           <View style={styles.section2}>
             <View style={styles.sectionHeader}>
@@ -340,14 +249,11 @@ export default function MenuDetailScreen({route}) {
               </View>
             </View>
             <View style={styles.variantsList}>
-              {/* AFFICHAGE DES OPTIONS DISPONIBLES */}
+              {}
               {menu.variants.map((variant, index) => {
-                // variant = { value: "variant_id", label: "Nom affiché" }
+                
                 const variantId = variant.value || variant._id || `variant-${index}`
-                const quantity = getVariantQuantity(variantId) // Nombre sélectionné (0, 1, 2...)
-
-                // RÉCUPÉRATION DES DÉTAILS POUR AFFICHER LE PRIX
-                // variantDetails[variantId] = { _id, name, extra, price, ... }
+                const quantity = getVariantQuantity(variantId) 
 
                 return (
                   <View key={`variant-${index}`} style={styles.variantItem}>
@@ -356,22 +262,12 @@ export default function MenuDetailScreen({route}) {
                         <Text style={styles.variantName}>{variant.label}</Text>
                         <Text style={styles.variantType}>{i18n.t('menu.customizableOption')}</Text>
                       </View>
-                      {/* AFFICHAGE DU PRIX SUPPLÉMENTAIRE DE L'OPTION */}
+                      {}
                       {(() => {
-                        // RÉCUPÉRER LES DÉTAILS DU VARIANT POUR SON PRIX
+                        
                         const variantInfo = variantDetails[variantId]
                         const hasExtraPrice = variantInfo && variantInfo.extra > 0
 
-                        // DEBUG : pourquoi le prix ne s'affiche pas ?
-                        console.log(`💰 VARIANT PRICE:`, {
-                          name: variant.label,
-                          id: variantId,
-                          detailsFound: !!variantInfo,
-                          extraPrice: variantInfo?.extra,
-                          willShow: hasExtraPrice
-                        });
-
-                        // Afficher "+2,50 €" si le variant coûte extra
                         return hasExtraPrice && (
                           <Text style={styles.variantPrice}>
                             +{formatPrice(variantInfo.extra)}
@@ -408,7 +304,7 @@ export default function MenuDetailScreen({route}) {
           </View>
         )}
 
-        {/* Informations détaillées */}
+        {}
         <View style={styles.section3}>
           <Text style={styles.title1}>{i18n.t('menu.productDetails')}</Text>
 
@@ -446,7 +342,7 @@ export default function MenuDetailScreen({route}) {
             )}
           </View>
 
-          {/* Call-to-action */}
+          {}
           <View style={styles.ctaContainer}>
             <Text style={styles.ctaText}>
               {i18n.t('menu.ctaText')}
@@ -454,7 +350,7 @@ export default function MenuDetailScreen({route}) {
           </View>
         </View>
 
-        {/* Bouton d'ajout au panier - centré en bas */}
+        {}
         <View style={styles.cartButtonContainer}>
           <AddToCartButton food={foodForCart} restaurant={restaurant} />
         </View>
