@@ -1,4 +1,6 @@
 const noCommentsPlugin = require('eslint-plugin-no-comments');
+const unusedImportsPlugin = require('eslint-plugin-unused-imports');
+
 module.exports = [
   {
     ignores: [
@@ -17,6 +19,7 @@ module.exports = [
       'no-comments': noCommentsPlugin,
       'i18next': require('eslint-plugin-i18next'),
       'react': require('eslint-plugin-react'),
+      'unused-imports': unusedImportsPlugin,
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -54,17 +57,18 @@ module.exports = [
       "max-lines-per-function": "off",
       // "complexity": ["warn", 10],
       // "react/jsx-max-depth": ["warn", { "max": 4 }],
-      // // Remplacement des règles unused-imports défaillantes
-      "no-unused-vars": ["warn", {
+      "no-unused-vars": "off",
+      "react/jsx-uses-vars": "error",
+      "react/jsx-uses-react": "error",
+
+      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-vars": ["warn", {
         "vars": "all",
         "varsIgnorePattern": "^_",
         "args": "after-used",
         "argsIgnorePattern": "^_",
-        "caughtErrors": "none"
       }],
-      "react/jsx-uses-vars": "error",
-      "react/jsx-uses-react": "error",
-  
+
       'i18next/no-literal-string': [
         'error',
         {
