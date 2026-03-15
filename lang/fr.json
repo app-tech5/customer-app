@@ -59,7 +59,26 @@
     "typeToSearch": "Tapez pour rechercher...",
     "restaurantOrCity": "Rechercher un restaurant ou une ville",
     "address": "Adresse",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "categoryFound": "1 catégorie trouvée",
+    "categoriesFound": "{{count}} catégories trouvées",
+    "forQuery": "pour \"{{query}}\"",
+    "loadingCategories": "Chargement des catégories...",
+    "allCategories": "Toutes les catégories",
+    "categories": "Catégories",
+    "categoriesFor": "Catégories pour {{name}}",
+    "itemFound": "1 article trouvé",
+    "itemsFound": "{{count}} articles trouvés",
+    "loadingItems": "Chargement des articles...",
+    "fromRestaurant": "De : {{name}}",
+    "allItems": "Tous les articles",
+    "items": "Articles",
+    "itemsFor": "Articles pour {{name}}",
+    "km": "km",
+    "list": "Liste",
+    "mapPlaceholder": "Vue carte à implémenter",
+    "position": "Position",
+    "restaurantsFound": "{{count}} restaurants trouvés"
   },
   "filters": {
     "title": "Filtres",
@@ -100,6 +119,7 @@
     "signUp": "S'inscrire",
     "login": "Connexion",
     "register": "Inscription",
+    "registerNow": "Inscrivez-vous !",
     "logout": "Déconnexion",
     "demoMode": "Mode Démo - Identifiants préremplis",
     "emailPlaceholder": "Entrez votre email",
@@ -157,6 +177,7 @@
     "pickup": "À emporter",
     "rating": "Note",
     "reviewsCount": "avis",
+    "ratingWithReviews": "{{rating}} ({{count}} avis)",
     "addToCart": "Ajouter au panier",
     "viewCart": "Voir le panier",
     "total": "Total",
@@ -217,11 +238,16 @@
     "subtotal": "Sous-total",
     "deliveryFee": "Frais de livraison",
     "tax": "Taxe",
-    "free": "GRATUIT"
+    "free": "GRATUIT",
+    "addItemsToStartCart": "Ajoutez des articles pour créer un panier",
+    "emptySubtitle": "Une fois que vous ajoutez des articles d'un restaurant ou d'un magasin, votre panier apparaîtra ici",
+    "startShopping": "Commencer mes achats",
+    "deliverTo": "livrer à {{address}}"
   },
   "order": {
     "placeOrder": "Passer la commande",
     "orderPlaced": "Commande passée !",
+    "quantityPrefix": "x",
     "orderFailed": "Échec de la commande",
     "tracking": "Suivre la commande",
     "track": "Suivre commande",
@@ -520,7 +546,16 @@
     "unavailable": "Indisponible",
     "minutesAbbrev": "min",
     "clearAll": "Tout effacer",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "formElement": "Formulaire",
+    "preparingExperience": "Préparation de votre expérience",
+    "loadingDeliciousOptions": "Chargement des options...",
+    "getStarted": "Commencer"
+  },
+  "onboarding": {
+    "title": "Good\nFoods",
+    "discover": "Découvrir les plats",
+    "continue": "Continuer"
   },
   "preference": {
     "choosePreference": "Choisir une préférence",
@@ -543,6 +578,14 @@
     "deliverySettingsContext": "useDeliverySettings doit être utilisé dans un DeliverySettingsProvider",
     "settingsLoad": "Erreur chargement settings :",
     "settingsContext": "useSettings doit être utilisé dans un SettingProvider"
+  },
+  "offers": {
+    "availableAt": "Disponible chez {{text}}",
+    "validUntil": "Valable jusqu'au {{date}}",
+    "specialOffers": "Offres spéciales",
+    "sortBy": "Trier par :",
+    "clearSearch": "Effacer la recherche",
+    "loadingDeals": "Chargement des offres..."
   },
   "promotion": {
     "untilDate": "Valable jusqu'au {{date}}",

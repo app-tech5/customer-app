@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native'
-import React, {useEffect} from 'react'
+import { View, Text, StyleSheet, TouchableOpacity} from 'react-native'
+import React from 'react'
 import * as Animatable from "react-native-animatable"
 import {LinearGradient} from 'expo-linear-gradient'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import i18n from '../i18n'
 
 export default function Splash() {
   const navigation = useNavigation()
@@ -26,12 +26,11 @@ export default function Splash() {
                       <LinearGradient
                           colors={['#ada996', '#f2f2f2', '#dbdbdb', '#eaeaea']}
                           style={styles.signInButton} >
-                          <Text style={styles.signInText}>Get Started</Text>
+                          <Text style={styles.signInText}>{i18n.t('common.getStarted')}</Text>
                           <MaterialIcons name="navigate-next" size={20} color="black" />
                       </LinearGradient>
                   </TouchableOpacity>
               </View>
-         
          
      </Animatable.View>
     </View>

@@ -1,19 +1,16 @@
-import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
-import { api, userInfos } from '../api'
+import { api } from '../api'
 import { config } from '../config'
 import i18n from '../i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"
 import { useDispatch } from 'react-redux'
-import { location } from '../global'
 import Loader from './Loader'
 import { saveSignInData, getSignInData } from '../utils/cacheUtils'
 import { SignInContext } from '../contexts/authContext'
-
-
 
 export default function SignIn({ navigation }) {
 
@@ -22,8 +19,7 @@ export default function SignIn({ navigation }) {
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
   const { dispatchSignedIn } = useContext(SignInContext)
-
-  // Charger l'email sauvegardé au montage
+  
   useEffect(() => {
     const loadSavedEmail = async () => {
       const savedData = await getSignInData();
@@ -34,18 +30,15 @@ export default function SignIn({ navigation }) {
     loadSavedEmail();
   }, [])
 
-
   const SignInUser = async () => {
 
     setLoginState(true)
 
     try {
       const result = await api.login(email, password)
-
-      // Sauvegarder le token
+      
       await AsyncStorage.setItem('userToken', result.token)
-
-      // Récupérer les infos utilisateur
+      
       const userInfo = await api.getUserInfo(result.user.id)
 
       dispatch({
@@ -55,14 +48,11 @@ export default function SignIn({ navigation }) {
           userId: result.user.id
         }
       });
-
-      // Sauvegarder les données utilisateur localement
+      
       await AsyncStorage.setItem('userData', JSON.stringify(userInfo))
-
-      // Sauvegarder l'email pour le cache intelligent
+      
       await saveSignInData(email, true);
-
-      // Mettre à jour l'état d'authentification dans le SignInContext
+      
       dispatchSignedIn({
         userToken: result.token
       });
@@ -70,7 +60,7 @@ export default function SignIn({ navigation }) {
       navigation.navigate('DrawerNavigator')
 
     } catch (e) {
-      console.log(e)
+      console.error(e)
       setLoginState(false)
     }
 
@@ -82,7 +72,6 @@ export default function SignIn({ navigation }) {
 
   if (loginState)
     return <Loader />
-
 
   return (
     <View style={styles.container}>
@@ -139,11 +128,9 @@ export default function SignIn({ navigation }) {
 
         </TouchableOpacity>
 
-
       </Animatable.View>
 
     </View>
-
 
   )
 }
@@ -192,7 +179,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 0.3,
     borderBottomColor: "grey"
-
 
   },
   textInput: {

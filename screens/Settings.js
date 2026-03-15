@@ -76,11 +76,9 @@ export default function Settings({ navigation }) {
             try {
               await AsyncStorage.setItem('language', nextLanguage.code)
               setCurrentLanguage(nextLanguage.code)
-
-              // Update Redux store
+              
               dispatch({ type: 'SET_LANGUAGE', payload: nextLanguage.code })
-
-              // Reload app language
+              
               i18n.locale = nextLanguage.code
 
               Alert.alert(
@@ -108,15 +106,12 @@ export default function Settings({ navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Clear user data from AsyncStorage
+              
               await AsyncStorage.removeItem('userToken')
               await AsyncStorage.removeItem('userData')
-
-              // Clear Redux store
+              
               dispatch({ type: 'LOGOUT' })
-
-              // Navigate to login screen (this would need to be implemented in your navigation)
-              // For now, just show a message
+              
               Alert.alert(
                 i18n.t('settings.loggedOut', 'Logged Out'),
                 i18n.t('settings.loggedOutMessage', 'You have been successfully logged out')
@@ -173,7 +168,7 @@ export default function Settings({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Account Section */}
+        {}
         <SettingSection title={i18n.t('settings.account', 'Account')}>
           <SettingItem
             icon="person"
@@ -192,7 +187,7 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {/* Preferences Section */}
+        {}
         <SettingSection title={i18n.t('settings.preferences', 'Preferences')}>
           <SettingItem
             icon="language"
@@ -225,7 +220,7 @@ export default function Settings({ navigation }) {
               />
             }
             onPress={() => {
-              // TODO: Navigate to detailed notification settings
+              
               Alert.alert('Not implemented', 'Detailed notification settings will be implemented')
             }}
             showArrow={false}
@@ -250,14 +245,14 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {/* Privacy Section */}
+        {}
         <SettingSection title={i18n.t('settings.privacySecurity', 'Privacy & Security')}>
           <SettingItem
             icon="lock-closed"
             title={i18n.t('settings.privacy', 'Privacy Policy')}
             subtitle={i18n.t('settings.privacyDescription', 'Read our privacy policy')}
             onPress={() => {
-              // TODO: Navigate to privacy policy
+              
               Alert.alert('Not implemented', 'Privacy policy screen will be implemented')
             }}
           />
@@ -268,7 +263,7 @@ export default function Settings({ navigation }) {
             title={i18n.t('settings.terms', 'Terms of Service')}
             subtitle={i18n.t('settings.termsDescription', 'Read our terms and conditions')}
             onPress={() => {
-              // TODO: Navigate to terms of service
+              
               Alert.alert('Not implemented', 'Terms of service screen will be implemented')
             }}
           />
@@ -278,13 +273,13 @@ export default function Settings({ navigation }) {
             title={i18n.t('settings.dataPrivacy', 'Data & Privacy')}
             subtitle={i18n.t('settings.dataPrivacyDescription', 'Manage your data and privacy settings')}
             onPress={() => {
-              // TODO: Navigate to data privacy settings
+              
               Alert.alert('Not implemented', 'Data privacy settings will be implemented')
             }}
           />
         </SettingSection>
 
-        {/* Marketing Section */}
+        {}
         <SettingSection title={i18n.t('settings.communication', 'Communication')}>
           <SettingItem
             icon="mail"
@@ -305,14 +300,14 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {/* Support Section */}
+        {}
         <SettingSection title={i18n.t('profile.help', 'Help & Support')}>
           <SettingItem
             icon="help-circle"
             title={i18n.t('settings.help', 'Help Center')}
             subtitle={i18n.t('settings.helpDescription', 'Find answers to common questions')}
             onPress={() => {
-              // TODO: Navigate to help center
+              
               Alert.alert('Not implemented', 'Help center will be implemented')
             }}
           />
@@ -322,7 +317,7 @@ export default function Settings({ navigation }) {
             title={i18n.t('settings.contactSupport', 'Contact Support')}
             subtitle={i18n.t('settings.contactSupportDescription', 'Get help from our support team')}
             onPress={() => {
-              // TODO: Navigate to contact support
+              
               Alert.alert('Not implemented', 'Contact support will be implemented')
             }}
           />
@@ -332,13 +327,13 @@ export default function Settings({ navigation }) {
             title={i18n.t('settings.rateApp', 'Rate the App')}
             subtitle={i18n.t('settings.rateAppDescription', 'Rate us on the app store')}
             onPress={() => {
-              // TODO: Open app store rating
+              
               Alert.alert('Not implemented', 'App rating will be implemented')
             }}
           />
         </SettingSection>
 
-        {/* About Section */}
+        {}
         <SettingSection title={i18n.t('profile.about', 'About')}>
           <SettingItem
             icon="information-circle"
@@ -358,13 +353,13 @@ export default function Settings({ navigation }) {
             title={i18n.t('settings.openSource', 'Open Source')}
             subtitle={i18n.t('settings.openSourceDescription', 'View our open source code')}
             onPress={() => {
-              // TODO: Open GitHub repository
+              
               Alert.alert('Not implemented', 'GitHub link will be implemented')
             }}
           />
         </SettingSection>
 
-        {/* Logout Section */}
+        {}
         <View style={styles.logoutSection}>
           <TouchableOpacity
             style={styles.logoutButton}

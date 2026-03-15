@@ -1,5 +1,5 @@
-import { View, Text, SafeAreaView, StatusBar, Image, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native'
+import React, { useState } from 'react'
 import { Entypo, MaterialIcons } from '@expo/vector-icons'
 import { api } from '../api'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -7,11 +7,8 @@ import * as Animatable from "react-native-animatable"
 import { useDispatch } from 'react-redux'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import Loader from './Loader'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import SearchBar from '../components/home/SearchBar'
-
-
+import i18n from '../i18n'
 
 export default function SignUp({ navigation }) {
 
@@ -24,9 +21,7 @@ export default function SignUp({ navigation }) {
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
 
-
-  async function signUp() {
-
+  const signUp = async () => {
     try {
       const userData = {
         email,
@@ -39,24 +34,19 @@ export default function SignUp({ navigation }) {
       };
 
       const result = await api.register(userData);
-
-      // Sauvegarder le token
       await AsyncStorage.setItem('userToken', result.token);
-
-      console.log("USER ACCOUNT CREATED");
+      console.warn("USER ACCOUNT CREATED");
       navigation.navigate("SignIn");
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Alert.alert("Erreur", "Impossible de créer le compte");
     }
   }
 
-
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Register Now !</Text>
+        <Text style={styles.title}>{i18n.t('auth.registerNow')}</Text>
       </View>
 
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
@@ -67,7 +57,6 @@ export default function SignUp({ navigation }) {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} >
-
 
           <View style={styles.textInputContainer}>
             <Entypo name="email" size={20} color="#3d5c5c" style={{
@@ -125,7 +114,7 @@ export default function SignUp({ navigation }) {
             <LinearGradient
               colors={['#948E99', '#2E1437']}
               style={styles.signInButton} >
-              <Text style={{ ...styles.signInText, color: 'white' }}>Sign Up</Text>
+              <Text style={{ ...styles.signInText, color: 'white' }}>{i18n.t('auth.signUp')}</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -134,7 +123,7 @@ export default function SignUp({ navigation }) {
             <LinearGradient
               colors={['#ada996', '#f2f2f2', '#dbdbdb', '#eaeaea']}
               style={styles.signInButton} >
-              <Text style={styles.signInText}>Sign In</Text>
+              <Text style={styles.signInText}>{i18n.t('auth.signIn')}</Text>
             </LinearGradient>
 
           </TouchableOpacity>
@@ -142,7 +131,6 @@ export default function SignUp({ navigation }) {
       </Animatable.View>
 
     </View>
-
 
   )
 }
@@ -184,7 +172,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 0.3,
     borderBottomColor: "grey"
-
 
   },
   textInput: {

@@ -60,7 +60,26 @@
     "typeToSearch": "Type to search...",
     "restaurantOrCity": "Search for a restaurant or city",
     "address": "Address",
-    "search": "Search"
+    "search": "Search",
+    "categoryFound": "1 category found",
+    "categoriesFound": "{{count}} categories found",
+    "forQuery": "for \"{{query}}\"",
+    "loadingCategories": "Loading categories...",
+    "allCategories": "All Categories",
+    "categories": "Categories",
+    "categoriesFor": "Categories for {{name}}",
+    "itemFound": "1 item found",
+    "itemsFound": "{{count}} items found",
+    "loadingItems": "Loading items...",
+    "fromRestaurant": "From: {{name}}",
+    "allItems": "All Items",
+    "items": "Items",
+    "itemsFor": "Items for {{name}}",
+    "km": "km",
+    "list": "List",
+    "mapPlaceholder": "Map view to be implemented",
+    "position": "Position",
+    "restaurantsFound": "{{count}} restaurants found"
   },
   "filters": {
     "title": "Filters",
@@ -101,6 +120,7 @@
     "signUp": "Sign Up",
     "login": "Login",
     "register": "Register",
+    "registerNow": "Register Now !",
     "logout": "Logout",
     "demoMode": "Demo Mode - Pre-filled credentials",
     "emailPlaceholder": "Enter your email",
@@ -158,6 +178,9 @@
     "pickup": "Pickup",
     "rating": "Rating",
     "reviewsCount": "reviews",
+    "ratingWithReviews": "{{rating}} ({{count}} reviews)",
+    "availableOffers": "Available Offers",
+    "recentReviews": "Recent Reviews",
     "addToCart": "Add to Cart",
     "viewCart": "View Cart",
     "total": "Total",
@@ -222,11 +245,16 @@
     "subtotal": "Subtotal",
     "deliveryFee": "Delivery fee",
     "tax": "Tax",
-    "free": "FREE"
+    "free": "FREE",
+    "addItemsToStartCart": "Add items to start a cart",
+    "emptySubtitle": "Once you add items from a restaurant or store, your cart will appear here",
+    "startShopping": "Start shopping",
+    "deliverTo": "deliver to {{address}}"
   },
   "order": {
     "placeOrder": "Place Order",
     "orderPlaced": "Order Placed!",
+    "quantityPrefix": "x",
     "orderFailed": "Order Failed",
     "tracking": "Track Order",
     "track": "Track Order",
@@ -528,7 +556,16 @@
     "unavailable": "Unavailable",
     "minutesAbbrev": "min",
     "clearAll": "Clear All",
-    "retry": "Retry"
+    "retry": "Retry",
+    "formElement": "Form",
+    "preparingExperience": "Preparing your experience",
+    "loadingDeliciousOptions": "Loading delicious options...",
+    "getStarted": "Get Started"
+  },
+  "onboarding": {
+    "title": "Good\nFoods",
+    "discover": "Discover Foods",
+    "continue": "Continue"
   },
   "preference": {
     "choosePreference": "Choose a preference",
@@ -551,6 +588,14 @@
     "deliverySettingsContext": "useDeliverySettings must be used within a DeliverySettingsProvider",
     "settingsLoad": "Error loading settings:",
     "settingsContext": "useSettings must be used within a SettingProvider"
+  },
+  "offers": {
+    "availableAt": "Available at {{text}}",
+    "validUntil": "Valid until {{date}}",
+    "specialOffers": "Special Offers",
+    "sortBy": "Sort by:",
+    "clearSearch": "Clear Search",
+    "loadingDeals": "Loading amazing deals..."
   },
   "promotion": {
     "untilDate": "Valid until {{date}}",

@@ -1,13 +1,10 @@
 import {
-  View, Text, StatusBar, FlatList, ScrollView,
-  ImageBackground, StyleSheet, Dimensions, TouchableOpacity,
-  TextInput, Alert
+  View, Text, FlatList, ScrollView,
+  ImageBackground, StyleSheet, Dimensions, TouchableOpacity
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import SearchComponent from '../components/SearchComponent'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { dataTest, filterData, themes } from '../data'
-import List from '../components/List'
 import { Menu } from '../components/home/HomeHeader'
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
 import { colors } from '../global'
@@ -26,8 +23,7 @@ export default function SearchScreen({ navigation }) {
     'Pizza', 'Burger', 'Sushi', 'Italian', 'Chinese', 'Fast Food'
   ])
   const [categories, setCategories] = useState([])
-
-  // Charger les données au montage
+  
   useEffect(() => {
     loadRecentSearches()
     loadCategories()
@@ -40,7 +36,7 @@ export default function SearchScreen({ navigation }) {
         setRecentSearches(JSON.parse(searches))
       }
     } catch (error) {
-      console.log('Error loading recent searches:', error)
+      console.error('Error loading recent searches:', error)
     }
   }
 
@@ -49,8 +45,8 @@ export default function SearchScreen({ navigation }) {
       const realCategories = await getCategories()
       setCategories(realCategories)
     } catch (error) {
-      console.log('Error loading categories:', error)
-      // En cas d'erreur, garder un tableau vide
+      console.error('Error loading categories:', error)
+      
       setCategories([])
     }
   }
@@ -61,7 +57,7 @@ export default function SearchScreen({ navigation }) {
       setRecentSearches(updatedSearches)
       await AsyncStorage.setItem('recentSearches', JSON.stringify(updatedSearches))
     } catch (error) {
-      console.log('Error saving recent search:', error)
+      console.error('Error saving recent search:', error)
     }
   }
 
@@ -72,14 +68,12 @@ export default function SearchScreen({ navigation }) {
 
   const performSearch = (query, type = activeTab) => {
     if (!query.trim()) return
-
-    // Ne pas sauvegarder les requêtes spéciales dans les recherches récentes
+    
     const specialQueries = ['TOP_RATED_SPECIAL', 'NEAR_ME_SPECIAL', 'FAVORITES_SPECIAL']
     if (!specialQueries.includes(query)) {
       saveRecentSearch(query)
     }
-
-    // Navigation vers les résultats selon le type
+    
     if (type === 'restaurants') {
       navigation.navigate("SearchResults", { name: query, type: 'restaurant' })
     } else if (type === 'dishes') {
@@ -112,7 +106,7 @@ export default function SearchScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header avec recherche */}
+      {}
       <View style={styles.header}>
         <Menu navigation={navigation} />
         <SearchComponent
@@ -124,9 +118,9 @@ export default function SearchScreen({ navigation }) {
         />
       </View>
 
-      {/* Contenu principal - toujours visible */}
+      {}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Pendant la saisie, on peut afficher une indication */}
+        {}
         {clicked && (
           <View style={styles.searchingIndicator}>
             <Text style={styles.searchingText}>
@@ -135,7 +129,7 @@ export default function SearchScreen({ navigation }) {
           </View>
         )}
 
-          {/* Onglets de recherche */}
+          {}
           <View style={styles.tabContainer}>
             <TouchableOpacity
               style={[styles.tab, activeTab === 'restaurants' && styles.activeTab]}
@@ -166,7 +160,7 @@ export default function SearchScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Actions rapides */}
+          {}
           <View style={styles.quickActionsContainer}>
             <Text style={styles.sectionTitle}>{i18n.t('search.quickActions')}</Text>
             <View style={styles.quickActionsGrid}>
@@ -195,7 +189,7 @@ export default function SearchScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Recherches récentes */}
+          {}
           {recentSearches.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
@@ -219,7 +213,7 @@ export default function SearchScreen({ navigation }) {
             </View>
           )}
 
-          {/* Tendances */}
+          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{i18n.t('search.trendingSearches')}</Text>
             <View style={styles.trendingContainer}>
@@ -235,11 +229,11 @@ export default function SearchScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Catégories populaires */}
+          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{i18n.t('search.browseByCategory')}</Text>
             <FlatList
-              data={categories.slice(0, 6)} // Limiter à 6 catégories
+              data={categories.slice(0, 6)} 
               keyExtractor={(item, index) => String(index)}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -294,8 +288,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-
-  // Onglets
+  
   tabContainer: {
     flexDirection: 'row',
     marginHorizontal: 16,
@@ -330,8 +323,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '600',
   },
-
-  // Actions rapides
+  
   quickActionsContainer: {
     marginHorizontal: 16,
     marginBottom: 24,
@@ -363,8 +355,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-
-  // Sections
+  
   section: {
     marginHorizontal: 16,
     marginBottom: 24,
@@ -385,8 +376,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '500',
   },
-
-  // Historique des recherches
+  
   historyItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -412,8 +402,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     padding: 4,
   },
-
-  // Tendances
+  
   trendingContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -431,8 +420,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontWeight: '500',
   },
-
-  // Catégories
+  
   categoriesList: {
     paddingRight: 16,
   },

@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Ionicons, MaterialIcons, FontAwesome, Entypo, AntDesign } from '@expo/vector-icons'
+import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import { getUserPaymentMethods, getUserTransactions } from '../api'
 import i18n from '../i18n'
@@ -37,17 +37,15 @@ export default function WalletScreen({ navigation }) {
     try {
       setLoader(true)
       setError(null)
-
-      // Charger les méthodes de paiement et transactions en parallèle
+      
       const [methodsData, transactionsData] = await Promise.all([
         getUserPaymentMethods(user.id || user.userId).catch(() => []),
         getUserTransactions(user.id || user.userId).catch(() => [])
       ])
 
       setPaymentMethods(methodsData || [])
-      setTransactions(transactionsData?.slice(0, 5) || []) // Afficher seulement les 5 dernières transactions
-
-      // Calculer le solde (simplifié - en réalité il faudrait une API dédiée)
+      setTransactions(transactionsData?.slice(0, 5) || []) 
+      
       const calculatedBalance = transactionsData?.reduce((acc, transaction) => {
         if (transaction.transaction_type === 'refund' || transaction.transaction_type === 'adjustment') {
           return acc + transaction.amount
@@ -88,7 +86,7 @@ export default function WalletScreen({ navigation }) {
         <TouchableOpacity
           style={styles.balanceActionButton}
           onPress={() => {
-            // TODO: Implement add money
+            
             Alert.alert('Not implemented', 'Add money functionality will be implemented')
           }}
         >
@@ -101,7 +99,7 @@ export default function WalletScreen({ navigation }) {
         <TouchableOpacity
           style={styles.balanceActionButton}
           onPress={() => {
-            // TODO: Implement send money
+            
             Alert.alert('Not implemented', 'Send money functionality will be implemented')
           }}
         >
@@ -184,7 +182,7 @@ export default function WalletScreen({ navigation }) {
         <TouchableOpacity
           style={styles.paymentMethodActions}
           onPress={() => {
-            // TODO: Show payment method options menu
+            
             Alert.alert(
               i18n.t('wallet.paymentMethodOptions', 'Options'),
               i18n.t('wallet.paymentMethodOptionsMessage', 'Choose an action'),
@@ -193,7 +191,7 @@ export default function WalletScreen({ navigation }) {
                 {
                   text: i18n.t('wallet.setAsDefault', 'Set as Default'),
                   onPress: () => {
-                    // TODO: Implement set as default
+                    
                     Alert.alert('Not implemented', 'Set as default will be implemented')
                   }
                 },
@@ -201,7 +199,7 @@ export default function WalletScreen({ navigation }) {
                   text: i18n.t('wallet.remove', 'Remove'),
                   style: 'destructive',
                   onPress: () => {
-                    // TODO: Implement remove payment method
+                    
                     Alert.alert('Not implemented', 'Remove payment method will be implemented')
                   }
                 }
@@ -224,7 +222,7 @@ export default function WalletScreen({ navigation }) {
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
-            // TODO: Navigate to add payment method screen
+            
             Alert.alert('Not implemented', 'Add payment method screen will be implemented')
           }}
         >
@@ -338,7 +336,7 @@ export default function WalletScreen({ navigation }) {
         </Text>
         <TouchableOpacity
           onPress={() => {
-            // TODO: Navigate to full transaction history
+            
             Alert.alert('Not implemented', 'Transaction history screen will be implemented')
           }}
         >
@@ -379,7 +377,7 @@ export default function WalletScreen({ navigation }) {
       <TouchableOpacity
         style={styles.promoCard}
         onPress={() => {
-          // TODO: Navigate to add promo code screen
+          
           Alert.alert('Not implemented', 'Add promo code screen will be implemented')
         }}
       >
@@ -429,16 +427,16 @@ export default function WalletScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Balance Card */}
+        {}
         <BalanceCard />
 
-        {/* Payment Methods */}
+        {}
         <PaymentMethodsSection />
 
-        {/* Recent Transactions */}
+        {}
         <RecentTransactionsSection />
 
-        {/* Promo Codes */}
+        {}
         <PromoSection />
       </ScrollView>
     </SafeAreaView>
