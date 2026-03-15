@@ -1,14 +1,10 @@
-import { View, Text, useWindowDimensions, Image, ScrollView, Animated, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native'
+import { View, Text, useWindowDimensions, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native'
 import React, { useContext, useEffect, useRef, useState, useCallback } from 'react'
-import MapView, { Callout, Marker } from 'react-native-maps'
-import RestaurantItems from '../components/home/RestaurantItems'
-import LottieView from 'lottie-react-native'
+import MapView, { Marker } from 'react-native-maps'
 import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantItems'
-import { location } from '../global'
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchBar from '../components/home/SearchBar'
-// BottomSheet temporairement désactivé pour éviter les conflits Reanimated
-// import BottomSheet from '@gorhom/bottom-sheet'
+
 import Categories from '../components/home/Categories'
 import { FlatList } from 'react-native-gesture-handler'
 import Reward from '../components/Reward'
@@ -18,24 +14,22 @@ import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import { useSelector } from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Location from 'expo-location'
-
+import i18n from '../i18n'
 
 export default function RestaurantsMapScreen({ route, navigation }) {
   const { restaurantData } = useContext(RestaurantsContext)
   const {lat,lng} = useSelector((state)=>state.userReducer)
   const [userLocation, setUserLocation] = useState(null)
   const [isManualFocus, setIsManualFocus] = useState(false)
-
-  // Récupérer la position utilisateur au montage du composant
+  
   useEffect(() => {
     getUserLocation()
   }, [])
 
   const getUserLocation = async () => {
     try {
-      console.log('📍 Tentative de récupération de la position utilisateur...')
-
-      // D'abord essayer depuis AsyncStorage (comme dans NearMeScreen)
+      console.warn('📍 Tentative de récupération de la position utilisateur...')
+      
       const userData = await AsyncStorage.getItem('userData')
       if (userData) {
         const user = JSON.parse(userData)
@@ -44,17 +38,16 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             lat: user.location.latitude,
             lng: user.location.longitude
           }
-          console.log('✅ Position trouvée dans AsyncStorage:', location)
+          console.warn('✅ Position trouvée dans AsyncStorage:', location)
           setUserLocation(location)
           return
         }
       }
-
-      // Si pas de coordonnées utilisateur, demander géolocalisation
-      console.log('📍 Pas de position dans AsyncStorage, demande de géolocalisation...')
+      
+      console.warn('📍 Pas de position dans AsyncStorage, demande de géolocalisation...')
       const { status } = await Location.requestForegroundPermissionsAsync()
       if (status !== 'granted') {
-        console.log('❌ Permission de géolocalisation refusée')
+        console.warn('❌ Permission de géolocalisation refusée')
         return
       }
 
@@ -67,7 +60,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         lng: location.coords.longitude
       }
 
-      console.log('✅ Position obtenue par géolocalisation:', userPos)
+      console.warn('✅ Position obtenue par géolocalisation:', userPos)
       setUserLocation(userPos)
 
     } catch (error) {
@@ -75,15 +68,14 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     }
   }
 
-  console.log('🔍 Position utilisateur récupérée:', { lat, lng, userLocation })
+  console.warn('🔍 Position utilisateur récupérée:', { lat, lng, userLocation })
   const { width, height } = useWindowDimensions();
   const _map = useRef(null)
   const restaurantsRef = useRef(null)
-
-  // Calculer automatiquement la région optimale basée sur les restaurants proches
+  
   useEffect(() => {
     if (restaurantData && restaurantData.length > 0 && _map.current) {
-      // Filtrer les restaurants proches (moins de 5km)
+      
       const nearbyRestaurants = restaurantData
         .filter(restaurant => {
           if (!restaurant.latitude || !restaurant.longitude) return false
@@ -92,11 +84,11 @@ export default function RestaurantsMapScreen({ route, navigation }) {
               userLocation.lat, userLocation.lng,
               restaurant.latitude, restaurant.longitude
             ) : 0
-          return distance < 5 // Restaurants dans un rayon de 5km
+          return distance < 5 
         })
 
       if (nearbyRestaurants.length > 0) {
-        // Calculer les limites des restaurants proches
+        
         const lats = nearbyRestaurants.map(r => r.latitude)
         const lngs = nearbyRestaurants.map(r => r.longitude)
 
@@ -104,8 +96,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         const maxLat = Math.max(...lats)
         const minLng = Math.min(...lngs)
         const maxLng = Math.max(...lngs)
-
-        // Ajouter une marge de 20%
+        
         const latMargin = (maxLat - minLat) * 0.2
         const lngMargin = (maxLng - minLng) * 0.2
 
@@ -116,7 +107,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           longitudeDelta: Math.max(maxLng - minLng + lngMargin * 2, 0.01)
         }
 
-        console.log('🗺️ Zoom initial ajusté:', region)
+        console.warn('🗺️ Zoom initial ajusté:', region)
         _map.current.animateToRegion(region, 1000)
       }
     }
@@ -160,8 +151,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       color: "black",
       zIndex: 1
     })])
-
-    // Centrer la carte UNIQUEMENT pour les restaurants proches (< 10km)
+    
     const restaurant = restaurantData[index]
     if (restaurant && userLocation?.lat && userLocation?.lng) {
       const distance = getDistanceFromLatLonInKm(
@@ -169,15 +159,13 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         restaurant.latitude || restaurant.lat,
         restaurant.longitude || restaurant.lng
       )
-
-      // Ne centrer que si le restaurant est à moins de 10km
+      
       if (distance < 10) {
         centerMapOnRestaurant(restaurant)
       }
     }
   }
-
-  // Vérifier que les données sont chargées
+  
   if (!restaurantData || restaurantData.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -192,10 +180,10 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       <MapView
         ref={_map}
         initialRegion={{
-          latitude: lat || restaurantData[0]?.lat || 48.8566, // Paris par défaut
-          longitude: lng || restaurantData[0]?.lng || 2.3522, // Paris par défaut
-          latitudeDelta: 0.005,  // Zoom très rapproché pour voir les détails
-          longitudeDelta: 0.005   // Zoom très rapproché pour voir les détails
+          latitude: lat || restaurantData[0]?.lat || 48.8566, 
+          longitude: lng || restaurantData[0]?.lng || 2.3522, 
+          latitudeDelta: 0.005,  
+          longitudeDelta: 0.005   
         }}
         style={{
           height: height,
@@ -217,7 +205,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         <View style={styles.searchbar}>
           <SearchBar restaurantData={restaurantData} navigation={navigation} />
         </View>
-        {/* Indicateur de position */}
+        {}
         {userLocation && (
           <TouchableOpacity
             style={styles.locationIndicator}
@@ -277,10 +265,9 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimeout = useRef(null)
-
-  // Afficher UNIQUEMENT les restaurants proches dans le carrousel (< 10km)
+  
   const sortedRestaurants = React.useMemo(() => {
-    console.log('🏪 RestaurantsView - Filtrage restaurants proches, horizontal:', horizontal)
+    console.warn('🏪 RestaurantsView - Filtrage restaurants proches, horizontal:', horizontal)
     return restaurantData
       .filter(restaurant => restaurant.latitude && restaurant.longitude)
       .map((restaurant, originalIndex) => ({
@@ -292,21 +279,18 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
             restaurant.latitude, restaurant.longitude
           ) : null
       }))
-      .filter(restaurant => restaurant.distance !== null && restaurant.distance < 10) // SEULEMENT < 10km
-      .sort((a, b) => a.distance - b.distance) // Trier par distance croissante
+      .filter(restaurant => restaurant.distance !== null && restaurant.distance < 10) 
+      .sort((a, b) => a.distance - b.distance) 
   }, [restaurantData, userLocation])
 
-  console.log(`🏪 RestaurantsView - ${sortedRestaurants.length} restaurants triés pour ${horizontal ? 'carrousel' : 'liste'}`)
-
-  // Fonction utilitaire pour calculer l'index à partir du scroll
+  console.warn(`🏪 RestaurantsView - ${sortedRestaurants.length} restaurants triés pour ${horizontal ? 'carrousel' : 'liste'}`)
+  
   const calculateIndexFromScroll = useCallback((scrollX, containerWidth) => {
     const itemWidth = containerWidth
     const rawIndex = scrollX / itemWidth
     return Math.max(0, Math.min(sortedRestaurants.length - 1, Math.round(rawIndex)))
   }, [sortedRestaurants.length])
-
-
-  // Cleanup timeout on unmount
+  
   useEffect(() => {
     return () => {
       if (scrollTimeout.current) {
@@ -358,17 +342,17 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
         scrollEnabled={scrollEnabled}
         showsHorizontalScrollIndicator={false}
         snapToAlignment={horizontal ? "center" : "start"}
-        snapToInterval={horizontal ? width * 0.85 + 16 : undefined} // 16 pour les marges
+        snapToInterval={horizontal ? width * 0.85 + 16 : undefined} 
         decelerationRate={horizontal ? "fast" : "normal"}
         onScrollBeginDrag={horizontal ? () => {
           setIsScrolling(true)
-          // Clear any pending timeout
+          
           if (scrollTimeout.current) {
             clearTimeout(scrollTimeout.current)
           }
         } : undefined}
         onScrollEndDrag={horizontal ? (event) => {
-          // Délai pour laisser le momentum finir
+          
           scrollTimeout.current = setTimeout(() => {
             setIsScrolling(false)
           }, 100)
@@ -382,8 +366,7 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
 
           setCurrentIndex(finalIndex)
           setIsScrolling(false)
-
-          // Utiliser l'index original du restaurant filtré
+          
           const originalIndex = sortedRestaurants[finalIndex]?.originalIndex
           if (originalIndex !== undefined) {
             setFocusFunction(originalIndex)
@@ -395,11 +378,10 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           const containerWidth = layoutMeasurement.width || width * 0.85
 
           const newIndex = calculateIndexFromScroll(scrollX, containerWidth)
-
-          // Mettre à jour l'index seulement si différent et pas en train de scroller
+          
           if (newIndex !== currentIndex && !isScrolling) {
             setCurrentIndex(newIndex)
-            // Utiliser l'index original du restaurant filtré
+            
             const originalIndex = sortedRestaurants[newIndex]?.originalIndex
             if (originalIndex !== undefined) {
               setFocusFunction(originalIndex)
@@ -425,15 +407,14 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
                 index === currentIndex && styles.paginationDotActive
               ]}
               onPress={() => {
-                // Navigation fluide vers l'index sélectionné
+                
                 setCurrentIndex(index)
                 restaurantsRef.current?.scrollToIndex({
                   index,
                   animated: true,
-                  viewPosition: 0.5 // Centrer l'élément
+                  viewPosition: 0.5 
                 })
-
-                // Animation de la carte synchronisée avec le scroll
+                
                 const restaurant = restaurantData[index]
                 animateMapToRestaurant(restaurant, 150)
 
@@ -447,9 +428,8 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
   )
 }
 const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurantsRef, visible, setVisible, userLocation }) => {
-  console.log('🗺️ RestaurantMarkers - Tri des restaurants par distance')
-
-  // Calculer les distances et trier
+  console.warn('🗺️ RestaurantMarkers - Tri des restaurants par distance')
+  
   const restaurantsWithDistance = restaurantData
     .filter(restaurant => {
       const lat = restaurant.latitude || restaurant.lat
@@ -482,11 +462,11 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
       if (b.distance === null) return -1
       return a.distance - b.distance
     })
-    .slice(0, 20) // Garder seulement les 20 plus proches
+    .slice(0, 20) 
 
-  console.log(`✅ ${restaurantsWithDistance.length} restaurants les plus proches trouvés`)
+  console.warn(`✅ ${restaurantsWithDistance.length} restaurants les plus proches trouvés`)
   restaurantsWithDistance.forEach((r, i) => {
-    console.log(`${i+1}. ${r.name}: ${r.distance?.toFixed(2)} km`)
+    console.warn(`${i+1}. ${r.name}: ${r.distance?.toFixed(2)} km`)
   })
 
   return restaurantsWithDistance.map((restaurant, displayIndex) => {
@@ -505,8 +485,7 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
         onPress={() => {
           if (visible) setVisible(false)
           setTimeout(() => {
-            // 🔥 CORRECTION: Trouver l'index dans le carrousel filtré
-            // Le carrousel affiche seulement les restaurants proches (< 10km)
+            
             const sortedRestaurants = restaurantData
               .filter(r => r.latitude && r.longitude)
               .map((r, originalIndex) => ({
@@ -521,12 +500,11 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
               }))
               .filter(r => r.distance !== null && r.distance < 10)
               .sort((a, b) => a.distance - b.distance)
-
-            // Trouver l'index du restaurant cliqué dans la liste filtrée du carrousel
+            
             const carouselIndex = sortedRestaurants.findIndex(r => r.originalIndex === restaurant.originalIndex)
 
             if (carouselIndex !== -1) {
-              console.log(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
+              console.warn(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
               setFocusFunction(carouselIndex)
               restaurantsRef.current?.scrollToIndex({
                 index: carouselIndex,
@@ -534,7 +512,7 @@ const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurant
                 viewPosition: 0.5
               })
             } else {
-              console.log(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
+              console.warn(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
             }
           }, 300)
         }}
@@ -561,7 +539,7 @@ const ListButton = ({ setVisible }) => {
       <View style={styles.menuListBloc}>
         <Icon type="material-community" name='menu' color="black" size={32}
           onPress={() => setVisible(true)} />
-        <Text style={{ fontWeight: "bold" }}>List</Text>
+        <Text style={{ fontWeight: "bold" }}>{i18n.t('search.list')}</Text>
       </View>
     </View>
   )
@@ -673,7 +651,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingBottom: 30,
-    paddingLeft: 20, // Pour centrer le premier élément
+    paddingLeft: 20, 
   },
   restaurantsContainer:
   {
