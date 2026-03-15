@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import i18n from '../i18n'
 import { colors } from '../global'
@@ -14,7 +14,7 @@ export default function AddressesScreen({ navigation }) {
     loadAddresses()
 
     navigation.setOptions({
-      title: i18n.t('addresses.title', 'Addresses'),
+      title: i18n.t('addresses.title'),
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -41,18 +41,16 @@ export default function AddressesScreen({ navigation }) {
   const loadAddresses = () => {
     try {
       setLoading(true)
-
-      // Utiliser les données utilisateur locales depuis Redux/AsyncStorage
+      
       let addressesData = []
-
-      // If user has an address in their profile (user.address du modèle User)
+      
       if (user.address && user.address.trim()) {
-        // Try to parse the address if it contains structured data
+        
         let addressParts = user.address.split(',')
         let address = user.address
         let city = ''
         let postalCode = ''
-        let country = 'France' // Default country
+        let country = 'France' 
 
         if (addressParts.length >= 2) {
           address = addressParts[0].trim()
@@ -78,8 +76,7 @@ export default function AddressesScreen({ navigation }) {
           } : null
         })
       }
-
-      // Mock additional addresses
+      
       const mockAddresses = [
         {
           id: '1',
@@ -99,25 +96,25 @@ export default function AddressesScreen({ navigation }) {
       setAddresses(addressesData)
     } catch (error) {
       console.error('Error loading addresses:', error)
-      Alert.alert(i18n.t('common.error', 'Error'), i18n.t('addresses.loadError', 'Failed to load addresses'))
+      Alert.alert(i18n.t('common.error'), i18n.t('addresses.loadError'))
     } finally {
       setLoading(false)
     }
   }
 
   const handleAddAddress = () => {
-    // TODO: Navigate to add/edit address screen
+    
     Alert.alert('Not implemented', 'Add address screen will be implemented')
   }
 
   const handleEditAddress = (address) => {
-    // TODO: Navigate to edit address screen with address data
+    
     Alert.alert('Not implemented', 'Edit address screen will be implemented', [
-      { text: i18n.t('common.cancel', 'Cancel') },
+      { text: i18n.t('common.cancel') },
       {
-        text: i18n.t('common.edit', 'Edit'),
+        text: i18n.t('common.edit'),
         onPress: () => {
-          // navigation.navigate('EditAddress', { address })
+          
         }
       }
     ])
@@ -125,28 +122,25 @@ export default function AddressesScreen({ navigation }) {
 
   const handleDeleteAddress = (address) => {
     Alert.alert(
-      i18n.t('addresses.deleteConfirm', 'Delete Address'),
-      i18n.t('addresses.deleteMessage', 'Are you sure you want to delete this address?'),
+      i18n.t('addresses.deleteConfirm'),
+      i18n.t('addresses.deleteMessage'),
       [
-        { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
+        { text: i18n.t('common.cancel'), style: 'cancel' },
         {
-          text: i18n.t('common.delete', 'Delete'),
+          text: i18n.t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
-              // TODO: Call delete API
-              // await deleteUserAddress(user.id || user.userId, address.id)
-
-              // Remove from local state
+              
               setAddresses(prev => prev.filter(addr => addr.id !== address.id))
 
               Alert.alert(
-                i18n.t('common.success', 'Success'),
-                i18n.t('addresses.deleted', 'Address deleted successfully')
+                i18n.t('common.success'),
+                i18n.t('addresses.deleted')
               )
             } catch (error) {
               console.error('Error deleting address:', error)
-              Alert.alert(i18n.t('common.error', 'Error'), i18n.t('addresses.deleteError', 'Failed to delete address'))
+              Alert.alert(i18n.t('common.error'), i18n.t('addresses.deleteError'))
             }
           }
         }
@@ -156,22 +150,19 @@ export default function AddressesScreen({ navigation }) {
 
   const handleSetDefaultAddress = async (address) => {
     try {
-      // TODO: Call set default API
-      // await setDefaultAddress(user.id || user.userId, address.id)
-
-      // Update local state
+      
       setAddresses(prev => prev.map(addr => ({
         ...addr,
         isDefault: addr.id === address.id
       })))
 
       Alert.alert(
-        i18n.t('common.success', 'Success'),
-        i18n.t('addresses.setDefault', 'Address set as default successfully')
+        i18n.t('common.success'),
+        i18n.t('addresses.setDefault')
       )
     } catch (error) {
       console.error('Error setting default address:', error)
-      Alert.alert(i18n.t('common.error', 'Error'), i18n.t('addresses.setDefaultError', 'Failed to set default address'))
+      Alert.alert(i18n.t('common.error'), i18n.t('addresses.setDefaultError'))
     }
   }
 
@@ -207,7 +198,7 @@ export default function AddressesScreen({ navigation }) {
             {address.isDefault && (
               <View style={styles.defaultBadge}>
                 <Text style={styles.defaultBadgeText}>
-                  {i18n.t('addresses.default', 'Default')}
+                  {i18n.t('addresses.default')}
                 </Text>
               </View>
             )}
@@ -257,7 +248,7 @@ export default function AddressesScreen({ navigation }) {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>
-            {i18n.t('common.loading', 'Loading...')}
+            {i18n.t('common.loading')}
           </Text>
         </View>
       </SafeAreaView>
@@ -269,24 +260,24 @@ export default function AddressesScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header Info */}
+        {}
         <View style={styles.headerInfo}>
           <Text style={styles.headerText}>
-            {i18n.t('addresses.description', 'Manage your delivery addresses for faster ordering')}
+            {i18n.t('addresses.description')}
           </Text>
         </View>
 
-        {/* Addresses List */}
+        {}
         {addresses.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="location-outline" size={80} color={colors.text.secondary} />
             <Text style={styles.emptyStateTitle}>
-              {i18n.t('addresses.noAddresses', 'No addresses yet')}
+              {i18n.t('addresses.noAddresses')}
             </Text>
           <Text style={styles.emptyStateText}>
             {user.address && user.address.trim()
-              ? i18n.t('addresses.addressFromProfile', 'Your profile address will be automatically added as your first delivery address')
-              : i18n.t('addresses.addFirstAddress', 'Add your first delivery address to get started')
+              ? i18n.t('addresses.addressFromProfile')
+              : i18n.t('addresses.addFirstAddress')
             }
           </Text>
 
@@ -296,7 +287,7 @@ export default function AddressesScreen({ navigation }) {
             >
               <Ionicons name="add" size={20} color={colors.text.white} />
               <Text style={styles.addFirstButtonText}>
-                {i18n.t('addresses.addAddress', 'Add Address')}
+                {i18n.t('addresses.addAddress')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -316,30 +307,30 @@ export default function AddressesScreen({ navigation }) {
             >
               <Ionicons name="add" size={20} color={colors.primary} />
               <Text style={styles.addMoreButtonText}>
-                {i18n.t('addresses.addNewAddress', 'Add New Address')}
+                {i18n.t('addresses.addNewAddress')}
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Tips Section */}
+        {}
         <View style={styles.tipsContainer}>
           <View style={styles.tipsHeader}>
             <Ionicons name="information-circle" size={20} color={colors.primary} />
             <Text style={styles.tipsTitle}>
-              {i18n.t('addresses.tips', 'Tips')}
+              {i18n.t('addresses.tips')}
             </Text>
           </View>
 
           <View style={styles.tipsList}>
             <Text style={styles.tipItem}>
-              • {i18n.t('addresses.tip1', 'Set a default address for faster checkout')}
+              • {i18n.t('addresses.tip1')}
             </Text>
             <Text style={styles.tipItem}>
-              • {i18n.t('addresses.tip2', 'Add work and home addresses for convenience')}
+              • {i18n.t('addresses.tip2')}
             </Text>
             <Text style={styles.tipItem}>
-              • {i18n.t('addresses.tip3', 'Keep addresses up to date for accurate delivery')}
+              • {i18n.t('addresses.tip3')}
             </Text>
           </View>
         </View>
