@@ -1,6 +1,6 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { getRestaurantsFromFirebase } from '../api'
+import { getRestaurants } from '../api'
 import { RestaurantImage, RestaurantInfo } from '../components/home/RestaurantItems'
 import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -58,7 +58,7 @@ export default function NearMeScreen({ route, navigation }) {
       setUserLocation({ latitude: userLat, longitude: userLon })
 
       // Récupérer et filtrer les restaurants
-      const allRestaurants = await getRestaurantsFromFirebase()
+      const allRestaurants = await getRestaurants()
 
       const nearbyRestaurants = allRestaurants
         .filter(restaurant => restaurant.latitude && restaurant.longitude)
