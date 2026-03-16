@@ -53,7 +53,12 @@
     "rn-range-slider": "^2.2.2",
     "save-dev": "^0.0.1-security",
     "short-id": "^0.1.0-1",
-    "tslib": "^2.6.0"
+    "tslib": "^2.6.0",
+    "@react-native-community/datetimepicker": "^8.6.0",
+    "@storybook/addon-ondevice-controls": "^10.2.3",
+    "@storybook/addon-ondevice-actions": "^10.2.3",
+    "@storybook/react-native": "^10.2.3",
+    "storybook": "^10.2.19"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -71,11 +76,12 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "storybook": "start-storybook -p 7007",
-    "build-storybook": "build-storybook",
+    "storybook": "storybook dev -p 7007",
+    "build-storybook": "storybook build",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "storybook-generate": "sb-rn-get-stories"
   },
   "version": "1.0.0",
   "private": true,

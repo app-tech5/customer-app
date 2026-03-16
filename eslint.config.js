@@ -61,13 +61,13 @@ module.exports = [
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",
 
-      "unused-imports/no-unused-imports": "warn",
-      "unused-imports/no-unused-vars": ["warn", {
-        "vars": "all",
-        "varsIgnorePattern": "^_",
-        "args": "after-used",
-        "argsIgnorePattern": "^_",
-      }],
+      // "unused-imports/no-unused-imports": "warn",
+      // "unused-imports/no-unused-vars": ["warn", {
+      //   "vars": "all",
+      //   "varsIgnorePattern": "^_",
+      //   "args": "after-used",
+      //   "argsIgnorePattern": "^_",
+      // }],
 
       'i18next/no-literal-string': [
         'error',

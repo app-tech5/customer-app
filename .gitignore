@@ -63,3 +63,6 @@ buck-out/
 .expo/
 .expo/*
 web-build/
+
+*storybook.log
+storybook-static
