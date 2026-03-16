@@ -20,9 +20,15 @@ import {
 } from '@expo-google-fonts/roboto'
 import Loader from "./screens/Loader";
 import { cleanupExpiredCache } from "./utils/cacheUtils";
+import StorybookUIRoot from "./storybook";
 
+const USE_STORYBOOK = process.env.EXPO_PUBLIC_STORYBOOK === '1';
 
 export default function App() {
+
+  if (USE_STORYBOOK) {
+    return <StorybookUIRoot />;
+  }
 
   let [fontsLoaded, error] = useFonts({
 

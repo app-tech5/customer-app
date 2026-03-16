@@ -1,5 +1,12 @@
 const noCommentsPlugin = require('eslint-plugin-no-comments');
 const unusedImportsPlugin = require('eslint-plugin-unused-imports');
+const noConsoleRemoveRule = require('./eslint-rules/no-console-remove');
+
+const localPlugin = {
+  rules: {
+    'no-console-remove': noConsoleRemoveRule,
+  },
+};
 
 module.exports = [
   {
@@ -20,6 +27,7 @@ module.exports = [
       'i18next': require('eslint-plugin-i18next'),
       'react': require('eslint-plugin-react'),
       'unused-imports': unusedImportsPlugin,
+      'local': localPlugin,
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -52,7 +60,8 @@ module.exports = [
     },
     rules: {
       "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": "off",
+      "local/no-console-remove": ["warn", { allow: ["warn", "error"] }],
       'no-comments/disallowComments': 'error',
       "max-lines-per-function": "off",
       // "complexity": ["warn", 10],
@@ -138,6 +147,7 @@ module.exports = [
     files: ['**/*.test.js', '**/*.spec.js', '__tests__/**/*.js'],
     rules: {
       'no-console': 'off',
+      'local/no-console-remove': 'off',
     },
   },
 ];

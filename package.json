@@ -69,15 +69,17 @@
     "eslint-plugin-no-comments": "^1.1.10",
     "eslint-plugin-react": "^7.37.5",
     "husky": "^8.0.3",
-    "eslint-plugin-unused-imports": "^4.4.1"
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "@storybook/react-webpack5": "^10.2.19"
   },
   "scripts": {
     "start": "expo start",
+    "start:localhost": "expo start --localhost",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "storybook": "storybook dev -p 7007",
-    "build-storybook": "storybook build",
+    "storybook": "EXPO_PUBLIC_STORYBOOK=1 expo start",
+    "storybook:localhost": "EXPO_PUBLIC_STORYBOOK=1 expo start --localhost",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "prepare": "husky install",
