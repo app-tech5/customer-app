@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from '../i18n';
 
 const CACHE_KEYS = {
   RESTAURANT_FOODS: 'restaurant_foods_',
@@ -42,7 +43,7 @@ export const hasDataChanged = (oldData, newData) => {
 export const saveFoodsToCache = async (restaurantId, data) => {
   try {
     if (!data || !Array.isArray(data)) {
-      console.warn('⚠️ Tentative de sauvegarde de données invalides en cache');
+      console.warn(i18n.t('cache.invalidDataSaveAttempt'));
       return;
     }
 
@@ -59,7 +60,7 @@ export const saveFoodsToCache = async (restaurantId, data) => {
     await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
     
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde en cache:', error);
+    console.error(i18n.t('cache.saveError'), error);
   }
 };
 
@@ -97,7 +98,7 @@ export const getFoodsFromCache = async (restaurantId) => {
     };
 
   } catch (error) {
-    console.error('❌ Erreur lors de la lecture du cache:', error);
+    console.error(i18n.t('cache.readError'), error);
     return null;
   }
 };
@@ -111,7 +112,7 @@ export const clearFoodsCache = async (restaurantId) => {
     await AsyncStorage.removeItem(timestampKey);
     
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression du cache:', error);
+    console.error(i18n.t('cache.clearError'), error);
   }
 };
 
@@ -123,7 +124,7 @@ export const loadFoodsWithSmartCache = async (
   onLoadingStateChange
 ) => {
   if (!restaurantId) {
-    console.error('❌ RestaurantId requis pour le chargement des données');
+    console.error(i18n.t('cache.restaurantIdRequired'));
     return;
   }
 
@@ -156,13 +157,13 @@ export const loadFoodsWithSmartCache = async (
         
       }
     } else {
-      console.warn('⚠️ Données API invalides ou vides');
+      console.warn(i18n.t('cache.invalidApiData'));
     }
     
     onLoadingStateChange?.(false);
 
   } catch (error) {
-    console.error('❌ Erreur lors du chargement intelligent:', error);
+    console.error(i18n.t('cache.loadSmartError'), error);
     onLoadingStateChange?.(false);
     
     const fallbackCache = await getFoodsFromCache(restaurantId);
@@ -176,7 +177,7 @@ export const loadFoodsWithSmartCache = async (
 export const saveRestaurantsToCache = async (restaurants) => {
   try {
     if (!restaurants || !Array.isArray(restaurants)) {
-      console.warn('⚠️ Tentative de sauvegarde de restaurants invalides en cache');
+      console.warn(i18n.t('cache.invalidRestaurantsSaveAttempt'));
       return;
     }
 
@@ -193,7 +194,7 @@ export const saveRestaurantsToCache = async (restaurants) => {
     await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
     
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde des restaurants en cache:', error);
+    console.error(i18n.t('cache.saveRestaurantsError'), error);
   }
 };
 
@@ -231,7 +232,7 @@ export const getRestaurantsFromCache = async () => {
     };
 
   } catch (error) {
-    console.error('❌ Erreur lors de la lecture du cache des restaurants:', error);
+    console.error(i18n.t('cache.readRestaurantsError'), error);
     return null;
   }
 };
@@ -245,7 +246,7 @@ export const clearRestaurantsCache = async () => {
     await AsyncStorage.removeItem(timestampKey);
     
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression du cache des restaurants:', error);
+    console.error(i18n.t('cache.clearRestaurantsError'), error);
   }
 };
 
@@ -284,13 +285,13 @@ export const loadRestaurantsWithSmartCache = async (
         
       }
     } else {
-      console.warn('⚠️ Données restaurants API invalides ou vides');
+      console.warn(i18n.t('cache.invalidRestaurantsApiData'));
     }
     
     onLoadingStateChange?.(false);
 
   } catch (error) {
-    console.error('❌ Erreur lors du chargement intelligent des restaurants:', error);
+    console.error(i18n.t('cache.loadRestaurantsSmartError'), error);
     onLoadingStateChange?.(false);
     
     const fallbackCache = await getRestaurantsFromCache();
@@ -304,7 +305,7 @@ export const loadRestaurantsWithSmartCache = async (
 export const savePromotionsToCache = async (promotions) => {
   try {
     if (!promotions || !Array.isArray(promotions)) {
-      console.warn('⚠️ Tentative de sauvegarde de promotions invalides en cache');
+      console.warn(i18n.t('cache.invalidPromotionsSaveAttempt'));
       return;
     }
 
@@ -321,7 +322,7 @@ export const savePromotionsToCache = async (promotions) => {
     await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
     
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde des promotions en cache:', error);
+    console.error(i18n.t('cache.savePromotionsError'), error);
   }
 };
 
@@ -359,7 +360,7 @@ export const getPromotionsFromCache = async () => {
     };
 
   } catch (error) {
-    console.error('❌ Erreur lors de la lecture du cache des promotions:', error);
+    console.error(i18n.t('cache.readPromotionsError'), error);
     return null;
   }
 };
@@ -367,7 +368,7 @@ export const getPromotionsFromCache = async () => {
 export const saveMenusToCache = async (menus) => {
   try {
     if (!menus || !Array.isArray(menus)) {
-      console.warn('⚠️ Tentative de sauvegarde de menus invalides en cache');
+      console.warn(i18n.t('cache.invalidMenusSaveAttempt'));
       return;
     }
 
@@ -384,7 +385,7 @@ export const saveMenusToCache = async (menus) => {
     await AsyncStorage.setItem(timestampKey, cacheData.timestamp.toString());
     
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde des menus en cache:', error);
+    console.error(i18n.t('cache.saveMenusError'), error);
   }
 };
 
@@ -422,7 +423,7 @@ export const getMenusFromCache = async () => {
     };
 
   } catch (error) {
-    console.error('❌ Erreur lors de la lecture du cache des menus:', error);
+    console.error(i18n.t('cache.readMenusError'), error);
     return null;
   }
 };
@@ -462,13 +463,13 @@ export const loadPromotionsWithSmartCache = async (
         
       }
     } else {
-      console.warn('⚠️ Données promotions API invalides ou vides');
+      console.warn(i18n.t('cache.invalidPromotionsApiData'));
     }
     
     onLoadingStateChange?.(false);
 
   } catch (error) {
-    console.error('❌ Erreur lors du chargement intelligent des promotions:', error);
+    console.error(i18n.t('cache.loadPromotionsSmartError'), error);
     onLoadingStateChange?.(false);
     
     const fallbackCache = await getPromotionsFromCache();
@@ -514,13 +515,13 @@ export const loadMenusWithSmartCache = async (
         
       }
     } else {
-      console.warn('⚠️ Données menus API invalides ou vides');
+      console.warn(i18n.t('cache.invalidMenusApiData'));
     }
     
     onLoadingStateChange?.(false);
 
   } catch (error) {
-    console.error('❌ Erreur lors du chargement intelligent des menus:', error);
+    console.error(i18n.t('cache.loadMenusSmartError'), error);
     onLoadingStateChange?.(false);
     
     const fallbackCache = await getMenusFromCache();
@@ -540,7 +541,7 @@ export const clearPromotionsCache = async () => {
     await AsyncStorage.removeItem(timestampKey);
     
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression du cache des promotions:', error);
+    console.error(i18n.t('cache.clearPromotionsError'), error);
   }
 };
 
@@ -553,7 +554,7 @@ export const clearMenusCache = async () => {
     await AsyncStorage.removeItem(timestampKey);
     
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression du cache des menus:', error);
+    console.error(i18n.t('cache.clearMenusError'), error);
   }
 };
 
@@ -591,7 +592,7 @@ export const cleanupExpiredCache = async () => {
     }
 
   } catch (error) {
-    console.error('❌ Erreur lors du nettoyage du cache:', error);
+    console.error(i18n.t('cache.cleanupError'), error);
   }
 };
 
@@ -612,7 +613,7 @@ export const saveSignInData = async (email, rememberMe = true) => {
     await AsyncStorage.setItem(CACHE_KEYS.USER_SIGNIN_DATA, JSON.stringify(signInData));
 
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde des données de connexion:', error);
+    console.error(i18n.t('cache.saveSignInError'), error);
   }
 };
 
@@ -640,7 +641,7 @@ export const getSignInData = async () => {
     };
 
   } catch (error) {
-    console.error('❌ Erreur lors de la lecture des données de connexion:', error);
+    console.error(i18n.t('cache.readSignInError'), error);
     return null;
   }
 };
@@ -650,7 +651,7 @@ export const clearSignInData = async () => {
     await AsyncStorage.removeItem(CACHE_KEYS.USER_SIGNIN_DATA);
     
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression des données de connexion:', error);
+    console.error(i18n.t('cache.clearSignInError'), error);
   }
 };
 
@@ -668,7 +669,7 @@ export const updateSignInEmail = async (newEmail) => {
     }
 
   } catch (error) {
-    console.error('❌ Erreur lors de la mise à jour de l\'email:', error);
+    console.error(i18n.t('cache.updateEmailError'), error);
   }
 };
  

@@ -1,4 +1,4 @@
-// API Client pour remplacer Firebase
+
 import { config } from './config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const API_BASE_URL = config.API_BASE_URL;
@@ -9,8 +9,7 @@ class ApiClient {
     this.user = null;
     this.initializeFromStorage();
   }
-
-  // Initialisation automatique depuis AsyncStorage
+  
   async initializeFromStorage() {
     try {
       const AsyncStorage = require('@react-native-async-storage/async-storage').default;
@@ -28,8 +27,7 @@ class ApiClient {
       console.error('Error initializing from storage:', error);
     }
   }
-
-  // Configuration des headers avec token si disponible
+  
   getHeaders() {
     const headers = {
       'Content-Type': 'application/json',
@@ -41,8 +39,7 @@ class ApiClient {
 
     return headers;
   }
-
-  // Méthode générique pour les appels API
+  
   async apiCall(endpoint, options = {}) {
     try {
       const url = `${API_BASE_URL}${endpoint}`;
@@ -63,8 +60,7 @@ class ApiClient {
       throw error;
     }
   }
-
-  // Authentification
+  
   async login(email, password) {
     const response = await this.apiCall('/auth/login', {
       method: 'POST',
@@ -100,8 +96,7 @@ class ApiClient {
     this.user = null;
     await this.clearStorage();
   }
-
-  // Gestion du stockage local
+  
   async saveToStorage() {
     try {
       const AsyncStorage = require('@react-native-async-storage/async-storage').default;
@@ -125,8 +120,7 @@ class ApiClient {
       console.error('Error clearing storage:', error);
     }
   }
-
-  // Utilisateurs
+  
   async getUserInfo(userId) {
     return await this.apiCall(`/users/${userId}`);
   }
@@ -137,132 +131,98 @@ class ApiClient {
       body: JSON.stringify(userData),
     });
   }
-
-  // GESTION DES FAVORIS
-
-  // Récupérer les favoris de l'utilisateur
+  
   async getFavorites() {
     return await this.apiCall('/users/favorites');
   }
-
-  // Ajouter un restaurant aux favoris
+  
   async addToFavorites(restaurantId) {
     return await this.apiCall(`/users/favorites/${restaurantId}`, {
       method: 'POST',
     });
   }
-
-  // Retirer un restaurant des favoris
+  
   async removeFromFavorites(restaurantId) {
     return await this.apiCall(`/users/favorites/${restaurantId}`, {
       method: 'DELETE',
     });
   }
-
-  // GESTION DU PORTEFEUILLE
-
-  // Récupérer les adresses de l'utilisateur
+  
   async getUserAddresses(userId) {
     return await this.apiCall(`/users/${userId}/addresses`);
   }
-
-  // Ajouter une adresse
+  
   async addUserAddress(userId, addressData) {
     return await this.apiCall(`/users/${userId}/addresses`, {
       method: 'POST',
       body: JSON.stringify(addressData),
     });
   }
-
-  // Modifier une adresse
+  
   async updateUserAddress(userId, addressId, addressData) {
     return await this.apiCall(`/users/${userId}/addresses/${addressId}`, {
       method: 'PUT',
       body: JSON.stringify(addressData),
     });
   }
-
-  // Supprimer une adresse
+  
   async deleteUserAddress(userId, addressId) {
     return await this.apiCall(`/users/${userId}/addresses/${addressId}`, {
       method: 'DELETE',
     });
   }
-
-  // Définir une adresse par défaut
+  
   async setDefaultAddress(userId, addressId) {
     return await this.apiCall(`/users/${userId}/addresses/${addressId}/default`, {
       method: 'PUT',
     });
   }
-
-  // Récupérer les méthodes de paiement de l'utilisateur
+  
   async getUserPaymentMethods(userId) {
     return await this.apiCall(`/users/${userId}/payment-methods`);
   }
-
-  // Ajouter une méthode de paiement
+  
   async addPaymentMethod(userId, paymentMethodData) {
     return await this.apiCall(`/users/${userId}/payment-methods`, {
       method: 'POST',
       body: JSON.stringify(paymentMethodData),
     });
   }
-
-  // Supprimer une méthode de paiement
+  
   async removePaymentMethod(userId, paymentMethodId) {
     return await this.apiCall(`/users/${userId}/payment-methods/${paymentMethodId}`, {
       method: 'DELETE',
     });
   }
-
-  // Définir une méthode de paiement par défaut
+  
   async setDefaultPaymentMethod(userId, paymentMethodId) {
     return await this.apiCall(`/users/${userId}/payment-methods/${paymentMethodId}/default`, {
       method: 'PUT',
     });
   }
-
-  // Récupérer l'historique des transactions
+  
   async getUserTransactions(userId, page = 1, limit = 20) {
     return await this.apiCall(`/users/${userId}/transactions?page=${page}&limit=${limit}`);
   }
-
-  // Récupérer le solde du portefeuille
+  
   async getWalletBalance(userId) {
     return await this.apiCall(`/users/${userId}/wallet/balance`);
   }
-
-  // Ajouter de l'argent au portefeuille
+  
   async addMoneyToWallet(userId, amount, paymentMethodId) {
     return await this.apiCall(`/users/${userId}/wallet/add-money`, {
       method: 'POST',
       body: JSON.stringify({ amount, paymentMethodId }),
     });
   }
-
-  // Retirer de l'argent du portefeuille
+  
   async withdrawFromWallet(userId, amount, paymentMethodId) {
     return await this.apiCall(`/users/${userId}/wallet/withdraw`, {
       method: 'POST',
       body: JSON.stringify({ amount, paymentMethodId }),
     });
   }
-
-  // // Restaurants
-  // async getRestaurants() {
-  //   const response = await this.apiCall('/resource/restaurants');
-  //   return response.map(restaurant => ({
-  //     restaurantId: restaurant._id || restaurant.id,
-  //     ...restaurant,
-  //   }));
-  // }
-
-  // async getRestaurantById(id) {
-  //   return await this.apiCall(`/resource/restaurants/${id}`);
-  // }
-
-  // Restaurants
+  
   async getRestaurants() {
     const response = await this.apiCall('/resource/restaurants');
     return response.map(restaurant => this.normalizeRestaurant(restaurant));
@@ -272,17 +232,14 @@ class ApiClient {
     const restaurant = await this.apiCall(`/resource/restaurants/${id}`);
     return this.normalizeRestaurant(restaurant);
   }
-
-  // Normalisation centrale
+  
   normalizeRestaurant(restaurant) {
     return {
       restaurantId: restaurant._id || restaurant.id,
       ...restaurant,
     };
   }
-
-
-  // Catégories
+  
   async getCategories() {
     const response = await this.apiCall('/resource/categories');
     return response.map(category => ({
@@ -292,19 +249,14 @@ class ApiClient {
   }
 
   async getCategoriesFromRestaurant(restaurantId) {
-    // Récupérer les catégories associées à un restaurant spécifique
-    // Pour l'instant, on retourne toutes les catégories
-    // TODO: Implémenter une route API qui retourne les catégories par restaurant
+    
     return await this.getCategories();
   }
 
   async searchRestaurantsByCategory(categoryIdentifier) {
-    // Rechercher les restaurants par catégorie (ID ou alias)
-    // Pour l'instant, on retourne tous les restaurants
-    // TODO: Implémenter une route API qui filtre par catégorie
+    
     const restaurants = await this.getRestaurants();
-    console.log('🔍 RESTAURANTS:', restaurants[0].categories, 'restaurants found');
-    // Filtrage temporaire côté client - à remplacer par filtrage côté serveur
+    
     if (categoryIdentifier && restaurants) {
       return restaurants.filter(restaurant =>
         restaurant.categories && restaurant.categories.some(cat =>
@@ -317,8 +269,7 @@ class ApiClient {
     }
     return restaurants || [];
   }
-
-  // Commandes
+  
   async createOrder(orderData) {
     return await this.apiCall('/resource/orders', {
       method: 'POST',
@@ -353,59 +304,42 @@ class ApiClient {
   async cancelOrder(orderId) {
     return await this.updateOrderStatus(orderId, 'cancelled');
   }
-
-  // Drivers
+  
   async getDriverInfo(driverId) {
     return await this.apiCall(`/resource/drivers/${driverId}`);
   }
-
-  // Foods/Menu items
+  
   async getFoods(restaurantId) {
-    // Utilisation de la nouvelle route dédiée aux produits avec filtrage d'images
+    
     return await this.apiCall(`/products?type=${restaurantId}`);
   }
-
-  // Reviews
+  
   async getRestaurantReviews(restaurantId) {
     try {
-      console.log('🔍 FETCHING REVIEWS for restaurantId:', restaurantId);
+      
       const reviews = await this.apiCall(`/resource/reviews`);
-      console.log('🔍 RAW REVIEWS from API:', reviews.length, 'reviews');
-
-      // Filtrer côté frontend les avis approuvés pour ce restaurant
+      
       const filtered = reviews.filter(review => {
         const reviewRestaurantId = review.restaurant?._id || review.restaurant;
         const matchesRestaurant = String(reviewRestaurantId) === String(restaurantId);
         const matchesStatus = review.status === 'approved';
 
-        console.log('🔍 REVIEW FILTER:', {
-          reviewId: review._id,
-          reviewRestaurant: reviewRestaurantId,
-          restaurantId: restaurantId,
-          matchesRestaurant,
-          status: review.status,
-          matchesStatus
-        });
-
         return matchesRestaurant && matchesStatus;
       });
 
-      console.log('🔍 FILTERED REVIEWS:', filtered.length, 'reviews');
-
-      return filtered.sort((a, b) => new Date(b.date) - new Date(a.date)); // Plus récents d'abord
+      return filtered.sort((a, b) => new Date(b.date) - new Date(a.date)); 
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      return []; // Retourner un tableau vide en cas d'erreur
+      return []; 
     }
   }
-
-  // Delivery Settings
+  
   async getDeliverySettings() {
     try {
       return await this.apiCall('/resource/deliverysettings');
     } catch (error) {
       console.error('Error fetching delivery settings:', error);
-      // Fallback aux valeurs par défaut en cas d'erreur
+      
       return {
         fixedDeliveryFee: 2.5,
         dynamicDeliveryFee: {
@@ -419,29 +353,21 @@ class ApiClient {
       };
     }
   }
-
-  // Promotions
+  
   async getAllActiveOffers() {
     try {
-      console.log('🔥 FETCHING ALL ACTIVE OFFERS');
-
-      // Récupérer toutes les promotions et tous les restaurants en parallèle
+      
       const [allPromotions, allRestaurants] = await Promise.all([
         this.apiCall('/resource/promotions'),
         this.getRestaurants()
       ]);
-
-      console.log('🔥 ALL PROMOTIONS:', allPromotions.length, 'promotions found');
-      console.log('🍽️ ALL RESTAURANTS:', allRestaurants.length, 'restaurants found');
-
-      // Filtrer seulement les promotions actives
+      
       const activePromotions = allPromotions.filter(promotion => {
         const now = new Date();
         const isActive = promotion.isActive &&
           now >= new Date(promotion.startDate) &&
           now <= new Date(promotion.endDate);
-
-        // Vérifier les happy hours si elles existent
+        
         if (promotion.happyHours && promotion.happyHours.length > 0) {
           const currentHour = now.getHours();
           const currentMinutes = now.getMinutes();
@@ -465,12 +391,9 @@ class ApiClient {
 
         return isActive;
       });
-
-      console.log('✅ ACTIVE PROMOTIONS:', activePromotions.length, 'promotions active');
-
-      // Créer une liste des promotions avec les informations d'applicabilité
+      
       const promotionsList = activePromotions.map(promotion => {
-        // Compter les restaurants applicables selon le scope
+        
         let applicableRestaurantsCount = 0;
         let applicableRestaurants = [];
 
@@ -507,12 +430,11 @@ class ApiClient {
             applicableRestaurantsCount = applicableRestaurants.length;
           }
         } else {
-          // Scope inconnu ou item : considérer tous les restaurants
+          
           applicableRestaurantsCount = allRestaurants.length;
           applicableRestaurants = allRestaurants.slice(0, 3);
         }
-
-        // Déterminer le texte d'affichage selon le scope
+        
         let availabilityText = '';
         let availabilityCount = 0;
 
@@ -527,12 +449,12 @@ class ApiClient {
           availabilityText = `${applicableRestaurantsCount} restaurant${applicableRestaurantsCount > 1 ? 's' : ''}`;
           availabilityCount = applicableRestaurantsCount;
         } else if (promotion.scope === 'item') {
-          // Promotion qui s'applique à des items/produits spécifiques
+          
           const itemCount = promotion.applicableItems?.length || 0;
           availabilityText = `${itemCount} item${itemCount > 1 ? 's' : ''}`;
           availabilityCount = itemCount;
         } else {
-          // Scope vraiment inconnu
+          
           availabilityText = 'selected items';
           availabilityCount = 1;
         }
@@ -540,55 +462,47 @@ class ApiClient {
         return {
           id: promotion._id,
           promotion: promotion,
-          // Propriétés pour compatibilité avec l'ancien format
+          
           discount_percentage: promotion.promotionType === 'percentage_discount' ? promotion.discountValue : 0,
           free_delivery: promotion.promotionType === 'free_delivery',
           bogo_offer: promotion.promotionType === 'buy_x_get_y',
           flash_deal: promotion.promotionType === 'flash_sale',
-          // Informations générales
+          
           name: promotion.name,
           description: promotion.description,
           image_url: promotion.image,
           scope: promotion.scope,
           availabilityText,
           availabilityCount,
-          applicableRestaurants: applicableRestaurants.slice(0, 3), // Montrer max 3 restaurants pour preview
+          applicableRestaurants: applicableRestaurants.slice(0, 3), 
           applicableCategories: promotion.applicableCategories,
           applicableItems: promotion.applicableItems,
-          // Propriétés de tri
+          
           priority: promotion.priority || 1,
           endDate: promotion.endDate
         };
       });
 
-      console.log('🎯 FINAL PROMOTIONS LIST:', promotionsList.length, 'promotions created');
-
       return promotionsList;
 
     } catch (error) {
       console.error('Error fetching all active offers:', error);
-      return []; // Retourner un tableau vide en cas d'erreur
+      return []; 
     }
   }
 
   async getRestaurantPromotions(restaurantId) {
     try {
-      console.log('🔥 FETCHING PROMOTIONS for restaurant:', restaurantId);
-
-      // Récupérer toutes les promotions actives et tous les menus en parallèle
+      
       const [allPromotions, allMenus] = await Promise.all([
         this.apiCall('/resource/promotions'),
-        getAllMenus() // Récupérer tous les menus (filtrage côté client)
+        getAllMenus() 
       ]);
-
-      console.log('🔥 ALL PROMOTIONS:', allPromotions.length, 'promotions found');
-      console.log('🍽️ ALL MENUS:', allMenus.length, 'menus found');
-
-      // Filtrer les menus qui appartiennent à ce restaurant
+      
       const restaurantMenuIds = new Set(
         allMenus
           .filter(menu => {
-            // Vérifier si le menu appartient au restaurant
+            
             const menuRestaurantId = menu.restaurant || menu.restaurants?.value;
             const restaurantIdStr = restaurantId.toString();
             const menuRestaurantIdStr = typeof menuRestaurantId === 'object'
@@ -603,26 +517,19 @@ class ApiClient {
           })
           .filter(Boolean)
       );
-
-      console.log('🏪 Restaurant has', restaurantMenuIds.size, 'menu items');
-
-      // Utiliser la fonction de filtrage commune
+      
       const restaurantPromotions = filterPromotionsByRestaurant(allPromotions, restaurantId, restaurantMenuIds);
-
-      console.log('🎯 FILTERED PROMOTIONS:', restaurantPromotions.length, 'promotions match restaurant');
-
-      // Trier par priorité (plus haute en premier) et limiter à 3 max
+      
       return restaurantPromotions
         .sort((a, b) => (b.priority || 1) - (a.priority || 1))
         .slice(0, 3);
 
     } catch (error) {
       console.error('Error fetching restaurant promotions:', error);
-      return []; // Retourner un tableau vide en cas d'erreur
+      return []; 
     }
   }
-
-  // GESTION DU PANIER
+  
   async getCart() {
     return await this.apiCall('/cart');
   }
@@ -665,8 +572,7 @@ class ApiClient {
       body: JSON.stringify({ localItems }),
     });
   }
-
-  // Méthodes utilitaires
+  
   setToken(token) {
     this.token = token;
   }
@@ -676,19 +582,16 @@ class ApiClient {
   }
 }
 
-// Instance globale
 export const api = new ApiClient();
 
-// Fonctions d'export pour maintenir la compatibilité avec l'ancien code Firebase
 export const auth = {
   currentUser: null,
   signOut: () => api.logout(),
 };
 
-export const db = {}; // Placeholder pour les références Firestore
-export const storage = {}; // Placeholder pour Storage
+export const db = {}; 
+export const storage = {}; 
 
-// Fonctions de compatibilité Firebase
 export const signInWithEmailAndPassword = async (auth, email, password) => {
   const result = await api.login(email, password);
   auth.currentUser = { uid: result.user.id, email: result.user.email };
@@ -702,7 +605,7 @@ export const createUserWithEmailAndPassword = async (auth, email, password) => {
 };
 
 export const onAuthStateChanged = (auth, callback) => {
-  // Vérifier l'état d'authentification au démarrage
+  
   if (api.user) {
     auth.currentUser = { uid: api.user.id, email: api.user.email };
     callback(auth.currentUser);
@@ -711,7 +614,6 @@ export const onAuthStateChanged = (auth, callback) => {
   }
 };
 
-// Fonctions pour les données (remplacement Firestore)
 export const getRestaurants = () => api.getRestaurants();
 export const getCategories = () => api.getCategories();
 export const getCategoriesFromRestaurant = (restaurantId) => api.getCategoriesFromRestaurant(restaurantId);
@@ -726,7 +628,6 @@ export const userInfos = (userId) => api.getUserInfo(userId);
 export const updateUser = (userData, userId) => api.updateUser(userId, userData);
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
 
-// Récupérer tous les variants (filtrage côté client)
 export const getVariants = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/resource/variants`, {
@@ -748,10 +649,9 @@ export const getVariants = async () => {
   }
 };
 
-// Récupérer tous les menus depuis la collection menus
 export const getAllMenus = async () => {
   try {
-    // Récupérer tous les menus via l'API backend
+    
     const response = await fetch(`${API_BASE_URL}/resource/menus`, {
       method: 'GET',
       headers: {
@@ -764,7 +664,7 @@ export const getAllMenus = async () => {
     }
 
     const menus = await response.json();
-    console.log('🍽️ Retrieved', menus.length, 'menus from backend');
+    
     return menus;
   } catch (error) {
     console.error('Error fetching all menus:', error);
@@ -774,10 +674,9 @@ export const getAllMenus = async () => {
 export const getRestaurantReviews = (restaurantId) => api.getRestaurantReviews(restaurantId);
 export const getDeliverySettings = () => api.getDeliverySettings();
 export const getAllActiveOffers = () => api.getAllActiveOffers();
-// Récupérer toutes les promotions (sans filtrage par restaurant)
+
 export const getAllPromotions = () => api.apiCall('/resource/promotions');
 
-// Fonction utilitaire pour calculer les IDs des menus d'un restaurant
 const calculateRestaurantMenuIds = (allMenus, restaurantId) => {
   return new Set(
     allMenus
@@ -798,20 +697,18 @@ const calculateRestaurantMenuIds = (allMenus, restaurantId) => {
   );
 };
 
-// Fonction utilitaire pour filtrer les promotions (logique extraite de getRestaurantPromotions)
 const filterPromotionsByRestaurant = (allPromotions, restaurantId, restaurantMenuIds) => {
   return allPromotions.filter(promotion => {
-    // Vérifier si la promotion est active
+    
     const now = new Date();
     const isActive = promotion.isActive &&
       now >= new Date(promotion.startDate) &&
       now <= new Date(promotion.endDate);
 
     if (!isActive) return false;
-
-    // Vérifier si la promotion s'applique au restaurant
+    
     const scopeMatch = (() => {
-      // Cas 1: Promotion avec scope 'restaurant' ET qui inclut ce restaurant
+      
       if (promotion.scope === 'restaurant') {
         const hasApplicableRestaurants = promotion.applicableRestaurants &&
           Array.isArray(promotion.applicableRestaurants);
@@ -824,14 +721,13 @@ const filterPromotionsByRestaurant = (allPromotions, restaurantId, restaurantMen
           });
 
           if (includesRestaurantId) {
-            console.log('✅ Promotion scope restaurant match:', promotion.name);
+            
             return true;
           }
         }
         return false;
       }
-
-      // Cas 2: Promotion avec scope 'item' ET qui inclut des items du restaurant
+      
       if (promotion.scope === 'item') {
         const hasApplicableItems = promotion.applicableItems &&
           Array.isArray(promotion.applicableItems);
@@ -844,23 +740,20 @@ const filterPromotionsByRestaurant = (allPromotions, restaurantId, restaurantMen
           });
 
           if (hasMatchingItem) {
-            console.log('✅ Promotion scope item match:', promotion.name);
+            
             return true;
           }
         }
         return false;
       }
-
-      // Cas 3: Promotion avec scope 'platform' - s'applique à tous les restaurants (dernière priorité)
+      
       if (promotion.scope === 'platform') {
-        console.log('✅ Promotion scope platform match:', promotion.name);
+        
         return true;
       }
-
-      // Cas 4: Promotion avec scope 'category' - si le restaurant a des catégories applicables
+      
       if (promotion.scope === 'category') {
-        // Cette logique serait plus complexe - à implémenter si nécessaire
-        console.log('⚠️ Promotion scope category - not implemented yet');
+        
         return false;
       }
 
@@ -871,19 +764,15 @@ const filterPromotionsByRestaurant = (allPromotions, restaurantId, restaurantMen
   });
 };
 
-// Fonction utilitaire pour filtrer les promotions côté client (même logique que getRestaurantPromotions)
 export const filterRestaurantPromotions = (allPromotions, restaurantId, allMenus = null) => {
   if (!allPromotions || !Array.isArray(allPromotions) || !restaurantId) {
     return [];
   }
-
-  // Calculer les IDs des menus du restaurant si allMenus est fourni
+  
   const restaurantMenuIds = allMenus ? calculateRestaurantMenuIds(allMenus, restaurantId) : new Set();
-
-  // Utiliser la même logique complète que getRestaurantPromotions
+  
   const restaurantPromotions = filterPromotionsByRestaurant(allPromotions, restaurantId, restaurantMenuIds);
-
-  // Trier par priorité et limiter à 3 max (comme getRestaurantPromotions)
+  
   return restaurantPromotions
     .sort((a, b) => (b.priority || 1) - (a.priority || 1))
     .slice(0, 3);
@@ -891,7 +780,6 @@ export const filterRestaurantPromotions = (allPromotions, restaurantId, allMenus
 
 export const getRestaurantPromotions = (restaurantId) => api.getRestaurantPromotions(restaurantId);
 
-// GESTION DU PANIER
 export const getCart = () => api.getCart();
 export const addToCart = (itemData) => api.addToCart(itemData);
 export const removeFromCart = (uniqueKey) => api.removeFromCart(uniqueKey);
@@ -900,28 +788,20 @@ export const clearRestaurantFromCart = (restaurantName) => api.clearRestaurantFr
 export const clearCart = () => api.clearCart();
 export const syncCart = (localItems) => api.syncCart(localItems);
 
-// GESTION DES FAVORIS
 export const getFavorites = () => api.getFavorites();
 
-// Récupérer tous les items/plats de tous les restaurants
 export const getAllMenuItems = async () => {
   try {
-    console.log('🍽️ Fetching all menus from backend...');
-
-    // Récupérer directement tous les menus depuis la collection menus
+    
     const allMenus = await getAllMenus();
-
-    console.log('✅ Retrieved', allMenus.length, 'menus from backend');
-
-    // Transformer les menus pour le format attendu par ItemResults
+    
     const allItems = allMenus.map(menu => ({
       ...menu,
       restaurantId: menu.restaurant || menu.restaurants?.value,
       restaurantName: menu.restaurants?.label,
-      // Conserver la référence complète du menu
+      
     }));
-
-    console.log('🍽️ Processed', allItems.length, 'menu items');
+    
     return allItems;
   } catch (error) {
     console.error('Error fetching all menu items:', error);
@@ -932,14 +812,12 @@ export const getRestaurantById = (id) => api.getRestaurantById(id);
 export const addToFavorites = (restaurantId) => api.addToFavorites(restaurantId);
 export const removeFromFavorites = (restaurantId) => api.removeFromFavorites(restaurantId);
 
-// Address APIs
 export const getUserAddresses = (userId) => api.getUserAddresses(userId);
 export const addUserAddress = (userId, addressData) => api.addUserAddress(userId, addressData);
 export const updateUserAddress = (userId, addressId, addressData) => api.updateUserAddress(userId, addressId, addressData);
 export const deleteUserAddress = (userId, addressId) => api.deleteUserAddress(userId, addressId);
 export const setDefaultAddress = (userId, addressId) => api.setDefaultAddress(userId, addressId);
 
-// Wallet APIs
 export const getUserPaymentMethods = (userId) => api.getUserPaymentMethods(userId);
 export const addPaymentMethod = (userId, paymentMethodData) => api.addPaymentMethod(userId, paymentMethodData);
 export const removePaymentMethod = (userId, paymentMethodId) => api.removePaymentMethod(userId, paymentMethodId);
@@ -949,11 +827,9 @@ export const getWalletBalance = (userId) => api.getWalletBalance(userId);
 export const addMoneyToWallet = (userId, amount, paymentMethodId) => api.addMoneyToWallet(userId, amount, paymentMethodId);
 export const withdrawFromWallet = (userId, amount, paymentMethodId) => api.withdrawFromWallet(userId, amount, paymentMethodId);
 
-// Collections (placeholders)
 export const restaurantsCol = 'restaurants';
 export const categoriesCol = 'categories';
 export const ordersCol = 'orders';
 export const userRef = 'users';
 
-// Exports par défaut
 export default api;
