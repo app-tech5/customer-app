@@ -258,7 +258,6 @@ export default function OrdersScreen({ navigation }) {
             </Text>
           </View>
         </View>
-
         
         <View style={styles.restaurantSection}>
           <View style={styles.restaurantIcon}>
@@ -273,7 +272,6 @@ export default function OrdersScreen({ navigation }) {
             </Text>
           </View>
         </View>
-
         
         <View style={styles.orderDetails}>
           <View style={styles.detailItem}>
@@ -294,7 +292,6 @@ export default function OrdersScreen({ navigation }) {
             </Text>
           </View>
         </View>
-
         
         <View style={styles.additionalInfo}>
           
@@ -306,7 +303,6 @@ export default function OrdersScreen({ navigation }) {
               </Text>
             </View>
           )}
-
           
           {item.delivery?.type && (
             <View style={styles.infoItem}>
@@ -320,7 +316,6 @@ export default function OrdersScreen({ navigation }) {
               </Text>
             </View>
           )}
-
           
           {item.status?.toLowerCase() === 'out_for_delivery' && item.delivery?.estimatedTime && (
             <View style={styles.infoItem}>
@@ -330,7 +325,6 @@ export default function OrdersScreen({ navigation }) {
               </Text>
             </View>
           )}
-
           
           {item.status?.toLowerCase() === 'out_for_delivery' && item.driver?.userId && (
             <View style={styles.infoItem}>
@@ -341,7 +335,6 @@ export default function OrdersScreen({ navigation }) {
             </View>
           )}
         </View>
-
         
         <View style={styles.orderActions}>
           {item.status?.toLowerCase() === 'pending' && (
@@ -454,7 +447,6 @@ export default function OrdersScreen({ navigation }) {
         <>
           
           <StatsHeader />
-
           
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={20} color={colors.text.secondary} style={styles.searchIcon} />
@@ -471,7 +463,6 @@ export default function OrdersScreen({ navigation }) {
               </TouchableOpacity>
             )}
           </View>
-
           
           <ScrollView
             horizontal
@@ -510,7 +501,6 @@ export default function OrdersScreen({ navigation }) {
               </TouchableOpacity>
             ))}
           </ScrollView>
-
           
           {filteredOrders.length === 0 ? (
             <View style={styles.noResultsContainer}>

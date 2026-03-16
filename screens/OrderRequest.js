@@ -197,7 +197,6 @@ export default function OrderRequest({ route, navigation }) {
             </View>
           </View>
         </View>
-
         
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
@@ -230,7 +229,6 @@ export default function OrderRequest({ route, navigation }) {
             </View>
           </View>
         </View>
-
         
         {specialInstructions && (
           <View style={styles.section}>
@@ -242,7 +240,6 @@ export default function OrderRequest({ route, navigation }) {
             </View>
           </View>
         )}
-
         
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
@@ -288,7 +285,6 @@ export default function OrderRequest({ route, navigation }) {
           </View>
         </View>
       </ScrollView>
-
       
       <View style={styles.bottomBar}>
         <View style={styles.totalContainer}>

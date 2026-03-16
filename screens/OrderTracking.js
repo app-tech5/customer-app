@@ -202,7 +202,6 @@ export default function OrderTracking() {
             {formatDate(order.createdAt || order.date)}
           </Text>
         </View>
-
         
         <View style={styles.timelineContainer}>
           <Text style={styles.sectionTitle}>
@@ -256,7 +255,6 @@ export default function OrderTracking() {
             </View>
           )}
         </View>
-
         
         {order.restaurant && (
           <View style={styles.infoCard}>
@@ -283,7 +281,6 @@ export default function OrderTracking() {
             )}
           </View>
         )}
-
         
         {order.driver && order.status?.toLowerCase() === 'out_for_delivery' && (
           <View style={styles.infoCard}>
@@ -322,7 +319,6 @@ export default function OrderTracking() {
             )}
           </View>
         )}
-
         
         {order.delivery?.address && (
           <View style={styles.infoCard}>
@@ -335,7 +331,6 @@ export default function OrderTracking() {
             </View>
           </View>
         )}
-
         
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>
@@ -390,7 +385,6 @@ export default function OrderTracking() {
             </Text>
           </View>
         </View>
-
         
         <TouchableOpacity
           style={styles.refreshButton}

@@ -255,7 +255,6 @@ export default function RestaurantDetail({ route, navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
       
       <ImageBackground
         source={{ uri: image }}
@@ -283,7 +282,6 @@ export default function RestaurantDetail({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </ImageBackground>
-
       
       <View style={styles.contentCard}>
         <ScrollView
@@ -315,7 +313,6 @@ export default function RestaurantDetail({ route, navigation }) {
                 {getRestaurantStatus.statusText}
               </Text>
             </View>
-
             
             {(restaurant.address || restaurant.phone) && (
               <View style={styles.restaurantInfoRow}>
@@ -345,7 +342,6 @@ export default function RestaurantDetail({ route, navigation }) {
           </TouchableOpacity>
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20 }} />
-
           
           {promotions.length > 0 && (
             <View style={styles.promotionsSection}>
@@ -360,7 +356,6 @@ export default function RestaurantDetail({ route, navigation }) {
           )}
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: promotions.length > 0 ? 10 : 0 }} />
-
           
           {reviews.length > 0 && (
             <View style={styles.reviewsSection}>
@@ -375,7 +370,6 @@ export default function RestaurantDetail({ route, navigation }) {
           )}
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: reviews.length > 0 ? 10 : 0 }} />
-
           
           <View style={styles.tabsWrapper}>
             <HeaderTabs
@@ -389,7 +383,6 @@ export default function RestaurantDetail({ route, navigation }) {
               delivery={() => setActiveTab("Delivery")}
             />
           </View>
-
           
           <View style={styles.menuList}>
             <MenuItems
@@ -411,19 +404,16 @@ export default function RestaurantDetail({ route, navigation }) {
           </View>
         </ScrollView>
       </View>
-
       
       <View style={styles.cartContainer}>
         <ViewCart navigation={navigation} route={route} restaurant={restaurant} />
       </View>
-
       
       {loading && (
         <View style={styles.loaderOverlay}>
           <Loader transparent/>
         </View>
       )}
-
       
       <RestaurantDetailComponent
         restaurant={restaurant}

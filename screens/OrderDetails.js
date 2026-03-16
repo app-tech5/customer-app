@@ -204,7 +204,6 @@ export default function OrderDetails() {
           <Text style={styles.quantityText}>{i18n.t('order.quantityPrefix')}{item.quantity}</Text>
         </View>
       </View>
-
       
       {item.extras && item.extras.length > 0 && (
         <View style={styles.extrasContainer}>
@@ -221,7 +220,6 @@ export default function OrderDetails() {
           ))}
         </View>
       )}
-
       
       {item.variants && item.variants.length > 0 && (
         <View style={styles.variantsContainer}>
@@ -513,10 +511,8 @@ export default function OrderDetails() {
       <ScrollView showsVerticalScrollIndicator={false}>
         
         <OrderHeader />
-
         
         <OrderSummary />
-
         
         <View style={styles.itemsContainer}>
           <Text style={styles.sectionTitle}>
@@ -530,16 +526,12 @@ export default function OrderDetails() {
             ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           />
         </View>
-
         
         <DeliveryInfo />
-
         
         <PaymentInfo />
-
         
         <OrderTotal />
-
         
         <ActionButtons />
       </ScrollView>
