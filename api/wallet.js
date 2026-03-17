@@ -1,6 +1,5 @@
 import { ApiClient } from './client';
 
-/** Resource: /users/:userId/transactions, /users/:userId/wallet */
 ApiClient.prototype.getUserTransactions = async function (userId, page = 1, limit = 20) {
   return await this.apiCall(
     `/users/${userId}/transactions?page=${page}&limit=${limit}`
@@ -27,4 +26,8 @@ ApiClient.prototype.withdrawFromWallet = async function (
     method: 'POST',
     body: JSON.stringify({ amount, paymentMethodId }),
   });
+};
+
+ApiClient.prototype.getTransactionById = async function (userId, transactionId) {
+  return await this.apiCall(`/users/${userId}/transactions/${transactionId}`);
 };

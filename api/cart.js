@@ -1,6 +1,5 @@
 import { ApiClient } from './client';
 
-/** Resource: /cart */
 ApiClient.prototype.getCart = async function () {
   return await this.apiCall('/cart');
 };
@@ -39,4 +38,25 @@ ApiClient.prototype.syncCart = async function (localItems) {
     method: 'POST',
     body: JSON.stringify({ localItems }),
   });
+};
+
+ApiClient.prototype.getCartCount = async function () {
+  try {
+    const cart = await this.getCart();
+    const items = cart?.items || cart?.localItems || [];
+    return items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  } catch {
+    return 0;
+  }
+};
+
+ApiClient.prototype.applyPromoCode = async function (code) {
+  return await this.apiCall('/cart/promo', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+};
+
+ApiClient.prototype.removePromoCode = async function () {
+  return await this.apiCall('/cart/promo', { method: 'DELETE' });
 };

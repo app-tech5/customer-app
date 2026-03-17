@@ -1,6 +1,5 @@
 import { ApiClient } from './client';
 
-/** Resource: /resource/deliverysettings */
 const DEFAULT_DELIVERY_SETTINGS = {
   fixedDeliveryFee: 2.5,
   dynamicDeliveryFee: {
@@ -19,5 +18,18 @@ ApiClient.prototype.getDeliverySettings = async function () {
   } catch (error) {
     console.error('Error fetching delivery settings:', error);
     return DEFAULT_DELIVERY_SETTINGS;
+  }
+};
+
+ApiClient.prototype.estimateDeliveryFee = async function (addressId, restaurantId, cartAmount) {
+  try {
+    const params = new URLSearchParams();
+    if (addressId) params.set('addressId', addressId);
+    if (restaurantId) params.set('restaurantId', restaurantId);
+    if (cartAmount != null) params.set('amount', cartAmount);
+    return await this.apiCall(`/resource/deliverysettings/estimate?${params}`);
+  } catch (error) {
+    console.error('Error estimating delivery fee:', error);
+    return null;
   }
 };

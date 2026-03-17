@@ -1,6 +1,5 @@
 import { ApiClient } from './client';
 
-/** Resource: /users/:userId/addresses */
 ApiClient.prototype.getUserAddresses = async function (userId) {
   return await this.apiCall(`/users/${userId}/addresses`);
 };
@@ -29,4 +28,8 @@ ApiClient.prototype.setDefaultAddress = async function (userId, addressId) {
   return await this.apiCall(`/users/${userId}/addresses/${addressId}/default`, {
     method: 'PUT',
   });
+};
+
+ApiClient.prototype.getAddressById = async function (userId, addressId) {
+  return await this.apiCall(`/users/${userId}/addresses/${addressId}`);
 };

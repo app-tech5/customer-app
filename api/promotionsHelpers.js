@@ -1,4 +1,3 @@
-/** Helpers for filtering promotions by restaurant (used by promotions.js and public filterRestaurantPromotions). */
 
 export function calculateRestaurantMenuIds(allMenus, restaurantId) {
   return new Set(

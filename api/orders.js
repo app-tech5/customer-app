@@ -1,6 +1,5 @@
 import { ApiClient } from './client';
 
-/** Resource: /resource/orders, /resource/settings, /resource/drivers */
 ApiClient.prototype.createOrder = async function (orderData) {
   return await this.apiCall('/resource/orders', {
     method: 'POST',
@@ -14,10 +13,6 @@ ApiClient.prototype.getOrders = async function () {
     id: order._id || order.id,
     ...order,
   }));
-};
-
-ApiClient.prototype.getSettings = async function () {
-  return await this.apiCall('/resource/settings');
 };
 
 ApiClient.prototype.getOrderById = async function (orderId) {
@@ -35,6 +30,19 @@ ApiClient.prototype.cancelOrder = async function (orderId) {
   return await this.updateOrderStatus(orderId, 'cancelled');
 };
 
-ApiClient.prototype.getDriverInfo = async function (driverId) {
-  return await this.apiCall(`/resource/drivers/${driverId}`);
+ApiClient.prototype.getOrderTracking = async function (orderId) {
+  return await this.apiCall(`/resource/orders/${orderId}/tracking`);
+};
+
+ApiClient.prototype.rateOrder = async function (orderId, rating, comment) {
+  return await this.apiCall(`/resource/orders/${orderId}/rate`, {
+    method: 'POST',
+    body: JSON.stringify({ rating, comment: comment || '' }),
+  });
+};
+
+ApiClient.prototype.reorder = async function (orderId) {
+  return await this.apiCall(`/resource/orders/${orderId}/reorder`, {
+    method: 'POST',
+  });
 };

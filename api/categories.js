@@ -1,6 +1,5 @@
 import { ApiClient } from './client';
 
-/** Resource: /resource/categories */
 ApiClient.prototype.getCategories = async function () {
   const response = await this.apiCall('/resource/categories');
   return response.map((category) => ({
@@ -27,4 +26,13 @@ ApiClient.prototype.searchRestaurantsByCategory = async function (categoryIdenti
     );
   }
   return restaurants || [];
+};
+
+ApiClient.prototype.getCategoryById = async function (categoryId) {
+  try {
+    return await this.apiCall(`/resource/categories/${categoryId}`);
+  } catch (error) {
+    console.error('Error fetching category:', error);
+    return null;
+  }
 };
