@@ -51,7 +51,6 @@ export default function App() {
    return <Loader />
    
   return (
-    <></>
-    // <RootNavigation statusBarColor="black"/>
+    <RootNavigation statusBarColor="black"/>
   );
 }
