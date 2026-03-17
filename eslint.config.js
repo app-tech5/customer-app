@@ -63,7 +63,7 @@ module.exports = [
       "no-console": "off",
       "local/no-console-remove": ["warn", { allow: ["warn", "error"] }],
       'no-comments/disallowComments': 'error',
-      "max-lines-per-function": "off",
+      "max-lines-per-function": ["warn", 50],
       // "complexity": ["warn", 10],
       // "react/jsx-max-depth": ["warn", { "max": 4 }],
       "no-unused-vars": "off",
@@ -134,13 +134,13 @@ module.exports = [
         },
       ],
 
-      "no-restricted-syntax": [
-        "warn",
-        {
-          selector: "FunctionDeclaration[id.name=/^[a-z]/]",
-          message: "Fonction trop longue, respectez 50 lignes max"
-        }
-      ]
+      // "no-restricted-syntax": [
+      //   "warn",
+      //   {
+      //     selector: "FunctionDeclaration[id.name=/^[a-z]/]",
+      //     message: "Fonction trop longue, respectez 80 lignes max"
+      //   }
+      // ]
     },
   },
   {

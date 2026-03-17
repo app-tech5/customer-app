@@ -25,58 +25,76 @@ export function isPromotionActive(promotion) {
   return isActive;
 }
 
-export function getApplicableRestaurantsForScope(promotion, allRestaurants) {
-  if (promotion.scope === 'restaurant') {
-    if (
-      promotion.applicableRestaurants &&
-      Array.isArray(promotion.applicableRestaurants)
-    ) {
-      const applicableRestaurants = allRestaurants.filter((restaurant) => {
-        const restaurantId = restaurant._id || restaurant.restaurantId;
-        return promotion.applicableRestaurants.some((restId) => {
-          const promoRestId =
-            typeof restId === 'object' ? restId.toString() : restId;
-          const restIdStr = restaurantId ? restaurantId.toString() : '';
-          return promoRestId === restIdStr;
-        });
+function getRestaurantScopeRestaurants(promotion, allRestaurants) {
+  if (
+    promotion.applicableRestaurants &&
+    Array.isArray(promotion.applicableRestaurants)
+  ) {
+    const applicableRestaurants = allRestaurants.filter((restaurant) => {
+      const restaurantId = restaurant._id || restaurant.restaurantId;
+      return promotion.applicableRestaurants.some((restId) => {
+        const promoRestId =
+          typeof restId === 'object' ? restId.toString() : restId;
+        const restIdStr = restaurantId ? restaurantId.toString() : '';
+        return promoRestId === restIdStr;
       });
-      return {
-        applicableRestaurants,
-        applicableRestaurantsCount: applicableRestaurants.length,
-      };
-    }
-    return { applicableRestaurants: [], applicableRestaurantsCount: 0 };
-  }
-  if (promotion.scope === 'platform') {
+    });
     return {
-      applicableRestaurants: allRestaurants.slice(0, 3),
-      applicableRestaurantsCount: allRestaurants.length,
+      applicableRestaurants,
+      applicableRestaurantsCount: applicableRestaurants.length,
     };
   }
-  if (promotion.scope === 'category') {
-    if (
-      promotion.applicableCategories &&
-      Array.isArray(promotion.applicableCategories)
-    ) {
-      const applicableRestaurants = allRestaurants.filter((restaurant) => {
-        if (!restaurant.categories) return false;
-        return restaurant.categories.some((cat) =>
-          promotion.applicableCategories.some(
-            (promoCat) =>
-              cat === promoCat ||
-              cat.name === promoCat ||
-              cat._id === promoCat ||
-              (typeof cat === 'string' && cat === promoCat) ||
-              (cat && cat.toString() === promoCat)
-          )
-        );
-      });
-      return {
-        applicableRestaurants,
-        applicableRestaurantsCount: applicableRestaurants.length,
-      };
-    }
+  return { applicableRestaurants: [], applicableRestaurantsCount: 0 };
+}
+
+function getPlatformScopeRestaurants(allRestaurants) {
+  return {
+    applicableRestaurants: allRestaurants.slice(0, 3),
+    applicableRestaurantsCount: allRestaurants.length,
+  };
+}
+
+function matchesCategory(promoCategories, cat) {
+  return promoCategories.some(
+    (promoCat) =>
+      cat === promoCat ||
+      cat.name === promoCat ||
+      cat._id === promoCat ||
+      (typeof cat === 'string' && cat === promoCat) ||
+      (cat && cat.toString() === promoCat)
+  );
+}
+
+function getCategoryScopeRestaurants(promotion, allRestaurants) {
+  if (
+    !promotion.applicableCategories ||
+    !Array.isArray(promotion.applicableCategories)
+  ) {
     return { applicableRestaurants: [], applicableRestaurantsCount: 0 };
+  }
+
+  const applicableRestaurants = allRestaurants.filter((restaurant) => {
+    if (!restaurant.categories) return false;
+    return restaurant.categories.some((cat) =>
+      matchesCategory(promotion.applicableCategories, cat)
+    );
+  });
+
+  return {
+    applicableRestaurants,
+    applicableRestaurantsCount: applicableRestaurants.length,
+  };
+}
+
+export function getApplicableRestaurantsForScope(promotion, allRestaurants) {
+  if (promotion.scope === 'restaurant') {
+    return getRestaurantScopeRestaurants(promotion, allRestaurants);
+  }
+  if (promotion.scope === 'platform') {
+    return getPlatformScopeRestaurants(allRestaurants);
+  }
+  if (promotion.scope === 'category') {
+    return getCategoryScopeRestaurants(promotion, allRestaurants);
   }
   return {
     applicableRestaurants: allRestaurants.slice(0, 3),
@@ -168,61 +186,58 @@ export function calculateRestaurantMenuIds(allMenus, restaurantId) {
   );
 }
 
+function matchesRestaurantScopeForRestaurant(promotion, restaurantId) {
+  const hasApplicableRestaurants =
+    promotion.applicableRestaurants &&
+    Array.isArray(promotion.applicableRestaurants);
+  if (!hasApplicableRestaurants) return false;
+
+  const restaurantIdStr = restaurantId.toString();
+  const includesRestaurantId = promotion.applicableRestaurants.some(
+    (restId) => {
+      const promoRestId =
+        typeof restId === 'object' ? (restId._id || restId.toString()) : restId;
+      return promoRestId.toString() === restaurantIdStr;
+    }
+  );
+  return includesRestaurantId;
+}
+
+function matchesItemScopeForRestaurant(promotion, restaurantMenuIds) {
+  const hasApplicableItems =
+    promotion.applicableItems && Array.isArray(promotion.applicableItems);
+  if (!hasApplicableItems || restaurantMenuIds.size === 0) return false;
+
+  const hasMatchingItem = promotion.applicableItems.some((itemId) => {
+    const promoItemId =
+      typeof itemId === 'object' ? (itemId._id || itemId.toString()) : itemId;
+    const promoItemIdStr = promoItemId ? promoItemId.toString() : '';
+    return restaurantMenuIds.has(promoItemIdStr);
+  });
+
+  return hasMatchingItem;
+}
+
+function doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds) {
+  if (!isPromotionActive(promotion)) return false;
+
+  if (promotion.scope === 'restaurant') {
+    return matchesRestaurantScopeForRestaurant(promotion, restaurantId);
+  }
+  if (promotion.scope === 'item') {
+    return matchesItemScopeForRestaurant(promotion, restaurantMenuIds);
+  }
+  if (promotion.scope === 'platform') return true;
+  if (promotion.scope === 'category') return false;
+  return false;
+}
+
 export function filterPromotionsByRestaurant(
   allPromotions,
   restaurantId,
   restaurantMenuIds
 ) {
-  return allPromotions.filter((promotion) => {
-    const now = new Date();
-    const isActive =
-      promotion.isActive &&
-      now >= new Date(promotion.startDate) &&
-      now <= new Date(promotion.endDate);
-    if (!isActive) return false;
-
-    const scopeMatch = (() => {
-      if (promotion.scope === 'restaurant') {
-        const hasApplicableRestaurants =
-          promotion.applicableRestaurants &&
-          Array.isArray(promotion.applicableRestaurants);
-        if (hasApplicableRestaurants) {
-          const restaurantIdStr = restaurantId.toString();
-          const includesRestaurantId = promotion.applicableRestaurants.some(
-            (restId) => {
-              const promoRestId =
-                typeof restId === 'object'
-                  ? (restId._id || restId.toString())
-                  : restId;
-              return promoRestId.toString() === restaurantIdStr;
-            }
-          );
-          if (includesRestaurantId) return true;
-        }
-        return false;
-      }
-      if (promotion.scope === 'item') {
-        const hasApplicableItems =
-          promotion.applicableItems &&
-          Array.isArray(promotion.applicableItems);
-        if (hasApplicableItems && restaurantMenuIds.size > 0) {
-          const hasMatchingItem = promotion.applicableItems.some((itemId) => {
-            const promoItemId =
-              typeof itemId === 'object'
-                ? (itemId._id || itemId.toString())
-                : itemId;
-            const promoItemIdStr = promoItemId ? promoItemId.toString() : '';
-            return restaurantMenuIds.has(promoItemIdStr);
-          });
-          if (hasMatchingItem) return true;
-        }
-        return false;
-      }
-      if (promotion.scope === 'platform') return true;
-      if (promotion.scope === 'category') return false;
-      return false;
-    })();
-
-    return scopeMatch;
-  });
+  return allPromotions.filter((promotion) =>
+    doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds)
+  );
 }
