@@ -41,7 +41,7 @@ export const cleanupExpiredCache = async () => {
     }
 
     if (cleanedCount > 0) {
-      // Optionally log or track cleaned entries
+      
     }
   } catch (error) {
     console.error(i18n.t('cache.cleanupError'), error);
