@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
 import { useSelector } from 'react-redux'
+import { config } from '../config'
 
 export default function DrawerContent(props) {
 
@@ -39,7 +40,7 @@ export default function DrawerContent(props) {
                         rounded
                         avatarStyle={styles.avatar}
                         size={60}
-                        source={image ? {uri: image} : {uri: "https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png"}}/>
+                        source={image ? {uri: image} : {uri: config.assetUrls.avatars.default}}/>
                     <View style={styles.userInfo}>
                         <Text style={styles.userName}>{name || 'Utilisateur'}</Text>
                         <Text style={styles.userEmail}>{email || 'email@example.com'}</Text>

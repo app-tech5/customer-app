@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { userInfos, updateUser } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
+import { config } from '../config'
 import Loader from './Loader'
 
 export default function EditProfileScreen({ navigation }) {
@@ -303,7 +304,7 @@ export default function EditProfileScreen({ navigation }) {
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
               <Image
-                source={{ uri: userData.image || 'https://via.placeholder.com/120x120' }}
+                source={{ uri: userData.image || config.assetUrls.placeholder.profileAvatar120 }}
                 style={styles.avatar}
                 resizeMode="cover"
               />

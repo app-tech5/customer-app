@@ -43,6 +43,7 @@ If you want to standardize visuals or switch to local placeholders later, update
 ### Groups
 
 - `assetUrls.placeholder.*`: image placeholders
+- `assetUrls.placeholder.*` keys are named after the UI usage (e.g. `orderDetailsHero400x200`, `profileAvatar120`) to keep them self-explanatory.
 - `assetUrls.icons.*`: remote icon URLs
 - `assetUrls.avatars.*`: default avatar URL
 - `assetUrls.demo.*`: demo-only image URLs (e.g. Preference screen)

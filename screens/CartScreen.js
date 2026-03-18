@@ -5,6 +5,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import i18n from '../lang/i18n';
 import CartModal from "../components/CartModal";
+import { config } from "../config";
 
 const CartScreen = ({navigation}) => {
   
@@ -18,7 +19,7 @@ const CartScreen = ({navigation}) => {
     <View style={{flex: 1}}> 
     {items.length === 0 ?
       <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-       <Image style={{width: 150, height: 150, marginBottom: 20}} source={{uri: "https://img.icons8.com/fluency/344/shopping-cart.png"}} />
+       <Image style={{width: 150, height: 150, marginBottom: 20}} source={{uri: config.assetUrls.icons.cart}} />
        <Text style={{fontSize: 20}}>{i18n.t('cart.addItemsToStartCart')}</Text>
        <Text style={{fontSize: 10, marginBottom: 15}}>{i18n.t('cart.emptySubtitle')}</Text>
        <TouchableOpacity 

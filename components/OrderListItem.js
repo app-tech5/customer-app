@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons';
 import { language, currency, colors } from '../global';
 import i18n from '../lang/i18n';
+import { config } from '../config';
 
 const OrderListItem = ({ order }) => {
   const navigation = useNavigation();
@@ -64,7 +65,7 @@ const OrderListItem = ({ order }) => {
       <View style={styles.content}>
         {}
         <Image
-          source={{ uri: order.restaurant?.image || 'https://via.placeholder.com/80' }}
+          source={{ uri: order.restaurant?.image || config.assetUrls.placeholder.orderListRestaurant80 }}
           style={styles.restaurantImage}
           defaultSource={require('../assets/images/default-food.jpg')}
         />

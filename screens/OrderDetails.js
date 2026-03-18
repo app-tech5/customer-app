@@ -7,6 +7,7 @@ import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
+import { config } from '../config'
 
 export default function OrderDetails() {
   const [order, setOrder] = useState(null)
@@ -128,7 +129,7 @@ export default function OrderDetails() {
   const OrderHeader = () => (
     <View style={styles.headerContainer}>
       <Image
-        source={{ uri: order.restaurant?.image || 'https://via.placeholder.com/400x200' }}
+        source={{ uri: order.restaurant?.image || config.assetUrls.placeholder.orderDetailsHero400x200 }}
         style={styles.restaurantImage}
         resizeMode="cover"
       />
@@ -188,7 +189,7 @@ export default function OrderDetails() {
     <View style={styles.itemContainer}>
       <View style={styles.itemHeader}>
         <Image
-          source={{ uri: item.image || 'https://via.placeholder.com/80x80' }}
+          source={{ uri: item.image || config.assetUrls.placeholder.orderDetailsItem80 }}
           style={styles.itemImage}
           resizeMode="cover"
         />

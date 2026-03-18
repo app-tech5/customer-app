@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import { userInfos, updateUser, getOrders } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
+import { config } from '../config'
 import Loader from './Loader'
 
 export default function AccountScreen({ navigation }) {
@@ -79,7 +80,7 @@ export default function AccountScreen({ navigation }) {
     <View style={styles.headerContainer}>
       <View style={styles.avatarContainer}>
         <Image
-          source={{ uri: userData?.image || 'https://via.placeholder.com/120x120' }}
+          source={{ uri: userData?.image || config.assetUrls.placeholder.profileAvatar120 }}
           style={styles.avatar}
           resizeMode="cover"
         />

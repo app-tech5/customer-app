@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import i18n from "../lang/i18n";
+import { config } from "../config";
 
 const DishListItem = ({ dish }) => {
   const navigation = useNavigation();
@@ -22,7 +23,7 @@ const DishListItem = ({ dish }) => {
       {dish?.image && (
         <Image
           source={imageError ?
-            { uri: 'https://via.placeholder.com/75x75/cccccc/666666?text=No+Image' } :
+            { uri: config.assetUrls.placeholder.dishListItemNoImage75 } :
             { uri: dish.image }
           }
           style={[styles.image, { backgroundColor: imageError ? '#f0f0f0' : 'transparent' }]}

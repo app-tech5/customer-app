@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
 import { getAllMenuItems, getRestaurantById } from '../api'
+import { config } from '../config'
 
 export default function ItemResults({route, navigation}) {
   const [itemData, setItemData] = useState([])
@@ -183,7 +184,7 @@ export default function ItemResults({route, navigation}) {
               <ImageBackground
                 style={styles.itemImage}
                 imageStyle={{ borderRadius: 8 }}
-                source={{ uri: item.image || 'https://via.placeholder.com/150' }}
+                source={{ uri: item.image || config.assetUrls.placeholder.itemResultsCard150 }}
               >
                 <View style={styles.itemOverlay}>
                   <Text style={styles.itemName}>{item.name}</Text>

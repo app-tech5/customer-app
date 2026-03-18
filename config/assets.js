@@ -1,12 +1,11 @@
 export const assetUrls = {
   placeholder: {
-    dish75: 'https://via.placeholder.com/75x75/cccccc/666666?text=No+Image',
-    dish80: 'https://via.placeholder.com/80',
-    image80: 'https://via.placeholder.com/80x80',
-    avatar120: 'https://via.placeholder.com/120x120',
-    image120: 'https://via.placeholder.com/120x120',
-    image150: 'https://via.placeholder.com/150',
-    hero400x200: 'https://via.placeholder.com/400x200',
+    dishListItemNoImage75: 'https://via.placeholder.com/75x75/cccccc/666666?text=No+Image',
+    orderListRestaurant80: 'https://via.placeholder.com/80',
+    orderDetailsItem80: 'https://via.placeholder.com/80x80',
+    profileAvatar120: 'https://via.placeholder.com/120x120',
+    itemResultsCard150: 'https://via.placeholder.com/150',
+    orderDetailsHero400x200: 'https://via.placeholder.com/400x200',
   },
   icons: {
     cart: 'https://img.icons8.com/fluency/344/shopping-cart.png',
