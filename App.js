@@ -1,5 +1,4 @@
 import RootNavigation from "./navigation/navigation";
-import { SafeAreaView, StatusBar} from "react-native";
 import {useFonts} from 'expo-font'
 import { useEffect } from 'react';
 
@@ -40,7 +39,6 @@ export default function App() {
 
   })
 
-  // Nettoyer les caches expirés au démarrage
   useEffect(() => {
     if (fontsLoaded) {
       cleanupExpiredCache().catch(console.error);
