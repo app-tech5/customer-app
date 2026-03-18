@@ -118,7 +118,7 @@ npm start
 ## Configuration
 
 ### API Configuration
-Edit `config.js`:
+Edit `config/index.js` (or keep importing from `config.js` for compatibility):
 
 ```javascript
 export const config = {
@@ -129,6 +129,7 @@ export const config = {
   DEMO_EMAIL: 'demo@customer.com',
   DEMO_PASSWORD: 'demo123',
   API_TIMEOUT: 10000,
+  assetUrls: { /* see config/assets.js */ },
 };
 ```
 
@@ -146,10 +147,11 @@ export const config = {
 ```
 customer-app/
 ├── App.js                    # Entry point
-├── api.js                    # REST API client
-├── config.js                 # App configuration
-├── i18n.js                   # Internationalization
-├── global.js                 # Global constants
+├── api/                      # API layer (client + endpoints)
+├── config/                   # App configuration (runtime + assets)
+├── config.js                 # Re-export for backward compatibility
+├── global/                   # Global constants & theme tokens (no inline comments)
+├── lang/                     # i18n setup + translations
 │
 ├── components/               # 41 reusable components
 │   ├── home/                 # Home screen components
@@ -211,7 +213,14 @@ customer-app/
 │   └── fr.json               # French translations
 │
 ├── utils/
-│   └── cacheUtils.js
+│   ├── cacheUtils.js         # Barrel re-export (compat)
+│   ├── cacheCommon.js        # Shared cache config/helpers
+│   ├── cacheFoods.js
+│   ├── cacheRestaurants.js
+│   ├── cachePromotions.js
+│   ├── cacheMenus.js
+│   ├── cacheSignIn.js
+│   └── cacheCleanup.js
 │
 └── doc/                      # Documentation
     ├── README.md
@@ -252,7 +261,7 @@ The app automatically detects device language using `expo-localization`.
 
 ### Usage
 ```javascript
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 
 // Simple text
 <Text>{i18n.t('auth.welcome')}</Text>
@@ -263,7 +272,7 @@ import i18n from '../i18n';
 
 ### Change Language
 ```javascript
-import { changeLanguage } from '../i18n';
+import { changeLanguage } from '../lang/i18n';
 changeLanguage('en'); // English
 changeLanguage('fr'); // French
 ```
@@ -329,7 +338,13 @@ npm install
 ## Documentation
 
 ### Detailed Documentation
-See the [`/doc`](./doc/) folder for complete documentation:
+See the [`/doc`](./doc/) folder for complete documentation, and module-level docs in:
+
+- `api/README.md` + `api/docs/`
+- `components/README.md` + `components/docs/`
+- `global/README.md` + `global/docs/`
+- `lang/README.md` + `lang/docs/`
+- `config/README.md`
 
 | File | Description |
 |------|-------------|

@@ -12,9 +12,9 @@ This folder contains technical documentation for the **Good Food Pro** customer 
 Complete technical documentation including:
 - ✅ **Tech Stack**: React Native 0.81.5, Expo SDK 54, Redux 5
 - ✅ **Project Structure**: Components, screens, navigation, contexts
-- ✅ **API Client**: REST API methods, authentication, endpoints
+- ✅ **API Layer**: `api/` (ApiClient + endpoints, auth, promotions)
 - ✅ **State Management**: Redux + React Context
-- ✅ **Internationalization**: i18n setup (EN/FR)
+- ✅ **Internationalization**: `lang/` (i18n setup + docs)
 - ✅ **Key Features**: Ordering, payments, tracking, promotions
 
 #### [API Reference](./api-reference.md)
@@ -26,6 +26,14 @@ Complete REST API documentation:
 - ✅ **Cart**: Server-side cart management
 - ✅ **Payments**: Wallet, payment methods
 - ✅ **Promotions**: Offers, discounts
+
+Additional module-level docs:
+
+- `api/README.md` + `api/docs/`
+- `components/README.md` + `components/docs/`
+- `global/README.md` + `global/docs/`
+- `lang/README.md` + `lang/docs/`
+- `config/README.md`
 
 ---
 

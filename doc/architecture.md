@@ -68,11 +68,11 @@ Good Food Pro Customer App is a React Native mobile application built with Expo 
 ```
 customer-app/
 ├── App.js                    # Entry point
-├── api.js                    # REST API client
-├── config.js                 # App configuration
-├── i18n.js                   # Internationalization
-├── global.js                 # Global constants
-├── utils.js                  # Utility functions
+├── api/                      # API layer (ApiClient + endpoints)
+├── config/                   # App configuration (runtime + asset URLs)
+├── config.js                 # Re-export for backward compatibility
+├── global/                   # Global constants & theme tokens
+├── lang/                     # i18n setup + translations
 │
 ├── components/
 │   ├── home/                 # Home screen components
@@ -153,11 +153,20 @@ customer-app/
 │       └── productsReducer.js # Products state
 │
 ├── lang/
+│   ├── i18n.js               # i18n-js instance + helpers
 │   ├── en.json               # English translations
-│   └── fr.json               # French translations
+│   ├── fr.json               # French translations
+│   └── docs/                 # i18n documentation
 │
 ├── utils/
-│   └── cacheUtils.js         # Cache utilities
+│   ├── cacheUtils.js         # Barrel re-export (compat)
+│   ├── cacheCommon.js        # Shared cache config/helpers
+│   ├── cacheFoods.js
+│   ├── cacheRestaurants.js
+│   ├── cachePromotions.js
+│   ├── cacheMenus.js
+│   ├── cacheSignIn.js
+│   └── cacheCleanup.js
 │
 └── doc/                      # Documentation
     ├── README.md
@@ -226,7 +235,7 @@ RootNavigation (Stack)
 
 ## API Client Architecture
 
-The `api.js` file contains a centralized API client (`ApiClient` class) that:
+The `api/` folder contains a centralized API client (`ApiClient` class) that:
 
 1. **Authentication**: JWT-based login/logout with token persistence
 2. **Auto-initialization**: Restores token from AsyncStorage on startup
@@ -310,13 +319,13 @@ The `api.js` file contains a centralized API client (`ApiClient` class) that:
 
 ### Usage
 ```javascript
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 
 // In components
 <Text>{i18n.t('auth.welcome')}</Text>
 
 // Change language
-import { changeLanguage } from '../i18n';
+import { changeLanguage } from '../lang/i18n';
 changeLanguage('fr');
 ```
 
@@ -338,7 +347,7 @@ changeLanguage('fr');
 
 ## Configuration
 
-### `config.js`
+### `config/`
 ```javascript
 export const config = {
   API_BASE_URL: 'http://localhost:5000/api',
@@ -350,6 +359,12 @@ export const config = {
   API_TIMEOUT: 10000,
 };
 ```
+
+The canonical source is now `config/index.js`. The root `config.js` re-exports `config` for backward compatibility.
+
+### Asset URL fallbacks
+
+Remote placeholder/icon/avatar URLs are centralized in `config/assets.js` as `assetUrls` and exposed as `config.assetUrls`.
 
 ### Demo Mode
 When `DEMO_MODE: true`:
