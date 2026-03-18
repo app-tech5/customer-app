@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Menu } from '../components/home/HomeHeader'
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
 import { colors } from '../global'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { getCategories } from '../api'
 

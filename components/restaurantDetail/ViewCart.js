@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, language, currency } from '../../global'
-import i18n from '../../i18n'
+import i18n from '../../lang/i18n'
 import CartModal from '../CartModal'
 
 export default function ViewCart({ navigation: _navigation, route, params, deliverySettings: _deliverySettings, restaurant: restaurantProp }) {

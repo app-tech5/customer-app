@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import i18n from "../i18n";
+import i18n from "../lang/i18n";
 
 const DishListItem = ({ dish }) => {
   const navigation = useNavigation();

@@ -2,7 +2,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, Statu
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { getCategories } from '../api'
 
 export default function CategoryResults({route, navigation}) {

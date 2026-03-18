@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native'
 import React from 'react'
 import { grey1 } from '../../global'
-import i18n from '../../i18n'
+import i18n from '../../lang/i18n'
 
 export default function HeaderTabs(props) {
   return (

@@ -12,7 +12,7 @@ import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
 import { colors, currency } from '../global'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const { height } = Dimensions.get('window')

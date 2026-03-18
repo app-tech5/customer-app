@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Icon } from 'react-native-elements';
 import RestaurantDetailComponent from '../RestaurantDetailComponent';
 import { getCategoriesFromRestaurant } from '../../api';
-import i18n from '../../i18n';
+import i18n from '../../lang/i18n';
 
 export default function About(props) {
   const {restaurant} = props.route.params

@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import SearchBar from '../components/home/SearchBar'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function SignUp({ navigation }) {
 

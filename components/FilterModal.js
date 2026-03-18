@@ -2,7 +2,7 @@ import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView, Platform} 
 import React, {useState} from 'react'
 import { AntDesign, Ionicons, FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons} from '@expo/vector-icons'
 import { colors, currency } from '../global'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function FilterModal({visible, setVisible, onApplyFilters}) {
   const [selectedFilters, setSelectedFilters] = useState({

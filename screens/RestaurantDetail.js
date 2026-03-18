@@ -15,7 +15,7 @@ import { config } from '../config'
 import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime } from '../utils'
 import * as Location from 'expo-location'
 import { getRestaurantReviews, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 const { width, height } = Dimensions.get('window')
 

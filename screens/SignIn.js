@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
 import { api } from '../api'
 import { config } from '../config'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"

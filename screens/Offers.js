@@ -8,7 +8,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { colors } from '../global'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getAllActiveOffers } from '../api'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 

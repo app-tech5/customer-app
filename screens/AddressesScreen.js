@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { colors } from '../global'
 
 export default function AddressesScreen({ navigation }) {

@@ -12,7 +12,7 @@ import OrdersScreen from '../screens/OrdersScreen';
 import OrderTracking from '../screens/OrderTracking'
 import OrderDetails from '../screens/OrderDetails'
 import { Ionicons, MaterialIcons, Entypo, Feather } from '@expo/vector-icons'
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 import { colors } from '../global';
 
 const Drawer = createDrawerNavigator();

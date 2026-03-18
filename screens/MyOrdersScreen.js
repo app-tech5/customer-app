@@ -2,7 +2,7 @@ import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpa
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { getOrders } from '../api'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'

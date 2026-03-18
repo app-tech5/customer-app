@@ -4,7 +4,7 @@ import * as Animatable from "react-native-animatable"
 import {LinearGradient} from 'expo-linear-gradient'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function Splash() {
   const navigation = useNavigation()

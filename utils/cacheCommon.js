@@ -1,4 +1,4 @@
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 
 export const CACHE_KEYS = {
   RESTAURANT_FOODS: 'restaurant_foods_',

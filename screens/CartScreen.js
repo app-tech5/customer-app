@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import {language, currency}  from '../global'
 import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 import CartModal from "../components/CartModal";
 
 const CartScreen = ({navigation}) => {

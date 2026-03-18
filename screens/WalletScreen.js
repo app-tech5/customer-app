@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import { getUserPaymentMethods, getUserTransactions } from '../api'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 

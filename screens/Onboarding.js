@@ -1,7 +1,7 @@
 import { View, Text, ImageBackground, StyleSheet, TouchableOpacity} from 'react-native'
 import React from 'react'
 import * as Animatable from "react-native-animatable"
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function OnboardingScreen({navigation}) {
   return (

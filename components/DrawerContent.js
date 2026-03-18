@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { MaterialIcons } from '@expo/vector-icons'
 import { colors } from '../global'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { useSelector } from 'react-redux'
 
 export default function DrawerContent(props) {

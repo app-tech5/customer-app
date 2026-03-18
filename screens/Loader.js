@@ -3,7 +3,7 @@ import React from 'react'
 import LottieView from 'lottie-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors } from '../global'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function Loader({ checkout = false, transparent = false }) {
   return (

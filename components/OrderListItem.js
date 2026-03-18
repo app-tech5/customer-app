@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from "react
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons';
 import { language, currency, colors } from '../global';
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 
 const OrderListItem = ({ order }) => {
   const navigation = useNavigation();

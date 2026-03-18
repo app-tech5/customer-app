@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Icon } from 'react-native-elements'
 import { colors, currency } from '../../global'
-import i18n from '../../i18n'
+import i18n from '../../lang/i18n'
 
 export default function PromotionCard({ promotion }) {
   

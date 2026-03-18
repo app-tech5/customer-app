@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { StyleSheet, TextInput, View, Keyboard, Animated, TouchableOpacity, Dimensions, Text } from "react-native";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { colors } from '../global';
-import i18n from '../i18n';
+import i18n from '../lang/i18n';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

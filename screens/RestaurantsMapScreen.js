@@ -14,7 +14,7 @@ import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import { useSelector } from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Location from 'expo-location'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function RestaurantsMapScreen({ route, navigation }) {
   const { restaurantData } = useContext(RestaurantsContext)

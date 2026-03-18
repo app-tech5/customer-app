@@ -4,7 +4,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import PromotionBadge from '../PromotionBadge';
 import { colors } from '../../global';
-import i18n from '../../i18n';
+import i18n from '../../lang/i18n';
 
 export default function RestaurantItems({navigation,...props}) {
     const { width } = useWindowDimensions();

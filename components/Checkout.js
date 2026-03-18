@@ -7,7 +7,7 @@ import { language, currency, colors } from '../global'
 import { api } from '../api'
 import { useNavigation } from '@react-navigation/native'
 import { LoaderContext } from '../contexts/LoaderContext'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 export default function Checkout({ restaurantName, setLoader: _setLoader, setViewCartButton, setModalVisible, closeModal, restaurant }) {
     const { setLoading } = useContext(LoaderContext)

@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native'
 import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
 import { Ionicons } from '@expo/vector-icons'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=>{

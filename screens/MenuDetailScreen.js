@@ -7,7 +7,7 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
 import { getVariants } from '../api'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function MenuDetailScreen({route}) {
   const navigation = useNavigation()

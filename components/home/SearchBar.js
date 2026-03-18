@@ -1,7 +1,7 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import i18n from '../../i18n'
+import i18n from '../../lang/i18n'
 
 export default function SearchBar({searchbar, cityHandler: _cityHandler, style, setAddress: _setAddress, navigation, restaurantData}) {
   const [searchText, setSearchText] = useState('')

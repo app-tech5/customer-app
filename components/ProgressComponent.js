@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React, { useRef } from 'react'
 import { ProgressStep, ProgressSteps } from 'react-native-progress-steps'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default function ProgressComponent() {
   const progressStep = useRef(null)

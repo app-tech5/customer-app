@@ -11,7 +11,7 @@ import AddToCartButton from '../AddToCartButton';
 import { FlatList } from 'react-native-gesture-handler';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { loadFoodsWithSmartCache } from '../../utils/cacheUtils';
-import i18n from '../../i18n';
+import i18n from '../../lang/i18n';
 
 const styles = StyleSheet.create({
   menuItemStyle: { flex: 1, },

@@ -3,7 +3,7 @@ import { Text, StyleSheet, View, ScrollView, Image, Platform } from 'react-nativ
 import { colors } from '../global'
 import { Icon, CheckBox } from 'react-native-elements'
 import { menuDetailedData } from '../data'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 export default class PreferenceScreen extends Component {
 

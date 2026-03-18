@@ -5,7 +5,7 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { language, currency, colors } from '../global'
 import Checkout from '../components/Checkout'
 import { Ionicons } from '@expo/vector-icons'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const CartDetailsScreen = () => {

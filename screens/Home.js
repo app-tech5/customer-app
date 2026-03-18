@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity} from 'react-native'
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import { Icon } from 'react-native-elements'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 import HeaderTabs from '../components/home/HeaderTabs'
 import SearchBar from '../components/home/SearchBar'
 import RestaurantItems from '../components/home/RestaurantItems'

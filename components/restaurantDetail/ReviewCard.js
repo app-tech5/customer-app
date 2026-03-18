@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet } from 'react-native'
 import React from 'react'
 import { Icon } from 'react-native-elements'
 import { colors } from '../../global'
-import i18n from '../../i18n'
+import i18n from '../../lang/i18n'
 
 export default function ReviewCard({ review }) {
   if (!review) return null;

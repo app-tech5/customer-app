@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { getDeliverySettings } from '../api'
 import { SignInContext } from './authContext'
-import i18n from '../i18n'
+import i18n from '../lang/i18n'
 
 const DeliverySettingsContext = createContext()
 
