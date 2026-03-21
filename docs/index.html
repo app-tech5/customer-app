@@ -285,6 +285,104 @@
         background: #ffffff;
       }
 
+      /* File Tree Styles */
+      .project-structure {
+        margin-top: 20px;
+      }
+
+      .tree-container {
+        background: var(--soft);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+        font-size: 13px;
+        line-height: 1.5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .tree-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .tree {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+      }
+
+      .tree li {
+        position: relative;
+        padding-left: 24px;
+        margin: 2px 0;
+      }
+
+      .tree li:before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: var(--border);
+      }
+
+      .tree li:last-child:before {
+        bottom: 50%;
+      }
+
+      .tree li .node {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        color: var(--muted);
+      }
+
+      .tree li .node:hover {
+        background: #f1f5f9;
+        color: var(--text);
+      }
+
+      .tree li .node.folder {
+        color: #eab308;
+        font-weight: 500;
+      }
+
+      .tree li .node.file {
+        color: #64748b;
+      }
+
+      .tree li .node .icon {
+        font-size: 15px;
+        width: 18px;
+      }
+
+      .tree li ul {
+        margin-top: 2px;
+        padding-left: 20px;
+        list-style: none;
+      }
+
+      .tree-path {
+        font-family: monospace;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: rgba(0, 0, 0, 0.02);
+        border-radius: 6px;
+        border: 1px dashed var(--border);
+      }
+
       @media (max-width: 920px) {
         .layout {
           grid-template-columns: 1fr;
@@ -322,6 +420,7 @@
         <p class="sidebar-label">Documentation</p>
         <nav class="nav">
           <a class="active" href="#overview">Overview</a>
+          <a href="#project-structure">Project Structure</a>
           <a href="./getting-started.html">Getting Started</a>
         </nav>
       </aside>
@@ -477,6 +576,79 @@
               Note: the backend is sold separately. This customer app connects to a compatible
               Good Food Pro backend API when available.
             </p>
+          </section>
+
+          <section id="project-structure" class="section-block">
+            <h2>Project Structure</h2>
+            <p class="section-subtext">
+              Well-organized React Native codebase following standard conventions. Key directories are highlighted below.
+            </p>
+
+            <div class="project-structure">
+              <div class="tree-container">
+                <div class="tree-title">
+                  <span class="icon">📁</span>
+                  customer-app/
+                </div>
+                <ul class="tree">
+                  <li>
+                    <div class="node file"><span class="icon">📄</span> App.js <span style="font-size:10px; color:#94a3b8;">(entry point)</span></div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> api/ <span style="font-size:10px; color:#94a3b8;">(REST client &amp; 15+ endpoints)</span></div>
+                    <ul>
+                      <li><div class="node file"><span class="icon">📄</span> index.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> client.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> auth.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> restaurants.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> orders.js</div></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> components/ <span style="font-size:10px; color:#94a3b8;">(41+ reusable UI components)</span></div>
+                    <ul>
+                      <li><div class="node folder"><span class="icon">📁</span> home/</div></li>
+                      <li><div class="node folder"><span class="icon">📁</span> restaurantDetail/</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> Cart.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> FilterModal.js</div></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> screens/ <span style="font-size:10px; color:#94a3b8;">(34+ screens)</span></div>
+                    <ul>
+                      <li><div class="node file"><span class="icon">📄</span> Home.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> RestaurantDetail.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> CartScreen.js</div></li>
+                      <li><div class="node file"><span class="icon">📄</span> OrderTracking.js</div></li>
+                    </ul>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> navigation/</div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> contexts/</div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> global/ <span style="font-size:10px; color:#94a3b8;">(theme, constants)</span></div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> lang/ <span style="font-size:10px; color:#94a3b8;">(i18n EN/FR)</span></div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> utils/ <span style="font-size:10px; color:#94a3b8;">(cache, helpers)</span></div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> config/ <span style="font-size:10px; color:#94a3b8;">(API, assets)</span></div>
+                  </li>
+                  <li>
+                    <div class="node folder"><span class="icon">📁</span> docs/ <span style="font-size:10px; color:#94a3b8;">(this documentation)</span></div>
+                  </li>
+                </ul>
+              </div>
+              <div class="tree-path">
+                Full structure available in README.md • 100+ files • Clean separation of concerns
+              </div>
+            </div>
           </section>
 
           <section class="section-block">
