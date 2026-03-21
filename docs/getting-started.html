@@ -511,26 +511,110 @@
         </section>
 
         <section class="section">
-          <h2>3) Basic Configuration</h2>
+          <h2>3) Configuration &amp; Personnalisation</h2>
           <p>
-            Configure the app with your branding and environment values before testing.
+            The customer app is highly configurable. You can adapt it to your brand, choose your preferred language, 
+            enable demo mode for presentations, and customize the visual appearance.
           </p>
-          <ul>
-            <li>Set the correct API base URL for your backend environment.</li>
-            <li>Keep app name / version fields aligned with your release strategy.</li>
-            <li>Use demo mode when preparing sales demos or first-time client presentations.</li>
-            <li>Validate language and region settings for your target market.</li>
-          </ul>
+
+          <h3 style="margin: 28px 0 12px 0; font-size: 19px;">API Configuration</h3>
+          <p>
+            The most important setting is the connection to your backend server. Edit the file 
+            <code>config/index.js</code> to set your API URL.
+          </p>
           <div class="code-block">
             <div class="code-head">
-              <span class="code-title">Example Configuration Values</span>
-              <span class="code-copy">reference</span>
+              <span class="code-title">config/index.js</span>
             </div>
-            <pre><code><span class="tok-var">API_BASE_URL</span> = <span class="tok-str">"http://YOUR_SERVER_IP:5000/api"</span>
-<span class="tok-var">DEMO_MODE</span> = <span class="tok-arg">true</span>
-<span class="tok-var">DEMO_EMAIL</span> = <span class="tok-str">"demo@customer.com"</span>
-<span class="tok-var">DEMO_PASSWORD</span> = <span class="tok-str">"demo123"</span></code></pre>
+            <pre><code><span class="tok-var">API_BASE_URL</span>: <span class="tok-str">'http://YOUR_SERVER_IP:5000/api'</span>,
+APP_NAME: <span class="tok-str">'Good Food'</span>,
+VERSION: <span class="tok-str">'1.0.0'</span></code></pre>
           </div>
+
+          <h3 style="margin: 28px 0 12px 0; font-size: 19px;">Demo Mode</h3>
+          <p>
+            Perfect for demonstrations and client presentations. When enabled, the app automatically fills 
+            the login form with demo credentials.
+          </p>
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-title">Demo Configuration</span>
+            </div>
+            <pre><code><span class="tok-var">DEMO_MODE</span>: <span class="tok-arg">true</span>,
+DEMO_EMAIL: <span class="tok-str">'demo@customer.com'</span>,
+DEMO_PASSWORD: <span class="tok-str">'demo123'</span></code></pre>
+          </div>
+
+          <h3 style="margin: 28px 0 12px 0; font-size: 19px;">Language Configuration</h3>
+          <p>
+            The default language is defined in <code>global/constants.js</code>. This value is used as a 
+            base configuration for the application.
+          </p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-title">global/constants.js</span>
+            </div>
+            <pre><code><span class="tok-var">export</span> <span class="tok-var">const</span> language = <span class="tok-str">"en"</span>;</code></pre>
+          </div>
+
+          <p class="sub">
+            You can change the default language by modifying this value. The app also supports automatic 
+            language detection based on the user's device settings (English and French are available).
+          </p>
+
+          <h3 style="margin: 28px 0 12px 0; font-size: 19px;">Visual Customization</h3>
+          <p>
+            You can customize colors, themes, and assets by editing the files in the <code>global/</code> 
+            and <code>config/assets.js</code> folders.
+          </p>
+
+          <div class="callout">
+            <strong>Pro tip:</strong> After making configuration changes, restart the development server 
+            with <code>npm start</code> for the changes to take effect.
+          </div>
+
+          <h3 style="margin: 28px 0 12px 0; font-size: 19px;">Maps Configuration for Production APK</h3>
+          <p>
+            The app displays restaurants on an interactive map. During development on your computer, the map works without any special configuration. 
+            However, when you want to create a real APK file for Android phones (production version), you need to configure a Google Maps API key.
+          </p>
+
+          <p class="sub">
+            This key tells Google that your application is allowed to use their mapping service. Without it, the map may not work correctly on real Android devices.
+          </p>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-title">Step 1: Create a Google Maps API Key</span>
+            </div>
+            <pre><code><span class="tok-comment">1. Go to Google Cloud Console: https://console.cloud.google.com</span>
+<span class="tok-comment">2. Create a new project (or select an existing one)</span>
+<span class="tok-comment">3. Enable the "Maps SDK for Android" API</span>
+<span class="tok-comment">4. Create an API key and restrict it to your Android app</span></code></pre>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head">
+              <span class="code-title">Step 2: Add your key in app.json</span>
+            </div>
+            <pre><code>{
+  "expo": {
+    "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "<span class="tok-str">AIzaSyYourActualGoogleMapsAPIKey123456789</span>"
+        }
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <p class="sub">
+            After adding the key, rebuild your APK using <code>expo build:android</code> or <code>eas build --platform android</code>.
+            The map should then display correctly on Android devices.
+          </p>
         </section>
 
         <section class="section">
