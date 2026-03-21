@@ -261,6 +261,93 @@
         font-size: 13px;
       }
 
+      /* Node.js Installation Styles */
+      .node-install {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        margin: 24px 0;
+      }
+
+      .install-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .node-logo {
+        width: 52px;
+        height: 52px;
+        background: #339933;
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(51, 153, 51, 0.2);
+      }
+
+      .install-step {
+        display: flex;
+        gap: 18px;
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .install-step:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .step-number {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+
+      .step-content h4 {
+        margin: 0 0 8px 0;
+        font-size: 17px;
+        color: var(--text);
+      }
+
+      .platform-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .platform-tab {
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid var(--border);
+      }
+
+      .platform-tab.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
       @media (max-width: 920px) {
         .layout {
           grid-template-columns: 1fr;
@@ -283,6 +370,32 @@
         }
       }
     </style>
+    <script>
+      function switchPlatform(el) {
+        // Remove active class from all tabs
+        document.querySelectorAll('.platform-tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        
+        // Add active class to clicked tab
+        el.classList.add('active');
+        
+        // Hide all contents
+        document.getElementById('mac-content').style.display = 'none';
+        document.getElementById('win-content').style.display = 'none';
+        document.getElementById('linux-content').style.display = 'none';
+        
+        // Show selected content
+        const platform = el.getAttribute('data-platform');
+        if (platform === 'mac') {
+          document.getElementById('mac-content').style.display = 'block';
+        } else if (platform === 'win') {
+          document.getElementById('win-content').style.display = 'block';
+        } else if (platform === 'linux') {
+          document.getElementById('linux-content').style.display = 'block';
+        }
+      }
+    </script>
   </head>
   <body>
     <main class="layout">
@@ -311,27 +424,70 @@
 
         <section class="section">
           <h2>1) Prerequisites</h2>
-          <p>Before installation, prepare the essentials:</p>
-          <ul>
-            <li>Node.js (LTS recommended)</li>
-            <li>npm or yarn</li>
-            <li>Expo tooling (Expo CLI / Expo Go)</li>
-            <li>Android Studio (Android) or Xcode (iOS)</li>
-            <li>A running backend API endpoint (backend package sold separately)</li>
-          </ul>
+          <p>Before you can run the customer app, you need to install several tools. Don't worry, this guide will walk you through everything step by step, even if you're doing this for the first time.</p>
+
           <div class="callout">
-            If you host your own backend, MongoDB is required on the backend side.
+            <strong>Important:</strong> The customer app needs a running backend server. Make sure to start the <code>my-backend</code> server before launching this app.
           </div>
+
+          <h3 style="margin: 32px 0 16px 0; font-size: 20px;">Node.js Installation</h3>
+          <p>
+            Node.js is the foundation of this project. It allows you to run JavaScript on your computer and includes <code>npm</code>, the package manager we'll use to install all other tools.
+          </p>
+          <p class="sub">
+            We recommend using an LTS (Long Term Support) version for maximum stability. Choose your operating system below:
+          </p>
+
+          <div style="margin: 20px 0 24px 0;">
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;" id="platformTabs">
+              <div onclick="switchPlatform(this)" class="platform-tab active" data-platform="mac" style="padding: 8px 18px; border-radius: 999px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 14px; font-weight: 500;">macOS</div>
+              <div onclick="switchPlatform(this)" class="platform-tab" data-platform="win" style="padding: 8px 18px; border-radius: 999px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 14px; font-weight: 500;">Windows</div>
+              <div onclick="switchPlatform(this)" class="platform-tab" data-platform="linux" style="padding: 8px 18px; border-radius: 999px; border: 1px solid #e2e8f0; cursor: pointer; font-size: 14px; font-weight: 500;">Linux</div>
+            </div>
+
+            <!-- macOS -->
+            <div id="mac-content">
+              <div class="code-block">
+                <div class="code-head">
+                  <span class="code-title">macOS - Using Homebrew (recommended)</span>
+                </div>
+                <pre><code><span class="tok-cmd">brew</span> <span class="tok-cmd">install</span> <span class="tok-arg">node</span></code></pre>
+              </div>
+            </div>
+
+            <!-- Windows -->
+            <div id="win-content" style="display: none;">
+              <div class="code-block">
+                <div class="code-head">
+                  <span class="code-title">Windows - Official Installer</span>
+                </div>
+                <pre><code><span class="tok-comment"># 1. Go to https://nodejs.org</span>
+<span class="tok-comment"># 2. Download the LTS version</span>
+<span class="tok-comment"># 3. Run the installer (.msi file)</span></code></pre>
+              </div>
+            </div>
+
+            <!-- Linux -->
+            <div id="linux-content" style="display: none;">
+              <div class="code-block">
+                <div class="code-head">
+                  <span class="code-title">Linux - Using NodeSource</span>
+                </div>
+                <pre><code><span class="tok-cmd">curl</span> -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+<span class="tok-cmd">sudo</span> <span class="tok-cmd">apt-get</span> <span class="tok-cmd">install</span> <span class="tok-arg">-y</span> nodejs</code></pre>
+              </div>
+            </div>
+          </div>
+
           <div class="code-block">
             <div class="code-head">
-              <span class="code-title">Quick Environment Check</span>
-              <span class="code-copy">zsh / bash</span>
+              <span class="code-title">Verify your installation (all platforms)</span>
             </div>
-            <pre><code><span class="tok-cmd">node</span> <span class="tok-arg">-v</span>
-<span class="tok-cmd">npm</span> <span class="tok-arg">-v</span>
-<span class="tok-cmd">npx</span> <span class="tok-cmd">expo</span> <span class="tok-arg">--version</span></code></pre>
+            <pre><code><span class="tok-cmd">node</span> <span class="tok-arg">--version</span>
+<span class="tok-cmd">npm</span> <span class="tok-arg">--version</span></code></pre>
           </div>
         </section>
+
 
         <section class="section">
           <h2>2) Step-by-Step Installation</h2>
@@ -378,7 +534,7 @@
         </section>
 
         <section class="section">
-          <h2>4) API Connection (Summary)</h2>
+          <h2>4) API Connection</h2>
           <p>
             The customer app sends requests to your backend API for authentication, restaurants,
             menus, cart actions, checkout, and order tracking updates.
@@ -414,25 +570,6 @@
           </div>
         </section>
 
-        <section class="section">
-          <h2>6) Screenshots (Recommended)</h2>
-          <p>
-            Add your own branded screenshots in this section for marketplace and client-facing documentation.
-          </p>
-          <div class="shot-grid">
-            <div class="shot">
-              <img src="https://docs.expo.dev/static/images/tools/expo-go/expo-go-home.png" alt="Expo Go home screen" />
-              <p>Suggested capture: app launch and first run on device.</p>
-            </div>
-            <div class="shot">
-              <img src="https://docs.expo.dev/static/images/tutorial/create-your-first-app/create-first-app-1.png" alt="Expo quick start screen" />
-              <p>Suggested capture: QR startup flow from terminal to mobile.</p>
-            </div>
-            <div class="shot">
-              <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1200&q=80" alt="Food app sample visual" />
-              <p>Suggested capture: key user journey (menu, cart, checkout, order tracking).</p>
-            </div>
-          </div>
         </section>
       </section>
     </main>
