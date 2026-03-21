@@ -44,21 +44,38 @@
         top: 0;
         align-self: start;
         height: 100vh;
-        padding: 30px 20px;
+        padding: 28px 18px;
         border-right: 1px solid var(--border);
         background: var(--sidebar-bg);
       }
 
-      .sidebar h2 {
-        margin: 0 0 16px;
-        font-size: 15px;
-        letter-spacing: 0.02em;
+      .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
       }
 
-      .sidebar small {
-        display: block;
-        color: var(--muted);
-        margin-bottom: 16px;
+      .brand-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .brand-title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .sidebar-label {
+        margin: 0 0 10px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
       }
 
       .nav {
@@ -72,15 +89,22 @@
         text-decoration: none;
         font-size: 14px;
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 9px 11px;
+        border-radius: 10px;
+        padding: 10px 11px;
         background: #ffffff;
         font-weight: 500;
+        transition: all 0.18s ease;
       }
 
       .nav a:hover {
         border-color: #cbd5e1;
         background: var(--soft);
+      }
+
+      .nav a.active {
+        border-color: #b8c6d8;
+        background: #eef3f7;
+        color: #0f172a;
       }
 
       .content {
@@ -138,6 +162,70 @@
       .section-subtext {
         margin-top: 12px;
       }
+
+      .product-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 7px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .product-link:hover {
+        background: var(--soft);
+        border-color: #94a3b8;
+      }
+
+      .compare-note {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--accent);
+        border-radius: 10px;
+        background: #ffffff;
+      }
+
+      .compare-title {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .compare-table-wrap {
+        margin-top: 10px;
+        overflow-x: auto;
+      }
+
+      .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        color: #334155;
+      }
+
+      .compare-table th,
+      .compare-table td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+      }
+
+      .compare-table th {
+        color: #0f172a;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
 
       .detail-list {
         margin-top: 14px;
@@ -227,15 +315,20 @@
   <body>
     <main class="layout">
       <aside class="sidebar">
-        <h2>Customer App Docs</h2>
+        <div class="sidebar-brand">
+          <span class="brand-dot"></span>
+          <p class="brand-title">Good Food Pro Docs</p>
+        </div>
+        <p class="sidebar-label">Documentation</p>
         <nav class="nav">
-          <a href="#overview">Overview</a>
+          <a class="active" href="#overview">Overview</a>
+          <a href="./getting-started.html">Getting Started</a>
         </nav>
       </aside>
 
       <section class="content">
         <header id="overview" class="hero">
-          <h1>Customer App Documentation</h1>
+          <h1>Good Food Pro - Customer App</h1>
           <p class="subtitle">
             Build a modern food-ordering experience your customers enjoy from day one.
           </p>
@@ -258,9 +351,57 @@
               It turns restaurant browsing and ordering into a clear, smooth, and user-friendly journey.
             </p>
             <p class="section-subtext">
+              Good Food Pro is the advanced multi-app edition of Good Food, and this customer app is
+              the buyer-facing mobile experience within that ecosystem.
+            </p>
+            <a class="product-link" href="https://codecanyon.net/item/multi-restaurants-food-delivery-app-admin-panel/39532345" target="_blank" rel="noopener noreferrer">
+              View Good Food on CodeCanyon
+            </a>
+            <p class="section-subtext">
               As the customer-facing part of the Good Food Pro ecosystem, it is designed to help
               users go from "I am hungry" to "Order confirmed" with minimal friction and maximum clarity.
             </p>
+            <div class="compare-note">
+              <p class="compare-title">Good Food vs Good Food Pro</p>
+              <div class="compare-table-wrap">
+                <table class="compare-table" aria-label="Good Food versus Good Food Pro">
+                  <thead>
+                    <tr>
+                      <th>Feature</th>
+                      <th>Good Food</th>
+                      <th>Good Food Pro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Backend</td>
+                      <td>Firebase</td>
+                      <td>Custom REST API (Express.js + MongoDB)</td>
+                    </tr>
+                    <tr>
+                      <td>Apps included</td>
+                      <td>Customer + Delivery + Restaurant + Admin</td>
+                      <td>Customer + Delivery + Restaurant + Admin + Backend</td>
+                    </tr>
+                    <tr>
+                      <td>Backend source code</td>
+                      <td>❌</td>
+                      <td>✅ Included</td>
+                    </tr>
+                    <tr>
+                      <td>Monthly costs</td>
+                      <td>Firebase fees</td>
+                      <td>Self-hosted (free)</td>
+                    </tr>
+                    <tr>
+                      <td>Full customization</td>
+                      <td>Limited</td>
+                      <td>✅ Full control</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </section>
 
           <section class="section-block">
@@ -271,11 +412,12 @@
             </p>
             <p class="section-subtext">
               Customers can sign in, discover nearby restaurants, explore menu items, add products
-              to the cart, and complete checkout in a smooth, guided flow.
+              to the cart, complete checkout, and follow order progress in a smooth, guided flow.
             </p>
             <p class="section-subtext">
               Beyond ordering, the app includes practical account features such as address management,
-              language preferences, payment options, and order follow-up to improve retention and trust.
+              language preferences, payment options, and order tracking visibility to improve
+              retention and trust.
             </p>
           </section>
 
@@ -283,15 +425,15 @@
             <h2>Main Function</h2>
             <p class="highlight">
               The core mission is simple: let users place food orders from mobile, from item discovery
-              to final confirmation.
+              to final confirmation, then keep them informed through order tracking.
             </p>
             <p class="section-subtext">
               In real usage, customers can search restaurants, filter by preferences, review menu details,
               customize quantities, and checkout in a few steps.
             </p>
             <p class="section-subtext">
-              After checkout, the app continues the experience with order status visibility, reducing
-              uncertainty and improving satisfaction during delivery.
+              After checkout, customers can monitor order status updates from preparation to delivery,
+              reducing uncertainty and improving satisfaction.
             </p>
           </section>
 
