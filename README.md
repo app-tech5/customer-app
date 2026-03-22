@@ -124,7 +124,7 @@ Edit `config/index.js` (or keep importing from `config.js` for compatibility):
 export const config = {
   API_BASE_URL: 'http://localhost:5000/api',
   APP_NAME: 'Good Food',
-  VERSION: '1.0.0',
+  VERSION: '1.1.0',
   DEMO_MODE: true,
   DEMO_EMAIL: 'demo@customer.com',
   DEMO_PASSWORD: 'demo123',
@@ -392,7 +392,7 @@ This app is the **customer** client in the Good Food ecosystem. Run your backend
 
 ## Version
 
-**v1.0.0** - Initial release (March 2026)
+**v1.1.0** — Good Food customer app update (March 2026)
 
 ---
 

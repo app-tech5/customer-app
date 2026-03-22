@@ -63,6 +63,7 @@ Additional module-level docs:
 ### Current Stack
 | Component | Version |
 |-----------|---------|
+| App (customer) | 1.1.0 |
 | React Native | 0.81.5 |
 | Expo SDK | 54.0.0 |
 | React | 19.1.0 |

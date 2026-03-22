@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo, Feather } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import i18n from '../lang/i18n'
+import { config } from '../config'
 import { colors } from '../global'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -338,11 +339,11 @@ export default function Settings({ navigation }) {
           <SettingItem
             icon="information-circle"
             title={i18n.t('settings.aboutApp', 'About Good Food')}
-            subtitle={i18n.t('settings.version', 'Version') + ' 1.0.0'}
+            subtitle={`${i18n.t('settings.version', 'Version')} ${config.VERSION}`}
             onPress={() => {
               Alert.alert(
                 i18n.t('profile.about', 'About'),
-                `${i18n.t('app.name', 'Good Food')}\n${i18n.t('settings.version', 'Version')} 1.0.0\n\n${i18n.t('settings.aboutDescription', 'Your favorite food delivery app')}`
+                `${i18n.t('app.name', 'Good Food')}\n${i18n.t('settings.version', 'Version')} ${config.VERSION}\n\n${i18n.t('settings.aboutDescription', 'Your favorite food delivery app')}`
               )
             }}
           />
