@@ -1,7 +1,7 @@
 # Updates - January 2025
 
 ## 📅 Period: January 2025
-**Responsible:** Good Food Pro Development Team
+**Responsible:** Good Food development
 
 ---
 
@@ -73,4 +73,4 @@ import i18n from '../i18n';
 
 ---
 
-*This month marks the establishment of solid foundations for internationalization and demo experience of the Good Food Pro application.*
+*This month marks the establishment of solid foundations for internationalization and demo experience of the Good Food customer application.*

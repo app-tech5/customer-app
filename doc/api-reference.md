@@ -1,4 +1,4 @@
-# API Reference - Good Food Pro Customer App
+# API Reference — Good Food Customer App
 
 This document summarizes the backend endpoints used by the customer app and points to the canonical, maintained API documentation in `api/`.
 

@@ -1,10 +1,10 @@
-# Architecture - Good Food Pro Customer App
+# Architecture — Good Food Customer App
 
 ## Overview
 
-Good Food Pro Customer App is a React Native mobile application built with Expo SDK 54. It provides a food ordering experience similar to Uber Eats, allowing customers to browse restaurants, view menus, place orders, and track deliveries.
+The Good Food customer app is a React Native application built with Expo SDK 54. It provides a food ordering experience: browse restaurants, view menus, place orders, and track deliveries.
 
-**Good Food Pro** is a complete ecosystem with 4 apps (Customer, Restaurant, Delivery, Admin) + a custom REST API backend.
+It is part of the Good Food suite (customer, restaurant, driver, admin) and uses a **custom REST API** (Express.js + MongoDB) as the backend—not Firebase.
 
 ---
 

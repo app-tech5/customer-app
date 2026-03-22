@@ -1,6 +1,6 @@
-# 📚 Documentation - Good Food Pro Customer App
+# Documentation — Good Food Customer App
 
-This folder contains technical documentation for the **Good Food Pro** customer application.
+Technical documentation for the **Good Food** customer application in this repository (`doc/` at project root).
 
 ---
 
@@ -50,12 +50,11 @@ Additional module-level docs:
 
 ### 📚 Major Versions
 
-#### [API Migration] - Firebase → REST API
+#### Historical migration (Firebase → REST API)
 **File:** [`migration-api-firebase.md`](./migration-api-firebase.md)
-- ✅ Complete migration from Firebase to custom REST API
-- ✅ Firebase dependencies removal
-- ✅ JWT + MongoDB implementation
-- ✅ Navigation bugs and imports fixes
+- Record of moving from Firebase to the custom REST API
+- JWT, MongoDB, and related client changes
+- Navigation and import fixes from that period
 
 ---
 
@@ -108,7 +107,7 @@ doc/
 ├── architecture.md              # Technical architecture reference
 ├── api-reference.md             # REST API endpoints documentation
 ├── 2025-01-updates.md          # Monthly updates (January 2025)
-└── migration-api-firebase.md   # Firebase → REST API migration
+└── migration-api-firebase.md   # Historical Firebase → REST migration notes
 ```
 
 ### Monthly files:

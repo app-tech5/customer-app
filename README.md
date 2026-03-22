@@ -1,8 +1,8 @@
-# Good Food Pro - Customer App
+# Good Food — Customer App
 
-React Native mobile application for online food ordering with custom REST API backend (Express.js + MongoDB).
+React Native application for online food ordering. It talks to your **Good Food REST API** (Express.js + MongoDB) for authentication, restaurants, cart, checkout, and order tracking.
 
-**Good Food Pro** is a complete food delivery ecosystem including 4 apps + backend.
+This repo is the **updated Good Food customer app**: self-hosted API and database, same codebase you ship as the buyer-facing mobile client in the suite.
 
 ---
 
@@ -312,7 +312,7 @@ npm run lint-fix   # Auto-fix lint errors
 |-------|-------|----------|
 | "Network request failed" | API server not running | Start backend with `npm start` |
 | "User not found" | Demo user missing | Run `npm run migrate:up` on backend |
-| "component auth has not been registered" | Firebase references | Clean Firebase imports |
+| "component auth has not been registered" | Stale or bad imports | Check navigation registration and imports |
 | "useLegacyImplementation prop" | Navigation/Reanimated conflict | Update React Navigation to v7 |
 | "cannot read property split of undefined" | i18n locale issue | Already fixed with fallback |
 
@@ -384,20 +384,9 @@ RootNavigation (Stack)
 
 ---
 
-## Related Product
+## Suite
 
-**Good Food Pro** is the advanced multi-app edition of [Good Food](https://codecanyon.net/).
-
-| Feature | Good Food | Good Food Pro |
-|---------|-----------|---------------|
-| Backend | Firebase | Custom REST API (Express.js + MongoDB) |
-| Database | Firestore | MongoDB |
-| Apps included | Customer only | Customer + Restaurant + Delivery + Admin |
-| Backend source code | ❌ | ✅ Included |
-| Internationalization | ❌ | ✅ EN/FR |
-| Monthly costs | Firebase fees | Self-hosted (free) |
-| Demo mode | ❌ | ✅ |
-| Full customization | Limited | ✅ Full control |
+This app is the **customer** client in the Good Food ecosystem. Run your backend, point `config/index.js` at `API_BASE_URL`, and use it alongside the restaurant, driver, and admin apps that share the same API.
 
 ---
 
