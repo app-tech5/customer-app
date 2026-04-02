@@ -10,6 +10,7 @@ import Splash from '../screens/Splash'
 import SignIn from '../screens/SignIn'
 import Offers from '../screens/Offers'
 import Wallet from '../screens/Wallet'
+import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
 import AddCard from '../screens/AddCard'
  import OnboardingScreen from '../screens/Onboarding'
 import SignUp from '../screens/SignUp'
@@ -53,7 +54,12 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="SearchResults" component={SearchResults} options={{ headerShown: true }} />
               <Stack.Screen name="Offers" component={Offers}/>
               <Stack.Screen name="Wallet" component={Wallet}/>
-              <Stack.Screen name="AddCard" component={AddCard}/>
+              <Stack.Screen
+                name="AddPaymentMethod"
+                component={AddPaymentMethodScreen}
+                options={{ headerShown: true }}
+              />
+              <Stack.Screen name="AddCard" component={AddCard} options={{ headerShown: true }} />
               <Stack.Screen name="Settings" component={Settings}/>
               {}
           </Stack.Navigator>

@@ -1,5 +1,6 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
@@ -14,29 +15,7 @@ export default function WalletScreen({ navigation, route}) {
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    loadWalletData()
-    
-    const fromAccount = route.params?.fromAccount;
-
-    navigation.setOptions({
-      title: i18n.t('wallet.title', 'Wallet'),
-      headerLeft: () =>
-        fromAccount ? (
-          <TouchableOpacity onPress={() => navigation.goBack()}
-          style={{ padding: 10, marginLeft: 5 }}>
-            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={() => navigation.toggleDrawer()}
-          style={{ padding: 10, marginLeft: 5 }}>
-            <Ionicons name="menu" size={24} color={colors.text.primary} />
-          </TouchableOpacity>
-        ),
-    });
-  }, [navigation])
-
-  const loadWalletData = () => {
+  const loadWalletData = useCallback(() => {
     try {
       setLoader(true)
       setError(null)
@@ -45,14 +24,23 @@ export default function WalletScreen({ navigation, route}) {
       let transactionsData = []
       
       methodsData = user.paymentMethods && user.paymentMethods.length > 0
-        ? user.paymentMethods.map((method, index) => ({
-            id: method._id || `method_${index}`,
-            methodType: method.type === 'card' ? 'credit_card' : method.type,
-            cardDetails: method.details || {},
-            isDefault: index === 0, 
-            isActive: true
-          }))
+        ? user.paymentMethods.map((method, index) => {
+            const details = method.details && typeof method.details === 'object' ? method.details : {}
+            return {
+              _id: method._id || method.id || `method_${index}`,
+              id: method._id || method.id || `method_${index}`,
+              methodType: method.type === 'card' ? 'credit_card' : method.type,
+              cardDetails: {
+                ...details,
+                label: details.label,
+                cardNumberLast4: details.cardNumberLast4 || details.last4,
+              },
+              isDefault: index === 0,
+              isActive: true,
+            }
+          })
         : [{
+            _id: 'mock_card',
             id: 'mock_card',
             methodType: 'credit_card',
             cardDetails: {
@@ -102,7 +90,33 @@ export default function WalletScreen({ navigation, route}) {
     } finally {
       setLoader(false)
     }
-  }
+  }, [user.paymentMethods, user.name])
+
+  useEffect(() => {
+    const fromAccount = route.params?.fromAccount
+
+    navigation.setOptions({
+      title: i18n.t('wallet.title', 'Wallet'),
+      headerLeft: () =>
+        fromAccount ? (
+          <TouchableOpacity onPress={() => navigation.goBack()}
+          style={{ padding: 10, marginLeft: 5 }}>
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => navigation.toggleDrawer()}
+          style={{ padding: 10, marginLeft: 5 }}>
+            <Ionicons name="menu" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+        ),
+    })
+  }, [navigation, route?.params?.fromAccount])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadWalletData()
+    }, [loadWalletData])
+  )
 
   const BalanceCard = () => (
     <View style={styles.balanceCard}>
@@ -166,6 +180,8 @@ export default function WalletScreen({ navigation, route}) {
           return 'logo-google'
         case 'cash_on_delivery':
           return 'cash'
+        case 'stripe':
+          return 'credit-card'
         default:
           return 'card'
       }
@@ -185,6 +201,8 @@ export default function WalletScreen({ navigation, route}) {
           return 'Google Pay'
         case 'cash_on_delivery':
           return i18n.t('payment.cash', 'Cash')
+        case 'stripe':
+          return 'Stripe'
         default:
           return type
       }
@@ -202,7 +220,7 @@ export default function WalletScreen({ navigation, route}) {
           </View>
           <View style={styles.paymentMethodInfo}>
             <Text style={styles.paymentMethodName}>
-              {getMethodName(method.methodType)}
+              {method.cardDetails?.label || getMethodName(method.methodType)}
             </Text>
             {method.cardDetails?.cardNumberLast4 && (
               <Text style={styles.paymentMethodDetails}>
@@ -261,10 +279,7 @@ export default function WalletScreen({ navigation, route}) {
         </Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => {
-            
-            Alert.alert('Not implemented', 'Add payment method screen will be implemented')
-          }}
+          onPress={() => navigation.navigate('AddPaymentMethod')}
         >
           <Ionicons name="add" size={20} color={colors.primary} />
           <Text style={styles.addButtonText}>
@@ -286,7 +301,7 @@ export default function WalletScreen({ navigation, route}) {
       ) : (
         <FlatList
           data={paymentMethods}
-          keyExtractor={(item, index) => item._id || index.toString()}
+          keyExtractor={(item, index) => String(item._id || item.id || index)}
           renderItem={({ item, index }) => <PaymentMethodItem method={item} index={index} />}
           scrollEnabled={false}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
