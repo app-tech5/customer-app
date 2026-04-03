@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native'
 import React, { useEffect, useState, useCallback } from 'react'
+import { CardField, StripeProvider } from '@stripe/stripe-react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -87,7 +88,7 @@ async function persistPaymentMethods(dispatch, user, next) {
   }
 }
 
-export default function AddCard({ navigation }) {
+function AddCard({ navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
   const [holderName, setHolderName] = useState('')
@@ -291,6 +292,14 @@ export default function AddCard({ navigation }) {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  )
+}
+
+export default function AddCardWrapper(props) {
+  return (
+    <StripeProvider publishableKey="pk_test_xxx">
+      <AddCard {...props} />
+    </StripeProvider>
   )
 }
 
