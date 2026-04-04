@@ -19,6 +19,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
+import { useGateway } from '../contexts/GatewayContext'
 
 function digitsOnly(s) {
   return (s || '').replace(/\D/g, '')
