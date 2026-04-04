@@ -51,6 +51,7 @@ function AddCard({ navigation }) {
     }
 
     setSaving(true)
+
     try {
       const entry = {
         _id: `card_${Date.now()}`,
@@ -73,22 +74,6 @@ function AddCard({ navigation }) {
     }
   }
 
-  const Field = ({ label, value, onChangeText, placeholder }) => (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.inputWrap}>
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={colors.text.secondary}
-          autoCorrect={false}
-        />
-      </View>
-    </View>
-  )
-
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
@@ -97,27 +82,51 @@ function AddCard({ navigation }) {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.iconHeader}>
             <View style={styles.iconCircle}>
               <FontAwesome name="credit-card" size={28} color={colors.primary} />
             </View>
-            <Text style={styles.title}>{i18n.t('wallet.addCreditOrDebit')}</Text>
+            <Text style={styles.title}>
+              {i18n.t('wallet.addCreditOrDebit')}
+            </Text>
           </View>
 
-          <Field
-            label={i18n.t('wallet.cardHolderName')}
-            value={holderName}
-            onChangeText={setHolderName}
-            placeholder={i18n.t('wallet.cardHolderNamePlaceholder')}
-          />
-
+          {/* NAME FIELD SIMPLE */}
           <View style={styles.field}>
-            <Text style={styles.label}>{i18n.t('wallet.cardNumber')}</Text>
+            <Text style={styles.label}>
+              {i18n.t('wallet.cardHolderName')}
+            </Text>
+
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={styles.input}
+                value={holderName}
+                onChangeText={setHolderName}
+                placeholder={i18n.t('wallet.cardHolderNamePlaceholder')}
+                placeholderTextColor={colors.text.secondary}
+                autoCorrect={false}
+                blurOnSubmit={false}
+              />
+            </View>
+          </View>
+
+          {/* STRIPE CARD FIELD */}
+          <View style={styles.field}>
+            <Text style={styles.label}>
+              {i18n.t('wallet.cardNumber')}
+            </Text>
+
             <View style={styles.inputWrap}>
               <CardField
                 postalCodeEnabled={false}
-                style={{ width: '100%', height: 50 }}
+                style={{
+                  width: '100%',
+                  height: 50,
+                }}
                 cardStyle={{
                   backgroundColor: colors.background.primary,
                   textColor: colors.text.primary,
@@ -142,9 +151,17 @@ function AddCard({ navigation }) {
             style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
             onPress={handleSave}
             disabled={saving}
+            activeOpacity={0.85}
           >
-            <Ionicons name="checkmark-circle" size={22} color={colors.text.white} style={styles.saveIcon} />
-            <Text style={styles.saveText}>{i18n.t('wallet.saveCard')}</Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={22}
+              color={colors.text.white}
+              style={styles.saveIcon}
+            />
+            <Text style={styles.saveText}>
+              {i18n.t('wallet.saveCard')}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -165,7 +182,10 @@ export default function AddCardWrapper(props) {
 
   if (stripePublishableKey) {
     return (
-      <StripeProvider publishableKey={stripePublishableKey} urlScheme="goodfoods">
+      <StripeProvider
+        publishableKey={stripePublishableKey}
+        urlScheme="goodfoods"
+      >
         <AddCard {...props} />
       </StripeProvider>
     )
