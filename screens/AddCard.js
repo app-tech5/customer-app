@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useGateway } from '../contexts/GatewayContext'
+import { useStripe } from '@stripe/stripe-react-native'
 
 async function persistPaymentMethods(dispatch, user, next) {
   const updatedUser = { ...user, paymentMethods: next }
@@ -34,6 +35,7 @@ async function persistPaymentMethods(dispatch, user, next) {
 function AddCard({ navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
+  const { createPaymentMethod } = useStripe()
 
   const [holderName, setHolderName] = useState('')
   const [saving, setSaving] = useState(false)
@@ -53,7 +55,7 @@ function AddCard({ navigation }) {
       )
       return
     }
-  
+
     if (!cardComplete) {
       Alert.alert(
         i18n.t('common.error'),
@@ -61,21 +63,40 @@ function AddCard({ navigation }) {
       )
       return
     }
-  
+
     setSaving(true)
-  
+
     try {
+      // 🔥 ICI Stripe crée la carte sécurisée
+      const { paymentMethod, error } = await createPaymentMethod({
+        paymentMethodType: 'Card',
+        billingDetails: {
+          name: holderName.trim(),
+        },
+      })
+
+      if (error) {
+        Alert.alert('Error', error.message)
+        return
+      }
+
+      // 🔥 ICI paymentMethod EXISTE
+      const last4 = paymentMethod.card.last4
+      const brand = paymentMethod.card.brand
+      console.log(last4, brand, "🔥 PaymentMethod created")
       const entry = {
         _id: `card_${Date.now()}`,
         type: 'card',
         details: {
           cardholderName: holderName.trim(),
+          last4,
+          brand
         },
       }
-  
+
       const next = [...(user.paymentMethods || []), entry]
       await persistPaymentMethods(dispatch, user, next)
-  
+
       Alert.alert(
         i18n.t('wallet.cardAddedTitle'),
         i18n.t('wallet.cardAddedMessage'),
