@@ -460,7 +460,7 @@
     "cardCvv": "Security code",
     "cardCvvPlaceholder": "CVV",
     "saveCard": "Save card",
-    "cardSecurityHint": "Your full card number is not stored on this device. Only the last four digits are saved locally.",
+    "cardSecurityHint": "Your full card number is not stored on this device.",
     "cardValidationName": "Please enter the name on the card.",
     "cardValidationNumber": "Please enter a valid card number.",
     "cardValidationExpiry": "Enter expiry as MM/YY.",

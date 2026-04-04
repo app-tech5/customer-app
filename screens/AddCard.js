@@ -95,7 +95,6 @@ function AddCard({ navigation }) {
             </Text>
           </View>
 
-          {/* NAME FIELD SIMPLE */}
           <View style={styles.field}>
             <Text style={styles.label}>
               {i18n.t('wallet.cardHolderName')}
@@ -114,7 +113,6 @@ function AddCard({ navigation }) {
             </View>
           </View>
 
-          {/* STRIPE CARD FIELD */}
           <View style={styles.field}>
             <Text style={styles.label}>
               {i18n.t('wallet.cardNumber')}
