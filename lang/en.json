@@ -468,7 +468,9 @@
     "cardValidationInvalidNumber": "This card number does not look valid.",
     "cardValidationExpiryPast": "This card has expired.",
     "cardAddedTitle": "Card saved",
-    "cardAddedMessage": "Your card has been added to your wallet."
+    "cardAddedMessage": "Your card has been added to your wallet.",
+    "unableToAddCard": "We couldn’t add your card. Please try again later.",
+    "cardFieldIncomplete": "Please complete the card details in the secure field."
   },
   "profile": {
     "title": "Profile",
@@ -658,7 +660,9 @@
     "deliverySettingsLoad": "Error loading delivery settings:",
     "deliverySettingsContext": "useDeliverySettings must be used within a DeliverySettingsProvider",
     "settingsLoad": "Error loading settings:",
-    "settingsContext": "useSettings must be used within a SettingProvider"
+    "settingsContext": "useSettings must be used within a SettingProvider",
+    "gatewayLoad": "Error loading payment gateways:",
+    "gatewayContext": "useGateway must be used within a GatewayProvider"
   },
   "offers": {
     "availableAt": "Available at {{text}}",

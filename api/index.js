@@ -11,6 +11,7 @@ import './reviews';
 import './categories';
 import './orders';
 import './settings';
+import './gateways';
 import './drivers';
 import './deliverySettings';
 import './promotions';
@@ -78,6 +79,7 @@ export const rateOrder = (orderId, rating, comment) =>
   api.rateOrder(orderId, rating, comment);
 export const reorder = (orderId) => api.reorder(orderId);
 export const getSettings = () => api.getSettings();
+export const getGateways = () => api.getGateways();
 export const getAppConfig = () => api.getAppConfig();
 export const getDriverInfos = (driverId) => api.getDriverInfo(driverId);
 export const getDriverLocation = (driverId, orderId) =>

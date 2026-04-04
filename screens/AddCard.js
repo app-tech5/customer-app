@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from 'react-native'
 import React, { useEffect, useState, useCallback } from 'react'
 import { CardField, StripeProvider } from '@stripe/stripe-react-native'
@@ -296,17 +297,36 @@ function AddCard({ navigation }) {
 }
 
 export default function AddCardWrapper(props) {
-  return (
-    <StripeProvider publishableKey="pk_test_xxx">
-      <AddCard {...props} />
-    </StripeProvider>
-  )
+  const { loading, stripePublishableKey } = useGateway()
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.safe, styles.gatewayLoading]}>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
+      </SafeAreaView>
+    )
+  }
+
+  if (stripePublishableKey) {
+    return (
+      <StripeProvider publishableKey={stripePublishableKey} urlScheme="goodfoods">
+        <AddCard {...props} />
+      </StripeProvider>
+    )
+  }
+
+  return <AddCard {...props} />
 }
 
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  gatewayLoading: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   flex: {
     flex: 1,

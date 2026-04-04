@@ -424,7 +424,9 @@
     "cardValidationInvalidNumber": "Ce numéro de carte ne semble pas valide.",
     "cardValidationExpiryPast": "Cette carte est expirée.",
     "cardAddedTitle": "Carte enregistrée",
-    "cardAddedMessage": "Votre carte a été ajoutée à votre portefeuille."
+    "cardAddedMessage": "Votre carte a été ajoutée à votre portefeuille.",
+    "unableToAddCard": "Impossible d’ajouter votre carte pour le moment. Réessayez plus tard.",
+    "cardFieldIncomplete": "Complétez les informations de carte dans le champ sécurisé."
   },
   "profile": {
     "title": "Profil",
@@ -616,7 +618,9 @@
     "deliverySettingsLoad": "Erreur chargement delivery settings :",
     "deliverySettingsContext": "useDeliverySettings doit être utilisé dans un DeliverySettingsProvider",
     "settingsLoad": "Erreur chargement settings :",
-    "settingsContext": "useSettings doit être utilisé dans un SettingProvider"
+    "settingsContext": "useSettings doit être utilisé dans un SettingProvider",
+    "gatewayLoad": "Erreur lors du chargement des passerelles de paiement :",
+    "gatewayContext": "useGateway doit être utilisé dans un GatewayProvider"
   },
   "offers": {
     "availableAt": "Disponible chez {{text}}",
