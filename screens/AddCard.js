@@ -37,6 +37,7 @@ function AddCard({ navigation }) {
 
   const [holderName, setHolderName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [cardComplete, setCardComplete] = useState(false)
 
   useEffect(() => {
     navigation.setOptions({
@@ -46,12 +47,23 @@ function AddCard({ navigation }) {
 
   const handleSave = async () => {
     if (!holderName.trim()) {
-      Alert.alert(i18n.t('common.error'), i18n.t('wallet.cardValidationName'))
+      Alert.alert(
+        i18n.t('common.error'),
+        i18n.t('wallet.cardValidationName')
+      )
       return
     }
-
+  
+    if (!cardComplete) {
+      Alert.alert(
+        i18n.t('common.error'),
+        i18n.t('wallet.cardInvalid')
+      )
+      return
+    }
+  
     setSaving(true)
-
+  
     try {
       const entry = {
         _id: `card_${Date.now()}`,
@@ -60,10 +72,10 @@ function AddCard({ navigation }) {
           cardholderName: holderName.trim(),
         },
       }
-
+  
       const next = [...(user.paymentMethods || []), entry]
       await persistPaymentMethods(dispatch, user, next)
-
+  
       Alert.alert(
         i18n.t('wallet.cardAddedTitle'),
         i18n.t('wallet.cardAddedMessage'),
@@ -128,6 +140,9 @@ function AddCard({ navigation }) {
                 cardStyle={{
                   backgroundColor: colors.background.primary,
                   textColor: colors.text.primary,
+                }}
+                onCardChange={(card) => {
+                  setCardComplete(card.complete)
                 }}
               />
             </View>
