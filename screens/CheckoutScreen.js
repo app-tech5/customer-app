@@ -100,11 +100,7 @@ export default function CheckoutScreen({ navigation, route }) {
         ? user.paymentMethods.map((method, index) => ({
             id: method._id || `method_${index}`,
             methodType: method.type === 'card' ? 'credit_card' : method.type,
-            cardDetails: {
-              ...(method.details || {}),
-              cardNumberLast4: method.details?.cardNumberLast4 || method.details?.last4,
-              cardBrand: method.details?.cardBrand || method.details?.brand,
-            },
+            cardDetails: method.details || {},
             isDefault: index === 0, 
             isActive: true
           }))

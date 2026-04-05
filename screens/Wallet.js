@@ -26,8 +26,6 @@ export default function WalletScreen({ navigation, route}) {
       cardDetails: {
         ...details,
         label: details.label,
-        cardNumberLast4: details.cardNumberLast4 || details.last4,
-        cardBrand: details.cardBrand || details.brand,
       },
       isDefault: index === 0,
       isActive: true,
