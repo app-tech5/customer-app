@@ -80,9 +80,11 @@ function AddCard({ navigation }) {
         return
       }
 
+      // console.log('PaymentMethod created:', paymentMethod)
+
       // 🔥 ICI paymentMethod EXISTE
-      const last4 = paymentMethod.card.last4
-      const brand = paymentMethod.card.brand
+      const last4 = paymentMethod.Card.last4
+      const brand = paymentMethod.Card.brand
       console.log(last4, brand, "🔥 PaymentMethod created")
       const entry = {
         _id: `card_${Date.now()}`,
@@ -213,17 +215,14 @@ export default function AddCardWrapper(props) {
       </SafeAreaView>
     )
   }
-
-  if (stripePublishableKey) {
-    return (
-      <StripeProvider
-        publishableKey={stripePublishableKey}
-        urlScheme="goodfoods"
-      >
-        <AddCard {...props} />
-      </StripeProvider>
-    )
-  }
+  return (
+    <StripeProvider
+      publishableKey={ stripePublishableKey }
+      urlScheme="goodfoods"
+    >
+      <AddCard {...props} />
+    </StripeProvider>
+  )
 
   return <AddCard {...props} />
 }
