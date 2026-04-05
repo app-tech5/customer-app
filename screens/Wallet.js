@@ -2,18 +2,76 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 
 export default function WalletScreen({ navigation, route}) {
+  const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
   const [paymentMethods, setPaymentMethods] = useState([])
   const [transactions, setTransactions] = useState([])
   const [balance, setBalance] = useState(0)
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
+
+  const normalizePaymentMethod = useCallback((method, index = 0) => {
+    const details = method?.details && typeof method.details === 'object' ? method.details : {}
+    return {
+      _id: method?._id || method?.id || `method_${index}`,
+      id: method?._id || method?.id || `method_${index}`,
+      methodType: method?.type === 'card' ? 'credit_card' : method?.type,
+      cardDetails: {
+        ...details,
+        label: details.label,
+        cardNumberLast4: details.cardNumberLast4 || details.last4,
+        cardBrand: details.cardBrand || details.brand,
+      },
+      isDefault: index === 0,
+      isActive: true,
+    }
+  }, [])
+
+  const persistPaymentMethods = useCallback(async (next) => {
+    const normalizedSelected = next.length > 0 ? normalizePaymentMethod(next[0], 0) : null
+    const updatedUser = {
+      ...user,
+      paymentMethods: next,
+      selectedPaymentMethod: normalizedSelected,
+    }
+
+    dispatch({
+      type: 'UPDATE_USER',
+      payload: {
+        paymentMethods: next,
+        selectedPaymentMethod: normalizedSelected,
+      },
+    })
+
+    try {
+      await AsyncStorage.setItem('userData', JSON.stringify(updatedUser))
+    } catch (e) {
+      console.warn('AsyncStorage userData', e)
+    }
+  }, [dispatch, normalizePaymentMethod, user])
+
+  const handleSetDefaultPaymentMethod = useCallback((methodId) => {
+    const current = user.paymentMethods || []
+    const currentIndex = current.findIndex((method, index) => (method._id || method.id || `method_${index}`) === methodId)
+
+    if (currentIndex <= 0) return
+
+    const next = [current[currentIndex], ...current.filter((_, index) => index !== currentIndex)]
+    void persistPaymentMethods(next)
+  }, [persistPaymentMethods, user.paymentMethods])
+
+  const handleRemovePaymentMethod = useCallback((methodId) => {
+    const current = user.paymentMethods || []
+    const next = current.filter((method, index) => (method._id || method.id || `method_${index}`) !== methodId)
+    void persistPaymentMethods(next)
+  }, [persistPaymentMethods, user.paymentMethods])
 
   const loadWalletData = useCallback(() => {
     try {
@@ -24,21 +82,7 @@ export default function WalletScreen({ navigation, route}) {
       let transactionsData = []
       
       methodsData = user.paymentMethods && user.paymentMethods.length > 0
-        ? user.paymentMethods.map((method, index) => {
-            const details = method.details && typeof method.details === 'object' ? method.details : {}
-            return {
-              _id: method._id || method.id || `method_${index}`,
-              id: method._id || method.id || `method_${index}`,
-              methodType: method.type === 'card' ? 'credit_card' : method.type,
-              cardDetails: {
-                ...details,
-                label: details.label,
-                cardNumberLast4: details.cardNumberLast4 || details.last4,
-              },
-              isDefault: index === 0,
-              isActive: true,
-            }
-          })
+        ? user.paymentMethods.map((method, index) => normalizePaymentMethod(method, index))
         : [{
             _id: 'mock_card',
             id: 'mock_card',
@@ -90,7 +134,7 @@ export default function WalletScreen({ navigation, route}) {
     } finally {
       setLoader(false)
     }
-  }, [user.paymentMethods, user.name])
+  }, [normalizePaymentMethod, user.paymentMethods, user.name])
 
   useEffect(() => {
     const fromAccount = route.params?.fromAccount
@@ -249,16 +293,27 @@ export default function WalletScreen({ navigation, route}) {
                 {
                   text: i18n.t('wallet.setAsDefault', 'Set as Default'),
                   onPress: () => {
-                    
-                    Alert.alert('Not implemented', 'Set as default will be implemented')
+                    if (method.id === 'mock_card') return
+                    handleSetDefaultPaymentMethod(method.id)
                   }
                 },
                 {
                   text: i18n.t('wallet.remove', 'Remove'),
                   style: 'destructive',
                   onPress: () => {
-                    
-                    Alert.alert('Not implemented', 'Remove payment method will be implemented')
+                    if (method.id === 'mock_card') return
+                    Alert.alert(
+                      i18n.t('wallet.remove', 'Remove'),
+                      i18n.t('wallet.removePaymentMethodConfirm', 'Remove this payment method?'),
+                      [
+                        { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
+                        {
+                          text: i18n.t('wallet.remove', 'Remove'),
+                          style: 'destructive',
+                          onPress: () => handleRemovePaymentMethod(method.id),
+                        },
+                      ]
+                    )
                   }
                 }
               ]

@@ -17,12 +17,12 @@ export default function OrderRequest({ route, navigation }) {
     restaurant,
     items,
     address,
-    paymentMethod,
     specialInstructions,
     totals,
     lat,
     lng
   } = route.params || {}
+  const paymentMethod = user.selectedPaymentMethod || null
 
   const [loading, setLoading] = useState(false)
 
@@ -73,7 +73,7 @@ export default function OrderRequest({ route, navigation }) {
         },
         status: "pending",
         payment: {
-          method: paymentMethod.methodType || "cash",
+          method: paymentMethod?.methodType || "cash",
           status: "pending"
         },
         delivery: {

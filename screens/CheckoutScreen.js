@@ -1,5 +1,6 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import i18n from '../lang/i18n'
@@ -40,8 +41,6 @@ export default function CheckoutScreen({ navigation, route }) {
   const taxRate = restaurant?.taxRate || 0.08
 
   useEffect(() => {
-    loadCheckoutData()
-
     navigation.setOptions({
       title: i18n.t('checkout.title', 'Checkout'),
       headerLeft: () => (
@@ -57,7 +56,7 @@ export default function CheckoutScreen({ navigation, route }) {
     })
   }, [navigation])
 
-  const loadCheckoutData = () => {
+  const loadCheckoutData = useCallback(() => {
     try {
       setLoading(true)
       
@@ -101,7 +100,11 @@ export default function CheckoutScreen({ navigation, route }) {
         ? user.paymentMethods.map((method, index) => ({
             id: method._id || `method_${index}`,
             methodType: method.type === 'card' ? 'credit_card' : method.type,
-            cardDetails: method.details || {},
+            cardDetails: {
+              ...(method.details || {}),
+              cardNumberLast4: method.details?.cardNumberLast4 || method.details?.last4,
+              cardBrand: method.details?.cardBrand || method.details?.brand,
+            },
             isDefault: index === 0, 
             isActive: true
           }))
@@ -121,17 +124,15 @@ export default function CheckoutScreen({ navigation, route }) {
 
       setAddresses(addressesData)
       
-      const defaultAddress = addressesData?.find(addr => addr.isDefault)
-      if (defaultAddress) {
-        setSelectedAddress(defaultAddress)
-      }
+      const defaultAddress = addressesData?.find(addr => addr.isDefault) || null
+      setSelectedAddress(defaultAddress)
 
       setPaymentMethods(paymentData)
       
-      const defaultPayment = paymentData?.find(method => method.isDefault)
-      if (defaultPayment) {
-        setSelectedPaymentMethod(defaultPayment)
-      }
+      const selectedPaymentId = user.selectedPaymentMethod?.id
+      const selectedPayment = paymentData?.find(method => method.id === selectedPaymentId)
+      const defaultPayment = selectedPayment || paymentData?.find(method => method.isDefault) || null
+      setSelectedPaymentMethod(defaultPayment)
 
     } catch (error) {
       console.error('Error loading checkout data:', error)
@@ -139,7 +140,13 @@ export default function CheckoutScreen({ navigation, route }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadCheckoutData()
+    }, [loadCheckoutData])
+  )
 
   const handleAddressSelect = (address) => {
     setSelectedAddress(address)
@@ -147,6 +154,7 @@ export default function CheckoutScreen({ navigation, route }) {
 
   const handlePaymentMethodSelect = (method) => {
     setSelectedPaymentMethod(method)
+    dispatch({ type: 'UPDATE_USER', payload: { selectedPaymentMethod: method } })
   }
 
   const handlePlaceOrder = () => {

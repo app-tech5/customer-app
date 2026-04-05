@@ -215,7 +215,7 @@ export default function AddCardWrapper(props) {
   }
   return (
     <StripeProvider
-      publishableKey={ stripePublishableKey }
+      publishableKey={ "pk_test_51TIcAILenxtQOhEhEjwR6VWyKw9h6jmOwMSOVIxdXpwnA7mAi9pDy08Dgk8cVvk3QC1lVpAxD2LKgIODDlK5Y22U00xCwBf9ok" }
       urlScheme="goodfoods"
     >
       <AddCard {...props} />
