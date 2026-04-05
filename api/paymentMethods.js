@@ -1,5 +1,16 @@
 import { ApiClient } from './client';
 
+export const createCardPaymentMethod = async (createPaymentMethod, holderName) => {
+  const { paymentMethod, error } = await createPaymentMethod({
+    paymentMethodType: 'Card',
+    billingDetails: {
+      name: holderName.trim(),
+    },
+  });
+
+  return { paymentMethod, error };
+};
+
 ApiClient.prototype.getUserPaymentMethods = async function (userId) {
   return await this.apiCall(`/users/${userId}/payment-methods`);
 };

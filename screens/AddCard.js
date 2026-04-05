@@ -21,6 +21,7 @@ import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useGateway } from '../contexts/GatewayContext'
 import { useStripe } from '@stripe/stripe-react-native'
+import { createCardPaymentMethod } from '../api/paymentMethods'
 
 async function persistPaymentMethods(dispatch, user, next) {
   const updatedUser = { ...user, paymentMethods: next }
@@ -67,13 +68,10 @@ function AddCard({ navigation }) {
     setSaving(true)
 
     try {
-      // 🔥 ICI Stripe crée la carte sécurisée
-      const { paymentMethod, error } = await createPaymentMethod({
-        paymentMethodType: 'Card',
-        billingDetails: {
-          name: holderName.trim(),
-        },
-      })
+      const { paymentMethod, error } = await createCardPaymentMethod(
+        createPaymentMethod,
+        holderName
+      )
 
       if (error) {
         Alert.alert('Error', error.message)
