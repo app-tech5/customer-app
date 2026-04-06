@@ -2,17 +2,19 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
-import { useSelector, useDispatch } from 'react-redux'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 import PaymentMethodItem from '../components/PaymentMethodItem'
+import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
 export default function WalletScreen({ navigation, route}) {
-  const dispatch = useDispatch()
-  const user = useSelector((state) => state.userReducer)
-  const [paymentMethods, setPaymentMethods] = useState([])
+  const {
+    paymentMethods,
+    setPaymentMethods,
+    setSelectedPaymentMethod,
+  } = usePaymentMethods()
+  const [walletPaymentMethods, setWalletPaymentMethods] = useState([])
   const [transactions, setTransactions] = useState([])
   const [balance, setBalance] = useState(0)
   const [loader, setLoader] = useState(true)
@@ -33,44 +35,27 @@ export default function WalletScreen({ navigation, route}) {
     }
   }, [])
 
-  const persistPaymentMethods = useCallback(async (next) => {
+  const persistPaymentMethods = useCallback((next) => {
     const normalizedSelected = next.length > 0 ? normalizePaymentMethod(next[0], 0) : null
-    const updatedUser = {
-      ...user,
-      paymentMethods: next,
-      selectedPaymentMethod: normalizedSelected,
-    }
-
-    dispatch({
-      type: 'UPDATE_USER',
-      payload: {
-        paymentMethods: next,
-        selectedPaymentMethod: normalizedSelected,
-      },
-    })
-
-    try {
-      await AsyncStorage.setItem('userData', JSON.stringify(updatedUser))
-    } catch (e) {
-      console.warn('AsyncStorage userData', e)
-    }
-  }, [dispatch, normalizePaymentMethod, user])
+    setPaymentMethods(next)
+    setSelectedPaymentMethod(normalizedSelected)
+  }, [normalizePaymentMethod, setPaymentMethods, setSelectedPaymentMethod])
 
   const handleSetDefaultPaymentMethod = useCallback((methodId) => {
-    const current = user.paymentMethods || []
+    const current = paymentMethods || []
     const currentIndex = current.findIndex((method, index) => (method._id || method.id || `method_${index}`) === methodId)
 
     if (currentIndex <= 0) return
 
     const next = [current[currentIndex], ...current.filter((_, index) => index !== currentIndex)]
-    void persistPaymentMethods(next)
-  }, [persistPaymentMethods, user.paymentMethods])
+    persistPaymentMethods(next)
+  }, [paymentMethods, persistPaymentMethods])
 
   const handleRemovePaymentMethod = useCallback((methodId) => {
-    const current = user.paymentMethods || []
+    const current = paymentMethods || []
     const next = current.filter((method, index) => (method._id || method.id || `method_${index}`) !== methodId)
-    void persistPaymentMethods(next)
-  }, [persistPaymentMethods, user.paymentMethods])
+    persistPaymentMethods(next)
+  }, [paymentMethods, persistPaymentMethods])
 
   const loadWalletData = useCallback(() => {
     try {
@@ -80,8 +65,8 @@ export default function WalletScreen({ navigation, route}) {
       let methodsData = []
       let transactionsData = []
       
-      methodsData = user.paymentMethods && user.paymentMethods.length > 0
-        ? user.paymentMethods.map((method, index) => normalizePaymentMethod(method, index))
+      methodsData = paymentMethods && paymentMethods.length > 0
+        ? paymentMethods.map((method, index) => normalizePaymentMethod(method, index))
         : []
       
       transactionsData = [
@@ -101,7 +86,7 @@ export default function WalletScreen({ navigation, route}) {
         }
       ]
 
-      setPaymentMethods(methodsData)
+      setWalletPaymentMethods(methodsData)
       setTransactions(transactionsData.slice(0, 5)) 
       
       const calculatedBalance = transactionsData.reduce((acc, transaction) => {
@@ -120,7 +105,7 @@ export default function WalletScreen({ navigation, route}) {
     } finally {
       setLoader(false)
     }
-  }, [normalizePaymentMethod, user.paymentMethods, user.name])
+  }, [normalizePaymentMethod, paymentMethods])
 
   useEffect(() => {
     const fromAccount = route.params?.fromAccount
@@ -213,7 +198,7 @@ export default function WalletScreen({ navigation, route}) {
         </TouchableOpacity>
       </View>
 
-      {paymentMethods.length === 0 ? (
+      {walletPaymentMethods.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="card-outline" size={64} color={colors.text.secondary} />
           <Text style={styles.emptyStateTitle}>
@@ -225,7 +210,7 @@ export default function WalletScreen({ navigation, route}) {
         </View>
       ) : (
         <FlatList
-          data={paymentMethods}
+          data={walletPaymentMethods}
           keyExtractor={(item, index) => String(item._id || item.id || index)}
           renderItem={({ item }) => (
             <PaymentMethodItem

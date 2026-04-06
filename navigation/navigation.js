@@ -21,6 +21,7 @@ import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
 import { SettingProvider } from '../contexts/SettingContext'
 import { GatewayProvider } from '../contexts/GatewayContext'
+import { PaymentMethodsProvider } from '../contexts/PaymentMethodsContext'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import SearchResults from '../screens/SearchResults'
@@ -40,6 +41,7 @@ export default function RootNavigation({statusBarColor}) {
         <LoaderContext.Provider value={{loading, setLoading}}>
           <SettingProvider>
             <GatewayProvider>
+            <PaymentMethodsProvider>
             <DeliverySettingsProvider>
               <RestaurantsContext.Provider value={{restaurantData, setRestaurantData}}>
                 <CategoriesContextProvider> 
@@ -68,6 +70,7 @@ export default function RootNavigation({statusBarColor}) {
               </CategoriesContextProvider>
             </RestaurantsContext.Provider>
           </DeliverySettingsProvider>
+            </PaymentMethodsProvider>
             </GatewayProvider>
         </SettingProvider>
       </LoaderContext.Provider>
