@@ -174,7 +174,6 @@ export default function WalletScreen({ navigation, route}) {
               variant="wallet"
               isSelected={item.isDefault}
               showDefaultBadge={true}
-              preferLabel={true}
               showMenu={true}
               onMenuPress={() => {
                 Alert.alert(

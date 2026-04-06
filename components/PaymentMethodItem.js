@@ -12,13 +12,10 @@ export default function PaymentMethodItem({
   onMenuPress,
   showMenu = false,
   showDefaultBadge = false,
-  preferLabel = false,
 }) {
   const IconComponent = FontAwesome
   const Container = onPress ? TouchableOpacity : View
-  const title = preferLabel && method?.cardDetails?.label
-    ? method.cardDetails.label
-    : i18n.t('payment.credit_card', 'Credit Card')
+  const title = method?.cardDetails?.cardBrand
   const isCheckout = variant === 'checkout'
 
   return (
