@@ -11,63 +11,20 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 export default function WalletScreen({ navigation, route}) {
   const {
     paymentMethods,
-    setPaymentMethods,
-    setSelectedPaymentMethod,
+    setDefaultPaymentMethod,
+    removePaymentMethod,
   } = usePaymentMethods()
-  const [walletPaymentMethods, setWalletPaymentMethods] = useState([])
   const [transactions, setTransactions] = useState([])
   const [balance, setBalance] = useState(0)
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
-
-  const normalizePaymentMethod = useCallback((method, index = 0) => {
-    const details = method?.details && typeof method.details === 'object' ? method.details : {}
-    return {
-      _id: method?._id || method?.id || `method_${index}`,
-      id: method?._id || method?.id || `method_${index}`,
-      methodType: method?.type === 'card' ? 'credit_card' : method?.type,
-      cardDetails: {
-        ...details,
-        label: details.label,
-      },
-      isDefault: index === 0,
-      isActive: true,
-    }
-  }, [])
-
-  const persistPaymentMethods = useCallback((next) => {
-    const normalizedSelected = next.length > 0 ? normalizePaymentMethod(next[0], 0) : null
-    setPaymentMethods(next)
-    setSelectedPaymentMethod(normalizedSelected)
-  }, [normalizePaymentMethod, setPaymentMethods, setSelectedPaymentMethod])
-
-  const handleSetDefaultPaymentMethod = useCallback((methodId) => {
-    const current = paymentMethods || []
-    const currentIndex = current.findIndex((method, index) => (method._id || method.id || `method_${index}`) === methodId)
-
-    if (currentIndex <= 0) return
-
-    const next = [current[currentIndex], ...current.filter((_, index) => index !== currentIndex)]
-    persistPaymentMethods(next)
-  }, [paymentMethods, persistPaymentMethods])
-
-  const handleRemovePaymentMethod = useCallback((methodId) => {
-    const current = paymentMethods || []
-    const next = current.filter((method, index) => (method._id || method.id || `method_${index}`) !== methodId)
-    persistPaymentMethods(next)
-  }, [paymentMethods, persistPaymentMethods])
 
   const loadWalletData = useCallback(() => {
     try {
       setLoader(true)
       setError(null)
       
-      let methodsData = []
       let transactionsData = []
-      
-      methodsData = paymentMethods && paymentMethods.length > 0
-        ? paymentMethods.map((method, index) => normalizePaymentMethod(method, index))
-        : []
       
       transactionsData = [
         {
@@ -86,7 +43,6 @@ export default function WalletScreen({ navigation, route}) {
         }
       ]
 
-      setWalletPaymentMethods(methodsData)
       setTransactions(transactionsData.slice(0, 5)) 
       
       const calculatedBalance = transactionsData.reduce((acc, transaction) => {
@@ -105,7 +61,7 @@ export default function WalletScreen({ navigation, route}) {
     } finally {
       setLoader(false)
     }
-  }, [normalizePaymentMethod, paymentMethods])
+  }, [])
 
   useEffect(() => {
     const fromAccount = route.params?.fromAccount
@@ -198,7 +154,7 @@ export default function WalletScreen({ navigation, route}) {
         </TouchableOpacity>
       </View>
 
-      {walletPaymentMethods.length === 0 ? (
+      {paymentMethods.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="card-outline" size={64} color={colors.text.secondary} />
           <Text style={styles.emptyStateTitle}>
@@ -210,7 +166,7 @@ export default function WalletScreen({ navigation, route}) {
         </View>
       ) : (
         <FlatList
-          data={walletPaymentMethods}
+          data={paymentMethods}
           keyExtractor={(item, index) => String(item._id || item.id || index)}
           renderItem={({ item }) => (
             <PaymentMethodItem
@@ -228,16 +184,12 @@ export default function WalletScreen({ navigation, route}) {
                     { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
                     {
                       text: i18n.t('wallet.setAsDefault', 'Set as Default'),
-                      onPress: () => {
-                        if (item.id === 'mock_card') return
-                        handleSetDefaultPaymentMethod(item.id)
-                      }
+                      onPress: () => setDefaultPaymentMethod(item.id)
                     },
                     {
                       text: i18n.t('wallet.remove', 'Remove'),
                       style: 'destructive',
                       onPress: () => {
-                        if (item.id === 'mock_card') return
                         Alert.alert(
                           i18n.t('wallet.remove', 'Remove'),
                           i18n.t('wallet.removePaymentMethodConfirm', 'Remove this payment method?'),
@@ -246,7 +198,7 @@ export default function WalletScreen({ navigation, route}) {
                             {
                               text: i18n.t('wallet.remove', 'Remove'),
                               style: 'destructive',
-                              onPress: () => handleRemovePaymentMethod(item.id),
+                              onPress: () => removePaymentMethod(item.id),
                             },
                           ]
                         )

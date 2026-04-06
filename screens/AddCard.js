@@ -15,27 +15,15 @@ import {
 import React, { useEffect, useState } from 'react'
 import { CardField, StripeProvider } from '@stripe/stripe-react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
-import { useSelector, useDispatch } from 'react-redux'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useGateway } from '../contexts/GatewayContext'
+import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useStripe } from '@stripe/stripe-react-native'
 import { createCardPaymentMethod } from '../api/paymentMethods'
 
-async function persistPaymentMethods(dispatch, user, next) {
-  const updatedUser = { ...user, paymentMethods: next }
-  dispatch({ type: 'UPDATE_USER', payload: { paymentMethods: next } })
-  try {
-    await AsyncStorage.setItem('userData', JSON.stringify(updatedUser))
-  } catch (e) {
-    console.warn('AsyncStorage userData', e)
-  }
-}
-
 function AddCard({ navigation }) {
-  const dispatch = useDispatch()
-  const user = useSelector((state) => state.userReducer)
+  const { addPaymentMethod } = usePaymentMethods()
   const { createPaymentMethod } = useStripe()
 
   const [holderName, setHolderName] = useState('')
@@ -85,17 +73,17 @@ function AddCard({ navigation }) {
       const cardBrand = paymentMethod.Card.brand
       console.log(cardNumberLast4, cardBrand, "🔥 PaymentMethod created")
       const entry = {
+        id: `card_${Date.now()}`,
         _id: `card_${Date.now()}`,
-        type: 'card',
-        details: {
+        methodType: 'credit_card',
+        cardDetails: {
           cardholderName: holderName.trim(),
           cardNumberLast4,
           cardBrand
-        },
+        }
       }
 
-      const next = [...(user.paymentMethods || []), entry]
-      await persistPaymentMethods(dispatch, user, next)
+      addPaymentMethod(entry)
 
       Alert.alert(
         i18n.t('wallet.cardAddedTitle'),
