@@ -66,15 +66,11 @@ function AddCard({ navigation }) {
         return
       }
 
-      // console.log('PaymentMethod created:', paymentMethod)
-
-      // 🔥 ICI paymentMethod EXISTE
       const cardNumberLast4 = paymentMethod.Card.last4
       const cardBrand = paymentMethod.Card.brand
       console.log(cardNumberLast4, cardBrand, "🔥 PaymentMethod created")
       const entry = {
         id: `card_${Date.now()}`,
-        _id: `card_${Date.now()}`,
         methodType: 'credit_card',
         cardDetails: {
           cardholderName: holderName.trim(),
