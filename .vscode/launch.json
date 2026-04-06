@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Hermes application",
+      "request": "attach",
+      "type": "reactnativedirect",
+      "cwd": "/Users/nass/Documents/good-food-app-main/customer-app"
+    },
+    {
+      "name": "Debug Android Hermes",
+      "request": "launch",
+      "type": "reactnativedirect",
+      "cwd": "/Users/nass/Documents/good-food-app-main/customer-app",
+      "platform": "android"
+    },
+    {
+      "name": "Debug iOS Hermes",
+      "request": "launch",
+      "type": "reactnativedirect",
+      "cwd": "/Users/nass/Documents/good-food-app-main/customer-app",
+      "platform": "ios"
+    },
+    {
+      "name": "Debug in Exponent",
+      "request": "launch",
+      "type": "reactnative",
+      "cwd": "/Users/nass/Documents/good-food-app-main/customer-app",
+      "platform": "exponent"
+    },
+    {
+      "name": "Debug Expo Web",
+      "request": "launch",
+      "type": "reactnativedirect",
+      "cwd": "/Users/nass/Documents/good-food-app-main/customer-app",
+      "platform": "expoweb",
+      "browserTarget": "chrome",
+      "url": "http://localhost:8081"
+    }
+  ]
+}
