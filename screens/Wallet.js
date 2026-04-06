@@ -81,20 +81,7 @@ export default function WalletScreen({ navigation, route}) {
       
       methodsData = user.paymentMethods && user.paymentMethods.length > 0
         ? user.paymentMethods.map((method, index) => normalizePaymentMethod(method, index))
-        : [{
-            _id: 'mock_card',
-            id: 'mock_card',
-            methodType: 'credit_card',
-            cardDetails: {
-              cardNumberLast4: '4242',
-              cardBrand: 'visa',
-              expiryMonth: 12,
-              expiryYear: 2025,
-              cardholderName: user.name || 'User'
-            },
-            isDefault: true,
-            isActive: true
-          }]
+        : []
       
       transactionsData = [
         {

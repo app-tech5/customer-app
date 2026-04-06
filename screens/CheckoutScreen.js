@@ -104,19 +104,7 @@ export default function CheckoutScreen({ navigation, route }) {
             isDefault: index === 0, 
             isActive: true
           }))
-        : [{
-            id: 'mock_card',
-            methodType: 'credit_card',
-            cardDetails: {
-              cardNumberLast4: '4242',
-              cardBrand: 'visa',
-              expiryMonth: 12,
-              expiryYear: 2025,
-              cardholderName: user.name || 'User'
-            },
-            isDefault: true,
-            isActive: true
-          }]
+        : []
 
       setAddresses(addressesData)
       
