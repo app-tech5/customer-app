@@ -4,53 +4,6 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 
-function normalizeMethodType(type) {
-  if (!type) return ''
-  const normalized = String(type).toLowerCase()
-  return normalized === 'card' ? 'credit_card' : normalized
-}
-
-function getMethodIcon(type) {
-  switch (normalizeMethodType(type)) {
-    case 'credit_card':
-    case 'debit_card':
-      return 'credit-card'
-    case 'paypal':
-      return 'paypal'
-    case 'apple_pay':
-      return 'logo-apple'
-    case 'google_pay':
-      return 'logo-google'
-    case 'cash_on_delivery':
-      return 'cash'
-    case 'stripe':
-      return 'credit-card'
-    default:
-      return 'card'
-  }
-}
-
-function getMethodName(type) {
-  switch (normalizeMethodType(type)) {
-    case 'credit_card':
-      return i18n.t('payment.credit_card', 'Credit Card')
-    case 'debit_card':
-      return i18n.t('payment.debit_card', 'Debit Card')
-    case 'paypal':
-      return 'PayPal'
-    case 'apple_pay':
-      return 'Apple Pay'
-    case 'google_pay':
-      return 'Google Pay'
-    case 'cash_on_delivery':
-      return i18n.t('payment.cash', 'Cash')
-    case 'stripe':
-      return 'Stripe'
-    default:
-      return i18n.t('payment.credit_card', 'Credit Card')
-  }
-}
-
 export default function PaymentMethodItem({
   method,
   variant = 'checkout',
@@ -61,14 +14,11 @@ export default function PaymentMethodItem({
   showDefaultBadge = false,
   preferLabel = false,
 }) {
-  const normalizedMethodType = normalizeMethodType(method?.methodType)
-  const IconComponent = normalizedMethodType.includes('apple') || normalizedMethodType.includes('google')
-    ? Ionicons
-    : FontAwesome
+  const IconComponent = FontAwesome
   const Container = onPress ? TouchableOpacity : View
   const title = preferLabel && method?.cardDetails?.label
     ? method.cardDetails.label
-    : getMethodName(normalizedMethodType)
+    : i18n.t('payment.credit_card', 'Credit Card')
   const isCheckout = variant === 'checkout'
 
   return (
@@ -80,7 +30,7 @@ export default function PaymentMethodItem({
       <View style={styles.left}>
         <View style={[styles.iconWrap, isCheckout && isSelected && styles.selectedIconWrap]}>
           <IconComponent
-            name={getMethodIcon(normalizedMethodType)}
+            name="credit-card"
             size={20}
             color={isCheckout && isSelected ? colors.text.white : colors.primary}
           />
