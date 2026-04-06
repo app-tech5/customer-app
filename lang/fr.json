@@ -425,6 +425,8 @@
     "cardValidationExpiryPast": "Cette carte est expirée.",
     "cardAddedTitle": "Carte enregistrée",
     "cardAddedMessage": "Votre carte a été ajoutée à votre portefeuille.",
+    "cardAlreadyAddedTitle": "Carte déjà ajoutée",
+    "cardAlreadyAddedMessage": "Cette carte est déjà dans votre portefeuille.",
     "unableToAddCard": "Impossible d’ajouter votre carte pour le moment. Réessayez plus tard.",
     "cardFieldIncomplete": "Complétez les informations de carte dans le champ sécurisé."
   },

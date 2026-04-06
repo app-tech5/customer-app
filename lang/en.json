@@ -470,6 +470,8 @@
     "cardValidationExpiryPast": "This card has expired.",
     "cardAddedTitle": "Card saved",
     "cardAddedMessage": "Your card has been added to your wallet.",
+    "cardAlreadyAddedTitle": "Card already added",
+    "cardAlreadyAddedMessage": "This card is already in your wallet.",
     "unableToAddCard": "We couldn’t add your card. Please try again later.",
     "cardFieldIncomplete": "Please complete the card details in the secure field."
   },
