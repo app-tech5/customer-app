@@ -15,6 +15,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { CardField, StripeProvider } from '@stripe/stripe-react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
+import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useGateway } from '../contexts/GatewayContext'
@@ -23,7 +24,8 @@ import { useStripe } from '@stripe/stripe-react-native'
 import { createCardPaymentMethod } from '../api/paymentMethods'
 
 function AddCard({ navigation }) {
-  const { addPaymentMethod } = usePaymentMethods()
+  const user = useSelector((state) => state.userReducer)
+  const { paymentMethods, addPaymentMethod } = usePaymentMethods()
   const { createPaymentMethod } = useStripe()
 
   const [holderName, setHolderName] = useState('')
@@ -68,9 +70,24 @@ function AddCard({ navigation }) {
 
       const cardNumberLast4 = paymentMethod.Card.last4
       const cardBrand = paymentMethod.Card.brand
-      console.log(cardNumberLast4, cardBrand, "🔥 PaymentMethod created")
+
+      const alreadyExists = paymentMethods.some((method) =>
+        method?.user === user?.id &&
+        method?.cardDetails?.cardNumberLast4 === cardNumberLast4 &&
+        method?.cardDetails?.cardBrand === cardBrand
+      )
+
+      if (alreadyExists) {
+        Alert.alert(
+          i18n.t('wallet.cardAlreadyAddedTitle', 'Card already added'),
+          i18n.t('wallet.cardAlreadyAddedMessage', 'This card is already in your wallet.')
+        )
+        return
+      }
+
       const entry = {
         id: `card_${Date.now()}`,
+        user: user?.id,
         methodType: 'credit_card',
         cardDetails: {
           cardholderName: holderName.trim(),
