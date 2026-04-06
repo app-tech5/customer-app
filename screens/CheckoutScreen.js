@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
+import PaymentMethodItem from '../components/PaymentMethodItem'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 export default function CheckoutScreen({ navigation, route }) {
@@ -209,75 +210,6 @@ export default function CheckoutScreen({ navigation, route }) {
     </TouchableOpacity>
   )
 
-  const PaymentMethodItem = ({ method, isSelected }) => {
-    const getMethodIcon = (type) => {
-      switch (type) {
-        case 'credit_card':
-        case 'debit_card':
-          return 'credit-card'
-        case 'paypal':
-          return 'paypal'
-        case 'apple_pay':
-          return 'logo-apple'
-        case 'google_pay':
-          return 'logo-google'
-        case 'cash_on_delivery':
-          return 'cash'
-        default:
-          return 'card'
-      }
-    }
-
-    const getMethodName = (type) => {
-      switch (type) {
-        case 'credit_card':
-          return i18n.t('payment.credit_card', 'Credit Card')
-        case 'debit_card':
-          return i18n.t('payment.debit_card', 'Debit Card')
-        case 'paypal':
-          return 'PayPal'
-        case 'apple_pay':
-          return 'Apple Pay'
-        case 'google_pay':
-          return 'Google Pay'
-        case 'cash_on_delivery':
-          return i18n.t('payment.cash', 'Cash')
-        default:
-          return type
-      }
-    }
-
-    const IconComponent = method.methodType?.includes('apple') || method.methodType?.includes('google')
-      ? Ionicons
-      : FontAwesome
-
-    return (
-      <TouchableOpacity
-        style={[styles.paymentItem, isSelected && styles.selectedPayment]}
-        onPress={() => handlePaymentMethodSelect(method)}
-      >
-        <View style={styles.paymentLeft}>
-          <View style={[styles.paymentIcon, isSelected && styles.selectedIcon]}>
-            <IconComponent name={getMethodIcon(method.methodType)} size={20} color={isSelected ? colors.text.white : colors.primary} />
-          </View>
-          <View style={styles.paymentInfo}>
-            <Text style={[styles.paymentName, isSelected && styles.selectedText]}>
-              {getMethodName(method.methodType)}
-            </Text>
-            {method.cardDetails?.cardNumberLast4 && (
-              <Text style={[styles.paymentDetails, isSelected && styles.selectedText]}>
-                •••• {method.cardDetails.cardNumberLast4}
-              </Text>
-            )}
-          </View>
-        </View>
-        {isSelected && (
-          <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-        )}
-      </TouchableOpacity>
-    )
-  }
-
   if (loading) return <Loader />
 
   return (
@@ -337,7 +269,12 @@ export default function CheckoutScreen({ navigation, route }) {
           </View>
 
           {selectedPaymentMethod ? (
-            <PaymentMethodItem method={selectedPaymentMethod} isSelected={true} />
+            <PaymentMethodItem
+              method={selectedPaymentMethod}
+              variant="checkout"
+              isSelected={true}
+              onPress={() => handlePaymentMethodSelect(selectedPaymentMethod)}
+            />
           ) : (
             <TouchableOpacity
               style={styles.emptyPayment}
@@ -547,44 +484,6 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: 16,
     textAlign: 'center',
-  },
-  paymentItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: colors.background.secondary,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  selectedPayment: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  paymentLeft: {
-    flexDirection: 'row',
-    flex: 1,
-  },
-  paymentIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  paymentInfo: {
-    flex: 1,
-  },
-  paymentName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 2,
-  },
-  paymentDetails: {
-    fontSize: 14,
-    color: colors.text.secondary,
   },
   emptyPayment: {
     alignItems: 'center',

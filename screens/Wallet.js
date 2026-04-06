@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
+import PaymentMethodItem from '../components/PaymentMethodItem'
 
 export default function WalletScreen({ navigation, route}) {
   const dispatch = useDispatch()
@@ -195,122 +196,6 @@ export default function WalletScreen({ navigation, route}) {
     </View>
   )
 
-  const PaymentMethodItem = ({ method, index }) => {
-    const getMethodIcon = (type) => {
-      switch (type) {
-        case 'credit_card':
-        case 'debit_card':
-          return 'credit-card'
-        case 'paypal':
-          return 'paypal'
-        case 'apple_pay':
-          return 'logo-apple'
-        case 'google_pay':
-          return 'logo-google'
-        case 'cash_on_delivery':
-          return 'cash'
-        case 'stripe':
-          return 'credit-card'
-        default:
-          return 'card'
-      }
-    }
-
-    const getMethodName = (type) => {
-      switch (type) {
-        case 'credit_card':
-          return i18n.t('payment.credit_card', 'Credit Card')
-        case 'debit_card':
-          return i18n.t('payment.debit_card', 'Debit Card')
-        case 'paypal':
-          return 'PayPal'
-        case 'apple_pay':
-          return 'Apple Pay'
-        case 'google_pay':
-          return 'Google Pay'
-        case 'cash_on_delivery':
-          return i18n.t('payment.cash', 'Cash')
-        case 'stripe':
-          return 'Stripe'
-        default:
-          return type
-      }
-    }
-
-    const IconComponent = method.methodType?.includes('apple') || method.methodType?.includes('google')
-      ? Ionicons
-      : FontAwesome
-
-    return (
-      <View style={[styles.paymentMethodItem, method.isDefault && styles.defaultPaymentMethod]}>
-        <View style={styles.paymentMethodLeft}>
-          <View style={styles.paymentMethodIcon}>
-            <IconComponent name={getMethodIcon(method.methodType)} size={20} color={colors.primary} />
-          </View>
-          <View style={styles.paymentMethodInfo}>
-            <Text style={styles.paymentMethodName}>
-              {method.cardDetails?.label || getMethodName(method.methodType)}
-            </Text>
-            {method.cardDetails?.cardNumberLast4 && (
-              <Text style={styles.paymentMethodDetails}>
-                •••• {method.cardDetails.cardNumberLast4}
-              </Text>
-            )}
-            {method.isDefault && (
-              <View style={styles.defaultBadge}>
-                <Text style={styles.defaultBadgeText}>
-                  {i18n.t('wallet.default', 'Default')}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.paymentMethodActions}
-          onPress={() => {
-            
-            Alert.alert(
-              i18n.t('wallet.paymentMethodOptions', 'Options'),
-              i18n.t('wallet.paymentMethodOptionsMessage', 'Choose an action'),
-              [
-                { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
-                {
-                  text: i18n.t('wallet.setAsDefault', 'Set as Default'),
-                  onPress: () => {
-                    if (method.id === 'mock_card') return
-                    handleSetDefaultPaymentMethod(method.id)
-                  }
-                },
-                {
-                  text: i18n.t('wallet.remove', 'Remove'),
-                  style: 'destructive',
-                  onPress: () => {
-                    if (method.id === 'mock_card') return
-                    Alert.alert(
-                      i18n.t('wallet.remove', 'Remove'),
-                      i18n.t('wallet.removePaymentMethodConfirm', 'Remove this payment method?'),
-                      [
-                        { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
-                        {
-                          text: i18n.t('wallet.remove', 'Remove'),
-                          style: 'destructive',
-                          onPress: () => handleRemovePaymentMethod(method.id),
-                        },
-                      ]
-                    )
-                  }
-                }
-              ]
-            )
-          }}
-        >
-          <Ionicons name="ellipsis-vertical" size={20} color={colors.text.secondary} />
-        </TouchableOpacity>
-      </View>
-    )
-  }
-
   const PaymentMethodsSection = () => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -342,7 +227,51 @@ export default function WalletScreen({ navigation, route}) {
         <FlatList
           data={paymentMethods}
           keyExtractor={(item, index) => String(item._id || item.id || index)}
-          renderItem={({ item, index }) => <PaymentMethodItem method={item} index={index} />}
+          renderItem={({ item }) => (
+            <PaymentMethodItem
+              method={item}
+              variant="wallet"
+              isSelected={item.isDefault}
+              showDefaultBadge={true}
+              preferLabel={true}
+              showMenu={true}
+              onMenuPress={() => {
+                Alert.alert(
+                  i18n.t('wallet.paymentMethodOptions', 'Options'),
+                  i18n.t('wallet.paymentMethodOptionsMessage', 'Choose an action'),
+                  [
+                    { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
+                    {
+                      text: i18n.t('wallet.setAsDefault', 'Set as Default'),
+                      onPress: () => {
+                        if (item.id === 'mock_card') return
+                        handleSetDefaultPaymentMethod(item.id)
+                      }
+                    },
+                    {
+                      text: i18n.t('wallet.remove', 'Remove'),
+                      style: 'destructive',
+                      onPress: () => {
+                        if (item.id === 'mock_card') return
+                        Alert.alert(
+                          i18n.t('wallet.remove', 'Remove'),
+                          i18n.t('wallet.removePaymentMethodConfirm', 'Remove this payment method?'),
+                          [
+                            { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
+                            {
+                              text: i18n.t('wallet.remove', 'Remove'),
+                              style: 'destructive',
+                              onPress: () => handleRemovePaymentMethod(item.id),
+                            },
+                          ]
+                        )
+                      }
+                    }
+                  ]
+                )
+              }}
+            />
+          )}
           scrollEnabled={false}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
         />
@@ -632,63 +561,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
-  },
-  paymentMethodItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: colors.background.secondary,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  defaultPaymentMethod: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  paymentMethodLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  paymentMethodIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  paymentMethodInfo: {
-    flex: 1,
-  },
-  paymentMethodName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 2,
-  },
-  paymentMethodDetails: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
-  defaultBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  defaultBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.text.white,
-    textTransform: 'uppercase',
-  },
-  paymentMethodActions: {
-    padding: 8,
   },
   transactionItem: {
     flexDirection: 'row',
