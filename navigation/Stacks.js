@@ -1,5 +1,7 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
+import { TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import Home from '../screens/Home'
 import RestaurantDetail from '../screens/RestaurantDetail'
 import MenuDetailScreen from '../screens/MenuDetailScreen'
@@ -21,6 +23,7 @@ import Wallet from '../screens/Wallet'
 import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
 import AddCard from '../screens/AddCard'
 import Settings from '../screens/Settings'
+import { colors } from '../global'
 
 const HomeStack = createStackNavigator()
 
@@ -154,13 +157,59 @@ export function SearchNavigator() {
 
 const WalletStack = createStackNavigator()
 
-export function WalletNavigator() {
+export function WalletSectionNavigator({ navigation }) {
   return (
     <WalletStack.Navigator>
       <WalletStack.Screen
         name="Wallet"
         component={Wallet}
+        options={{
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.toggleDrawer()}
+              style={{ padding: 10, marginLeft: 5 }}
+              accessibilityRole="button"
+              accessibilityLabel="Open menu"
+            >
+              <Ionicons name="menu" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <WalletStack.Screen
+        name="AddPaymentMethod"
+        component={AddPaymentMethodScreen}
         options={{ headerShown: true }}
+      />
+      <WalletStack.Screen
+        name="AddCard"
+        component={AddCard}
+        options={{ headerShown: true }}
+      />
+    </WalletStack.Navigator>
+  )
+}
+
+export function WalletFlowNavigator({ navigation }) {
+  return (
+    <WalletStack.Navigator>
+      <WalletStack.Screen
+        name="Wallet"
+        component={Wallet}
+        options={{
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ padding: 10, marginLeft: 5 }}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
+        }}
       />
       <WalletStack.Screen
         name="AddPaymentMethod"
@@ -178,7 +227,7 @@ export function WalletNavigator() {
 
 const CheckoutStack = createStackNavigator()
 
-export function CheckoutNavigator() {
+export function CheckoutNavigator({ navigation }) {
   return (
     <CheckoutStack.Navigator>
       <CheckoutStack.Screen
@@ -186,7 +235,17 @@ export function CheckoutNavigator() {
         component={CheckoutScreen}
         options={{
           title: 'Checkout',
-          headerShown: true
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ padding: 10, marginLeft: 5 }}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <CheckoutStack.Screen
@@ -227,19 +286,75 @@ export function OrdersNavigator() {
 
 const OrderStatusStack = createStackNavigator()
 
-export function OrderStatusNavigator() {
+export function OrderStatusNavigator({ navigation, route }) {
+  const initialRouteName = route?.params?.screen === 'OrderTracking' ? 'OrderTracking' : 'OrderDetails'
+  const initialParams = route?.params?.params
+
   return (
-    <OrderStatusStack.Navigator>
+    <OrderStatusStack.Navigator initialRouteName={initialRouteName}>
       <OrderStatusStack.Screen
         name="OrderDetails"
         component={OrderDetails}
-        options={{ headerShown: false }}
+        initialParams={initialRouteName === 'OrderDetails' ? initialParams : undefined}
+        options={{
+          headerShown: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ padding: 10, marginLeft: 5 }}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
+        }}
       />
       <OrderStatusStack.Screen
         name="OrderTracking"
         component={OrderTracking}
-        options={{ headerShown: true }}
+        initialParams={initialRouteName === 'OrderTracking' ? initialParams : undefined}
+        options={{
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ padding: 10, marginLeft: 5 }}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
+        }}
       />
     </OrderStatusStack.Navigator>
+  )
+}
+
+const SettingsStack = createStackNavigator()
+
+export function SettingsSectionNavigator({ navigation }) {
+  return (
+    <SettingsStack.Navigator>
+      <SettingsStack.Screen
+        name="SettingsScreen"
+        component={Settings}
+        options={{
+          title: 'Settings',
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.toggleDrawer()}
+              style={{ padding: 10, marginLeft: 5 }}
+              accessibilityRole="button"
+              accessibilityLabel="Open menu"
+            >
+              <Ionicons name="menu" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+    </SettingsStack.Navigator>
   )
 }

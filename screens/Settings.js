@@ -7,7 +7,7 @@ import { config } from '../config'
 import { colors } from '../global'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export default function Settings({ navigation, route }) {
+export default function Settings({ navigation }) {
   const dispatch = useDispatch()
   const { language } = useSelector((state) => state.settings || {})
 
@@ -18,31 +18,7 @@ export default function Settings({ navigation, route }) {
 
   useEffect(() => {
     loadSettings()
-    const fromAccount = route?.params?.fromAccount === true
-
-    navigation.setOptions({
-      title: i18n.t('settings.title', 'Settings'),
-      headerLeft: () => fromAccount ? (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ padding: 10, marginLeft: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          onPress={() => navigation.toggleDrawer()}
-          style={{ padding: 10, marginLeft: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Open menu"
-        >
-          <Ionicons name="menu" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-      ),
-    })
-  }, [navigation, route?.params?.fromAccount])
+  }, [])
 
   const loadSettings = async () => {
     try {
@@ -196,7 +172,6 @@ export default function Settings({ navigation, route }) {
             subtitle={i18n.t('settings.manageWallet', 'Manage payment methods and balance')}
             onPress={() => navigation.navigate('WalletFlow', {
               screen: 'Wallet',
-              params: { returnToPrevious: true }
             })}
           />
         </SettingSection>

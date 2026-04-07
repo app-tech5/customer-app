@@ -355,7 +355,6 @@ export default function CheckoutScreen({ navigation, route }) {
           setPaymentSelectorVisible(false)
           navigation.navigate('WalletFlow', {
             screen: 'Wallet',
-            params: { returnToPrevious: true }
           })
         }}
       />

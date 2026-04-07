@@ -214,7 +214,6 @@ export default function AccountScreen({ navigation }) {
         subtitle={i18n.t('profile.managePayments')}
         onPress={() => navigation.navigate('WalletFlow', {
           screen: 'Wallet',
-          params: { returnToPrevious: true }
         })}
       />
 
@@ -239,7 +238,7 @@ export default function AccountScreen({ navigation }) {
         icon="settings"
         title={i18n.t('drawer.settings')}
         subtitle={i18n.t('profile.appSettings')}
-        onPress={() => navigation.navigate('Settings', { fromAccount: true })}
+        onPress={() => navigation.navigate('Settings')}
       />
 
       <MenuItem

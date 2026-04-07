@@ -2,11 +2,10 @@ import React from 'react'
 import {createDrawerNavigator} from '@react-navigation/drawer'
 import BottomTabs from './BottomTabs'
 import DrawerContent from '../components/DrawerContent';
-import { SearchNavigator, AccountNavigator, OrdersNavigator, WalletNavigator } from './Stacks';
+import { SearchNavigator, AccountNavigator, OrdersNavigator, WalletSectionNavigator, SettingsSectionNavigator } from './Stacks';
 import NearMeScreen from '../screens/NearMeScreen';
 
 import Offers from '../screens/Offers'
-import Settings from '../screens/Settings';
 import { Ionicons, MaterialIcons, Entypo, Feather } from '@expo/vector-icons'
 import i18n from '../lang/i18n';
 import { colors } from '../global';
@@ -134,7 +133,7 @@ export default function DrawerNavigator() {
         
         <Drawer.Screen
             name = "Wallet"
-            component={WalletNavigator}
+            component={WalletSectionNavigator}
             options={{
                 title: i18n.t('drawer.wallet'),
                 headerShown: false,
@@ -150,10 +149,10 @@ export default function DrawerNavigator() {
         
         <Drawer.Screen
             name = "Settings"
-            component={Settings}
+            component={SettingsSectionNavigator}
             options={{
                 title: i18n.t('drawer.settings'),
-                headerShown: true,
+                headerShown: false,
                 drawerIcon: ({focused, size}) => (
                     <Ionicons
                         name="settings-outline"

@@ -20,7 +20,7 @@ import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import {
   SearchNavigator,
-  WalletNavigator,
+  WalletFlowNavigator,
   CheckoutNavigator,
   OrderStatusNavigator,
 } from './Stacks'
@@ -52,7 +52,7 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="DrawerNavigator" component={DrawerNavigator}/>
               <Stack.Screen name="OrderCompleted" component={OrderCompleted}/>
               <Stack.Screen name="SearchFlow" component={SearchNavigator} options={{ headerShown: false }} />
-              <Stack.Screen name="WalletFlow" component={WalletNavigator} options={{ headerShown: false }} />
+              <Stack.Screen name="WalletFlow" component={WalletFlowNavigator} options={{ headerShown: false }} />
               <Stack.Screen name="CheckoutFlow" component={CheckoutNavigator} options={{ headerShown: false }} />
               <Stack.Screen name="OrderStatusFlow" component={OrderStatusNavigator} options={{ headerShown: false }} />
               <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />

@@ -63,26 +63,6 @@ export default function WalletScreen({ navigation, route}) {
     }
   }, [])
 
-  useEffect(() => {
-    const returnToPrevious = route.params?.returnToPrevious === true || route.params?.fromAccount === true
-
-    navigation.setOptions({
-      title: i18n.t('wallet.title', 'Wallet'),
-      headerLeft: () =>
-        returnToPrevious ? (
-          <TouchableOpacity onPress={() => navigation.goBack()}
-          style={{ padding: 10, marginLeft: 5 }}>
-            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={() => navigation.toggleDrawer()}
-          style={{ padding: 10, marginLeft: 5 }}>
-            <Ionicons name="menu" size={24} color={colors.text.primary} />
-          </TouchableOpacity>
-        ),
-    })
-  }, [navigation, route?.params?.fromAccount, route?.params?.returnToPrevious])
-
   useFocusEffect(
     useCallback(() => {
       loadWalletData()
