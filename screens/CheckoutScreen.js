@@ -7,6 +7,7 @@ import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 import PaymentMethodItem from '../components/PaymentMethodItem'
+import CheckoutPaymentSelector from '../components/CheckoutPaymentSelector'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
@@ -20,6 +21,8 @@ export default function CheckoutScreen({ navigation, route }) {
   const totalsFromParams = route.params?.totals || null
   const [addresses, setAddresses] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [paymentSelectorVisible, setPaymentSelectorVisible] = useState(false)
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [loading, setLoading] = useState(true)
   
@@ -118,7 +121,27 @@ export default function CheckoutScreen({ navigation, route }) {
     setSelectedAddress(address)
   }
 
-  const effectivePaymentMethod = paymentMethods.find((method) => method.isDefault) || null
+  const getPaymentMethodId = (method, index = 0) => method?._id || method?.id || `method_${index}`
+
+  useEffect(() => {
+    if (paymentMethods.length === 0) {
+      setSelectedPaymentMethod(null)
+      return
+    }
+
+    const selectedId = getPaymentMethodId(selectedPaymentMethod, -1)
+    const existingSelectedMethod = paymentMethods.find((method, index) => (
+      getPaymentMethodId(method, index) === selectedId
+    ))
+
+    if (existingSelectedMethod) {
+      return
+    }
+
+    setSelectedPaymentMethod(paymentMethods.find((method) => method.isDefault) || paymentMethods[0])
+  }, [paymentMethods, selectedPaymentMethod])
+
+  const effectivePaymentMethod = selectedPaymentMethod || paymentMethods.find((method) => method.isDefault) || null
 
   const handlePlaceOrder = () => {
     
@@ -239,7 +262,7 @@ export default function CheckoutScreen({ navigation, route }) {
             <Text style={styles.sectionTitle}>
               {i18n.t('checkout.paymentMethod', 'Payment Method')}
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Wallet', { fromAccount: true })}>
+            <TouchableOpacity onPress={() => setPaymentSelectorVisible(true)}>
               <Text style={styles.manageLink}>
                 {i18n.t('checkout.managePayment', 'Manage')}
               </Text>
@@ -251,11 +274,12 @@ export default function CheckoutScreen({ navigation, route }) {
               method={effectivePaymentMethod}
               variant="checkout"
               isSelected={true}
+              onPress={() => setPaymentSelectorVisible(true)}
             />
           ) : (
             <TouchableOpacity
               style={styles.emptyPayment}
-              onPress={() => navigation.navigate('Wallet', { fromAccount: true })}
+              onPress={() => setPaymentSelectorVisible(true)}
             >
               <Ionicons name="card-outline" size={48} color={colors.text.secondary} />
               <Text style={styles.emptyPaymentText}>
@@ -341,6 +365,18 @@ export default function CheckoutScreen({ navigation, route }) {
           <Ionicons name="arrow-forward" size={20} color={colors.text.white} />
         </TouchableOpacity>
       </View>
+
+      <CheckoutPaymentSelector
+        visible={paymentSelectorVisible}
+        paymentMethods={paymentMethods}
+        selectedPaymentMethod={effectivePaymentMethod}
+        onSelect={setSelectedPaymentMethod}
+        onClose={() => setPaymentSelectorVisible(false)}
+        onManage={() => {
+          setPaymentSelectorVisible(false)
+          navigation.navigate('Wallet', { fromAccount: true })
+        }}
+      />
     </SafeAreaView>
   )
 }
