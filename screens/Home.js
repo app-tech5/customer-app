@@ -522,14 +522,11 @@ export default function Home({navigation}) {
                 <TouchableOpacity
                   onPress={() => {
                     
-                    navigation.navigate('Search', {
-                      screen: 'SearchResults',
-                      params: {
-                        searchTerm: section.title,
-                        restaurantData: section.restaurants,
-                        totalResults: section.restaurants.length,
-                        sectionType: section.id
-                      }
+                    navigation.navigate('SearchResults', {
+                      searchTerm: section.title,
+                      restaurantData: section.restaurants,
+                      totalResults: section.restaurants.length,
+                      sectionType: section.id
                     })
                   }}
                 >

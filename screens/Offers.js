@@ -176,25 +176,19 @@ export default function Offers({ navigation }) {
     if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length >= 1) {
       
       const restaurantIds = promotion.applicableRestaurants.map(rest => rest._id || rest.restaurantId || rest.id)
-      navigation.navigate('Search', {
-        screen: 'SearchResults',
-        params: {
-          applicableRestaurants: restaurantIds, 
-          name: promotion.name,
-          type: 'restaurant',
-          fromOffers: true,
-          promotionScope: 'restaurant'
-        }
+      navigation.navigate('SearchResults', {
+        applicableRestaurants: restaurantIds, 
+        name: promotion.name,
+        type: 'restaurant',
+        fromOffers: true,
+        promotionScope: 'restaurant'
       });
     } else if (promotion.scope === 'platform') {
       
-      navigation.navigate('Search', {
-        screen: 'SearchResults',
-        params: {
-          name: 'ALL_RESTAURANTS',
-          type: 'restaurant',
-          fromOffers: true
-        }
+      navigation.navigate('SearchResults', {
+        name: 'ALL_RESTAURANTS',
+        type: 'restaurant',
+        fromOffers: true
       });
     } else if (promotion.scope === 'category') {
       
@@ -213,7 +207,12 @@ export default function Offers({ navigation }) {
         fromOffers: true
       });
     } else {
-      navigation.navigate('Search');
+      navigation.navigate('DrawerNavigator', {
+        screen: 'BottomTabs',
+        params: {
+          screen: 'Search'
+        }
+      });
     }
   }
 
@@ -358,7 +357,12 @@ export default function Offers({ navigation }) {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.navigate('Search', { screen: 'SearchScreen' })}
+            onPress={() => navigation.navigate('DrawerNavigator', {
+              screen: 'BottomTabs',
+              params: {
+                screen: 'Search'
+              }
+            })}
             accessibilityRole="button"
             accessibilityLabel="Search offers"
             accessibilityHint="Navigate to search screen"

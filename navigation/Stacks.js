@@ -4,11 +4,9 @@ import Home from '../screens/Home'
 import RestaurantDetail from '../screens/RestaurantDetail'
 import MenuDetailScreen from '../screens/MenuDetailScreen'
 import OrderDetails from '../screens/OrderDetails'
-import SearchResults from '../screens/SearchResults'
 import SearchScreen from '../screens/SearchScreen'
 import OrdersScreen from '../screens/OrdersScreen'
 import OrderTracking from '../screens/OrderTracking'
-import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
 import CartDetailsScreen from '../screens/CartDetailsScreen'
 import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
@@ -17,7 +15,6 @@ import AccountScreen from '../screens/AccountScreen'
 import EditProfileScreen from '../screens/EditProfileScreen'
 import AddressesScreen from '../screens/AddressesScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
-import Wallet from '../screens/Wallet'
 
 const HomeStack = createStackNavigator()
 
@@ -133,22 +130,6 @@ export function AccountNavigator() {
           headerShown: true
         }}
       />
-      <AccountStack.Screen
-        name="OrderRequest"
-        component={OrderRequest}
-        options={{
-          title: 'Confirm Order',
-          headerShown: true
-        }}
-      />
-      <AccountStack.Screen
-        name="Wallet"
-        component={Wallet}
-        options={{
-          title: 'Wallet',
-          headerShown: true
-        }}
-      />
     </AccountStack.Navigator>
   )
 }
@@ -163,14 +144,6 @@ export function SearchNavigator() {
         name="SearchScreen"
         component={SearchScreen}
         options={{ headerShown: false }} />
-
-      <SearchStack.Screen
-        name="SearchResults"
-        component={SearchResults}
-        options={{}} />
-
-
-
     </SearchStack.Navigator>
   )
 

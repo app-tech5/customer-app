@@ -53,7 +53,16 @@ const OrderListItem = ({ order }) => {
   };
 
   const handlePress = () => {
-    navigation.navigate('OrderDetails', { id: order._id });
+    navigation.navigate('DrawerNavigator', {
+      screen: 'BottomTabs',
+      params: {
+        screen: 'Cart',
+        params: {
+          screen: 'OrderDetails',
+          params: { id: order._id }
+        }
+      }
+    });
   };
 
   return (

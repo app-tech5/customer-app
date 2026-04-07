@@ -184,7 +184,7 @@ export default function Settings({ navigation }) {
             iconType="MaterialIcons"
             title={i18n.t('drawer.wallet', 'Wallet')}
             subtitle={i18n.t('settings.manageWallet', 'Manage payment methods and balance')}
-            onPress={() => navigation.navigate('WalletScreen')}
+            onPress={() => navigation.navigate('Wallet')}
           />
         </SettingSection>
 

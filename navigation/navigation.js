@@ -8,15 +8,12 @@ import DrawerNavigator from './DrawerNavigator'
 import OrderRequest from '../screens/OrderRequest'
 import Splash from '../screens/Splash'
 import SignIn from '../screens/SignIn'
-import Offers from '../screens/Offers'
-import Wallet from '../screens/Wallet'
 import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
 import AddCard from '../screens/AddCard'
  import OnboardingScreen from '../screens/Onboarding'
 import SignUp from '../screens/SignUp'
 import { LoaderContext } from '../contexts/LoaderContext'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
-import Settings from '../screens/Settings'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
 import { SettingProvider } from '../contexts/SettingContext'
@@ -56,15 +53,12 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
               <Stack.Screen name="ItemResults" component={ItemResults} options={{ headerShown: true }} />
               <Stack.Screen name="SearchResults" component={SearchResults} options={{ headerShown: true }} />
-              <Stack.Screen name="Offers" component={Offers}/>
-              <Stack.Screen name="Wallet" component={Wallet}/>
               <Stack.Screen
                 name="AddPaymentMethod"
                 component={AddPaymentMethodScreen}
                 options={{ headerShown: true }}
               />
               <Stack.Screen name="AddCard" component={AddCard} options={{ headerShown: true }} />
-              <Stack.Screen name="Settings" component={Settings}/>
               {}
           </Stack.Navigator>
               </CategoriesContextProvider>
