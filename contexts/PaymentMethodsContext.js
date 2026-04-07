@@ -8,7 +8,6 @@ export function PaymentMethodsProvider({ children }) {
   const user = useSelector((state) => state.userReducer)
   const currentUserId = user?.userId
   const [paymentMethods, setPaymentMethods] = useState([])
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [hydrated, setHydrated] = useState(false)
   const storageKey = useMemo(
     () => (currentUserId ? `payment_methods:${currentUserId}` : null),
@@ -22,7 +21,6 @@ export function PaymentMethodsProvider({ children }) {
       if (!storageKey) {
         if (isMounted) {
           setPaymentMethods([])
-          setSelectedPaymentMethod(null)
           setHydrated(true)
         }
         return
@@ -36,19 +34,14 @@ export function PaymentMethodsProvider({ children }) {
         const storedPaymentMethods = Array.isArray(storedValue?.paymentMethods)
           ? storedValue.paymentMethods
           : []
-        const storedSelectedPaymentMethod = storedValue?.selectedPaymentMethod || null
-        const fallbackSelectedPaymentMethod =
-          storedPaymentMethods.find((method) => method.isDefault) || null
 
         if (isMounted) {
           setPaymentMethods(storedPaymentMethods)
-          setSelectedPaymentMethod(storedSelectedPaymentMethod || fallbackSelectedPaymentMethod)
         }
       } catch (error) {
         console.warn('Failed to load payment methods from storage', error)
         if (isMounted) {
           setPaymentMethods([])
-          setSelectedPaymentMethod(null)
         }
       } finally {
         if (isMounted) {
@@ -73,10 +66,9 @@ export function PaymentMethodsProvider({ children }) {
       storageKey,
       JSON.stringify({
         paymentMethods,
-        selectedPaymentMethod,
       })
     )
-  }, [hydrated, paymentMethods, selectedPaymentMethod, storageKey])
+  }, [hydrated, paymentMethods, storageKey])
 
   const addPaymentMethod = useCallback((method) => {
     const isFirstPaymentMethod = paymentMethods.length === 0
@@ -87,10 +79,6 @@ export function PaymentMethodsProvider({ children }) {
     const next = [...paymentMethods, nextMethod]
 
     setPaymentMethods(next)
-
-    if (isFirstPaymentMethod) {
-      setSelectedPaymentMethod(nextMethod)
-    }
   }, [paymentMethods])
 
   const setDefaultPaymentMethod = useCallback((methodId) => {
@@ -103,7 +91,6 @@ export function PaymentMethodsProvider({ children }) {
     })
 
     setPaymentMethods(next)
-    setSelectedPaymentMethod(next.find((method) => method.isDefault) || null)
   }, [paymentMethods])
 
   const removePaymentMethod = useCallback((methodId) => {
@@ -121,20 +108,16 @@ export function PaymentMethodsProvider({ children }) {
         }))
 
     setPaymentMethods(next)
-    setSelectedPaymentMethod(next.find((method) => method.isDefault) || null)
   }, [paymentMethods])
 
   const value = useMemo(() => ({
     paymentMethods,
     setPaymentMethods,
-    selectedPaymentMethod,
-    setSelectedPaymentMethod,
     addPaymentMethod,
     setDefaultPaymentMethod,
     removePaymentMethod,
   }), [
     paymentMethods,
-    selectedPaymentMethod,
     addPaymentMethod,
     setDefaultPaymentMethod,
     removePaymentMethod,

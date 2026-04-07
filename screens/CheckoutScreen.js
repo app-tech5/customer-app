@@ -12,11 +12,7 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
 export default function CheckoutScreen({ navigation, route }) {
   const user = useSelector((state) => state.userReducer)
-  const {
-    paymentMethods,
-    selectedPaymentMethod,
-    setSelectedPaymentMethod,
-  } = usePaymentMethods()
+  const { paymentMethods } = usePaymentMethods()
   
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
@@ -122,11 +118,7 @@ export default function CheckoutScreen({ navigation, route }) {
     setSelectedAddress(address)
   }
 
-  const handlePaymentMethodSelect = (method) => {
-    setSelectedPaymentMethod(method)
-  }
-
-  const effectivePaymentMethod = selectedPaymentMethod || paymentMethods.find((method) => method.isDefault) || null
+  const effectivePaymentMethod = paymentMethods.find((method) => method.isDefault) || null
 
   const handlePlaceOrder = () => {
     
@@ -259,7 +251,6 @@ export default function CheckoutScreen({ navigation, route }) {
               method={effectivePaymentMethod}
               variant="checkout"
               isSelected={true}
-              onPress={() => handlePaymentMethodSelect(effectivePaymentMethod)}
             />
           ) : (
             <TouchableOpacity

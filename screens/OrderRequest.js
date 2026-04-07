@@ -14,7 +14,7 @@ export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
   const currentUserId = user?.userId
-  const { paymentMethods, selectedPaymentMethod } = usePaymentMethods()
+  const { paymentMethods } = usePaymentMethods()
   
   const {
     restaurantName,
@@ -27,7 +27,6 @@ export default function OrderRequest({ route, navigation }) {
     lng
   } = route.params || {}
   const paymentMethod =
-    selectedPaymentMethod ||
     paymentMethods.find((method) => method.isDefault) ||
     route.params?.paymentMethod ||
     null
