@@ -7,10 +7,12 @@ import { colors, currency, language } from '../global'
 import Loader from './Loader'
 import { api } from '../api'
 import { config } from '../config'
+import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
+  const { paymentMethods, selectedPaymentMethod } = usePaymentMethods()
   
   const {
     restaurantName,
@@ -22,7 +24,11 @@ export default function OrderRequest({ route, navigation }) {
     lat,
     lng
   } = route.params || {}
-  const paymentMethod = user.selectedPaymentMethod || null
+  const paymentMethod =
+    selectedPaymentMethod ||
+    paymentMethods.find((method) => method.isDefault) ||
+    route.params?.paymentMethod ||
+    null
 
   const [loading, setLoading] = useState(false)
 
