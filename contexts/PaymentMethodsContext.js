@@ -1,10 +1,81 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useSelector } from 'react-redux'
 
 const PaymentMethodsContext = createContext()
 
 export function PaymentMethodsProvider({ children }) {
+  const user = useSelector((state) => state.userReducer)
   const [paymentMethods, setPaymentMethods] = useState([])
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
+  const [hydrated, setHydrated] = useState(false)
+  const storageKey = useMemo(
+    () => (user?.id ? `payment_methods:${user.id}` : null),
+    [user?.id]
+  )
+
+  useEffect(() => {
+    let isMounted = true
+
+    const hydratePaymentMethods = async () => {
+      if (!storageKey) {
+        if (isMounted) {
+          setPaymentMethods([])
+          setSelectedPaymentMethod(null)
+          setHydrated(true)
+        }
+        return
+      }
+
+      setHydrated(false)
+
+      try {
+        const raw = await AsyncStorage.getItem(storageKey)
+        const storedValue = raw ? JSON.parse(raw) : null
+        const storedPaymentMethods = Array.isArray(storedValue?.paymentMethods)
+          ? storedValue.paymentMethods
+          : []
+        const storedSelectedPaymentMethod = storedValue?.selectedPaymentMethod || null
+        const fallbackSelectedPaymentMethod =
+          storedPaymentMethods.find((method) => method.isDefault) || null
+
+        if (isMounted) {
+          setPaymentMethods(storedPaymentMethods)
+          setSelectedPaymentMethod(storedSelectedPaymentMethod || fallbackSelectedPaymentMethod)
+        }
+      } catch (error) {
+        console.warn('Failed to load payment methods from storage', error)
+        if (isMounted) {
+          setPaymentMethods([])
+          setSelectedPaymentMethod(null)
+        }
+      } finally {
+        if (isMounted) {
+          setHydrated(true)
+        }
+      }
+    }
+
+    void hydratePaymentMethods()
+
+    return () => {
+      isMounted = false
+    }
+  }, [storageKey])
+
+  useEffect(() => {
+    if (!storageKey || !hydrated) {
+      return
+    }
+
+    void AsyncStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        paymentMethods,
+        selectedPaymentMethod,
+      })
+    )
+  }, [hydrated, paymentMethods, selectedPaymentMethod, storageKey])
 
   const addPaymentMethod = useCallback((method) => {
     const isFirstPaymentMethod = paymentMethods.length === 0
