@@ -13,7 +13,7 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
 export default function CheckoutScreen({ navigation, route }) {
   const user = useSelector((state) => state.userReducer)
-  const { paymentMethods } = usePaymentMethods()
+  const { paymentMethods, setDefaultPaymentMethod } = usePaymentMethods()
   
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
@@ -21,7 +21,6 @@ export default function CheckoutScreen({ navigation, route }) {
   const totalsFromParams = route.params?.totals || null
   const [addresses, setAddresses] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [paymentSelectorVisible, setPaymentSelectorVisible] = useState(false)
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [loading, setLoading] = useState(true)
@@ -121,24 +120,7 @@ export default function CheckoutScreen({ navigation, route }) {
     setSelectedAddress(address)
   }
 
-  useEffect(() => {
-    if (paymentMethods.length === 0) {
-      setSelectedPaymentMethod(null)
-      return
-    }
-
-    const existingSelectedMethod = paymentMethods.find(
-      (method) => method.id === selectedPaymentMethod?.id
-    )
-
-    if (existingSelectedMethod) {
-      return
-    }
-
-    setSelectedPaymentMethod(paymentMethods.find((method) => method.isDefault) || paymentMethods[0])
-  }, [paymentMethods, selectedPaymentMethod])
-
-  const effectivePaymentMethod = selectedPaymentMethod || paymentMethods.find((method) => method.isDefault) || null
+  const effectivePaymentMethod = paymentMethods.find((method) => method.isDefault) || null
 
   const handlePlaceOrder = () => {
     
@@ -366,8 +348,8 @@ export default function CheckoutScreen({ navigation, route }) {
       <CheckoutPaymentSelector
         visible={paymentSelectorVisible}
         paymentMethods={paymentMethods}
-        selectedPaymentMethod={effectivePaymentMethod}
-        onSelect={setSelectedPaymentMethod}
+        activePaymentMethod={effectivePaymentMethod}
+        onSelect={(method) => setDefaultPaymentMethod(method.id)}
         onClose={() => setPaymentSelectorVisible(false)}
         onManage={() => {
           setPaymentSelectorVisible(false)

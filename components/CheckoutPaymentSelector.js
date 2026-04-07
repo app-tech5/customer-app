@@ -15,12 +15,12 @@ import PaymentMethodItem from './PaymentMethodItem'
 export default function CheckoutPaymentSelector({
   visible,
   paymentMethods = [],
-  selectedPaymentMethod = null,
+  activePaymentMethod = null,
   onSelect,
   onClose,
   onManage,
 }) {
-  const selectedId = selectedPaymentMethod?.id
+  const selectedId = activePaymentMethod?.id
 
   return (
     <Modal
