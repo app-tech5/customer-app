@@ -25,6 +25,7 @@ import { createCardPaymentMethod } from '../api/paymentMethods'
 
 function AddCard({ navigation }) {
   const user = useSelector((state) => state.userReducer)
+  const currentUserId = user?.userId
   const { paymentMethods, addPaymentMethod } = usePaymentMethods()
   const { createPaymentMethod } = useStripe()
 
@@ -72,7 +73,7 @@ function AddCard({ navigation }) {
       const cardBrand = paymentMethod.Card.brand
 
       const alreadyExists = paymentMethods.some((method) =>
-        method?.user === user?.id &&
+        method?.user === currentUserId &&
         method?.cardDetails?.cardNumberLast4 === cardNumberLast4 &&
         method?.cardDetails?.cardBrand === cardBrand
       )
@@ -87,7 +88,7 @@ function AddCard({ navigation }) {
 
       const entry = {
         id: `card_${Date.now()}`,
-        user: user?.id,
+        user: currentUserId,
         methodType: 'credit_card',
         cardDetails: {
           cardholderName: holderName.trim(),

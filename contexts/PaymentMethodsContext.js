@@ -6,12 +6,13 @@ const PaymentMethodsContext = createContext()
 
 export function PaymentMethodsProvider({ children }) {
   const user = useSelector((state) => state.userReducer)
+  const currentUserId = user?.userId
   const [paymentMethods, setPaymentMethods] = useState([])
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [hydrated, setHydrated] = useState(false)
   const storageKey = useMemo(
-    () => (user?.id ? `payment_methods:${user.id}` : null),
-    [user?.id]
+    () => (currentUserId ? `payment_methods:${currentUserId}` : null),
+    [currentUserId]
   )
 
   useEffect(() => {

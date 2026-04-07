@@ -13,6 +13,7 @@ import PaymentMethodItem from '../components/PaymentMethodItem'
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
+  const currentUserId = user?.userId
   const { paymentMethods, selectedPaymentMethod } = usePaymentMethods()
   
   const {
@@ -69,7 +70,7 @@ export default function OrderRequest({ route, navigation }) {
       }));
 
       const orderData = {
-        user: user.id,
+        user: currentUserId,
         restaurant: restaurant?._id || restaurant?.id,
         items: orderItems,
         totalPrice: totals.total,
