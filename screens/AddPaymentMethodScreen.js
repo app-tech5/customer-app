@@ -11,32 +11,18 @@ import {
   Platform,
 } from 'react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
-import { useSelector, useDispatch } from 'react-redux'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-
-async function persistPaymentMethods(dispatch, user, next) {
-  const updatedUser = { ...user, paymentMethods: next }
-  dispatch({ type: 'UPDATE_USER', payload: { paymentMethods: next } })
-  try {
-    await AsyncStorage.setItem('userData', JSON.stringify(updatedUser))
-  } catch (e) {
-    console.warn('AsyncStorage userData', e)
-  }
-}
-
-function methodTypeKey(m) {
-  return m.type === 'card' ? 'credit_card' : m.type
-}
+import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
 export default function AddPaymentMethodScreen({ navigation }) {
-  const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
+  const { paymentMethods, addPaymentMethod } = usePaymentMethods()
 
   const existingTypes = useMemo(
-    () => new Set((user.paymentMethods || []).map(methodTypeKey)),
-    [user.paymentMethods]
+    () => new Set(paymentMethods.map((method) => method.methodType)),
+    [paymentMethods]
   )
 
   useEffect(() => {
@@ -53,15 +39,14 @@ export default function AddPaymentMethodScreen({ navigation }) {
       )
       return
     }
-    const next = [
-      ...(user.paymentMethods || []),
-      {
-        _id: `${type}_${Date.now()}`,
-        type,
-        details: { label },
-      },
-    ]
-    void persistPaymentMethods(dispatch, user, next)
+
+    addPaymentMethod({
+      id: `${type}_${Date.now()}`,
+      user: user?.id,
+      methodType: type,
+      cardDetails: { label },
+    })
+
     Alert.alert(i18n.t('wallet.added'), i18n.t('wallet.addedMessage'), [
       { text: i18n.t('common.ok'), onPress: () => navigation.goBack() },
     ])
