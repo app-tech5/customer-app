@@ -2,25 +2,28 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
+import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 
 export default function CheckoutScreen({ navigation, route }) {
-  const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
+  const {
+    paymentMethods,
+    selectedPaymentMethod,
+    setSelectedPaymentMethod,
+  } = usePaymentMethods()
   
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
   const restaurantName = route.params?.restaurantName || restaurant?.name || ''
   const totalsFromParams = route.params?.totals || null
   const [addresses, setAddresses] = useState([])
-  const [paymentMethods, setPaymentMethods] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null)
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [loading, setLoading] = useState(true)
   
@@ -62,7 +65,6 @@ export default function CheckoutScreen({ navigation, route }) {
       setLoading(true)
       
       let addressesData = []
-      let paymentData = []
       
       if (user.address && user.address.trim()) {
         
@@ -97,27 +99,10 @@ export default function CheckoutScreen({ navigation, route }) {
         }]
       }
       
-      paymentData = user.paymentMethods && user.paymentMethods.length > 0
-        ? user.paymentMethods.map((method, index) => ({
-            id: method._id || `method_${index}`,
-            methodType: method.type === 'card' ? 'credit_card' : method.type,
-            cardDetails: method.details || {},
-            isDefault: index === 0, 
-            isActive: true
-          }))
-        : []
-
       setAddresses(addressesData)
       
       const defaultAddress = addressesData?.find(addr => addr.isDefault) || null
       setSelectedAddress(defaultAddress)
-
-      setPaymentMethods(paymentData)
-      
-      const selectedPaymentId = user.selectedPaymentMethod?.id
-      const selectedPayment = paymentData?.find(method => method.id === selectedPaymentId)
-      const defaultPayment = selectedPayment || paymentData?.find(method => method.isDefault) || null
-      setSelectedPaymentMethod(defaultPayment)
 
     } catch (error) {
       console.error('Error loading checkout data:', error)
@@ -139,8 +124,9 @@ export default function CheckoutScreen({ navigation, route }) {
 
   const handlePaymentMethodSelect = (method) => {
     setSelectedPaymentMethod(method)
-    dispatch({ type: 'UPDATE_USER', payload: { selectedPaymentMethod: method } })
   }
+
+  const effectivePaymentMethod = selectedPaymentMethod || paymentMethods.find((method) => method.isDefault) || null
 
   const handlePlaceOrder = () => {
     
@@ -149,7 +135,7 @@ export default function CheckoutScreen({ navigation, route }) {
       return
     }
 
-    if (!selectedPaymentMethod) {
+    if (!effectivePaymentMethod) {
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('checkout.selectPayment', 'Please select a payment method'))
       return
     }
@@ -159,7 +145,7 @@ export default function CheckoutScreen({ navigation, route }) {
       restaurant,
       items: cartItems,
       address: selectedAddress,
-      paymentMethod: selectedPaymentMethod,
+      paymentMethod: effectivePaymentMethod,
       specialInstructions,
       totals: {
         subtotal,
@@ -268,12 +254,12 @@ export default function CheckoutScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
-          {selectedPaymentMethod ? (
+          {effectivePaymentMethod ? (
             <PaymentMethodItem
-              method={selectedPaymentMethod}
+              method={effectivePaymentMethod}
               variant="checkout"
               isSelected={true}
-              onPress={() => handlePaymentMethodSelect(selectedPaymentMethod)}
+              onPress={() => handlePaymentMethodSelect(effectivePaymentMethod)}
             />
           ) : (
             <TouchableOpacity
@@ -354,9 +340,9 @@ export default function CheckoutScreen({ navigation, route }) {
         </View>
 
         <TouchableOpacity
-          style={[styles.placeOrderButton, (!selectedAddress || !selectedPaymentMethod) && styles.disabledButton]}
+          style={[styles.placeOrderButton, (!selectedAddress || !effectivePaymentMethod) && styles.disabledButton]}
           onPress={handlePlaceOrder}
-          disabled={!selectedAddress || !selectedPaymentMethod}
+          disabled={!selectedAddress || !effectivePaymentMethod}
         >
           <Text style={styles.placeOrderText}>
             {i18n.t('checkout.placeOrder', 'Place Order')}
