@@ -53,15 +53,9 @@ const OrderListItem = ({ order }) => {
   };
 
   const handlePress = () => {
-    navigation.navigate('DrawerNavigator', {
-      screen: 'BottomTabs',
-      params: {
-        screen: 'Cart',
-        params: {
-          screen: 'OrderDetails',
-          params: { id: order._id }
-        }
-      }
+    navigation.navigate('OrderStatusFlow', {
+      screen: 'OrderDetails',
+      params: { id: order._id }
     });
   };
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { Icon, withBadge} from 'react-native-elements'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { HomeNavigator, SearchNavigator } from './Stacks'
-import { OrderNavigator } from './Stacks'
+import { CartNavigator } from './Stacks'
 import { useSelector } from 'react-redux'
 import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
 import { FontAwesome } from '@expo/vector-icons'
@@ -45,7 +45,7 @@ export default function BottomTabs() {
          />
          <Tab.Screen 
         name = "Cart"
-         component={OrderNavigator} 
+         component={CartNavigator} 
          options ={{
            headerShown: false,
            tabBarIcon: ({color, size}) =>(

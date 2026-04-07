@@ -212,7 +212,10 @@ export default function AccountScreen({ navigation }) {
         iconType="MaterialIcons"
         title={i18n.t('drawer.wallet')}
         subtitle={i18n.t('profile.managePayments')}
-        onPress={() => navigation.navigate('Wallet')}
+        onPress={() => navigation.navigate('WalletFlow', {
+          screen: 'Wallet',
+          params: { returnToPrevious: true }
+        })}
       />
 
       <MenuItem
@@ -236,7 +239,7 @@ export default function AccountScreen({ navigation }) {
         icon="settings"
         title={i18n.t('drawer.settings')}
         subtitle={i18n.t('profile.appSettings')}
-        onPress={() => navigation.navigate('Settings')}
+        onPress={() => navigation.navigate('Settings', { fromAccount: true })}
       />
 
       <MenuItem

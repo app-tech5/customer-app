@@ -64,12 +64,12 @@ export default function WalletScreen({ navigation, route}) {
   }, [])
 
   useEffect(() => {
-    const fromAccount = route.params?.fromAccount
+    const returnToPrevious = route.params?.returnToPrevious === true || route.params?.fromAccount === true
 
     navigation.setOptions({
       title: i18n.t('wallet.title', 'Wallet'),
       headerLeft: () =>
-        fromAccount ? (
+        returnToPrevious ? (
           <TouchableOpacity onPress={() => navigation.goBack()}
           style={{ padding: 10, marginLeft: 5 }}>
             <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
@@ -81,7 +81,7 @@ export default function WalletScreen({ navigation, route}) {
           </TouchableOpacity>
         ),
     })
-  }, [navigation, route?.params?.fromAccount])
+  }, [navigation, route?.params?.fromAccount, route?.params?.returnToPrevious])
 
   useFocusEffect(
     useCallback(() => {

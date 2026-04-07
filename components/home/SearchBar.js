@@ -28,10 +28,13 @@ export default function SearchBar({searchbar, cityHandler: _cityHandler, style, 
       restaurant?.city?.toLowerCase().includes(searchText.toLowerCase())
     )
 
-    navigation.navigate('SearchResults', {
-      searchTerm: searchText,
-      restaurantData: filteredRestaurants,
-      totalResults: filteredRestaurants.length
+    navigation.navigate('SearchFlow', {
+      screen: 'SearchResults',
+      params: {
+        searchTerm: searchText,
+        restaurantData: filteredRestaurants,
+        totalResults: filteredRestaurants.length
+      }
     })
   }
 

@@ -238,16 +238,7 @@ export default function OrdersScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.orderItem}
-        onPress={() => navigation.navigate('DrawerNavigator', {
-          screen: 'BottomTabs',
-          params: {
-            screen: 'Cart',
-            params: {
-              screen: 'OrderDetails',
-              params: { order: item }
-            }
-          }
-        })}
+        onPress={() => navigation.navigate('OrderDetails', { order: item })}
         activeOpacity={0.7}
       >
         
@@ -359,16 +350,7 @@ export default function OrdersScreen({ navigation }) {
           )}
           <TouchableOpacity
             style={styles.trackButton}
-            onPress={() => navigation.navigate('DrawerNavigator', {
-              screen: 'BottomTabs',
-              params: {
-                screen: 'Cart',
-                params: {
-                  screen: 'OrderTracking',
-                  params: { order: item }
-                }
-              }
-            })}
+            onPress={() => navigation.navigate('OrderTracking', { order: item })}
           >
             <Ionicons name="location" size={16} color={colors.primary} />
             <Text style={styles.trackButtonText}>

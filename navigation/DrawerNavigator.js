@@ -2,13 +2,11 @@ import React from 'react'
 import {createDrawerNavigator} from '@react-navigation/drawer'
 import BottomTabs from './BottomTabs'
 import DrawerContent from '../components/DrawerContent';
-import { SearchNavigator, AccountNavigator } from './Stacks';
+import { SearchNavigator, AccountNavigator, OrdersNavigator, WalletNavigator } from './Stacks';
 import NearMeScreen from '../screens/NearMeScreen';
 
 import Offers from '../screens/Offers'
 import Settings from '../screens/Settings';
-import Wallet from '../screens/Wallet';
-import OrdersScreen from '../screens/OrdersScreen';
 import { Ionicons, MaterialIcons, Entypo, Feather } from '@expo/vector-icons'
 import i18n from '../lang/i18n';
 import { colors } from '../global';
@@ -105,10 +103,10 @@ export default function DrawerNavigator() {
 
         <Drawer.Screen
             name = "Orders"
-            component={OrdersScreen}
+            component={OrdersNavigator}
             options={{
                 title: i18n.t('drawer.orderHistory'),
-                headerShown: true,
+                headerShown: false,
                 drawerIcon: ({focused, size}) => (
                     <Feather
                         name="clock"
@@ -136,10 +134,10 @@ export default function DrawerNavigator() {
         
         <Drawer.Screen
             name = "Wallet"
-            component={Wallet}
+            component={WalletNavigator}
             options={{
                 title: i18n.t('drawer.wallet'),
-                headerShown: true,
+                headerShown: false,
                 drawerIcon: ({focused, size}) => (
                     <Entypo
                         name="wallet"

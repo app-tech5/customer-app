@@ -5,11 +5,8 @@ import { Provider as ReduxProvider } from 'react-redux'
 import configureStore from '../redux/store'
 import OrderCompleted from '../screens/OrderCompleted'
 import DrawerNavigator from './DrawerNavigator'
-import OrderRequest from '../screens/OrderRequest'
 import Splash from '../screens/Splash'
 import SignIn from '../screens/SignIn'
-import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
-import AddCard from '../screens/AddCard'
  import OnboardingScreen from '../screens/Onboarding'
 import SignUp from '../screens/SignUp'
 import { LoaderContext } from '../contexts/LoaderContext'
@@ -21,7 +18,12 @@ import { GatewayProvider } from '../contexts/GatewayContext'
 import { PaymentMethodsProvider } from '../contexts/PaymentMethodsContext'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
-import SearchResults from '../screens/SearchResults'
+import {
+  SearchNavigator,
+  WalletNavigator,
+  CheckoutNavigator,
+  OrderStatusNavigator,
+} from './Stacks'
 import { SignInContextProvider } from '../contexts/authContext'
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
@@ -48,17 +50,13 @@ export default function RootNavigation({statusBarColor}) {
               <Stack.Screen name="SignIn" component={SignIn}/>
               <Stack.Screen name="SignUp" component={SignUp}/>
               <Stack.Screen name="DrawerNavigator" component={DrawerNavigator}/>
-              <Stack.Screen name="OrderRequest" component={OrderRequest}/>
               <Stack.Screen name="OrderCompleted" component={OrderCompleted}/>
+              <Stack.Screen name="SearchFlow" component={SearchNavigator} options={{ headerShown: false }} />
+              <Stack.Screen name="WalletFlow" component={WalletNavigator} options={{ headerShown: false }} />
+              <Stack.Screen name="CheckoutFlow" component={CheckoutNavigator} options={{ headerShown: false }} />
+              <Stack.Screen name="OrderStatusFlow" component={OrderStatusNavigator} options={{ headerShown: false }} />
               <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
               <Stack.Screen name="ItemResults" component={ItemResults} options={{ headerShown: true }} />
-              <Stack.Screen name="SearchResults" component={SearchResults} options={{ headerShown: true }} />
-              <Stack.Screen
-                name="AddPaymentMethod"
-                component={AddPaymentMethodScreen}
-                options={{ headerShown: true }}
-              />
-              <Stack.Screen name="AddCard" component={AddCard} options={{ headerShown: true }} />
               {}
           </Stack.Navigator>
               </CategoriesContextProvider>

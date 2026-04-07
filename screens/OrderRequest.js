@@ -108,18 +108,12 @@ export default function OrderRequest({ route, navigation }) {
 
       dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName });
 
-      navigation.navigate('DrawerNavigator', {
-        screen: 'BottomTabs',
+      navigation.navigate('OrderStatusFlow', {
+        screen: 'OrderTracking',
         params: {
-          screen: 'Cart',
-          params: {
-            screen: 'OrderTracking',
-            params: {
-              order: createdOrder,
-              lat,
-              lng
-            }
-          }
+          order: createdOrder,
+          lat,
+          lng
         }
       });
 

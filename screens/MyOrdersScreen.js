@@ -89,15 +89,9 @@ export default function MyOrdersScreen({ navigation }) {
       style={styles.orderItem}
       onPress={() => {
         
-        navigation.navigate('DrawerNavigator', {
-          screen: 'BottomTabs',
-          params: {
-            screen: 'Cart',
-            params: {
-              screen: 'OrderDetails',
-              params: { order: item }
-            }
-          }
+        navigation.navigate('OrderStatusFlow', {
+          screen: 'OrderDetails',
+          params: { order: item }
         })
       }}
       activeOpacity={0.7}
@@ -149,15 +143,9 @@ export default function MyOrdersScreen({ navigation }) {
           style={styles.trackButton}
           onPress={() => {
             
-            navigation.navigate('DrawerNavigator', {
-              screen: 'BottomTabs',
-              params: {
-                screen: 'Cart',
-                params: {
-                  screen: 'OrderTracking',
-                  params: { order: item }
-                }
-              }
+            navigation.navigate('OrderStatusFlow', {
+              screen: 'OrderTracking',
+              params: { order: item }
             })
           }}
         >

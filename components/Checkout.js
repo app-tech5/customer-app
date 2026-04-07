@@ -77,12 +77,15 @@ export default function Checkout({ restaurantName, setLoader: _setLoader, setVie
 
             dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName })
             setLoading(false)
-            navigation.navigate('CheckoutScreen',{
+            navigation.navigate('CheckoutFlow',{
+              screen: 'CheckoutScreen',
+              params: {
                 restaurantName,
                 restaurant,
                 items,
                 lat,
                 lng
+              }
             })
         } catch (error) {
             console.error('Error creating order:', error);
@@ -104,20 +107,17 @@ export default function Checkout({ restaurantName, setLoader: _setLoader, setVie
                         
                         closeModal ? closeModal() : setModalVisible(false);
                         
-                        navigation.navigate('DrawerNavigator', {
-                            screen: 'Account',
-                            params: {
-                              screen: 'CheckoutScreen',
-                              params: {
-                                items,
-                                restaurant,
-                                restaurantName,
-                                totals,
-                                lat,
-                                lng,
-                              },
-                            },
-                          });
+                        navigation.navigate('CheckoutFlow', {
+                          screen: 'CheckoutScreen',
+                          params: {
+                            items,
+                            restaurant,
+                            restaurantName,
+                            totals,
+                            lat,
+                            lng,
+                          },
+                        });
                         
                       }}
                       activeOpacity={0.9}

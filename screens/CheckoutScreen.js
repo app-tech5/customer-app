@@ -353,7 +353,10 @@ export default function CheckoutScreen({ navigation, route }) {
         onClose={() => setPaymentSelectorVisible(false)}
         onManage={() => {
           setPaymentSelectorVisible(false)
-          navigation.navigate('Wallet', { fromAccount: true })
+          navigation.navigate('WalletFlow', {
+            screen: 'Wallet',
+            params: { returnToPrevious: true }
+          })
         }}
       />
     </SafeAreaView>

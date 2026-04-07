@@ -176,19 +176,25 @@ export default function Offers({ navigation }) {
     if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length >= 1) {
       
       const restaurantIds = promotion.applicableRestaurants.map(rest => rest._id || rest.restaurantId || rest.id)
-      navigation.navigate('SearchResults', {
-        applicableRestaurants: restaurantIds, 
-        name: promotion.name,
-        type: 'restaurant',
-        fromOffers: true,
-        promotionScope: 'restaurant'
+      navigation.navigate('SearchFlow', {
+        screen: 'SearchResults',
+        params: {
+          applicableRestaurants: restaurantIds, 
+          name: promotion.name,
+          type: 'restaurant',
+          fromOffers: true,
+          promotionScope: 'restaurant'
+        }
       });
     } else if (promotion.scope === 'platform') {
       
-      navigation.navigate('SearchResults', {
-        name: 'ALL_RESTAURANTS',
-        type: 'restaurant',
-        fromOffers: true
+      navigation.navigate('SearchFlow', {
+        screen: 'SearchResults',
+        params: {
+          name: 'ALL_RESTAURANTS',
+          type: 'restaurant',
+          fromOffers: true
+        }
       });
     } else if (promotion.scope === 'category') {
       
@@ -207,11 +213,8 @@ export default function Offers({ navigation }) {
         fromOffers: true
       });
     } else {
-      navigation.navigate('DrawerNavigator', {
-        screen: 'BottomTabs',
-        params: {
-          screen: 'Search'
-        }
+      navigation.navigate('SearchFlow', {
+        screen: 'SearchScreen'
       });
     }
   }
@@ -357,12 +360,7 @@ export default function Offers({ navigation }) {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.navigate('DrawerNavigator', {
-              screen: 'BottomTabs',
-              params: {
-                screen: 'Search'
-              }
-            })}
+            onPress={() => navigation.navigate('SearchFlow', { screen: 'SearchScreen' })}
             accessibilityRole="button"
             accessibilityLabel="Search offers"
             accessibilityHint="Navigate to search screen"
