@@ -167,7 +167,7 @@ export default function WalletScreen({ navigation, route}) {
       ) : (
         <FlatList
           data={paymentMethods}
-          keyExtractor={(item, index) => String(item._id || item.id || index)}
+          keyExtractor={(item, index) => String(item.id || index)}
           renderItem={({ item }) => (
             <PaymentMethodItem
               method={item}
@@ -319,7 +319,7 @@ export default function WalletScreen({ navigation, route}) {
       ) : (
         <FlatList
           data={transactions}
-          keyExtractor={(item, index) => item._id || index.toString()}
+          keyExtractor={(item, index) => item.id || index.toString()}
           renderItem={({ item }) => <TransactionItem transaction={item} />}
           scrollEnabled={false}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}

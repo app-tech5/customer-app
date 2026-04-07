@@ -12,10 +12,6 @@ import i18n from '../lang/i18n'
 import { colors } from '../global'
 import PaymentMethodItem from './PaymentMethodItem'
 
-function getPaymentMethodId(method, index = 0) {
-  return method?._id || method?.id || `method_${index}`
-}
-
 export default function CheckoutPaymentSelector({
   visible,
   paymentMethods = [],
@@ -24,7 +20,7 @@ export default function CheckoutPaymentSelector({
   onClose,
   onManage,
 }) {
-  const selectedId = getPaymentMethodId(selectedPaymentMethod, -1)
+  const selectedId = selectedPaymentMethod?.id
 
   return (
     <Modal
@@ -56,13 +52,12 @@ export default function CheckoutPaymentSelector({
               showsVerticalScrollIndicator={false}
             >
               {paymentMethods.map((method, index) => {
-                const methodId = getPaymentMethodId(method, index)
                 return (
                   <PaymentMethodItem
-                    key={methodId}
+                    key={method.id || String(index)}
                     method={method}
                     variant="checkout"
-                    isSelected={methodId === selectedId}
+                    isSelected={method.id === selectedId}
                     onPress={() => {
                       onSelect?.(method)
                       onClose?.()

@@ -82,22 +82,16 @@ export function PaymentMethodsProvider({ children }) {
   }, [paymentMethods])
 
   const setDefaultPaymentMethod = useCallback((methodId) => {
-    const next = paymentMethods.map((method, index) => {
-      const currentId = method._id || method.id || `method_${index}`
-      return {
-        ...method,
-        isDefault: currentId === methodId,
-      }
-    })
+    const next = paymentMethods.map((method) => ({
+      ...method,
+      isDefault: method.id === methodId,
+    }))
 
     setPaymentMethods(next)
   }, [paymentMethods])
 
   const removePaymentMethod = useCallback((methodId) => {
-    const filtered = paymentMethods.filter((method, index) => {
-      const currentId = method._id || method.id || `method_${index}`
-      return currentId !== methodId
-    })
+    const filtered = paymentMethods.filter((method) => method.id !== methodId)
 
     const hasDefault = filtered.some((method) => method.isDefault)
     const next = hasDefault

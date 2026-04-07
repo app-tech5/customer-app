@@ -121,18 +121,15 @@ export default function CheckoutScreen({ navigation, route }) {
     setSelectedAddress(address)
   }
 
-  const getPaymentMethodId = (method, index = 0) => method?._id || method?.id || `method_${index}`
-
   useEffect(() => {
     if (paymentMethods.length === 0) {
       setSelectedPaymentMethod(null)
       return
     }
 
-    const selectedId = getPaymentMethodId(selectedPaymentMethod, -1)
-    const existingSelectedMethod = paymentMethods.find((method, index) => (
-      getPaymentMethodId(method, index) === selectedId
-    ))
+    const existingSelectedMethod = paymentMethods.find(
+      (method) => method.id === selectedPaymentMethod?.id
+    )
 
     if (existingSelectedMethod) {
       return
