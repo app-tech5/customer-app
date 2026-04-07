@@ -1,6 +1,6 @@
 import { View, Text, useWindowDimensions, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native'
 import React, { useContext, useEffect, useRef, useState, useCallback } from 'react'
-import MapView, { Marker } from 'react-native-maps'
+import { WebView } from 'react-native-webview'
 import { RestaurantInfo, RestaurantImage } from '../components/home/RestaurantItems'
 import { MaterialIcons } from '@expo/vector-icons';
 import SearchBar from '../components/home/SearchBar'
@@ -16,15 +16,389 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as Location from 'expo-location'
 import i18n from '../lang/i18n'
 
+const DEFAULT_REGION = {
+  latitude: 48.8566,
+  longitude: 2.3522,
+  latitudeDelta: 0.005,
+  longitudeDelta: 0.005,
+}
+
+const getRestaurantCoordinates = (restaurant) => {
+  const latitude = Number(restaurant?.latitude ?? restaurant?.lat)
+  const longitude = Number(restaurant?.longitude ?? restaurant?.lng)
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null
+  }
+
+  return { latitude, longitude }
+}
+
+const buildSortedRestaurants = (restaurantData, userLocation) => {
+  return restaurantData
+    .map((restaurant, originalIndex) => {
+      const coordinates = getRestaurantCoordinates(restaurant)
+
+      if (!coordinates) {
+        return null
+      }
+
+      return {
+        ...restaurant,
+        originalIndex,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        distance: userLocation?.lat && userLocation?.lng
+          ? getDistanceFromLatLonInKm(
+            userLocation.lat,
+            userLocation.lng,
+            coordinates.latitude,
+            coordinates.longitude
+          )
+          : null,
+      }
+    })
+    .filter(Boolean)
+    .filter((restaurant) => restaurant.distance !== null && restaurant.distance < 10)
+    .sort((a, b) => a.distance - b.distance)
+}
+
+const buildMapRestaurants = (restaurantData, userLocation) => {
+  return restaurantData
+    .map((restaurant, originalIndex) => {
+      const coordinates = getRestaurantCoordinates(restaurant)
+
+      if (!coordinates) {
+        return null
+      }
+
+      return {
+        ...restaurant,
+        originalIndex,
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        distance: userLocation?.lat && userLocation?.lng
+          ? getDistanceFromLatLonInKm(
+            userLocation.lat,
+            userLocation.lng,
+            coordinates.latitude,
+            coordinates.longitude
+          )
+          : null,
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (a.distance === null && b.distance === null) return 0
+      if (a.distance === null) return 1
+      if (b.distance === null) return -1
+      return a.distance - b.distance
+    })
+    .slice(0, 20)
+}
+
+const getZoomLevel = (latitudeDelta = 0.005) => {
+  const safeDelta = Math.max(Number(latitudeDelta) || 0.005, 0.0005)
+  return Math.max(3, Math.min(18, Math.round(Math.log2(360 / safeDelta))))
+}
+
+const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <style>
+      html, body, #map {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #f5f5f5;
+      }
+
+      .leaflet-control-attribution {
+        font-size: 10px;
+      }
+
+      .map-marker-wrapper {
+        background: transparent;
+        border: none;
+      }
+
+      .map-marker {
+        width: 30px;
+        height: 30px;
+        border-radius: 15px;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .map-marker.active {
+        background: #000000;
+      }
+
+      .map-marker-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        background: #000000;
+      }
+
+      .map-marker.active .map-marker-dot {
+        background: #ffffff;
+      }
+
+      .user-marker {
+        width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        background: #4caf50;
+        border: 3px solid #ffffff;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+      const initialRegion = ${JSON.stringify(initialRegion)};
+      const map = L.map('map', {
+        zoomControl: false,
+        preferCanvas: true,
+      }).setView(
+        [initialRegion.latitude, initialRegion.longitude],
+        ${getZoomLevel(initialRegion.latitudeDelta)}
+      );
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+
+      const markerLayer = L.layerGroup().addTo(map);
+      let userMarker = null;
+
+      const escapeHtml = (value) =>
+        String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+      const getMarkerIcon = (isActive) =>
+        L.divIcon({
+          className: 'map-marker-wrapper',
+          html:
+            '<div class="map-marker' +
+            (isActive ? ' active' : '') +
+            '"><div class="map-marker-dot"></div></div>',
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
+        });
+
+      const syncMarkers = (payload) => {
+        markerLayer.clearLayers();
+
+        (payload.restaurants || []).forEach((restaurant) => {
+          const marker = L.marker(
+            [restaurant.latitude, restaurant.longitude],
+            {
+              icon: getMarkerIcon(restaurant.originalIndex === payload.focusedOriginalIndex),
+              zIndexOffset: restaurant.originalIndex === payload.focusedOriginalIndex ? 1000 : 1,
+            }
+          );
+
+          marker.bindPopup(
+            '<strong>' +
+              escapeHtml(restaurant.name || 'Restaurant') +
+              '</strong><br />' +
+              escapeHtml(
+                restaurant.distance !== null && restaurant.distance !== undefined
+                  ? restaurant.distance.toFixed(1) + ' km'
+                  : 'Distance inconnue'
+              )
+          );
+
+          marker.on('click', () => {
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(
+                JSON.stringify({
+                  type: 'MARKER_PRESS',
+                  payload: { originalIndex: restaurant.originalIndex },
+                })
+              );
+            }
+          });
+
+          marker.addTo(markerLayer);
+        });
+
+        if (payload.userLocation && payload.userLocation.lat && payload.userLocation.lng) {
+          if (userMarker) {
+            map.removeLayer(userMarker);
+          }
+
+          userMarker = L.marker(
+            [payload.userLocation.lat, payload.userLocation.lng],
+            {
+              icon: L.divIcon({
+                className: 'map-marker-wrapper',
+                html: '<div class="user-marker"></div>',
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
+              }),
+            }
+          ).addTo(map);
+        }
+      };
+
+      const setRegion = (region, animated = true) => {
+        if (!region) return;
+
+        const zoom = Math.max(
+          3,
+          Math.min(18, Math.round(Math.log2(360 / Math.max(region.latitudeDelta || 0.005, 0.0005))))
+        );
+
+        if (animated) {
+          map.flyTo([region.latitude, region.longitude], zoom, { duration: 0.5 });
+          return;
+        }
+
+        map.setView([region.latitude, region.longitude], zoom);
+      };
+
+      window.__updateMap = (message) => {
+        if (!message || !message.type) return;
+
+        if (message.type === 'SYNC_MAP') {
+          syncMarkers(message.payload || {});
+          return;
+        }
+
+        if (message.type === 'ANIMATE_TO_REGION') {
+          setRegion(message.payload, true);
+        }
+      };
+
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MAP_READY' }));
+      }
+    </script>
+  </body>
+</html>`
+
+const OpenStreetMap = ({
+  initialRegion,
+  targetRegion,
+  restaurants,
+  focusedOriginalIndex,
+  userLocation,
+  onMarkerPress,
+}) => {
+  const webViewRef = useRef(null)
+  const [mapReady, setMapReady] = useState(false)
+
+  const injectMapMessage = useCallback((message) => {
+    if (!webViewRef.current || !mapReady) {
+      return
+    }
+
+    const escapedMessage = JSON.stringify(message).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+    webViewRef.current.injectJavaScript(`
+      if (window.__updateMap) {
+        window.__updateMap(JSON.parse('${escapedMessage}'));
+      }
+      true;
+    `)
+  }, [mapReady])
+
+  useEffect(() => {
+    injectMapMessage({
+      type: 'SYNC_MAP',
+      payload: {
+        restaurants,
+        focusedOriginalIndex,
+        userLocation,
+      },
+    })
+  }, [focusedOriginalIndex, injectMapMessage, restaurants, userLocation])
+
+  useEffect(() => {
+    injectMapMessage({
+      type: 'ANIMATE_TO_REGION',
+      payload: targetRegion,
+    })
+  }, [injectMapMessage, targetRegion])
+
+  const handleMessage = useCallback((event) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data)
+
+      if (data.type === 'MAP_READY') {
+        setMapReady(true)
+        return
+      }
+
+      if (data.type === 'MARKER_PRESS') {
+        onMarkerPress?.(data.payload?.originalIndex)
+      }
+    } catch (error) {
+      console.warn('Erreur message carte OSM:', error)
+    }
+  }, [onMarkerPress])
+
+  return (
+    <WebView
+      ref={webViewRef}
+      originWhitelist={['*']}
+      source={{ html: createOpenStreetMapHtml(initialRegion) }}
+      onMessage={handleMessage}
+      javaScriptEnabled
+      domStorageEnabled
+      mixedContentMode="always"
+      style={StyleSheet.absoluteFill}
+    />
+  )
+}
+
 export default function RestaurantsMapScreen({ route, navigation }) {
   const { restaurantData } = useContext(RestaurantsContext)
   const {lat,lng} = useSelector((state)=>state.userReducer)
   const [userLocation, setUserLocation] = useState(null)
   const [isManualFocus, setIsManualFocus] = useState(false)
+  const [focus, setFocus] = useState(new Array(restaurantData?.length || 0).fill({
+    backgroundColor: "white",
+    color: "black",
+    zIndex: 1,
+  }))
   
   useEffect(() => {
     getUserLocation()
   }, [])
+
+  useEffect(() => {
+    setFocus(new Array(restaurantData?.length || 0).fill({
+      backgroundColor: "white",
+      color: "black",
+      zIndex: 1,
+    }))
+  }, [restaurantData?.length])
 
   const getUserLocation = async () => {
     try {
@@ -68,24 +442,48 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     }
   }
 
-  console.warn('🔍 Position utilisateur récupérée:', { lat, lng, userLocation })
   const { width, height } = useWindowDimensions();
-  const _map = useRef(null)
   const restaurantsRef = useRef(null)
+  const firstRestaurantCoordinates = getRestaurantCoordinates(restaurantData?.[0])
+  const initialRegion = React.useMemo(() => ({
+    latitude: lat || firstRestaurantCoordinates?.latitude || DEFAULT_REGION.latitude,
+    longitude: lng || firstRestaurantCoordinates?.longitude || DEFAULT_REGION.longitude,
+    latitudeDelta: DEFAULT_REGION.latitudeDelta,
+    longitudeDelta: DEFAULT_REGION.longitudeDelta,
+  }), [firstRestaurantCoordinates?.latitude, firstRestaurantCoordinates?.longitude, lat, lng])
+  const [mapRegion, setMapRegion] = useState(initialRegion)
+  const mapRestaurants = React.useMemo(() => buildMapRestaurants(restaurantData || [], userLocation), [restaurantData, userLocation])
+  const animateMapToRegion = useCallback((region) => {
+    if (!region) return
+
+    setMapRegion({
+      latitude: region.latitude,
+      longitude: region.longitude,
+      latitudeDelta: region.latitudeDelta ?? DEFAULT_REGION.latitudeDelta,
+      longitudeDelta: region.longitudeDelta ?? DEFAULT_REGION.longitudeDelta,
+    })
+  }, [])
+
+  const focusedOriginalIndex = focus.findIndex((item) => item.backgroundColor === "black")
+
+  useEffect(() => {
+    setMapRegion(initialRegion)
+  }, [initialRegion])
   
   useEffect(() => {
-    if (restaurantData && restaurantData.length > 0 && _map.current) {
-      
+    if (restaurantData && restaurantData.length > 0) {
       const nearbyRestaurants = restaurantData
-        .filter(restaurant => {
-          if (!restaurant.latitude || !restaurant.longitude) return false
+        .map((restaurant) => {
+          const coordinates = getRestaurantCoordinates(restaurant)
+          if (!coordinates) return null
           const distance = userLocation?.lat && userLocation?.lng ?
             getDistanceFromLatLonInKm(
               userLocation.lat, userLocation.lng,
-              restaurant.latitude, restaurant.longitude
+              coordinates.latitude, coordinates.longitude
             ) : 0
-          return distance < 5 
+          return distance < 5 ? coordinates : null
         })
+        .filter(Boolean)
 
       if (nearbyRestaurants.length > 0) {
         
@@ -108,33 +506,24 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         }
 
         console.warn('🗺️ Zoom initial ajusté:', region)
-        _map.current.animateToRegion(region, 1000)
+        animateMapToRegion(region)
       }
     }
-  }, [restaurantData, userLocation])
+  }, [animateMapToRegion, restaurantData, userLocation])
   const [visible, setVisible] = useState(route.params?.visible ?? false)
   const [scrollEnabled, setScrollEnabled] = useState(false)
   const [offset, setOffset] = useState(0)
   const [direction, setDirection] = useState("")
-  const [focus, setFocus] = useState(new Array(restaurantData?.length || 0).fill({
-    backgroundColor: "white",
-    color: "black",
-    zIndex: 1,
-  }))
   const centerMapOnRestaurant = (restaurant) => {
-    if (!_map.current) return
+    const coordinates = getRestaurantCoordinates(restaurant)
+    if (!coordinates) return
 
-    const lat = Number(restaurant.latitude ?? restaurant.lat)
-    const lng = Number(restaurant.longitude ?? restaurant.lng)
-
-    if (!lat || !lng) return
-
-    _map.current.animateToRegion({
-      latitude: lat,
-      longitude: lng,
+    animateMapToRegion({
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005
-    }, 300)
+    })
   }
 
   const setFocusFunction = async (index) => {
@@ -154,10 +543,13 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     
     const restaurant = restaurantData[index]
     if (restaurant && userLocation?.lat && userLocation?.lng) {
+      const coordinates = getRestaurantCoordinates(restaurant)
+      if (!coordinates) return
+
       const distance = getDistanceFromLatLonInKm(
         userLocation.lat, userLocation.lng,
-        restaurant.latitude || restaurant.lat,
-        restaurant.longitude || restaurant.lng
+        coordinates.latitude,
+        coordinates.longitude
       )
       
       if (distance < 10) {
@@ -165,6 +557,32 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       }
     }
   }
+
+  const handleMarkerPress = useCallback((originalIndex) => {
+    const restaurant = restaurantData?.[originalIndex]
+    if (!restaurant) return
+
+    if (visible) {
+      setVisible(false)
+    }
+
+    setTimeout(() => {
+      const sortedRestaurants = buildSortedRestaurants(restaurantData || [], userLocation)
+      const carouselIndex = sortedRestaurants.findIndex((item) => item.originalIndex === originalIndex)
+
+      if (carouselIndex !== -1) {
+        console.warn(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
+        setFocusFunction(originalIndex)
+        restaurantsRef.current?.scrollToIndex({
+          index: carouselIndex,
+          animated: true,
+          viewPosition: 0.5
+        })
+      } else {
+        console.warn(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
+      }
+    }, 300)
+  }, [restaurantData, setVisible, setFocusFunction, userLocation, visible])
   
   if (!restaurantData || restaurantData.length === 0) {
     return (
@@ -177,22 +595,19 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   return (
     <View style={{
     }}>
-      <MapView
-        ref={_map}
-        initialRegion={{
-          latitude: lat || restaurantData[0]?.lat || 48.8566, 
-          longitude: lng || restaurantData[0]?.lng || 2.3522, 
-          latitudeDelta: 0.005,  
-          longitudeDelta: 0.005   
-        }}
-        style={{
-          height: height,
-          width: width
-        }}
-      >
-        <RestaurantMarkers restaurantData={restaurantData} focus={focus} setFocusFunction={setFocusFunction} restaurantsRef={restaurantsRef}
-          visible={visible} setVisible={setVisible} userLocation={userLocation} />
-      </MapView>
+      <View style={{
+        height: height,
+        width: width
+      }}>
+        <OpenStreetMap
+          initialRegion={initialRegion}
+          targetRegion={mapRegion}
+          restaurants={mapRestaurants}
+          focusedOriginalIndex={focusedOriginalIndex}
+          userLocation={userLocation}
+          onMarkerPress={handleMarkerPress}
+        />
+      </View>
       <View style={{ ...styles.header, width: width, }}>
         <TouchableOpacity
           style={styles.arrowBack}
@@ -210,13 +625,13 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           <TouchableOpacity
             style={styles.locationIndicator}
             onPress={() => {
-              if (_map.current && userLocation.lat && userLocation.lng) {
-                _map.current.animateToRegion({
+              if (userLocation.lat && userLocation.lng) {
+                animateMapToRegion({
                   latitude: userLocation.lat,
                   longitude: userLocation.lng,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01
-                }, 500)
+                })
               }
             }}
           >
@@ -250,37 +665,27 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             marginBottom: 10
           }} />
           <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
-            focus={focus} _map={_map} width={width} horizontal={false} Categories={Categories} scrollEnabled={true}
+            focus={focus} width={width} horizontal={false} Categories={Categories} scrollEnabled={true}
             setDirection={setDirection} setOffset={setOffset} offset={offset} direction={direction}
-            setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>
+            setScrollEnabled={setScrollEnabled} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}
+            onSelectRestaurant={centerMapOnRestaurant} />
         </View>
       )}
       {!visible && <RestaurantsView restaurantsRef={restaurantsRef} restaurantData={restaurantData} setFocusFunction={setFocusFunction}
-        focus={focus} _map={_map} width={width} horizontal={true} setVisible={setVisible} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}/>}
+        focus={focus} width={width} horizontal={true} setVisible={setVisible} navigation={navigation} userLocation={userLocation} isManualFocus={isManualFocus} setIsManualFocus={setIsManualFocus}
+        onSelectRestaurant={centerMapOnRestaurant} />}
     </View>
   )
 }
-const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunction, focus, width, horizontal,
-  Categories, scrollEnabled, offset, setOffset, direction, setDirection, setScrollEnabled, setVisible, navigation, userLocation, isManualFocus, setIsManualFocus}) => {
+const RestaurantsView = ({ restaurantsRef, restaurantData, setFocusFunction, focus, width, horizontal,
+  Categories, scrollEnabled, offset, setOffset, direction, setDirection, setScrollEnabled, setVisible, navigation, userLocation, isManualFocus, setIsManualFocus, onSelectRestaurant}) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimeout = useRef(null)
   
   const sortedRestaurants = React.useMemo(() => {
     console.warn('🏪 RestaurantsView - Filtrage restaurants proches, horizontal:', horizontal)
-    return restaurantData
-      .filter(restaurant => restaurant.latitude && restaurant.longitude)
-      .map((restaurant, originalIndex) => ({
-        ...restaurant,
-        originalIndex,
-        distance: userLocation?.lat && userLocation?.lng ?
-          getDistanceFromLatLonInKm(
-            userLocation.lat, userLocation.lng,
-            restaurant.latitude, restaurant.longitude
-          ) : null
-      }))
-      .filter(restaurant => restaurant.distance !== null && restaurant.distance < 10) 
-      .sort((a, b) => a.distance - b.distance) 
+    return buildSortedRestaurants(restaurantData, userLocation)
   }, [restaurantData, userLocation])
 
   console.warn(`🏪 RestaurantsView - ${sortedRestaurants.length} restaurants triés pour ${horizontal ? 'carrousel' : 'liste'}`)
@@ -397,9 +802,9 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
           <Categories />
         </View> : <></>}
       />
-      {horizontal && restaurantData && restaurantData.length > 1 && (
+      {horizontal && sortedRestaurants.length > 1 && (
         <View style={styles.paginationContainer}>
-          {restaurantData.map((_, index) => (
+          {sortedRestaurants.map((restaurant, index) => (
             <TouchableOpacity
               key={index}
               style={[
@@ -414,11 +819,9 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
                   animated: true,
                   viewPosition: 0.5 
                 })
-                
-                const restaurant = restaurantData[index]
-                animateMapToRestaurant(restaurant, 150)
 
-                setFocusFunction(index)
+                onSelectRestaurant?.(restaurant)
+                setFocusFunction(restaurant.originalIndex)
               }}
             />
           ))}
@@ -426,112 +829,6 @@ const RestaurantsView = ({ _map, restaurantsRef, restaurantData, setFocusFunctio
       )}
     </View>
   )
-}
-const RestaurantMarkers = ({ restaurantData, focus, setFocusFunction, restaurantsRef, visible, setVisible, userLocation }) => {
-  console.warn('🗺️ RestaurantMarkers - Tri des restaurants par distance')
-  
-  const restaurantsWithDistance = restaurantData
-    .filter(restaurant => {
-      const lat = restaurant.latitude || restaurant.lat
-      const lng = restaurant.longitude || restaurant.lng
-      return lat && lng
-    })
-    .map((restaurant, originalIndex) => {
-      const lat = restaurant.latitude || restaurant.lat
-      const lng = restaurant.longitude || restaurant.lng
-
-      let distance = null
-      if (userLocation?.lat && userLocation?.lng) {
-        distance = getDistanceFromLatLonInKm(
-          userLocation.lat, userLocation.lng,
-          lat, lng
-        )
-      }
-
-      return {
-        ...restaurant,
-        originalIndex,
-        latitude: lat,
-        longitude: lng,
-        distance
-      }
-    })
-    .sort((a, b) => {
-      if (a.distance === null && b.distance === null) return 0
-      if (a.distance === null) return 1
-      if (b.distance === null) return -1
-      return a.distance - b.distance
-    })
-    .slice(0, 20) 
-
-  console.warn(`✅ ${restaurantsWithDistance.length} restaurants les plus proches trouvés`)
-  restaurantsWithDistance.forEach((r, i) => {
-    console.warn(`${i+1}. ${r.name}: ${r.distance?.toFixed(2)} km`)
-  })
-
-  return restaurantsWithDistance.map((restaurant, displayIndex) => {
-
-    const focusStyle = focus[restaurant.originalIndex] || { backgroundColor: "white", color: "black", zIndex: 1 }
-
-    return (
-      <Marker
-        key={`marker-${restaurant.originalIndex}`}
-        coordinate={{
-          latitude: parseFloat(restaurant.latitude),
-          longitude: parseFloat(restaurant.longitude),
-        }}
-        title={restaurant.name || "Restaurant"}
-        description={restaurant.distance ? `${restaurant.distance.toFixed(1)} km` : "Distance inconnue"}
-        onPress={() => {
-          if (visible) setVisible(false)
-          setTimeout(() => {
-            
-            const sortedRestaurants = restaurantData
-              .filter(r => r.latitude && r.longitude)
-              .map((r, originalIndex) => ({
-                ...r,
-                originalIndex,
-                distance: userLocation?.lat && userLocation?.lng ?
-                  getDistanceFromLatLonInKm(
-                    userLocation.lat, userLocation.lng,
-                    r.latitude || r.lat,
-                    r.longitude || r.lng
-                  ) : null
-              }))
-              .filter(r => r.distance !== null && r.distance < 10)
-              .sort((a, b) => a.distance - b.distance)
-            
-            const carouselIndex = sortedRestaurants.findIndex(r => r.originalIndex === restaurant.originalIndex)
-
-            if (carouselIndex !== -1) {
-              console.warn(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
-              setFocusFunction(carouselIndex)
-              restaurantsRef.current?.scrollToIndex({
-                index: carouselIndex,
-                animated: true,
-                viewPosition: 0.5
-              })
-            } else {
-              console.warn(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
-            }
-          }, 300)
-        }}
-      >
-        <View style={{
-          ...styles.restaurant_marker,
-          backgroundColor: focusStyle.backgroundColor,
-          zIndex: focusStyle.zIndex
-        }}>
-          <MaterialIcons
-            style={styles.restaurant_marker_icon}
-            name="restaurant"
-            size={focusStyle.backgroundColor === "black" ? 18 : 15}
-            color={focusStyle.color}
-          />
-        </View>
-      </Marker>
-    )
-  }).filter(marker => marker !== null)
 }
 const ListButton = ({ setVisible }) => {
   return (
