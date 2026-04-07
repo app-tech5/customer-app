@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Ionicons, FontAwesome } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors, currency, language } from '../global'
@@ -8,6 +8,7 @@ import Loader from './Loader'
 import { api } from '../api'
 import { config } from '../config'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
+import PaymentMethodItem from '../components/PaymentMethodItem'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
@@ -208,32 +209,17 @@ export default function OrderRequest({ route, navigation }) {
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.paymentMethod', 'Payment Method')}
           </Text>
-          <View style={styles.paymentCard}>
-            <View style={styles.paymentIcon}>
-              {paymentMethod?.methodType?.includes('card') && (
-                <Ionicons name="card" size={20} color={colors.primary} />
-              )}
-              {paymentMethod?.methodType?.includes('paypal') && (
-                <FontAwesome name="paypal" size={20} color={colors.primary} />
-              )}
-              {paymentMethod?.methodType?.includes('cash') && (
-                <Ionicons name="cash" size={20} color={colors.primary} />
-              )}
-            </View>
-            <View style={styles.paymentInfo}>
-              <Text style={styles.paymentName}>
-                {paymentMethod?.cardDetails?.cardBrand ?
-                  `${paymentMethod.cardDetails.cardBrand.toUpperCase()} **** ${paymentMethod.cardDetails.cardNumberLast4}` :
-                  paymentMethod?.methodType || 'Cash'
-                }
-              </Text>
-              {paymentMethod?.cardDetails?.cardholderName && (
-                <Text style={styles.paymentDetails}>
-                  {paymentMethod.cardDetails.cardholderName}
-                </Text>
-              )}
-            </View>
-          </View>
+          {paymentMethod ? (
+            <PaymentMethodItem
+              method={paymentMethod}
+              variant="checkout"
+              isSelected={true}
+            />
+          ) : (
+            <Text style={styles.addressDetails}>
+              {i18n.t('checkout.selectPayment', 'Select payment method')}
+            </Text>
+          )}
         </View>
         
         {specialInstructions && (

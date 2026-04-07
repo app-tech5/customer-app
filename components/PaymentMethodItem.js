@@ -13,9 +13,23 @@ export default function PaymentMethodItem({
   showMenu = false,
   showDefaultBadge = false,
 }) {
-  const IconComponent = FontAwesome
+  const methodType = method?.methodType
+  const IconComponent = methodType?.includes('paypal') ? FontAwesome : Ionicons
   const Container = onPress ? TouchableOpacity : View
+  const iconName = methodType?.includes('card')
+    ? 'card'
+    : methodType?.includes('paypal')
+      ? 'paypal'
+      : methodType?.includes('cash')
+        ? 'cash'
+        : 'card'
   const title = method?.cardDetails?.cardBrand
+    || method?.cardDetails?.label
+    || (methodType?.includes('paypal')
+      ? i18n.t('wallet.paypal', 'PayPal')
+      : methodType?.includes('cash')
+        ? i18n.t('payment.cash', 'Cash')
+        : i18n.t('payment.credit_card', 'Credit Card'))
   const isCheckout = variant === 'checkout'
 
   return (
@@ -27,7 +41,7 @@ export default function PaymentMethodItem({
       <View style={styles.left}>
         <View style={[styles.iconWrap, isCheckout && isSelected && styles.selectedIconWrap]}>
           <IconComponent
-            name="credit-card"
+            name={iconName}
             size={20}
             color={isCheckout && isSelected ? colors.text.white : colors.primary}
           />
