@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
     paddingTop: 18,
-    paddingBottom: 28,
+    paddingBottom: 44,
     maxHeight: '75%',
   },
   header: {
@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   },
   manageButton: {
     marginTop: 8,
+    marginBottom: 8,
     backgroundColor: colors.background.secondary,
     borderRadius: 14,
     paddingVertical: 14,
