@@ -60,14 +60,9 @@ tags:
 # ===========================================================
 # 4) Marker -> carrousel
 # ===========================================================
-# Ferme d'abord la feuille avec le bouton Android back
-- back
-- waitForAnimationToEnd
-- assertVisible:
-    id: "restaurants-map-horizontal-list"
+# Le même bouton list referme la feuille (toggle)
 - tapOn:
-    id: "restaurants-map-webview"
-    point: "50%,45%"
+    id: "restaurants-map-list-toggle-button"
 - waitForAnimationToEnd
 - assertVisible:
     id: "restaurants-map-horizontal-list"

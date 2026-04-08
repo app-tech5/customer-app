@@ -252,6 +252,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             offset={offset}
             direction={direction}
             setScrollEnabled={setScrollEnabled}
+            setVisible={setVisible}
             navigation={navigation}
             userLocation={userLocation}
             onSelectRestaurant={centerMapOnRestaurant} />

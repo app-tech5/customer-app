@@ -16,7 +16,7 @@ const ListButton = ({ setVisible }) => {
         testID="restaurants-map-list-toggle-button"
         accessibilityLabel="restaurants-map-list-toggle-button"
         style={styles.menuListBloc}
-        onPress={() => setVisible(true)}
+        onPress={() => setVisible((prev) => !prev)}
       >
         <Icon
           type="material-community"
@@ -76,7 +76,7 @@ export default function RestaurantsView({
       accessibilityLabel={horizontal ? 'restaurants-map-horizontal-container' : 'restaurants-map-vertical-container'}
       style={horizontal ? styles.flatlist : null}
     >
-      {horizontal && <ListButton setVisible={setVisible} />}
+      {setVisible && <ListButton setVisible={setVisible} />}
       <FlatList
         testID={horizontal ? 'restaurants-map-horizontal-list' : 'restaurants-map-vertical-list'}
         accessibilityLabel={horizontal ? 'restaurants-map-horizontal-list' : 'restaurants-map-vertical-list'}
