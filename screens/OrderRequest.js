@@ -4,11 +4,12 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import i18n from '../lang/i18n'
-import { colors, currency, language } from '../global'
+import { colors, language } from '../global'
 import Loader from './Loader'
-import { api } from '../api'
+import { api, createStripePaymentIntent } from '../api'
 import { config } from '../config'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
+import { useSettings } from '../contexts/SettingContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
 
@@ -17,7 +18,10 @@ export default function OrderRequest({ route, navigation }) {
   const user = useSelector((state) => state.userReducer)
   const currentUserId = user?.userId
   const { paymentMethods } = usePaymentMethods()
-  
+  const { currency: appCurrency } = useSettings()
+  const currencyCode = appCurrency?.code || 'EUR'
+  const stripeCurrency = currencyCode.toLowerCase().slice(0, 3)
+
   const {
     restaurantName,
     restaurant,
@@ -56,6 +60,13 @@ export default function OrderRequest({ route, navigation }) {
 
     try {
       setLoading(true);
+
+      if (!config.DEMO_MODE) {
+        await createStripePaymentIntent({
+          amount: Math.round(Number(totals?.total) * 100),
+          currency: stripeCurrency,
+        });
+      }
 
       const orderItems = items.map(cartItem => ({
         type: cartItem.itemType || 'Menu',
@@ -146,7 +157,7 @@ export default function OrderRequest({ route, navigation }) {
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemPrice}>
-          {item.price ? item.price.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+          {item.price ? item.price.toLocaleString(language, { style: "currency", currency: currencyCode }) : ""}
         </Text>
         {item.extras && item.extras.length > 0 && (
           <Text style={styles.itemExtras}>
@@ -249,7 +260,7 @@ export default function OrderRequest({ route, navigation }) {
                 {i18n.t('cart.subtotal', 'Subtotal')}
               </Text>
               <Text style={styles.summaryValue}>
-                {totals?.subtotal ? totals.subtotal.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+                {totals?.subtotal ? totals.subtotal.toLocaleString(language, { style: "currency", currency: currencyCode }) : ""}
               </Text>
             </View>
 
@@ -258,7 +269,7 @@ export default function OrderRequest({ route, navigation }) {
                 {i18n.t('cart.deliveryFee', 'Delivery fee')}
               </Text>
               <Text style={styles.summaryValue}>
-                {totals?.deliveryFee ? totals.deliveryFee.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+                {totals?.deliveryFee ? totals.deliveryFee.toLocaleString(language, { style: "currency", currency: currencyCode }) : ""}
               </Text>
             </View>
 
@@ -267,7 +278,7 @@ export default function OrderRequest({ route, navigation }) {
                 {i18n.t('cart.tax', 'Tax')}
               </Text>
               <Text style={styles.summaryValue}>
-                {totals?.taxAmount ? totals.taxAmount.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+                {totals?.taxAmount ? totals.taxAmount.toLocaleString(language, { style: "currency", currency: currencyCode }) : ""}
               </Text>
             </View>
 
@@ -276,7 +287,7 @@ export default function OrderRequest({ route, navigation }) {
                 {i18n.t('cart.total', 'Total')}
               </Text>
               <Text style={styles.totalValue}>
-                {totals?.total ? totals.total.toLocaleString(language, { style: "currency", currency: currency }) : ""}
+                {totals?.total ? totals.total.toLocaleString(language, { style: "currency", currency: currencyCode }) : ""}
               </Text>
             </View>
           </View>
@@ -285,7 +296,7 @@ export default function OrderRequest({ route, navigation }) {
       
       <CheckoutTotalActionFooter
         totalAmount={
-          totals?.total ? totals.total.toLocaleString(language, { style: 'currency', currency: currency }) : ''
+          totals?.total ? totals.total.toLocaleString(language, { style: 'currency', currency: currencyCode }) : ''
         }
         totalCaption={i18n.t('cart.total', 'Total')}
         actionLabel={i18n.t('order.confirmOrder', 'Confirm Order')}

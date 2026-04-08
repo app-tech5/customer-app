@@ -4,6 +4,7 @@ import './user';
 import './favorites';
 import './addresses';
 import './paymentMethods';
+import './payments';
 import './wallet';
 import './restaurants';
 import './foods';
@@ -168,6 +169,8 @@ export const removePaymentMethod = (userId, paymentMethodId) =>
   api.removePaymentMethod(userId, paymentMethodId);
 export const setDefaultPaymentMethod = (userId, paymentMethodId) =>
   api.setDefaultPaymentMethod(userId, paymentMethodId);
+export const createStripePaymentIntent = (payload) =>
+  api.createStripePaymentIntent(payload);
 export const getUserTransactions = (userId, page, limit) =>
   api.getUserTransactions(userId, page, limit);
 export const getTransactionById = (userId, transactionId) =>
