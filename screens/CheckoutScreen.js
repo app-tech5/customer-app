@@ -3,11 +3,12 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
 import PaymentMethodItem from '../components/PaymentMethodItem'
+import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
 import CheckoutPaymentSelector from '../components/CheckoutPaymentSelector'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
@@ -15,7 +16,6 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 export default function CheckoutScreen({ navigation, route }) {
   const user = useSelector((state) => state.userReducer)
   const { paymentMethods, setDefaultPaymentMethod } = usePaymentMethods()
-  const insets = useSafeAreaInsets()
   
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
@@ -328,24 +328,15 @@ export default function CheckoutScreen({ navigation, route }) {
         </View>
       </ScrollView>
 
-      {}
-      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
-          <Text style={styles.totalLabel}>{i18n.t('cart.total', 'Total')}</Text>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.placeOrderButton, (!selectedAddress || !effectivePaymentMethod) && styles.disabledButton]}
-          onPress={handlePlaceOrder}
-          disabled={!selectedAddress || !effectivePaymentMethod}
-        >
-          <Text style={styles.placeOrderText}>
-            {i18n.t('checkout.placeOrder', 'Place Order')}
-          </Text>
-          <Ionicons name="arrow-forward" size={20} color={colors.text.white} />
-        </TouchableOpacity>
-      </View>
+      <CheckoutTotalActionFooter
+        totalAmount={`$${total.toFixed(2)}`}
+        totalCaption={i18n.t('cart.total', 'Total')}
+        actionLabel={i18n.t('checkout.placeOrder', 'Place Order')}
+        onActionPress={handlePlaceOrder}
+        disabled={!selectedAddress || !effectivePaymentMethod}
+        actionIcon="arrow-forward"
+        variant="primary"
+      />
 
       <CheckoutPaymentSelector
         visible={paymentSelectorVisible}
@@ -533,49 +524,5 @@ const styles = StyleSheet.create({
   instructionsPlaceholder: {
     fontSize: 14,
     color: colors.text.secondary,
-  },
-  bottomBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    backgroundColor: colors.background.primary,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  totalContainer: {
-    flex: 1,
-  },
-  totalAmount: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  totalLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textTransform: 'uppercase',
-  },
-  placeOrderButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 12,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  placeOrderText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.white,
-    marginRight: 8,
   },
 })

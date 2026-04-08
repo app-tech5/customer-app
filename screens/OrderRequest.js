@@ -2,7 +2,7 @@ import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert,
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import i18n from '../lang/i18n'
 import { colors, currency, language } from '../global'
 import Loader from './Loader'
@@ -10,13 +10,13 @@ import { api } from '../api'
 import { config } from '../config'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
+import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
   const user = useSelector((state) => state.userReducer)
   const currentUserId = user?.userId
   const { paymentMethods } = usePaymentMethods()
-  const insets = useSafeAreaInsets()
   
   const {
     restaurantName,
@@ -283,25 +283,17 @@ export default function OrderRequest({ route, navigation }) {
         </View>
       </ScrollView>
       
-      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalAmount}>
-            {totals?.total ? totals.total.toLocaleString(language, { style: "currency", currency: currency }) : ""}
-          </Text>
-          <Text style={styles.totalLabel}>{i18n.t('cart.total', 'Total')}</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={handleConfirmOrder}
-          disabled={loading}
-        >
-          <Text style={styles.confirmText}>
-            {i18n.t('order.confirmOrder', 'Confirm Order')}
-          </Text>
-          <Ionicons name="checkmark-circle" size={20} color={colors.text.white} />
-        </TouchableOpacity>
-      </View>
+      <CheckoutTotalActionFooter
+        totalAmount={
+          totals?.total ? totals.total.toLocaleString(language, { style: 'currency', currency: currency }) : ''
+        }
+        totalCaption={i18n.t('cart.total', 'Total')}
+        actionLabel={i18n.t('order.confirmOrder', 'Confirm Order')}
+        onActionPress={handleConfirmOrder}
+        disabled={loading}
+        actionIcon="checkmark-circle"
+        variant="success"
+      />
     </SafeAreaView>
   )
 }
@@ -490,46 +482,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.primary,
-  },
-  bottomBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    backgroundColor: colors.background.primary,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  totalContainer: {
-    flex: 1,
-  },
-  totalAmount: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  totalLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textTransform: 'uppercase',
-  },
-  confirmButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.success,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 12,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  confirmText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.white,
-    marginRight: 8,
   },
 })
