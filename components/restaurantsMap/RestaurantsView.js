@@ -12,16 +12,20 @@ import styles from './styles'
 const ListButton = ({ setVisible }) => {
   return (
     <View style={styles.menuList}>
-      <View style={styles.menuListBloc}>
+      <TouchableOpacity
+        testID="restaurants-map-list-toggle-button"
+        accessibilityLabel="restaurants-map-list-toggle-button"
+        style={styles.menuListBloc}
+        onPress={() => setVisible(true)}
+      >
         <Icon
           type="material-community"
           name="menu"
           color="black"
           size={32}
-          onPress={() => setVisible(true)}
         />
         <Text style={{ fontWeight: 'bold' }}>{i18n.t('search.list')}</Text>
-      </View>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -67,9 +71,15 @@ export default function RestaurantsView({
   }, [])
 
   return (
-    <View style={horizontal ? styles.flatlist : null}>
+    <View
+      testID={horizontal ? 'restaurants-map-horizontal-container' : 'restaurants-map-vertical-container'}
+      accessibilityLabel={horizontal ? 'restaurants-map-horizontal-container' : 'restaurants-map-vertical-container'}
+      style={horizontal ? styles.flatlist : null}
+    >
       {horizontal && <ListButton setVisible={setVisible} />}
       <FlatList
+        testID={horizontal ? 'restaurants-map-horizontal-list' : 'restaurants-map-vertical-list'}
+        accessibilityLabel={horizontal ? 'restaurants-map-horizontal-list' : 'restaurants-map-vertical-list'}
         ref={restaurantsRef}
         horizontal={horizontal}
         data={sortedRestaurants}
@@ -79,6 +89,8 @@ export default function RestaurantsView({
 
           return (
             <TouchableOpacity
+              testID={`restaurants-map-card-index-${index}`}
+              accessibilityLabel={`restaurants-map-card-${item.id || item._id || index}`}
               style={{
                 ...styles.restaurant,
                 width: horizontal ? width * 0.85 : 'auto',
@@ -175,6 +187,8 @@ export default function RestaurantsView({
           {sortedRestaurants.map((restaurant, index) => (
             <TouchableOpacity
               key={index}
+              testID={`restaurants-map-pagination-dot-${index}`}
+              accessibilityLabel={`restaurants-map-pagination-dot-${index}`}
               style={[
                 styles.paginationDot,
                 index === currentIndex && styles.paginationDotActive,

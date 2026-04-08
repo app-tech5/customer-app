@@ -179,16 +179,17 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   
   if (!restaurantData || restaurantData.length === 0) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Chargement des restaurants...</Text>
+      <View testID="restaurants-map-empty-state" accessibilityLabel="restaurants-map-empty-state" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text testID="restaurants-map-loading-text" accessibilityLabel="restaurants-map-loading-text">Chargement des restaurants...</Text>
       </View>
     )
   }
 
   return (
-    <View>
-      <View style={{ height, width }}>
+    <View testID="restaurants-map-screen" accessibilityLabel="restaurants-map-screen">
+      <View testID="restaurants-map-container" accessibilityLabel="restaurants-map-container" style={{ height, width }}>
         <OpenStreetMap
+          testID="restaurants-map-webview"
           initialRegion={initialRegion}
           targetRegion={mapRegion}
           restaurants={mapRestaurants}
@@ -197,8 +198,10 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           onMarkerPress={handleMarkerPress}
         />
       </View>
-      <View style={{ ...styles.header, width: width, }}>
+      <View testID="restaurants-map-header" accessibilityLabel="restaurants-map-header" style={{ ...styles.header, width: width, }}>
         <TouchableOpacity
+          testID="restaurants-map-back-button"
+          accessibilityLabel="restaurants-map-back-button"
           style={styles.arrowBack}
           onPress={() => navigation.goBack()}
         >
@@ -207,10 +210,17 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           </View>
         </TouchableOpacity>
         <View style={styles.searchbar}>
-          <SearchBar restaurantData={restaurantData} navigation={navigation} />
+          <SearchBar
+            inputTestID="restaurants-map-search-input"
+            submitTestID="restaurants-map-search-submit"
+            restaurantData={restaurantData}
+            navigation={navigation}
+          />
         </View>
         {userLocation && (
           <TouchableOpacity
+            testID="restaurants-map-location-button"
+            accessibilityLabel="restaurants-map-location-button"
             style={styles.locationIndicator}
             onPress={() => {
               if (userLocation.lat && userLocation.lng) {
@@ -228,8 +238,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         )}
       </View>
       {visible && (
-        <View style={styles.bottomSheet}>
-          <View style={styles.bottomSheetHandle} />
+        <View testID="restaurants-map-bottom-sheet" accessibilityLabel="restaurants-map-bottom-sheet" style={styles.bottomSheet}>
+          <View testID="restaurants-map-bottom-sheet-handle" accessibilityLabel="restaurants-map-bottom-sheet-handle" style={styles.bottomSheetHandle} />
           <RestaurantsView
             restaurantsRef={restaurantsRef}
             restaurantData={restaurantData}

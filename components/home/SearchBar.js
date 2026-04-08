@@ -3,7 +3,16 @@ import React, { useState, useEffect } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import i18n from '../../lang/i18n'
 
-export default function SearchBar({searchbar, cityHandler: _cityHandler, style, setAddress: _setAddress, navigation, restaurantData}) {
+export default function SearchBar({
+  searchbar,
+  cityHandler: _cityHandler,
+  style,
+  setAddress: _setAddress,
+  navigation,
+  restaurantData,
+  inputTestID,
+  submitTestID,
+}) {
   const [searchText, setSearchText] = useState('')
   
   useEffect(() => {
@@ -58,6 +67,8 @@ export default function SearchBar({searchbar, cityHandler: _cityHandler, style, 
         </View>
         <TextInput
           ref={searchbar}
+          testID={inputTestID}
+          accessibilityLabel={inputTestID}
           style={{
             flex: 1,
             backgroundColor: !style?'#eee':style.backgroundColor,
@@ -76,6 +87,8 @@ export default function SearchBar({searchbar, cityHandler: _cityHandler, style, 
         />
         {!style && (
           <TouchableOpacity
+            testID={submitTestID}
+            accessibilityLabel={submitTestID}
             style={{
               flexDirection: "row",
               marginRight: 8,

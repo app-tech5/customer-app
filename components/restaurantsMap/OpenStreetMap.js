@@ -211,6 +211,7 @@ export default function OpenStreetMap({
   focusedOriginalIndex,
   userLocation,
   onMarkerPress,
+  testID,
 }) {
   const webViewRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
@@ -266,6 +267,8 @@ export default function OpenStreetMap({
 
   return (
     <WebView
+      testID={testID}
+      accessibilityLabel={testID}
       ref={webViewRef}
       originWhitelist={['*']}
       source={{ html: createOpenStreetMapHtml(initialRegion) }}
