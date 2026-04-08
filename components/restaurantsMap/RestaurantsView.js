@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
 import { Icon } from 'react-native-elements'
 import Reward from '../Reward'
 import Categories from '../home/Categories'
 import { RestaurantImage, RestaurantInfo } from '../home/RestaurantItems'
-import i18n from '../../lang/i18n'
 import { buildSortedRestaurants } from '../../utils'
 import styles from './styles'
 
-const ListButton = ({ setVisible }) => {
+const ListButton = ({ setVisible, horizontal }) => {
+  const iconName = horizontal ? 'menu' : 'map'
+
   return (
     <View style={styles.menuList}>
       <TouchableOpacity
@@ -20,11 +21,10 @@ const ListButton = ({ setVisible }) => {
       >
         <Icon
           type="material-community"
-          name="menu"
-          color="black"
-          size={32}
+          name={iconName}
+          color="#333"
+          size={22}
         />
-        <Text style={{ fontWeight: 'bold' }}>{i18n.t('search.list')}</Text>
       </TouchableOpacity>
     </View>
   )
@@ -76,7 +76,7 @@ export default function RestaurantsView({
       accessibilityLabel={horizontal ? 'restaurants-map-horizontal-container' : 'restaurants-map-vertical-container'}
       style={horizontal ? styles.flatlist : null}
     >
-      {setVisible && <ListButton setVisible={setVisible} />}
+      {setVisible && <ListButton setVisible={setVisible} horizontal={horizontal} />}
       <FlatList
         testID={horizontal ? 'restaurants-map-horizontal-list' : 'restaurants-map-vertical-list'}
         accessibilityLabel={horizontal ? 'restaurants-map-horizontal-list' : 'restaurants-map-vertical-list'}
