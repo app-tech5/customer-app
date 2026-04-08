@@ -209,7 +209,13 @@ export default function RestaurantDetail({ route, navigation }) {
     };
   }, [restaurant.openingTime, restaurant.closingTime]);
 
-  if (!userLocation) return <Loader />
+  if (!userLocation) {
+    return (
+      <View testID="restaurant-detail-screen" accessibilityLabel="restaurant-detail-screen">
+        <Loader />
+      </View>
+    )
+  }
   
   const formattedRating = restaurant.rating ? parseFloat(restaurant.rating).toFixed(1) : "4.5";
   const price = restaurant.price || "$$";
@@ -253,7 +259,7 @@ export default function RestaurantDetail({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View testID="restaurant-detail-screen" accessibilityLabel="restaurant-detail-screen" style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       <ImageBackground

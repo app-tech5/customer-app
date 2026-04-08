@@ -33,7 +33,7 @@ tags:
     id: "restaurants-map-horizontal-list"
 
 # ===========================================================
-# 2) Bouton "list" -> ouverture bottom sheet
+# 2) Bouton toggle (icône seule) -> ouverture bottom sheet
 # ===========================================================
 - tapOn:
     id: "restaurants-map-list-toggle-button"
@@ -60,7 +60,7 @@ tags:
 # ===========================================================
 # 4) Marker -> carrousel
 # ===========================================================
-# Le même bouton list referme la feuille (toggle)
+# Le même bouton toggle (icône seule) referme la feuille
 - tapOn:
     id: "restaurants-map-list-toggle-button"
 - waitForAnimationToEnd
@@ -96,9 +96,9 @@ tags:
 - tapOn:
     id: "restaurants-map-card-index-0"
 - waitForAnimationToEnd
-# Assert générique détail (texte dépend de la locale/routing)
+# Assert robuste sans texte en dur
 - assertVisible:
-    text: "(Menu|Détails|Details)"
+    id: "restaurant-detail-screen"
 
 # ===========================================================
 # 8) Navigation retour
