@@ -1,8 +1,9 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import Loader from './Loader'
@@ -14,6 +15,7 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 export default function CheckoutScreen({ navigation, route }) {
   const user = useSelector((state) => state.userReducer)
   const { paymentMethods, setDefaultPaymentMethod } = usePaymentMethods()
+  const insets = useSafeAreaInsets()
   
   const cartItems = route.params?.items || []
   const restaurant = route.params?.restaurant || null
@@ -327,7 +329,7 @@ export default function CheckoutScreen({ navigation, route }) {
       </ScrollView>
 
       {}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
           <Text style={styles.totalLabel}>{i18n.t('cart.total', 'Total')}</Text>
@@ -535,7 +537,8 @@ const styles = StyleSheet.create({
   bottomBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    paddingTop: 20,
+    paddingHorizontal: 20,
     backgroundColor: colors.background.primary,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
