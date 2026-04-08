@@ -368,18 +368,24 @@ export default function SearchResults({route, navigation}) {
     </View>
   )
 
-  if (loader) return <Loader />
+  if (loader) {
+    return (
+      <SafeAreaView testID="search-results-screen" accessibilityLabel="search-results-screen" style={styles.container}>
+        <Loader />
+      </SafeAreaView>
+    )
+  }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView testID="search-results-screen" accessibilityLabel="search-results-screen" style={styles.container}>
         <EmptyState query={searchQuery} isError={true} />
       </SafeAreaView>
     )
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView testID="search-results-screen" accessibilityLabel="search-results-screen" style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       {restaurantData.length === 0 ? (

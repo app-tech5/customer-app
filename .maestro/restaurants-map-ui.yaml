@@ -119,9 +119,9 @@ tags:
 - tapOn:
     id: "restaurants-map-search-submit"
 - waitForAnimationToEnd
-# Vérification navigation/résultat (générique FR/EN)
+# Vérification navigation/résultat robuste (sans texte)
 - assertVisible:
-    text: "(résultat|results|Recherche|Search)"
+    id: "search-results-screen"
 
 # ===========================================================
 # 10) Non-régression UX: interactions rapides
