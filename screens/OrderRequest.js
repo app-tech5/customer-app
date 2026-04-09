@@ -62,10 +62,11 @@ export default function OrderRequest({ route, navigation }) {
       setLoading(true);
 
       if (!config.DEMO_MODE) {
-        await createStripePaymentIntent({
+       const response = await createStripePaymentIntent({
           amount: Math.round(Number(totals?.total) * 100),
           currency: stripeCurrency,
         });
+        clientSecret = response.client_secret;
       }
 
       const orderItems = items.map(cartItem => ({
