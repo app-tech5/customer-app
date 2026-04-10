@@ -89,7 +89,7 @@ export default function OrderRequest({ route, navigation }) {
         if (error) {
           throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
         }
-        if (paymentIntent.status !== 'succeeded') {
+        if (paymentIntent.status !== 'Succeeded') {
           console.log('❌ Payment failed with status:', paymentIntent);
           throw new Error(i18n.t('payment.notSuccessful', 'Payment was not successful. Please try again.'));
         }
