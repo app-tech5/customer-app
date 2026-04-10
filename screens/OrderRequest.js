@@ -12,6 +12,7 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useSettings } from '../contexts/SettingContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
+import { confirmPayment } from '@stripe/stripe-react-native'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
@@ -58,15 +59,41 @@ export default function OrderRequest({ route, navigation }) {
   const handleConfirmOrder = async () => {
     let createdOrder = null;
 
+    const defaultPaymentMethod = paymentMethods.find(
+      (method) => method.isDefault
+    );
+
+    if (!defaultPaymentMethod) {
+      throw new Error("No default payment method found");
+    }
+
+    const paymentMethodId = defaultPaymentMethod.id;
+
+    console.log('💳 Processing payment with method ID:', defaultPaymentMethod);
+
     try {
       setLoading(true);
 
       if (!config.DEMO_MODE) {
-       const response = await createStripePaymentIntent({
+        const response = await createStripePaymentIntent({
           amount: Math.round(Number(totals?.total) * 100),
           currency: stripeCurrency,
         });
-        clientSecret = response.client_secret;
+        const clientSecret = response.client_secret;
+        const { paymentIntent, error } = await confirmPayment(clientSecret, {
+          paymentMethodType: 'Card',
+          paymentMethodData:{
+            paymentMethodId
+          }
+        });
+        if (error) {
+          throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
+        }
+        if (paymentIntent.status !== 'succeeded') {
+          console.log('❌ Payment failed with status:', paymentIntent);
+          throw new Error(i18n.t('payment.notSuccessful', 'Payment was not successful. Please try again.'));
+        }
+
       }
 
       const orderItems = items.map(cartItem => ({
@@ -114,7 +141,7 @@ export default function OrderRequest({ route, navigation }) {
           updatedAt: new Date().toISOString(),
           orderId: `DEMO-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
         };
-        
+
         await new Promise(resolve => setTimeout(resolve, 1000));
       } else {
         createdOrder = await api.createOrder(orderData);
@@ -133,7 +160,7 @@ export default function OrderRequest({ route, navigation }) {
 
     } catch (error) {
       console.error('❌ Error in handleConfirmOrder:', error);
-      
+
       Alert.alert(
         i18n.t('common.error', 'Error'),
         error.message || i18n.t('order.createError', 'Failed to create order. Please try again.'),
@@ -176,7 +203,7 @@ export default function OrderRequest({ route, navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {}
+        { }
         <View style={styles.restaurantHeader}>
           <Text style={styles.restaurantName}>{restaurant?.name || restaurantName}</Text>
           <Text style={styles.orderItems}>
@@ -184,7 +211,7 @@ export default function OrderRequest({ route, navigation }) {
           </Text>
         </View>
 
-        {}
+        { }
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('order.yourOrder', 'Your Order')}
@@ -197,7 +224,7 @@ export default function OrderRequest({ route, navigation }) {
           />
         </View>
 
-        {}
+        { }
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.deliveryAddress', 'Delivery Address')}
@@ -221,7 +248,7 @@ export default function OrderRequest({ route, navigation }) {
             </View>
           </View>
         </View>
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.paymentMethod', 'Payment Method')}
@@ -238,7 +265,7 @@ export default function OrderRequest({ route, navigation }) {
             </Text>
           )}
         </View>
-        
+
         {specialInstructions && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
@@ -249,7 +276,7 @@ export default function OrderRequest({ route, navigation }) {
             </View>
           </View>
         )}
-        
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.orderSummary', 'Order Summary')}
@@ -294,7 +321,7 @@ export default function OrderRequest({ route, navigation }) {
           </View>
         </View>
       </ScrollView>
-      
+
       <CheckoutTotalActionFooter
         totalAmount={
           totals?.total ? totals.total.toLocaleString(language, { style: 'currency', currency: currencyCode }) : ''

@@ -6,7 +6,7 @@ export const config = {
   APP_NAME: 'Good Food',
   VERSION: '1.1.0',
 
-  DEMO_MODE: true,
+  DEMO_MODE: false,
   DEMO_EMAIL: 'demo@customer.com',
   DEMO_PASSWORD: 'demo123',
 

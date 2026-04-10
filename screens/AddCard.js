@@ -87,7 +87,8 @@ function AddCard({ navigation }) {
       }
 
       const entry = {
-        id: `card_${Date.now()}`,
+        // id: `card_${Date.now()}`,
+        id:paymentMethod.id,
         user: currentUserId,
         methodType: 'credit_card',
         cardDetails: {
@@ -224,7 +225,6 @@ export default function AddCardWrapper(props) {
     </StripeProvider>
   )
 
-  return <AddCard {...props} />
 }
 
 const styles = StyleSheet.create({
