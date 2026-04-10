@@ -16,6 +16,7 @@ import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
 import { SettingProvider } from '../contexts/SettingContext'
 import { GatewayProvider } from '../contexts/GatewayContext'
 import { PaymentMethodsProvider } from '../contexts/PaymentMethodsContext'
+import { StripeProvider } from '@stripe/stripe-react-native'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import {
@@ -25,6 +26,22 @@ import {
   OrderStatusNavigator,
 } from './Stacks'
 import { SignInContextProvider } from '../contexts/authContext'
+import { useGateway } from '../contexts/GatewayContext'
+
+const FALLBACK_STRIPE_PUBLISHABLE_KEY = 'pk_test_51TIcAILenxtQOhEhEjwR6VWyKw9h6jmOwMSOVIxdXpwnA7mAi9pDy08Dgk8cVvk3QC1lVpAxD2LKgIODDlK5Y22U00xCwBf9ok'
+
+function StripeWrappedNavigation({ children }) {
+  const { stripePublishableKey } = useGateway()
+  return (
+    <StripeProvider
+      publishableKey={stripePublishableKey || FALLBACK_STRIPE_PUBLISHABLE_KEY}
+      urlScheme="goodfoods"
+    >
+      {children}
+    </StripeProvider>
+  )
+}
+
 const store = configureStore();
 export default function RootNavigation({statusBarColor}) {
     const Stack = createStackNavigator();
@@ -40,6 +57,7 @@ export default function RootNavigation({statusBarColor}) {
         <LoaderContext.Provider value={{loading, setLoading}}>
           <SettingProvider>
             <GatewayProvider>
+            <StripeWrappedNavigation>
             <PaymentMethodsProvider>
             <DeliverySettingsProvider>
               <RestaurantsContext.Provider value={{restaurantData, setRestaurantData}}>
@@ -63,6 +81,7 @@ export default function RootNavigation({statusBarColor}) {
             </RestaurantsContext.Provider>
           </DeliverySettingsProvider>
             </PaymentMethodsProvider>
+            </StripeWrappedNavigation>
             </GatewayProvider>
         </SettingProvider>
       </LoaderContext.Provider>

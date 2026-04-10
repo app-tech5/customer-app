@@ -10,15 +10,13 @@ import {
   SafeAreaView,
   StatusBar,
   Alert,
-  ActivityIndicator,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { CardField, StripeProvider } from '@stripe/stripe-react-native'
+import { CardField } from '@stripe/stripe-react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-import { useGateway } from '../contexts/GatewayContext'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useStripe } from '@stripe/stripe-react-native'
 import { createCardPaymentMethod } from '../api/paymentMethods'
@@ -206,26 +204,7 @@ function AddCard({ navigation }) {
   )
 }
 
-export default function AddCardWrapper(props) {
-  const { loading, stripePublishableKey } = useGateway()
-
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.safe, styles.gatewayLoading]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </SafeAreaView>
-    )
-  }
-  return (
-    <StripeProvider
-      publishableKey={ "pk_test_51TIcAILenxtQOhEhEjwR6VWyKw9h6jmOwMSOVIxdXpwnA7mAi9pDy08Dgk8cVvk3QC1lVpAxD2LKgIODDlK5Y22U00xCwBf9ok" }
-      urlScheme="goodfoods"
-    >
-      <AddCard {...props} />
-    </StripeProvider>
-  )
-
-}
+export default AddCard
 
 const styles = StyleSheet.create({
   safe: {
