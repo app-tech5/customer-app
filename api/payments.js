@@ -6,3 +6,10 @@ ApiClient.prototype.createStripePaymentIntent = async function (payload) {
     body: JSON.stringify(payload),
   });
 };
+
+ApiClient.prototype.attachStripePaymentMethod = async function (paymentMethodId) {
+  return await this.apiCall('/payments/stripe/attach-payment-method', {
+    method: 'POST',
+    body: JSON.stringify({ paymentMethodId }),
+  });
+};

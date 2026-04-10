@@ -171,6 +171,8 @@ export const setDefaultPaymentMethod = (userId, paymentMethodId) =>
   api.setDefaultPaymentMethod(userId, paymentMethodId);
 export const createStripePaymentIntent = (payload) =>
   api.createStripePaymentIntent(payload);
+export const attachStripePaymentMethod = (paymentMethodId) =>
+  api.attachStripePaymentMethod(paymentMethodId);
 export const getUserTransactions = (userId, page, limit) =>
   api.getUserTransactions(userId, page, limit);
 export const getTransactionById = (userId, transactionId) =>

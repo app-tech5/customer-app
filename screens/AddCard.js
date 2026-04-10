@@ -20,6 +20,7 @@ import { colors } from '../global'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useStripe } from '@stripe/stripe-react-native'
 import { createCardPaymentMethod } from '../api/paymentMethods'
+import { attachStripePaymentMethod } from '../api'
 
 function AddCard({ navigation }) {
   const user = useSelector((state) => state.userReducer)
@@ -83,6 +84,8 @@ function AddCard({ navigation }) {
         )
         return
       }
+
+      await attachStripePaymentMethod(paymentMethod.id)
 
       const entry = {
         // id: `card_${Date.now()}`,
