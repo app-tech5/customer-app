@@ -159,20 +159,21 @@ export const setDefaultAddress = (userId, addressId) =>
 export const getAddressById = (userId, addressId) =>
   api.getAddressById(userId, addressId);
 
-export const getUserPaymentMethods = (userId) =>
-  api.getUserPaymentMethods(userId);
-export const getPaymentMethodById = (userId, paymentMethodId) =>
-  api.getPaymentMethodById(userId, paymentMethodId);
-export const addPaymentMethod = (userId, paymentMethodData) =>
-  api.addPaymentMethod(userId, paymentMethodData);
-export const removePaymentMethod = (userId, paymentMethodId) =>
-  api.removePaymentMethod(userId, paymentMethodId);
-export const setDefaultPaymentMethod = (userId, paymentMethodId) =>
-  api.setDefaultPaymentMethod(userId, paymentMethodId);
+export const getUserPaymentMethods = () => api.getUserPaymentMethods();
+export const getPaymentMethodById = (paymentMethodId) =>
+  api.getPaymentMethodById(paymentMethodId);
+export const addPaymentMethod = (paymentMethodData) =>
+  api.addPaymentMethod(paymentMethodData);
+export const removePaymentMethod = (paymentMethodId) =>
+  api.removePaymentMethod(paymentMethodId);
+export const setDefaultPaymentMethod = (paymentMethodId) =>
+  api.setDefaultPaymentMethod(paymentMethodId);
 export const createStripePaymentIntent = (payload) =>
   api.createStripePaymentIntent(payload);
 export const attachStripePaymentMethod = (paymentMethodId) =>
   api.attachStripePaymentMethod(paymentMethodId);
+export const removeStripePaymentMethod = (paymentMethodId) =>
+  api.removeStripePaymentMethod(paymentMethodId);
 export const getUserTransactions = (userId, page, limit) =>
   api.getUserTransactions(userId, page, limit);
 export const getTransactionById = (userId, transactionId) =>

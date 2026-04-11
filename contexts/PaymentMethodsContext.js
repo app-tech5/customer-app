@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSelector } from 'react-redux'
+import { removeStripePaymentMethod } from '../api'
 
 const PaymentMethodsContext = createContext()
 
@@ -90,7 +91,8 @@ export function PaymentMethodsProvider({ children }) {
     setPaymentMethods(next)
   }, [paymentMethods])
 
-  const removePaymentMethod = useCallback((methodId) => {
+  const removePaymentMethod = useCallback(async (methodId) => {
+    await removeStripePaymentMethod(methodId)
     const filtered = paymentMethods.filter((method) => method.id !== methodId)
 
     const hasDefault = filtered.some((method) => method.isDefault)

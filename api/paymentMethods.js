@@ -11,32 +11,30 @@ export const createCardPaymentMethod = async (createPaymentMethod, holderName) =
   return { paymentMethod, error };
 };
 
-ApiClient.prototype.getUserPaymentMethods = async function (userId) {
-  return await this.apiCall(`/users/${userId}/payment-methods`);
+ApiClient.prototype.getUserPaymentMethods = async function () {
+  return await this.apiCall('/resource/paymentMethods');
 };
 
-ApiClient.prototype.addPaymentMethod = async function (userId, paymentMethodData) {
-  return await this.apiCall(`/users/${userId}/payment-methods`, {
+ApiClient.prototype.addPaymentMethod = async function (paymentMethodData) {
+  return await this.apiCall('/resource/paymentMethods', {
     method: 'POST',
     body: JSON.stringify(paymentMethodData),
   });
 };
 
-ApiClient.prototype.removePaymentMethod = async function (userId, paymentMethodId) {
-  return await this.apiCall(`/users/${userId}/payment-methods/${paymentMethodId}`, {
+ApiClient.prototype.removePaymentMethod = async function (paymentMethodId) {
+  return await this.apiCall(`/resource/paymentMethods/${paymentMethodId}`, {
     method: 'DELETE',
   });
 };
 
-ApiClient.prototype.setDefaultPaymentMethod = async function (userId, paymentMethodId) {
-  return await this.apiCall(
-    `/users/${userId}/payment-methods/${paymentMethodId}/default`,
-    { method: 'PUT' }
-  );
+ApiClient.prototype.setDefaultPaymentMethod = async function (paymentMethodId) {
+  return await this.apiCall(`/resource/paymentMethods/${paymentMethodId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ isDefault: true }),
+  });
 };
 
-ApiClient.prototype.getPaymentMethodById = async function (userId, paymentMethodId) {
-  return await this.apiCall(
-    `/users/${userId}/payment-methods/${paymentMethodId}`
-  );
+ApiClient.prototype.getPaymentMethodById = async function (paymentMethodId) {
+  return await this.apiCall(`/resource/paymentMethods/${paymentMethodId}`);
 };

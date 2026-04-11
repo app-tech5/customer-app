@@ -13,3 +13,10 @@ ApiClient.prototype.attachStripePaymentMethod = async function (paymentMethodId)
     body: JSON.stringify({ paymentMethodId }),
   });
 };
+
+ApiClient.prototype.removeStripePaymentMethod = async function (paymentMethodId) {
+  return await this.apiCall('/payments/stripe/remove-payment-method', {
+    method: 'POST',
+    body: JSON.stringify({ paymentMethodId }),
+  });
+};
