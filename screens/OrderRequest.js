@@ -13,6 +13,7 @@ import { useSettings } from '../contexts/SettingContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
 import { confirmPayment } from '@stripe/stripe-react-native'
+import { updatePaymentMethod as updatePaymentMethodApi } from '../api'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
@@ -86,6 +87,10 @@ export default function OrderRequest({ route, navigation }) {
             paymentMethodId
           }
         });
+        await updatePaymentMethodApi(paymentMethodId, {
+          verificationStatus: 'verified',
+          verificationDate: new Date(),
+        }); 
         if (error) {
           throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
         }

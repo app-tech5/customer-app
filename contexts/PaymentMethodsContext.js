@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSelector } from 'react-redux'
 import { removeStripePaymentMethod } from '../api'
+import { addPaymentMethod as addPaymentMethodApi } from '../api'
 
 const PaymentMethodsContext = createContext()
 
@@ -71,7 +72,8 @@ export function PaymentMethodsProvider({ children }) {
     )
   }, [hydrated, paymentMethods, storageKey])
 
-  const addPaymentMethod = useCallback((method) => {
+  const addPaymentMethod = useCallback(async (method) => {
+
     const isFirstPaymentMethod = paymentMethods.length === 0
     const nextMethod = {
       ...method,
@@ -79,6 +81,11 @@ export function PaymentMethodsProvider({ children }) {
     }
     const next = [...paymentMethods, nextMethod]
 
+    await addPaymentMethodApi({
+      ...nextMethod,
+      isActive: true,
+      verificationStatus: 'unverified',
+    })
     setPaymentMethods(next)
   }, [paymentMethods])
 

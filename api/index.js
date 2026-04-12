@@ -183,7 +183,8 @@ export const addMoneyToWallet = (userId, amount, paymentMethodId) =>
   api.addMoneyToWallet(userId, amount, paymentMethodId);
 export const withdrawFromWallet = (userId, amount, paymentMethodId) =>
   api.withdrawFromWallet(userId, amount, paymentMethodId);
-
+export const updatePaymentMethod = (paymentMethodId, paymentMethodData) =>
+  api.updatePaymentMethod(paymentMethodId, paymentMethodData);      
 export const restaurantsCol = 'restaurants';
 export const categoriesCol = 'categories';
 export const ordersCol = 'orders';

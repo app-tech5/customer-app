@@ -38,3 +38,10 @@ ApiClient.prototype.setDefaultPaymentMethod = async function (paymentMethodId) {
 ApiClient.prototype.getPaymentMethodById = async function (paymentMethodId) {
   return await this.apiCall(`/resource/paymentMethods/${paymentMethodId}`);
 };
+
+ApiClient.prototype.updatePaymentMethod = async function (paymentMethodId, paymentMethodData) {
+  return await this.apiCall(`/resource/paymentMethods/${paymentMethodId}`, {
+    method: 'PUT',
+    body: JSON.stringify(paymentMethodData),
+  });
+};

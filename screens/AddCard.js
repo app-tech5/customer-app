@@ -95,10 +95,10 @@ function AddCard({ navigation }) {
         cardDetails: {
           cardholderName: holderName.trim(),
           cardNumberLast4,
-          cardBrand
+          cardBrand: cardBrand.toLowerCase(),
         }
       }
-
+      
       addPaymentMethod(entry)
 
       Alert.alert(

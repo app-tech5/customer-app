@@ -27,8 +27,9 @@ import {
 } from './Stacks'
 import { SignInContextProvider } from '../contexts/authContext'
 import { useGateway } from '../contexts/GatewayContext'
+import { config } from '../config'
 
-const FALLBACK_STRIPE_PUBLISHABLE_KEY = 'pk_test_51TIcAILenxtQOhEhEjwR6VWyKw9h6jmOwMSOVIxdXpwnA7mAi9pDy08Dgk8cVvk3QC1lVpAxD2LKgIODDlK5Y22U00xCwBf9ok'
+const FALLBACK_STRIPE_PUBLISHABLE_KEY = config.FALLBACK_STRIPE_PUBLISHABLE_KEY
 
 function StripeWrappedNavigation({ children }) {
   const { stripePublishableKey } = useGateway()
