@@ -23,7 +23,8 @@ export default function PaymentMethodItem({
       : methodType?.includes('cash')
         ? 'cash'
         : 'card'
-  const title = method?.cardDetails?.cardBrand
+  const firstLetter = method?.cardDetails?.cardBrand?.charAt(0).toUpperCase()
+  const title = firstLetter + method?.cardDetails?.cardBrand?.slice(1)
     || method?.cardDetails?.label
     || (methodType?.includes('paypal')
       ? i18n.t('wallet.paypal', 'PayPal')

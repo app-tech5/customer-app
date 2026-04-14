@@ -12,7 +12,7 @@ export const createCardPaymentMethod = async (createPaymentMethod, holderName) =
 };
 
 ApiClient.prototype.getUserPaymentMethods = async function () {
-  return await this.apiCall('/resource/paymentMethods');
+  return await this.apiCall('/resource/paymentMethods/byUserId');
 };
 
 ApiClient.prototype.addPaymentMethod = async function (paymentMethodData) {
