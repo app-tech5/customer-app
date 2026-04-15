@@ -19,7 +19,7 @@ export default function WalletScreen({ navigation, route}) {
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
 
-  const loadWalletData = useCallback(() => {
+  const loadWalletData = useCallback(async() => {
     try {
       setLoader(true)
       setError(null)

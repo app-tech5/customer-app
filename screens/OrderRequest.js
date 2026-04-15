@@ -87,10 +87,12 @@ export default function OrderRequest({ route, navigation }) {
             paymentMethodId
           }
         });
-        await updatePaymentMethodApi(paymentMethodId, {
-          verificationStatus: 'verified',
-          verificationDate: new Date(),
-        }); 
+        if (defaultPaymentMethod.verificationStatus === 'unverified') {
+          await updatePaymentMethodApi(defaultPaymentMethod._id, {
+            verificationStatus: 'verified',
+            verificationDate: new Date(),
+          }); 
+        }
         if (error) {
           throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
         }
