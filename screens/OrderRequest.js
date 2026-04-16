@@ -12,7 +12,7 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useSettings } from '../contexts/SettingContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
-import { confirmPayment } from '@stripe/stripe-react-native'
+import { confirmPayment, confirmPlatformPayPayment } from '@stripe/stripe-react-native'
 import { updatePaymentMethod as updatePaymentMethodApi } from '../api'
 
 export default function OrderRequest({ route, navigation }) {
@@ -81,17 +81,33 @@ export default function OrderRequest({ route, navigation }) {
           currency: stripeCurrency,
         });
         const clientSecret = response.client_secret;
-        const { paymentIntent, error } = await confirmPayment(clientSecret, {
-          paymentMethodType: 'Card',
-          paymentMethodData:{
-            paymentMethodId
-          }
-        });
-        if (defaultPaymentMethod.verificationStatus === 'unverified') {
-          await updatePaymentMethodApi(defaultPaymentMethod._id, {
-            verificationStatus: 'verified',
-            verificationDate: new Date(),
-          }); 
+        let paymentIntent;
+        let error;
+        if (defaultPaymentMethod.methodType === 'google_pay') {
+          ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
+            googlePay: {
+              testEnv: true,
+              merchantName: 'Good Foods',
+              countryCode: 'FR',
+              currencyCode: stripeCurrency.toUpperCase(),
+            },
+          }));
+        } else if (defaultPaymentMethod.methodType === 'apple_pay') {
+          ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
+            applePay: {
+              testEnv: true,
+              merchantName: 'Good Foods',
+              countryCode: 'FR',
+              currencyCode: stripeCurrency.toUpperCase(),
+            },
+          }));
+        } else {
+          ({ paymentIntent, error } = await confirmPayment(clientSecret, {
+            paymentMethodType: 'Card',
+            paymentMethodData:{
+              paymentMethodId
+            }
+          }));
         }
         if (error) {
           throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
@@ -99,6 +115,12 @@ export default function OrderRequest({ route, navigation }) {
         if (paymentIntent.status !== 'Succeeded') {
           console.log('❌ Payment failed with status:', paymentIntent);
           throw new Error(i18n.t('payment.notSuccessful', 'Payment was not successful. Please try again.'));
+        }
+        if (defaultPaymentMethod.verificationStatus === 'unverified') {
+          await updatePaymentMethodApi(defaultPaymentMethod._id, {
+            verificationStatus: 'verified',
+            verificationDate: new Date(),
+          }); 
         }
 
       }

@@ -19,6 +19,7 @@ import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 export default function AddPaymentMethodScreen({ navigation }) {
   const user = useSelector((state) => state.userReducer)
   const { paymentMethods, addPaymentMethod } = usePaymentMethods()
+  const currentUserId = user?.userId || user?.id
 
   const existingTypes = useMemo(
     () => new Set(paymentMethods.map((method) => method.methodType)),
@@ -45,13 +46,14 @@ export default function AddPaymentMethodScreen({ navigation }) {
       user: user?.id,
       methodType: type,
       cardDetails: { label },
+      paypalEmail: type === 'paypal' ? label : null,
     })
 
     Alert.alert(i18n.t('wallet.added'), i18n.t('wallet.addedMessage'), [
       { text: i18n.t('common.ok'), onPress: () => navigation.goBack() },
     ])
   }
-
+  
   const rows = [
     {
       id: 'card',
@@ -67,7 +69,7 @@ export default function AddPaymentMethodScreen({ navigation }) {
       subtitle: i18n.t('wallet.paypalSubtitle'),
       Icon: FontAwesome,
       iconName: 'paypal',
-      onPress: () => addSimpleMethod('paypal', i18n.t('wallet.paypal')),
+      onPress: () => addSimpleMethod('paypal',  user?.email),
     },
     {
       id: 'cash',
@@ -86,7 +88,7 @@ export default function AddPaymentMethodScreen({ navigation }) {
       subtitle: i18n.t('wallet.applePaySubtitle'),
       Icon: Ionicons,
       iconName: 'logo-apple',
-      onPress: () => Alert.alert(i18n.t('common.comingSoon'), i18n.t('wallet.applePaySoon')),
+      onPress: () => addSimpleMethod('apple_pay'),
     })
   }
 
@@ -97,7 +99,7 @@ export default function AddPaymentMethodScreen({ navigation }) {
       subtitle: i18n.t('wallet.googlePaySubtitle'),
       Icon: Ionicons,
       iconName: 'logo-google',
-      onPress: () => Alert.alert(i18n.t('common.comingSoon'), i18n.t('wallet.googlePaySoon')),
+      onPress: () => addSimpleMethod('google_pay'),
     })
   }
 

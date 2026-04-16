@@ -16,21 +16,11 @@ export default function PaymentMethodItem({
   const methodType = method?.methodType
   const IconComponent = methodType?.includes('paypal') ? FontAwesome : Ionicons
   const Container = onPress ? TouchableOpacity : View
-  const iconName = methodType?.includes('card')
-    ? 'card'
-    : methodType?.includes('paypal')
-      ? 'paypal'
-      : methodType?.includes('cash')
-        ? 'cash'
-        : 'card'
+
+  const iconName = methodType?.includes('card') ? 'card' : methodType?.includes('paypal') ? 'paypal' : methodType?.includes('cash') ? 'cash' : methodType?.includes('google_pay') ? 'card-outline' : methodType?.includes('apple_pay') ? 'apple_pay' : 'card'
   const firstLetter = method?.cardDetails?.cardBrand?.charAt(0).toUpperCase()
-  const title = firstLetter + method?.cardDetails?.cardBrand?.slice(1)
-    || method?.cardDetails?.label
-    || (methodType?.includes('paypal')
-      ? i18n.t('wallet.paypal', 'PayPal')
-      : methodType?.includes('cash')
-        ? i18n.t('payment.cash', 'Cash')
-        : i18n.t('payment.credit_card', 'Credit Card'))
+  
+  const title = methodType?.includes('paypal') ? 'Paypal' : methodType?.includes('google_pay') ? 'Google Pay' : methodType?.includes('apple_pay') ? 'Apple Pay' : firstLetter + method?.cardDetails?.cardBrand?.slice(1) || method?.cardDetails?.label
   const isCheckout = variant === 'checkout'
 
   return (
