@@ -20,7 +20,7 @@ export default function PaymentMethodItem({
   const iconName = methodType?.includes('card') ? 'card' : methodType?.includes('paypal') ? 'paypal' : methodType?.includes('cash') ? 'cash' : methodType?.includes('google_pay') ? 'card-outline' : methodType?.includes('apple_pay') ? 'apple_pay' : 'card'
   const firstLetter = method?.cardDetails?.cardBrand?.charAt(0).toUpperCase()
   
-  const title = methodType?.includes('paypal') ? 'Paypal' : methodType?.includes('google_pay') ? 'Google Pay' : methodType?.includes('apple_pay') ? 'Apple Pay' : firstLetter + method?.cardDetails?.cardBrand?.slice(1) || method?.cardDetails?.label
+  const title = methodType?.includes('cash') ? 'Cash' : methodType?.includes('paypal') ? 'Paypal' : methodType?.includes('google_pay') ? 'Google Pay' : methodType?.includes('apple_pay') ? 'Apple Pay' : firstLetter + method?.cardDetails?.cardBrand?.slice(1) || method?.cardDetails?.label
   const isCheckout = variant === 'checkout'
 
   return (

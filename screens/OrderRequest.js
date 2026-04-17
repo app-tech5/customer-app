@@ -76,53 +76,64 @@ export default function OrderRequest({ route, navigation }) {
       setLoading(true);
 
       if (!config.DEMO_MODE) {
-        const response = await createStripePaymentIntent({
-          amount: Math.round(Number(totals?.total) * 100),
-          currency: stripeCurrency,
-        });
-        const clientSecret = response.client_secret;
-        let paymentIntent;
-        let error;
-        if (defaultPaymentMethod.methodType === 'google_pay') {
-          ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
-            googlePay: {
-              testEnv: true,
-              merchantName: 'Good Foods',
-              countryCode: 'FR',
-              currencyCode: stripeCurrency.toUpperCase(),
-            },
-          }));
-        } else if (defaultPaymentMethod.methodType === 'apple_pay') {
-          ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
-            applePay: {
-              testEnv: true,
-              merchantName: 'Good Foods',
-              countryCode: 'FR',
-              currencyCode: stripeCurrency.toUpperCase(),
-            },
-          }));
-        } else {
-          ({ paymentIntent, error } = await confirmPayment(clientSecret, {
-            paymentMethodType: 'Card',
-            paymentMethodData:{
-              paymentMethodId
-            }
-          }));
-        }
-        if (error) {
-          throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
-        }
-        if (paymentIntent.status !== 'Succeeded') {
-          console.log('❌ Payment failed with status:', paymentIntent);
-          throw new Error(i18n.t('payment.notSuccessful', 'Payment was not successful. Please try again.'));
-        }
-        if (defaultPaymentMethod.verificationStatus === 'unverified') {
-          await updatePaymentMethodApi(defaultPaymentMethod._id, {
-            verificationStatus: 'verified',
-            verificationDate: new Date(),
-          }); 
-        }
+        if (defaultPaymentMethod.methodType === 'cash_on_delivery') {
 
+        } else {
+          const response = await createStripePaymentIntent({
+            amount: Math.round(Number(totals?.total) * 100),
+            currency: stripeCurrency,
+          });
+          const clientSecret = response.client_secret;
+          let paymentIntent;
+          let error;
+          if (defaultPaymentMethod.methodType === 'google_pay') {
+            ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
+              googlePay: {
+                testEnv: true,
+                merchantName: 'Good Foods',
+                countryCode: 'FR',
+                currencyCode: stripeCurrency.toUpperCase(),
+              },
+            }));
+          } else if (defaultPaymentMethod.methodType === 'apple_pay') {
+            ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
+              applePay: {
+                testEnv: true,
+                merchantName: 'Good Foods',
+                countryCode: 'FR',
+                currencyCode: stripeCurrency.toUpperCase(),
+              },
+            }));
+          }
+          else if (defaultPaymentMethod.methodType === 'paypal') {
+            ({ paymentIntent, error } = await confirmPayment(clientSecret, {
+              paymentMethodType: 'Paypal',
+              paymentMethodData: {
+                paymentMethodId
+              }
+            }));
+          } else {
+            ({ paymentIntent, error } = await confirmPayment(clientSecret, {
+              paymentMethodType: 'Card',
+              paymentMethodData: {
+                paymentMethodId
+              }
+            }));
+          }
+          if (error) {
+            throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
+          }
+          if (paymentIntent.status !== 'Succeeded') {
+            console.log('❌ Payment failed with status:', paymentIntent);
+            throw new Error(i18n.t('payment.notSuccessful', 'Payment was not successful. Please try again.'));
+          }
+          if (defaultPaymentMethod.verificationStatus === 'unverified') {
+            await updatePaymentMethodApi(defaultPaymentMethod._id, {
+              verificationStatus: 'verified',
+              verificationDate: new Date(),
+            });
+          }
+        }
       }
 
       const orderItems = items.map(cartItem => ({
