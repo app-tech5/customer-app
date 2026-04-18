@@ -2,10 +2,12 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
+import { io } from 'socket.io-client'
 import { getOrderById } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
+import { config } from '../config'
 import Loader from './Loader'
 
 export default function OrderTracking() {
@@ -17,6 +19,64 @@ export default function OrderTracking() {
   const [order, setOrder] = useState(orderParam)
   const [loader, setLoader] = useState(!orderParam)
   const [error, setError] = useState(null)
+
+  const loadOrder = async () => {
+    try {
+      setLoader(true)
+      setError(null)
+
+      const orderId = orderParam?.id || orderParam?._id || order?.id || order?._id
+      if (!orderId) {
+        throw new Error('Order ID is required')
+      }
+
+      if (orderId.startsWith('demo_order_')) {
+        console.warn('🎭 Demo order detected, skipping API call');
+        setOrder(orderParam)
+        return
+      }
+
+      const orderData = await getOrderById(orderId)
+      setOrder(orderData)
+    } catch (err) {
+      console.error('Error loading order:', err)
+      setError(i18n.t('order.loadingError', 'Error loading order'))
+
+      if (orderParam) {
+        setOrder(orderParam)
+      }
+    } finally {
+      setLoader(false)
+    }
+  }
+
+  // Socket : même host que l’API mais sans "/api" (ex. http://localhost:5000)
+  const orderId =
+    orderParam?.id || orderParam?._id || order?.id || order?._id
+
+  useEffect(() => {
+    if (!orderId || String(orderId).startsWith('demo_order_')) return undefined
+
+    const url = String(config.API_BASE_URL).replace(/\/api\/?$/, '')
+    const socket = io(url)
+    const id = String(orderId)
+
+    socket.on('connect', () => {
+      socket.emit('joinOrderRoom', id)
+    })
+
+    socket.on('order-status-updated', (data) => {
+      if (String(data?.orderId) !== id) return
+      setOrder((prev) =>
+        prev ? { ...prev, status: data.status, updatedAt: data.updatedAt } : prev
+      )
+    })
+
+    return () => {
+      socket.emit('leaveOrderRoom', id)
+      socket.disconnect()
+    }
+  }, [orderId])
 
   useEffect(() => {
     navigation.setOptions({
@@ -45,36 +105,6 @@ export default function OrderTracking() {
       }
     }
   }, [navigation])
-
-  const loadOrder = async () => {
-    try {
-      setLoader(true)
-      setError(null)
-
-      const orderId = orderParam?.id || orderParam?._id || order?.id || order?._id
-      if (!orderId) {
-        throw new Error('Order ID is required')
-      }
-      
-      if (orderId.startsWith('demo_order_')) {
-        console.warn('🎭 Demo order detected, skipping API call');
-        setOrder(orderParam)
-        return
-      }
-
-      const orderData = await getOrderById(orderId)
-      setOrder(orderData)
-    } catch (err) {
-      console.error('Error loading order:', err)
-      setError(i18n.t('order.loadingError', 'Error loading order'))
-      
-      if (orderParam) {
-        setOrder(orderParam)
-      }
-    } finally {
-      setLoader(false)
-    }
-  }
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
