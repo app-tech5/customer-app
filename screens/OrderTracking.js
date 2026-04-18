@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { io } from 'socket.io-client'
@@ -9,11 +9,13 @@ import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import { config } from '../config'
 import Loader from './Loader'
+import { OrdersContext } from '../contexts/OrdersContext'
 
 export default function OrderTracking() {
   const route = useRoute()
   const navigation = useNavigation()
   const { order: orderParam } = route.params || {}
+  const { orders, setOrders } = useContext(OrdersContext)
   const { currency } = useSettings()
   
   const [order, setOrder] = useState(orderParam)
@@ -50,7 +52,6 @@ export default function OrderTracking() {
     }
   }
 
-  // Socket : même host que l’API mais sans "/api" (ex. http://localhost:5000)
   const orderId =
     orderParam?.id || orderParam?._id || order?.id || order?._id
 
@@ -70,6 +71,7 @@ export default function OrderTracking() {
       setOrder((prev) =>
         prev ? { ...prev, status: data.status, updatedAt: data.updatedAt } : prev
       )
+      setOrders(prev => prev.map(order => order.id === data.orderId ? { ...order, status: data.status, updatedAt: data.updatedAt } : order))
     })
 
     return () => {

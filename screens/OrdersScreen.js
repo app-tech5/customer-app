@@ -1,14 +1,16 @@
 import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native'
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useContext } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { getOrders } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
+import { OrdersContext } from '../contexts/OrdersContext'
 
 export default function OrdersScreen({ navigation }) {
-  const [orders, setOrders] = useState([])
+  //const [orders, setOrders] = useState([])
+  const { orders, setOrders } = useContext(OrdersContext)
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
