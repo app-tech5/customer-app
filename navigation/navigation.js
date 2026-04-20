@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import { Provider as ReduxProvider } from 'react-redux'
@@ -25,7 +25,7 @@ import {
   CheckoutNavigator,
   OrderStatusNavigator,
 } from './Stacks'
-import { SignInContextProvider } from '../contexts/authContext'
+import { SignInContext, SignInContextProvider } from '../contexts/authContext'
 import { useGateway } from '../contexts/GatewayContext'
 import { config } from '../config'
 import { OrdersProvider } from '../contexts/OrdersContext'
@@ -49,12 +49,22 @@ export default function RootNavigation({ statusBarColor }) {
   const Stack = createStackNavigator();
   const [loading, setLoading] = useState(false)
   const [restaurantData, setRestaurantData] = useState()
+  const { signedIn } = useContext(SignInContext)
   const screenOptions = {
     headerShown: false,
   }
   return (
-    <SignInContextProvider>
-      <ReduxProvider store={store}>
+    !signedIn ? (
+      <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Splash" component={Splash} />
+            <Stack.Screen name="SignIn" component={SignIn} />
+            <Stack.Screen name="SignUp" component={SignUp} />
+          </Stack.Navigator>
+      </NavigationContainer>
+    ) :
+      
         <NavigationContainer>
           <LoaderContext.Provider value={{ loading, setLoading }}>
             <SettingProvider>
@@ -66,10 +76,6 @@ export default function RootNavigation({ statusBarColor }) {
                         <OrdersProvider>
                           <CategoriesContextProvider>
                             <Stack.Navigator screenOptions={screenOptions}>
-                              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-                              <Stack.Screen name="Splash" component={Splash} />
-                              <Stack.Screen name="SignIn" component={SignIn} />
-                              <Stack.Screen name="SignUp" component={SignUp} />
                               <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
                               <Stack.Screen name="OrderCompleted" component={OrderCompleted} />
                               <Stack.Screen name="SearchFlow" component={SearchNavigator} options={{ headerShown: false }} />
@@ -90,7 +96,5 @@ export default function RootNavigation({ statusBarColor }) {
             </SettingProvider>
           </LoaderContext.Provider>
         </NavigationContainer>
-      </ReduxProvider>
-    </SignInContextProvider>
   )
 }

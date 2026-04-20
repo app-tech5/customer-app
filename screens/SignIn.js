@@ -18,7 +18,7 @@ export default function SignIn({ navigation }) {
   const [password, setPassword] = useState(config.DEMO_MODE ? config.DEMO_PASSWORD : '')
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
-  const { dispatchSignedIn } = useContext(SignInContext)
+  const { setSignedIn } = useContext(SignInContext)
   
   useEffect(() => {
     const loadSavedEmail = async () => {
@@ -53,11 +53,9 @@ export default function SignIn({ navigation }) {
       
       await saveSignInData(email, true);
       
-      dispatchSignedIn({
-        userToken: result.token
-      });
+      setSignedIn(result.token)
 
-      navigation.navigate('DrawerNavigator')
+      // navigation.navigate('DrawerNavigator')
 
     } catch (e) {
       console.error(e)

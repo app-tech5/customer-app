@@ -1,7 +1,9 @@
 import RootNavigation from "./navigation/navigation";
 import {useFonts} from 'expo-font'
 import { useEffect } from 'react';
-
+import { SignInContextProvider } from './contexts/authContext';
+import { Provider as ReduxProvider } from 'react-redux' 
+import configureStore from './redux/store'
 
 import { 
   Roboto_100Thin,
@@ -19,6 +21,8 @@ import {
 } from '@expo-google-fonts/roboto'
 import Loader from "./screens/Loader";
 import { cleanupExpiredCache } from "./utils/cacheUtils";
+
+const store = configureStore();
 
 export default function App() {
 
@@ -49,6 +53,8 @@ export default function App() {
    return <Loader />
    
   return (
-    <RootNavigation statusBarColor="black"/>
+    <SignInContextProvider>
+      <ReduxProvider store={store}><RootNavigation statusBarColor="black"/></ReduxProvider>
+    </SignInContextProvider>
   );
 }

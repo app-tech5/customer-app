@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Avatar, Divider } from 'react-native-elements'
 import {
     DrawerContentScrollView,
@@ -14,19 +14,21 @@ import { colors } from '../global'
 import i18n from '../lang/i18n'
 import { useSelector } from 'react-redux'
 import { config } from '../config'
+import { SignInContext } from '../contexts/authContext'
 
 export default function DrawerContent(props) {
 
     const [_isSignedIn, _setIsSignedIn] = useState(true)
     const { name, email, image } = useSelector((state) => state.userReducer)
-
+    const { setSignedIn } = useContext(SignInContext)
     const navigation = useNavigation()
 
     const signOutUser = () => {
         AsyncStorage.getAllKeys().then(k => AsyncStorage.multiRemove(k))
         .then(()=>{
         api.logout();
-        navigation.navigate('SignIn');
+        setSignedIn(null)
+        // navigation.navigate('SignIn');
     })
         .catch((err) => console.error(err))
     }
