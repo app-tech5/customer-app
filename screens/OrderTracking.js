@@ -2,12 +2,10 @@ import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, Scro
 import React, { useContext, useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
-import { io } from 'socket.io-client'
 import { getOrderById } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
-import { config } from '../config'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
 
@@ -52,34 +50,6 @@ export default function OrderTracking() {
     }
   }
 
-  const orderId =
-    orderParam?.id || orderParam?._id || order?.id || order?._id
-
-  useEffect(() => {
-    if (!orderId || String(orderId).startsWith('demo_order_')) return undefined
-
-    const url = String(config.API_BASE_URL).replace(/\/api\/?$/, '')
-    const socket = io(url)
-    const id = String(orderId)
-
-    socket.on('connect', () => {
-      socket.emit('joinOrderRoom', id)
-    })
-
-    socket.on('order-status-updated', (data) => {
-      if (String(data?.orderId) !== id) return
-      setOrder((prev) =>
-        prev ? { ...prev, status: data.status, updatedAt: data.updatedAt } : prev
-      )
-      setOrders(prev => prev.map(order => order.id === data.orderId ? { ...order, status: data.status, updatedAt: data.updatedAt } : order))
-    })
-
-    return () => {
-      socket.emit('leaveOrderRoom', id)
-      socket.disconnect()
-    }
-  }, [orderId])
-
   useEffect(() => {
     navigation.setOptions({
       title: i18n.t('order.tracking', 'Track Order'),
@@ -107,6 +77,15 @@ export default function OrderTracking() {
       }
     }
   }, [navigation])
+
+  useEffect(() => {
+    const updatedOrder = orders.find(
+      (o) => o._id === order?._id
+    )
+    if (updatedOrder) {
+      setOrder(updatedOrder)
+    }
+  }, [orders])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
