@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { getOrderById } from '../api'
@@ -8,6 +8,7 @@ import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
+import OpenStreetMap from '../components/restaurantsMap/OpenStreetMap'
 
 export default function OrderTracking() {
   const route = useRoute()
@@ -86,6 +87,52 @@ export default function OrderTracking() {
       setOrder(updatedOrder)
     }
   }, [orders])
+
+  const driverPoint = useMemo(() => {
+    const coordinates = order?.driver?.location?.coordinates
+    if (Array.isArray(coordinates) && coordinates.length >= 2) {
+      const longitude = Number(coordinates[0])
+      const latitude = Number(coordinates[1])
+
+      if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+        return { latitude, longitude }
+      }
+    }
+
+    const latitude = Number(order?.driver?.location?.latitude)
+    const longitude = Number(order?.driver?.location?.longitude)
+
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      return { latitude, longitude }
+    }
+
+    return null
+  }, [order?.driver?.location])
+
+  const mapRegion = useMemo(() => {
+    if (!driverPoint) return null
+
+    return {
+      latitude: driverPoint.latitude,
+      longitude: driverPoint.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    }
+  }, [driverPoint])
+
+  const mapMarkers = useMemo(() => {
+    if (!driverPoint) return []
+
+    return [
+      {
+        originalIndex: 0,
+        name: i18n.t('order.driver', 'Delivery Driver'),
+        latitude: driverPoint.latitude,
+        longitude: driverPoint.longitude,
+        distance: null,
+      },
+    ]
+  }, [driverPoint])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -342,6 +389,24 @@ export default function OrderTracking() {
             </View>
           </View>
         )}
+
+        {order.status?.toLowerCase() === 'out_for_delivery' && mapRegion && (
+          <View style={styles.infoCard}>
+            <Text style={styles.sectionTitle}>
+              {i18n.t('order.mapTracking', 'Delivery Map')}
+            </Text>
+            <View style={styles.mapContainer}>
+              <OpenStreetMap
+                testID="order-tracking-map"
+                initialRegion={mapRegion}
+                targetRegion={mapRegion}
+                restaurants={mapMarkers}
+                focusedOriginalIndex={0}
+                onMarkerPress={() => {}}
+              />
+            </View>
+          </View>
+        )}
         
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>
@@ -515,6 +580,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: colors.border.light,
+  },
+  mapContainer: {
+    height: 220,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: colors.background.secondary,
   },
   infoRow: {
     flexDirection: 'row',
