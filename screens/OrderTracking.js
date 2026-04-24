@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
@@ -355,12 +355,12 @@ export default function OrderTracking() {
                 </View>
                 {order.driver.userId?.phone && (
                   <View style={styles.infoRow}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.phoneButton}
-                      onPress={() => {
-                        
-                        console.warn('Call driver:', order.driver.userId.phone)
-                      }}
+                      activeOpacity={0.7}
+                      onPress={() =>
+                        Linking.openURL(`tel:${order.driver.userId.phone}`)
+                      }
                     >
                       <Ionicons name="call" size={20} color={colors.primary} />
                       <Text style={styles.phoneText}>{order.driver.userId.phone}</Text>
@@ -370,7 +370,7 @@ export default function OrderTracking() {
                 {order.driver?.vehicle && (
                   <View style={styles.infoRow}>
                     <Ionicons name="car" size={20} color={colors.text.secondary} />
-                    <Text style={styles.infoText}>{order.driver.vehicle}</Text>
+                    <Text style={styles.infoText}>{order.driver.vehicle.type} {order.driver.vehicle.model} {order.driver.vehicle.licensePlate}</Text>
                   </View>
                 )}
               </>
@@ -602,12 +602,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 12,
+    flex: 1,
   },
   phoneText: {
     fontSize: 14,
     color: colors.primary,
     marginLeft: 8,
     fontWeight: '500',
+    flexShrink: 1,
   },
   detailsRow: {
     flexDirection: 'row',
