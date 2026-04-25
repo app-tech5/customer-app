@@ -9,6 +9,8 @@ import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
 import OpenStreetMap from '../components/restaurantsMap/OpenStreetMap'
+import { getPointFromLocation } from '../utils/geoUtils'
+import { useSelector } from 'react-redux'
 
 export default function OrderTracking() {
   const route = useRoute()
@@ -16,6 +18,7 @@ export default function OrderTracking() {
   const { order: orderParam } = route.params || {}
   const { orders, setOrders } = useContext(OrdersContext)
   const { currency } = useSettings()
+  const user  = useSelector((state) => state.userReducer)
   
   const [order, setOrder] = useState(orderParam)
   const [loader, setLoader] = useState(!orderParam)
@@ -88,26 +91,15 @@ export default function OrderTracking() {
     }
   }, [orders])
 
-  const driverPoint = useMemo(() => {
-    const coordinates = order?.driver?.location?.coordinates
-    if (Array.isArray(coordinates) && coordinates.length >= 2) {
-      const longitude = Number(coordinates[0])
-      const latitude = Number(coordinates[1])
+  const driverPoint = useMemo(
+    () => getPointFromLocation(order?.driver?.location),
+    [order?.driver?.location]
+  )
 
-      if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-        return { latitude, longitude }
-      }
-    }
-
-    const latitude = Number(order?.driver?.location?.latitude)
-    const longitude = Number(order?.driver?.location?.longitude)
-
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      return { latitude, longitude }
-    }
-
-    return null
-  }, [order?.driver?.location])
+  const customerPoint = useMemo(
+    () => getPointFromLocation(user?.location),
+    [user?.location]
+  )
 
   const mapRegion = useMemo(() => {
     if (!driverPoint) return null
@@ -123,7 +115,7 @@ export default function OrderTracking() {
   const mapMarkers = useMemo(() => {
     if (!driverPoint) return []
 
-    return [
+    const markers = [
       {
         originalIndex: 0,
         name: i18n.t('order.driver', 'Delivery Driver'),
@@ -132,7 +124,19 @@ export default function OrderTracking() {
         distance: null,
       },
     ]
-  }, [driverPoint])
+
+    if (customerPoint) {
+      markers.push({
+        originalIndex: 1,
+        name: i18n.t('order.customer', 'Customer'),
+        latitude: customerPoint.latitude,
+        longitude: customerPoint.longitude,
+        distance: null,
+      })
+    }
+
+    return markers
+  }, [driverPoint, customerPoint])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {

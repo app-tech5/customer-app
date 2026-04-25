@@ -7,6 +7,7 @@ import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { config } from '../config'
 import Loader from './Loader'
+import { RefreshControl } from 'react-native'
 
 export default function AccountScreen({ navigation }) {
   const user = useSelector((state) => state.userReducer)
@@ -44,6 +45,7 @@ export default function AccountScreen({ navigation }) {
       ])
 
       setUserData(userInfo)
+      console.log("userInfo", userInfo)
       setTotalOrders(ordersData?.length || 0)
     } catch (err) {
       console.error('Error loading user data:', err)
@@ -323,14 +325,13 @@ export default function AccountScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {}
+      <ScrollView showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={loader} onRefresh={loadUserData} />}>
+        
         <ProfileHeader />
 
-        {}
         <StatsSection />
 
-        {}
         <MenuSection />
       </ScrollView>
     </SafeAreaView>
