@@ -16,7 +16,12 @@ ApiClient.prototype.getOrders = async function () {
 };
 
 ApiClient.prototype.getOrderById = async function (orderId) {
-  return await this.apiCall(`/resource/orders/${orderId}`);
+  const order = await this.apiCall(`/resource/orders/${orderId}`);
+  if (!order) return order;
+  return {
+    id: order._id || order.id,
+    ...order,
+  };
 };
 
 ApiClient.prototype.updateOrderStatus = async function (orderId, status) {

@@ -51,6 +51,8 @@ export default function OrderTracking() {
     }
   }
 
+  const orderIdFromParams = orderParam?.id || orderParam?._id
+
   useEffect(() => {
     navigation.setOptions({
       title: i18n.t('order.tracking', 'Track Order'),
@@ -65,19 +67,17 @@ export default function OrderTracking() {
         </TouchableOpacity>
       ),
     })
-    
-    if (orderParam && (orderParam.id || orderParam._id)) {
-      
-      const orderId = orderParam.id || orderParam._id
+
+    if (orderIdFromParams) {
+      const orderId = String(orderIdFromParams)
       if (!orderId.startsWith('demo_order_')) {
-        
         loadOrder()
       } else {
         console.warn('🎭 Demo order detected in useEffect, skipping API refresh')
         setLoader(false)
       }
     }
-  }, [navigation])
+  }, [navigation, orderIdFromParams])
 
   useEffect(() => {
     const updatedOrder = orders.find(
