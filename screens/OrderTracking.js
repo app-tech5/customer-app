@@ -102,15 +102,36 @@ export default function OrderTracking() {
   )
 
   const mapRegion = useMemo(() => {
-    if (!driverPoint) return null
+    if (!driverPoint && !customerPoint) return null
+    if (!driverPoint) {
+      return {
+        latitude: customerPoint.latitude,
+        longitude: customerPoint.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    }
+    if (!customerPoint) {
+      return {
+        latitude: driverPoint.latitude,
+        longitude: driverPoint.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }
+    }
+
+    const minLat = Math.min(driverPoint.latitude, customerPoint.latitude);
+    const maxLat = Math.max(driverPoint.latitude, customerPoint.latitude);
+    const minLng = Math.min(driverPoint.longitude, customerPoint.longitude);
+    const maxLng = Math.max(driverPoint.longitude, customerPoint.longitude);
 
     return {
-      latitude: driverPoint.latitude,
-      longitude: driverPoint.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+      latitude: (minLat + maxLat) / 2,
+      longitude: (minLng + maxLng) / 2,
+      latitudeDelta: Math.max((maxLat - minLat) * 1.3, 0.01),
+      longitudeDelta: Math.max((maxLng - minLng) * 1.3, 0.01),
     }
-  }, [driverPoint])
+  }, [driverPoint, customerPoint])
 
   const mapMarkers = useMemo(() => {
     if (!driverPoint) return []
