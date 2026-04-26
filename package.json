@@ -53,6 +53,7 @@
     "react-redux": "^9.0.0",
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "redux": "^5.0.0",
+    "redux-persist": "^6.0.0",
     "rn-range-slider": "^2.2.2",
     "save-dev": "^0.0.1-security",
     "short-id": "^0.1.0-1",
