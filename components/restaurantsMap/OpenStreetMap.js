@@ -118,7 +118,9 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
       }).addTo(map);
 
       const markerLayer = L.layerGroup().addTo(map);
+      const routeLayer = L.layerGroup().addTo(map);
       let userMarker = null;
+      let routeRequestId = 0;
 
       const initialBounds = regionToBounds(initialRegion);
       if (initialBounds && initialBounds.isValid()) {
@@ -159,10 +161,62 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
         return Math.max(1, Math.round(baseMinutes + 2));
       };
 
+      const drawRouteBetween = async (fromPoint, toPoint) => {
+        routeLayer.clearLayers();
+        if (!fromPoint || !toPoint) return;
+
+        routeRequestId += 1;
+        const requestId = routeRequestId;
+
+        try {
+          const url =
+            'https://router.project-osrm.org/route/v1/driving/' +
+            fromPoint.longitude +
+            ',' +
+            fromPoint.latitude +
+            ';' +
+            toPoint.longitude +
+            ',' +
+            toPoint.latitude +
+            '?overview=full&geometries=geojson';
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (requestId !== routeRequestId) return;
+
+          const coordinates = data?.routes?.[0]?.geometry?.coordinates;
+          if (!Array.isArray(coordinates) || !coordinates.length) return;
+
+          const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
+          L.polyline(latLngs, {
+            color: '#111827',
+            weight: 4,
+            opacity: 0.75,
+            dashArray: '8, 8',
+            lineCap: 'round',
+            lineJoin: 'round',
+          }).addTo(routeLayer);
+        } catch (_error) {
+          // Fallback silencieux: pas de tracé si OSRM indisponible.
+        }
+      };
+
       const syncMarkers = (payload) => {
         markerLayer.clearLayers();
+        routeLayer.clearLayers();
+
+        let deliveryPoint = null;
+        let customerPoint = null;
 
         (payload.restaurants || []).forEach((restaurant) => {
+          if (restaurant?.entityType === 'delivery') {
+            deliveryPoint = { latitude: restaurant.latitude, longitude: restaurant.longitude };
+          }
+          if (restaurant?.entityType === 'customer') {
+            customerPoint = { latitude: restaurant.latitude, longitude: restaurant.longitude };
+          }
+
           const marker = L.marker(
             [restaurant.latitude, restaurant.longitude],
             {
@@ -201,6 +255,8 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 
           marker.addTo(markerLayer);
         });
+
+        drawRouteBetween(deliveryPoint, customerPoint);
 
         if (payload.userLocation && payload.userLocation.lat && payload.userLocation.lng) {
           if (userMarker) {
