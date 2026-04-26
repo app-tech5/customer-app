@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview'
-import { getZoomLevel } from '../../utils'
 
 const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 <html>
@@ -75,13 +74,30 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
       const initialRegion = ${JSON.stringify(initialRegion)};
+
+      const regionToBounds = (region) => {
+        if (!region || typeof region.latitude !== 'number' || typeof region.longitude !== 'number') {
+          return null;
+        }
+        const latD = Math.max(Number(region.latitudeDelta) || 0.01, 0.0005);
+        const lngD = Math.max(
+          Number(region.longitudeDelta) || latD,
+          0.0005
+        );
+        const south = region.latitude - latD / 2;
+        const north = region.latitude + latD / 2;
+        const west = region.longitude - lngD / 2;
+        const east = region.longitude + lngD / 2;
+        return L.latLngBounds(
+          L.latLng(south, west),
+          L.latLng(north, east)
+        );
+      };
+
       const map = L.map('map', {
         zoomControl: false,
         preferCanvas: true,
-      }).setView(
-        [initialRegion.latitude, initialRegion.longitude],
-        ${getZoomLevel(initialRegion.latitudeDelta)}
-      );
+      });
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -92,6 +108,16 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 
       const markerLayer = L.layerGroup().addTo(map);
       let userMarker = null;
+
+      const initialBounds = regionToBounds(initialRegion);
+      if (initialBounds && initialBounds.isValid()) {
+        map.fitBounds(initialBounds, { padding: [20, 20], maxZoom: 18 });
+      } else {
+        map.setView(
+          [initialRegion.latitude || 0, initialRegion.longitude || 0],
+          14
+        );
+      }
 
       const escapeHtml = (value) =>
         String(value ?? '')
@@ -112,6 +138,12 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           iconAnchor: [15, 15],
         });
 
+      const estimateEtaMinutesFromDistance = (distanceKm) => {
+        const avgSpeedKmh = 25;
+        const baseMinutes = (distanceKm / avgSpeedKmh) * 60;
+        return Math.max(1, Math.round(baseMinutes + 2));
+      };
+
       const syncMarkers = (payload) => {
         markerLayer.clearLayers();
 
@@ -130,7 +162,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
               '</strong><br />' +
               escapeHtml(
                 restaurant.distance !== null && restaurant.distance !== undefined
-                  ? restaurant.distance.toFixed(1) + ' km'
+                  ? restaurant.distance.toFixed(1) +
+                    ' km · ETA ~' +
+                    estimateEtaMinutesFromDistance(restaurant.distance) +
+                    ' min'
                   : 'Distance inconnue'
               )
           );
@@ -171,17 +206,17 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
       const setRegion = (region, animated = true) => {
         if (!region) return;
 
-        const zoom = Math.max(
-          3,
-          Math.min(18, Math.round(Math.log2(360 / Math.max(region.latitudeDelta || 0.005, 0.0005))))
-        );
+        const bounds = regionToBounds(region);
+        if (!bounds || !bounds.isValid()) return;
 
-        if (animated) {
-          map.flyTo([region.latitude, region.longitude], zoom, { duration: 0.5 });
+        const fitOpts = { padding: [20, 20], maxZoom: 18 };
+
+        if (animated && map.flyToBounds) {
+          map.flyToBounds(bounds, { ...fitOpts, duration: 0.5 });
           return;
         }
 
-        map.setView([region.latitude, region.longitude], zoom);
+        map.fitBounds(bounds, fitOpts);
       };
 
       window.__updateMap = (message) => {

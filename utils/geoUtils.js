@@ -22,6 +22,21 @@ export function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+export function getDistanceBetweenPointsInKm(fromPoint, toPoint) {
+  if (!fromPoint || !toPoint) return null;
+
+  const fromLat = Number(fromPoint.latitude);
+  const fromLng = Number(fromPoint.longitude);
+  const toLat = Number(toPoint.latitude);
+  const toLng = Number(toPoint.longitude);
+
+  if (![fromLat, fromLng, toLat, toLng].every(Number.isFinite)) {
+    return null;
+  }
+
+  return getDistanceFromLatLonInKm(fromLat, fromLng, toLat, toLng);
+}
+
 export function getPointFromLocation(location) {
   const coordinates = location?.coordinates;
   if (Array.isArray(coordinates) && coordinates.length >= 2) {

@@ -9,7 +9,8 @@ import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
 import OpenStreetMap from '../components/restaurantsMap/OpenStreetMap'
-import { getPointFromLocation } from '../utils/geoUtils'
+import { getDistanceBetweenPointsInKm, getPointFromLocation } from '../utils/geoUtils'
+import { formatEstimatedTime } from '../utils/orderTime'
 import { useSelector } from 'react-redux'
 
 export default function OrderTracking() {
@@ -101,6 +102,11 @@ export default function OrderTracking() {
     [user?.location]
   )
 
+  const driverToCustomerDistanceKm = useMemo(
+    () => getDistanceBetweenPointsInKm(driverPoint, customerPoint),
+    [driverPoint, customerPoint]
+  )
+
   const mapRegion = useMemo(() => {
     if (!driverPoint && !customerPoint) return null
     if (!driverPoint) {
@@ -142,7 +148,7 @@ export default function OrderTracking() {
         name: i18n.t('order.driver', 'Delivery Driver'),
         latitude: driverPoint.latitude,
         longitude: driverPoint.longitude,
-        distance: null,
+        distance: driverToCustomerDistanceKm,
       },
     ]
 
@@ -157,7 +163,7 @@ export default function OrderTracking() {
     }
 
     return markers
-  }, [driverPoint, customerPoint])
+  }, [driverPoint, customerPoint, driverToCustomerDistanceKm])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -215,27 +221,6 @@ export default function OrderTracking() {
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     } catch (error) {
       console.error('Error formatting date:', error)
-      return i18n.t('common.unknown', 'Unknown')
-    }
-  }
-
-  const formatEstimatedTime = (dateString) => {
-    if (!dateString) return i18n.t('common.unknown', 'Unknown')
-
-    try {
-      const date = new Date(dateString)
-      if (isNaN(date.getTime())) return i18n.t('common.unknown', 'Unknown')
-
-      const now = new Date()
-      const diff = date - now
-      const minutes = Math.floor(diff / 60000)
-
-      if (minutes < 0) return i18n.t('order.delivered', 'Delivered')
-      if (minutes < 60) return `${minutes} ${i18n.t('order.minutes', 'minutes')}`
-      const hours = Math.floor(minutes / 60)
-      return `${hours}h ${minutes % 60}${i18n.t('order.minutes', 'min')}`
-    } catch (error) {
-      console.error('Error formatting estimated time:', error)
       return i18n.t('common.unknown', 'Unknown')
     }
   }
@@ -322,7 +307,7 @@ export default function OrderTracking() {
                       </Text>
                       {step.isCurrent && order.delivery?.estimatedTime && (
                         <Text style={styles.timelineTime}>
-                          {i18n.t('order.estimatedArrival', 'Estimated arrival')}: {formatEstimatedTime(order.delivery.estimatedTime)}
+                          {i18n.t('order.estimatedArrival', 'Estimated arrival')}: {formatEstimatedTime(order.delivery.estimatedTime, (key, fallback) => i18n.t(key, fallback))}
                         </Text>
                       )}
                     </View>
