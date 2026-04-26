@@ -189,11 +189,30 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           if (!Array.isArray(coordinates) || !coordinates.length) return;
 
           const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
+          // Base shadow line for depth.
           L.polyline(latLngs, {
-            color: '#111827',
-            weight: 4,
-            opacity: 0.75,
-            dashArray: '8, 8',
+            color: '#0f172a',
+            weight: 9,
+            opacity: 0.2,
+            lineCap: 'round',
+            lineJoin: 'round',
+          }).addTo(routeLayer);
+
+          // Main route line.
+          L.polyline(latLngs, {
+            color: '#2563eb',
+            weight: 5,
+            opacity: 0.9,
+            lineCap: 'round',
+            lineJoin: 'round',
+          }).addTo(routeLayer);
+
+          // Subtle directional accent on top.
+          L.polyline(latLngs, {
+            color: '#93c5fd',
+            weight: 2,
+            opacity: 0.95,
+            dashArray: '2, 10',
             lineCap: 'round',
             lineJoin: 'round',
           }).addTo(routeLayer);
