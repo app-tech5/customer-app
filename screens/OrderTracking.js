@@ -145,6 +145,7 @@ export default function OrderTracking() {
     const markers = [
       {
         originalIndex: 0,
+        entityType: 'delivery',
         name: i18n.t('order.driver', 'Delivery Driver'),
         latitude: driverPoint.latitude,
         longitude: driverPoint.longitude,
@@ -155,6 +156,7 @@ export default function OrderTracking() {
     if (customerPoint) {
       markers.push({
         originalIndex: 1,
+        entityType: 'customer',
         name: i18n.t('order.customer', 'Customer'),
         latitude: customerPoint.latitude,
         longitude: customerPoint.longitude,

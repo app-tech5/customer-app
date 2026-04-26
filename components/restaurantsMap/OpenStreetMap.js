@@ -14,6 +14,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
     <style>
       html, body, #map {
         margin: 0;
@@ -45,7 +49,8 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
       }
 
       .map-marker.active {
-        background: #000000;
+        border-color: #111827;
+        box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.15), 0 2px 8px rgba(0, 0, 0, 0.22);
       }
 
       .map-marker-dot {
@@ -55,8 +60,14 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
         background: #000000;
       }
 
-      .map-marker.active .map-marker-dot {
-        background: #ffffff;
+      .map-marker-icon {
+        color: #111827;
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      .map-marker-icon.restaurant {
+        color: #111827;
       }
 
       .user-marker {
@@ -127,13 +138,17 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#39;');
 
-      const getMarkerIcon = (isActive) =>
+      const getMarkerIcon = (isActive, entityType = 'restaurant') =>
         L.divIcon({
           className: 'map-marker-wrapper',
           html:
             '<div class="map-marker' +
             (isActive ? ' active' : '') +
-            '"><div class="map-marker-dot"></div></div>',
+            '"><span class="map-marker-icon ' +
+            (entityType === 'delivery' ? 'delivery' : entityType === 'customer' ? 'customer' : 'restaurant') +
+            '"><i class="fa-solid ' +
+            (entityType === 'delivery' ? 'fa-motorcycle' : entityType === 'customer' ? 'fa-user' : 'fa-utensils') +
+            '"></i></span></div>',
           iconSize: [30, 30],
           iconAnchor: [15, 15],
         });
@@ -151,7 +166,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           const marker = L.marker(
             [restaurant.latitude, restaurant.longitude],
             {
-              icon: getMarkerIcon(restaurant.originalIndex === payload.focusedOriginalIndex),
+              icon: getMarkerIcon(
+                restaurant.originalIndex === payload.focusedOriginalIndex,
+                restaurant.entityType
+              ),
               zIndexOffset: restaurant.originalIndex === payload.focusedOriginalIndex ? 1000 : 1,
             }
           );
