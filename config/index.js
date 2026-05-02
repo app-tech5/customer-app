@@ -11,6 +11,7 @@ export const config = {
   DEMO_PASSWORD: 'demo123',
 
   API_TIMEOUT: 10000,
+  MAPTILER_API_KEY: '',
 
   assetUrls,
 };

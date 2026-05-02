@@ -337,6 +337,8 @@
     "driverName": "Driver",
     "deliveryAddress": "Delivery Address",
     "mapTracking": "Delivery Map",
+    "mapMarkerDriver": "Driver",
+    "mapMarkerDropoff": "Delivery location",
     "details": "Order Details",
     "subtotal": "Subtotal",
     "deliveryFee": "Delivery Fee",

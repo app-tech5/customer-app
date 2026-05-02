@@ -10,7 +10,6 @@ import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
 import NativeTrackingMap from '../components/restaurantsMap/NativeTrackingMap'
 import { formatEstimatedTime } from '../utils/orderTime'
-import { getGeoJsonPointFromSocketPayload } from '../utils/geoUtils'
 import { useSelector } from 'react-redux'
 
 export default function OrderTracking() {
@@ -24,7 +23,6 @@ export default function OrderTracking() {
   const [order, setOrder] = useState(orderParam)
   const [loader, setLoader] = useState(!orderParam)
   const [error, setError] = useState(null)
-  const [driverLocation, setDriverLocation] = useState(null)
   const loadOrder = async () => {
     try {
       setLoader(true)
@@ -91,28 +89,6 @@ export default function OrderTracking() {
       setOrder(updatedOrder)
     }
   }, [orders])
-
-  useEffect(() => {
-    setDriverLocation(order?.driver?.location || null)
-  }, [order?.driver?.location])
-
-  useEffect(() => {
-    if (!socket || !order?._id) return
-
-    socket.emit('joinOrderTrackingRoom', order._id)
-
-    const onDriverLocationUpdated = (data) => {
-      const nextLocation = getGeoJsonPointFromSocketPayload(data)
-      if (!nextLocation) return
-      setDriverLocation(nextLocation)
-    }
-
-    socket.on('driver-location-updated', onDriverLocationUpdated)
-
-    return () => {
-      socket.off('driver-location-updated', onDriverLocationUpdated)
-    }
-  }, [socket, order?._id])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -357,7 +333,8 @@ export default function OrderTracking() {
             <View style={styles.mapContainer}>
               <NativeTrackingMap
                 trackingOrderId={order._id}
-                driverLocation={driverLocation ?? order?.driver?.location}
+                socket={socket}
+                driverLocation={order?.driver?.location}
                 customerLocation={user?.location || order?.user?.location || order?.delivery?.location}
                 driverCalloutTitle={i18n.t('order.mapMarkerDriver', 'Driver')}
                 driverCalloutSubtitle={

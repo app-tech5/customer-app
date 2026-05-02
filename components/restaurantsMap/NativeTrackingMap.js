@@ -18,6 +18,8 @@ export default function NativeTrackingMap({
   driverCalloutSubtitle,
   customerCalloutTitle,
   customerCalloutSubtitle,
+  trackingOrderId,
+  socket,
 }) {
   const cameraRef = useRef(null)
   const [isMapReady, setIsMapReady] = useState(false)
@@ -203,6 +205,8 @@ export default function NativeTrackingMap({
               kind="driver"
               latitude={driverPoint.latitude}
               longitude={driverPoint.longitude}
+              socket={socket}
+              trackingOrderId={trackingOrderId}
               calloutTitle={driverCalloutTitle}
               calloutSubtitle={driverCalloutSubtitle}
             />

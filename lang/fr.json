@@ -294,6 +294,8 @@
     "driverName": "Livreur",
     "deliveryAddress": "Adresse de livraison",
     "mapTracking": "Carte de livraison",
+    "mapMarkerDriver": "Livreur",
+    "mapMarkerDropoff": "Point de livraison",
     "details": "Détails de la commande",
     "subtotal": "Sous-total",
     "deliveryFee": "Frais de livraison",

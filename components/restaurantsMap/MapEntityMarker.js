@@ -9,6 +9,7 @@ import React, {
 import { View, Text, StyleSheet, Platform } from 'react-native'
 import { Marker, Callout } from '@maplibre/maplibre-react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { getGeoJsonPointFromSocketPayload } from '../../utils/geoUtils'
 
 /** Visual defaults only — user-facing strings come from the parent (i18n). */
 const KIND_DEFAULTS = {
@@ -56,9 +57,12 @@ export function MapEntityMarker({
   calloutTitle,
   calloutSubtitle,
   anchor = 'bottom',
+  socket,
+  trackingOrderId,
 }) {
   const scope = useContext(MapMarkerCalloutContext)
   const [localCalloutOpen, setLocalCalloutOpen] = useState(false)
+  const [liveDriverPoint, setLiveDriverPoint] = useState(null)
 
   const calloutOpen = scope ? scope.activeId === id : localCalloutOpen
 
@@ -73,10 +77,37 @@ export function MapEntityMarker({
     else setLocalCalloutOpen(false)
   }, [latitude, longitude, id, clearIfActive])
 
+  useEffect(() => {
+    setLiveDriverPoint(null)
+  }, [trackingOrderId, latitude, longitude])
+
+  useEffect(() => {
+    if (kind !== 'driver' || !socket || !trackingOrderId) return
+
+    socket.emit('joinOrderTrackingRoom', trackingOrderId)
+
+    const onDriverLocationUpdated = (data) => {
+      const next = getGeoJsonPointFromSocketPayload(data)
+      if (!next || !Array.isArray(next.coordinates) || next.coordinates.length < 2) return
+      const [lng, lat] = next.coordinates
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+      setLiveDriverPoint({ latitude: lat, longitude: lng })
+    }
+
+    socket.on('driver-location-updated', onDriverLocationUpdated)
+
+    return () => {
+      socket.off('driver-location-updated', onDriverLocationUpdated)
+    }
+  }, [kind, socket, trackingOrderId])
+
   const preset = KIND_DEFAULTS[kind] || KIND_DEFAULTS.customer
   const resolvedIcon = iconName || preset.icon
   const resolvedColor = iconColor || preset.color
-  const lngLat = [longitude, latitude]
+
+  const effectiveLat = liveDriverPoint?.latitude ?? latitude
+  const effectiveLng = liveDriverPoint?.longitude ?? longitude
+  const lngLat = [effectiveLng, effectiveLat]
 
   const hasSubtitle =
     calloutSubtitle != null && String(calloutSubtitle).trim().length > 0
