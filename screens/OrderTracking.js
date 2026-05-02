@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native'
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { getOrderById } from '../api'
@@ -8,23 +8,23 @@ import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
-import OpenStreetMap from '../components/restaurantsMap/OpenStreetMap'
-import { getDistanceBetweenPointsInKm, getPointFromLocation } from '../utils/geoUtils'
+import NativeTrackingMap from '../components/restaurantsMap/NativeTrackingMap'
 import { formatEstimatedTime } from '../utils/orderTime'
+import { getGeoJsonPointFromSocketPayload } from '../utils/geoUtils'
 import { useSelector } from 'react-redux'
 
 export default function OrderTracking() {
   const route = useRoute()
   const navigation = useNavigation()
   const { order: orderParam } = route.params || {}
-  const { orders, setOrders } = useContext(OrdersContext)
+  const { orders, socket } = useContext(OrdersContext)
   const { currency } = useSettings()
   const user  = useSelector((state) => state.userReducer)
   
   const [order, setOrder] = useState(orderParam)
   const [loader, setLoader] = useState(!orderParam)
   const [error, setError] = useState(null)
-
+  const [driverLocation, setDriverLocation] = useState(null)
   const loadOrder = async () => {
     try {
       setLoader(true)
@@ -92,80 +92,27 @@ export default function OrderTracking() {
     }
   }, [orders])
 
-  const driverPoint = useMemo(
-    () => getPointFromLocation(order?.driver?.location),
-    [order?.driver?.location]
-  )
+  useEffect(() => {
+    setDriverLocation(order?.driver?.location || null)
+  }, [order?.driver?.location])
 
-  const customerPoint = useMemo(
-    () => getPointFromLocation(user?.location),
-    [user?.location]
-  )
+  useEffect(() => {
+    if (!socket || !order?._id) return
 
-  const driverToCustomerDistanceKm = useMemo(
-    () => getDistanceBetweenPointsInKm(driverPoint, customerPoint),
-    [driverPoint, customerPoint]
-  )
+    socket.emit('joinOrderTrackingRoom', order._id)
 
-  const mapRegion = useMemo(() => {
-    if (!driverPoint && !customerPoint) return null
-    if (!driverPoint) {
-      return {
-        latitude: customerPoint.latitude,
-        longitude: customerPoint.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }
-    }
-    if (!customerPoint) {
-      return {
-        latitude: driverPoint.latitude,
-        longitude: driverPoint.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }
+    const onDriverLocationUpdated = (data) => {
+      const nextLocation = getGeoJsonPointFromSocketPayload(data)
+      if (!nextLocation) return
+      setDriverLocation(nextLocation)
     }
 
-    const minLat = Math.min(driverPoint.latitude, customerPoint.latitude);
-    const maxLat = Math.max(driverPoint.latitude, customerPoint.latitude);
-    const minLng = Math.min(driverPoint.longitude, customerPoint.longitude);
-    const maxLng = Math.max(driverPoint.longitude, customerPoint.longitude);
+    socket.on('driver-location-updated', onDriverLocationUpdated)
 
-    return {
-      latitude: (minLat + maxLat) / 2,
-      longitude: (minLng + maxLng) / 2,
-      latitudeDelta: Math.max((maxLat - minLat) * 1.3, 0.01),
-      longitudeDelta: Math.max((maxLng - minLng) * 1.3, 0.01),
+    return () => {
+      socket.off('driver-location-updated', onDriverLocationUpdated)
     }
-  }, [driverPoint, customerPoint])
-
-  const mapMarkers = useMemo(() => {
-    if (!driverPoint) return []
-
-    const markers = [
-      {
-        originalIndex: 0,
-        entityType: 'delivery',
-        name: i18n.t('order.driver', 'Delivery Driver'),
-        latitude: driverPoint.latitude,
-        longitude: driverPoint.longitude,
-        distance: driverToCustomerDistanceKm,
-      },
-    ]
-
-    if (customerPoint) {
-      markers.push({
-        originalIndex: 1,
-        entityType: 'customer',
-        name: i18n.t('order.customer', 'Customer'),
-        latitude: customerPoint.latitude,
-        longitude: customerPoint.longitude,
-        distance: null,
-      })
-    }
-
-    return markers
-  }, [driverPoint, customerPoint, driverToCustomerDistanceKm])
+  }, [socket, order?._id])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -402,19 +349,23 @@ export default function OrderTracking() {
           </View>
         )}
 
-        {order.status?.toLowerCase() === 'out_for_delivery' && mapRegion && (
+        {order.status?.toLowerCase() === 'out_for_delivery' && (
           <View style={styles.infoCard}>
             <Text style={styles.sectionTitle}>
               {i18n.t('order.mapTracking', 'Delivery Map')}
             </Text>
             <View style={styles.mapContainer}>
-              <OpenStreetMap
-                testID="order-tracking-map"
-                initialRegion={mapRegion}
-                targetRegion={mapRegion}
-                restaurants={mapMarkers}
-                focusedOriginalIndex={0}
-                onMarkerPress={() => {}}
+              <NativeTrackingMap
+                trackingOrderId={order._id}
+                driverLocation={driverLocation ?? order?.driver?.location}
+                customerLocation={user?.location || order?.user?.location || order?.delivery?.location}
+                driverCalloutTitle={i18n.t('order.mapMarkerDriver', 'Driver')}
+                driverCalloutSubtitle={
+                  order.driver?.userId?.name || order.driver?.name || undefined
+                }
+                customerCalloutTitle={i18n.t('order.mapMarkerDropoff', 'Delivery location')}
+                customerCalloutSubtitle={order.delivery?.address}
+                style={styles.map}
               />
             </View>
           </View>
@@ -598,6 +549,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: colors.background.secondary,
+  },
+  map: {
+    flex: 1,
   },
   infoRow: {
     flexDirection: 'row',

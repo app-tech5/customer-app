@@ -1,13 +1,24 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { View, StyleSheet, Text } from 'react-native'
 import { Camera, GeoJSONSource, Layer, Map } from '@maplibre/maplibre-react-native'
+import MapEntityMarker, { MapMarkerCalloutScope } from './MapEntityMarker'
 import { getPointFromLocation } from '../../utils/geoUtils'
 
 const FIT_PADDING = { top: 48, right: 48, bottom: 48, left: 48 }
 const DEFAULT_ZOOM = 13
 const FALLBACK_STYLE_URL = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+const MARKER_ID_DRIVER = 'tracking-driver'
+const MARKER_ID_CUSTOMER = 'tracking-customer'
 
-export default function NativeTrackingMap({ driverLocation, customerLocation, style }) {
+export default function NativeTrackingMap({
+  driverLocation,
+  customerLocation,
+  style,
+  driverCalloutTitle,
+  driverCalloutSubtitle,
+  customerCalloutTitle,
+  customerCalloutSubtitle,
+}) {
   const cameraRef = useRef(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const [routeCoordinates, setRouteCoordinates] = useState([])
@@ -142,40 +153,6 @@ export default function NativeTrackingMap({ driverLocation, customerLocation, st
     }
   }, [routeCoordinates])
 
-  const pointsGeoJson = useMemo(() => {
-    const features = []
-    if (driverPoint) {
-      features.push({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [driverPoint.longitude, driverPoint.latitude],
-        },
-        properties: {
-          id: 'driver',
-          kind: 'driver',
-        },
-      })
-    }
-    if (customerPoint) {
-      features.push({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [customerPoint.longitude, customerPoint.latitude],
-        },
-        properties: {
-          id: 'customer',
-          kind: 'customer',
-        },
-      })
-    }
-    return {
-      type: 'FeatureCollection',
-      features,
-    }
-  }, [driverPoint, customerPoint])
-
   return (
     <View style={style}>
       <Map
@@ -219,27 +196,28 @@ export default function NativeTrackingMap({ driverLocation, customerLocation, st
             />
           </GeoJSONSource>
         )}
-        <GeoJSONSource id="points-source" data={pointsGeoJson}>
-          <Layer
-            id="points-layer"
-            type="circle"
-            source="points-source"
-            paint={{
-              'circle-radius': 7,
-              'circle-color': [
-                'match',
-                ['get', 'kind'],
-                'driver',
-                '#2563eb',
-                'customer',
-                '#16a34a',
-                '#6b7280',
-              ],
-              'circle-stroke-color': '#ffffff',
-              'circle-stroke-width': 2,
-            }}
-          />
-        </GeoJSONSource>
+        <MapMarkerCalloutScope>
+          {driverPoint && (
+            <MapEntityMarker
+              id={MARKER_ID_DRIVER}
+              kind="driver"
+              latitude={driverPoint.latitude}
+              longitude={driverPoint.longitude}
+              calloutTitle={driverCalloutTitle}
+              calloutSubtitle={driverCalloutSubtitle}
+            />
+          )}
+          {customerPoint && (
+            <MapEntityMarker
+              id={MARKER_ID_CUSTOMER}
+              kind="customer"
+              latitude={customerPoint.latitude}
+              longitude={customerPoint.longitude}
+              calloutTitle={customerCalloutTitle}
+              calloutSubtitle={customerCalloutSubtitle}
+            />
+          )}
+        </MapMarkerCalloutScope>
       </Map>
       {driverPoint && (
         <View style={styles.etaChip}>
