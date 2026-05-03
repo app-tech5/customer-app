@@ -74,3 +74,55 @@ export function getGeoJsonPointFromSocketPayload(payload) {
     coordinates: [longitude, latitude],
   };
 }
+
+/** Distance in km from (lat, lng) to segment (lat1, lon1)-(lat2, lon2); local planar approx. */
+function distancePointToSegmentKm(lat, lng, lat1, lon1, lat2, lon2) {
+  const refLat = deg2rad((lat1 + lat2 + lat) / 3);
+  const ky = 111.32;
+  const kx = 111.32 * Math.cos(refLat);
+  const ax = (lon1 - lng) * kx;
+  const ay = (lat1 - lat) * ky;
+  const bx = (lon2 - lng) * kx;
+  const by = (lat2 - lat) * ky;
+  const wx = bx - ax;
+  const wy = by - ay;
+  const len2 = wx * wx + wy * wy;
+  if (len2 < 1e-20) {
+    return Math.hypot(ax, ay);
+  }
+  let t = -(ax * wx + ay * wy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx = ax + t * wx;
+  const cy = ay + t * wy;
+  return Math.hypot(cx, cy);
+}
+
+/**
+ * Bearing (0–360°) of the polyline segment closest to (lat, lng).
+ * @param {Array<{ latitude: number, longitude: number }>} points — order along the route (e.g. driver → dropoff).
+ */
+export function bearingAlongPolylineNearPoint(lat, lng, points) {
+  if (!Array.isArray(points) || points.length < 2) return null;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  let bestDist = Infinity;
+  let bestBearing = null;
+
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const a = points[i];
+    const b = points[i + 1];
+    const lat1 = Number(a.latitude);
+    const lon1 = Number(a.longitude);
+    const lat2 = Number(b.latitude);
+    const lon2 = Number(b.longitude);
+    if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) continue;
+
+    const d = distancePointToSegmentKm(lat, lng, lat1, lon1, lat2, lon2);
+    if (d < bestDist) {
+      bestDist = d;
+      bestBearing = bearing(lat1, lon1, lat2, lon2);
+    }
+  }
+
+  return bestBearing;
+}

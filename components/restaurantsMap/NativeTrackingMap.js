@@ -205,8 +205,11 @@ export default function NativeTrackingMap({
               kind="driver"
               latitude={driverPoint.latitude}
               longitude={driverPoint.longitude}
+              anchor="center"
               socket={socket}
               trackingOrderId={trackingOrderId}
+              routePolyline={routeCoordinates}
+              headingFallbackPoint={customerPoint}
               calloutTitle={driverCalloutTitle}
               calloutSubtitle={driverCalloutSubtitle}
             />
