@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity} from 'react-native'
 import React from 'react'
-import { language, currency, colors } from '../global'
+import { language, colors } from '../global'
 import AddToCartButton from '../components/AddToCartButton'
 import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
 import { getVariants } from '../api'
 import i18n from '../lang/i18n'
+import { useSettings } from '../contexts/SettingContext'
 
 export default function MenuDetailScreen({route}) {
   const navigation = useNavigation()
@@ -15,6 +16,7 @@ export default function MenuDetailScreen({route}) {
   const routeParams = route?.params || {}
   const menu = routeParams.food
   const restaurant = routeParams.restaurant
+  const { settings } = useSettings()
   
   const [selectedVariants, setSelectedVariants] = React.useState({})
   
@@ -99,7 +101,7 @@ export default function MenuDetailScreen({route}) {
   }, [menu.price, menu.discount])
   
   const formatPrice = (price) => {
-    return price.toLocaleString(language, { style: "currency", currency: currency })
+    return price.toLocaleString(language, { style: "currency", currency: settings.currency.code })
   }
   
   const addVariant = (variantId) => {

@@ -12,11 +12,11 @@ export function SettingProvider({ children }) {
   const { signedIn } = useContext(SignInContext)
 
   useEffect(() => {
-    if (signedIn.userToken) {
+    if (signedIn) {
       
       loadSettings()
     }
-  }, [signedIn.userToken])
+  }, [signedIn])
 
   const loadSettings = async () => {
     try {

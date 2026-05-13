@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useMemo, useCallback } from 're
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
 import { Divider } from 'react-native-elements'
 import { useDispatch, useSelector } from 'react-redux';
-import { language, currency } from '../../global'
+import { language } from '../../global'
 import { AntDesign } from '@expo/vector-icons';
 import { Icon } from 'react-native-elements';
 import { getFoods, getCategoriesFromRestaurant } from '../../api';
@@ -12,6 +12,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { loadFoodsWithSmartCache } from '../../utils/cacheUtils';
 import i18n from '../../lang/i18n';
+import { useSettings } from '../../contexts/SettingContext';
 
 const styles = StyleSheet.create({
   menuItemStyle: { flex: 1, },
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
 export default function MenuItems({ route, restaurant, activeTab, marginLeft, navigation, foodsRef,
   pickup: _pickup, delivery: _delivery, setActiveTab: _setActiveTab, userLocation: _userLocation, mapRef: _mapRef, apikey: _apikey, scrollEnabled, setScrollEnabled,
   opacity, setCategoriesFood, hideHeader: _hideHeader }) {
-  
+
   const restaurantData = restaurant || route?.params?.restaurant
   const { categories, setCategories } = useContext(CategoriesContext)
   const [foods, setFoods] = useState([])
@@ -422,7 +423,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
   )
 }
 const FoodInfo = (props) => {
-
+  const { settings } = useSettings()
   return (
     <TouchableOpacity
       style={{ flex: 3, justifyContent: "center", paddingHorizontal: 10 }}
@@ -433,7 +434,7 @@ const FoodInfo = (props) => {
       <Text>{props.food.description}</Text>
       <Text>{props.food.price.toLocaleString(language, {
         style: "currency",
-        currency: currency
+        currency: settings.currency.code
       })}</Text>
     </TouchableOpacity>
   )

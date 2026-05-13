@@ -15,6 +15,7 @@ import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusW
 import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import * as Location from 'expo-location'
+import SettingContext from '../contexts/SettingContext'
 
 export default function Home({navigation}) {
   const {restaurantData, setRestaurantData} = useContext(RestaurantsContext)
@@ -26,6 +27,7 @@ export default function Home({navigation}) {
   const [userLocation, setUserLocation] = useState(null)
   const flatlist = useRef(null)
   const searchbar = useRef(null)
+  const { settings } = useContext(SettingContext)
   
   const getUserLocation = async () => {
     try {
@@ -67,6 +69,7 @@ export default function Home({navigation}) {
     
     getUserLocation()
     
+    if(settings) {
     loadRestaurantsWithSmartCache(
       
       async () => {
@@ -117,7 +120,8 @@ export default function Home({navigation}) {
       
       null
     );
-  },[])
+  }
+  },[settings])
   
   const applyFiltersToRestaurants = (restaurants) => {
     let filtered = [...restaurants]
