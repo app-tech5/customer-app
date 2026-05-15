@@ -397,17 +397,10 @@ export default function SearchResults({route, navigation}) {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={() => {
-                
-                navigation.navigate('BottomTabs', {
-                  screen: 'Home',
-                  params: {
-                    screen: 'RestaurantDetail',
-                    params: {
-                      restaurant: item,
-                      fromPromotion: cameFromOffers,
-                      promotionName: route.params?.name || undefined
-                    }
-                  }
+                navigation.navigate('RestaurantDetail', {
+                  restaurant: item,
+                  fromPromotion: cameFromOffers,
+                  promotionName: route.params?.name || undefined,
                 });
               }}
               style={styles.itemContainer}

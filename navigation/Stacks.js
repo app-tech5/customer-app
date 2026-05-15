@@ -150,6 +150,10 @@ export function SearchNavigator() {
         name="SearchResults"
         component={SearchResults}
         options={{}} />
+      <SearchStack.Screen
+        name="RestaurantDetail"
+        component={RestaurantDetail}
+        options={{ headerShown: false }} />
     </SearchStack.Navigator>
   )
 
