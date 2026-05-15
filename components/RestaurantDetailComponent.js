@@ -11,7 +11,7 @@ import {
 import { Divider, Icon } from 'react-native-elements'
 import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
-import { colors, currency } from '../global'
+import { colors, currency, formatRestaurantRatingSummary } from '../global'
 import i18n from '../lang/i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
@@ -138,7 +138,7 @@ export default function RestaurantDetailComponent({
               iconName="star"
               iconType="FontAwesome"
               iconSize={20}
-              text={`⭐ ${Number(rating).toFixed(1)} (${review_count}+ ratings)`}
+              text={`⭐ ${formatRestaurantRatingSummary(rating, review_count)}`}
             />
 
             <RestaurantInfo

@@ -10,7 +10,7 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import ReviewCard from '../components/restaurantDetail/ReviewCard'
 import PromotionCard from '../components/restaurantDetail/PromotionCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
-import { colors } from '../global'
+import { colors, formatRestaurantRatingDisplay } from '../global'
 import { config } from '../config'
 import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime } from '../utils'
 import * as Location from 'expo-location'
@@ -217,7 +217,10 @@ export default function RestaurantDetail({ route, navigation }) {
     )
   }
   
-  const formattedRating = restaurant.rating ? parseFloat(restaurant.rating).toFixed(1) : "4.5";
+  const formattedRating = formatRestaurantRatingDisplay(
+    restaurant.rating,
+    restaurant.review_count,
+  );
   const price = restaurant.price || "$$";
   
   const categoriesText = restaurant.categories && restaurant.categories.length > 0

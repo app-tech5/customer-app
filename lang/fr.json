@@ -176,6 +176,7 @@
     "delivery": "Livraison",
     "pickup": "À emporter",
     "rating": "Note",
+    "noReviewsYet": "Pas encore d'avis",
     "reviewsCount": "avis",
     "ratingWithReviews": "{{rating}} ({{count}} avis)",
     "addToCart": "Ajouter au panier",

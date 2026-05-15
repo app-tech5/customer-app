@@ -3,7 +3,7 @@ import React, {useState} from 'react'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import PromotionBadge from '../PromotionBadge';
-import { colors } from '../../global';
+import { colors, formatRestaurantRatingDisplay } from '../../global';
 import i18n from '../../lang/i18n';
 
 export default function RestaurantItems({navigation,...props}) {
@@ -53,6 +53,7 @@ export default function RestaurantItems({navigation,...props}) {
                                 <RestaurantInfo
                                     name={item.name.substring(0,25)}
                                     rating={item.rating}
+                                    review_count={item.review_count}
                                     city={item.city}
                                     distance={item.distance}
                                     deliveryTime={item.deliveryTime}
@@ -174,7 +175,7 @@ export const RestaurantInfo = (props)=>(
                     color: colors.rating,
                     marginLeft: 2
                 }}>
-                    {props.rating ? parseFloat(props.rating).toFixed(1) : 'N/A'}
+                    {formatRestaurantRatingDisplay(props.rating, props.review_count)}
                 </Text>
             </View>
         </View>

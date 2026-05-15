@@ -116,6 +116,7 @@ export default function RestaurantsView({
                 <RestaurantInfo
                   name={item.name}
                   rating={item.rating}
+                  review_count={item.review_count}
                   city={item.city}
                 />
                 {!horizontal && <Reward restaurant={item} />}

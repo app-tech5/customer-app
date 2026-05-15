@@ -410,6 +410,7 @@ export default function SearchResults({route, navigation}) {
               <RestaurantInfo
                 name={item.name}
                 rating={item.rating}
+                review_count={item.review_count}
                 city={item.city}
                 distance={route.params?.name === 'NEAR_ME_SPECIAL' ? item.distance : undefined}
               />

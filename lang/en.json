@@ -209,6 +209,7 @@
     "delivery": "Delivery",
     "pickup": "Pickup",
     "rating": "Rating",
+    "noReviewsYet": "No reviews yet",
     "reviewsCount": "reviews",
     "ratingWithReviews": "{{rating}} ({{count}} reviews)",
     "availableOffers": "Available Offers",

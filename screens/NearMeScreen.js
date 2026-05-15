@@ -187,6 +187,7 @@ export default function NearMeScreen({ route, navigation }) {
               <RestaurantInfo
                 name={item.name}
                 rating={item.rating}
+                review_count={item.review_count}
                 city={item.city}
                 distance={item.distance}
               />

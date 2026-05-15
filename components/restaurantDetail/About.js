@@ -4,6 +4,7 @@ import { Icon } from 'react-native-elements';
 import RestaurantDetailComponent from '../RestaurantDetailComponent';
 import { getCategoriesFromRestaurant } from '../../api';
 import i18n from '../../lang/i18n';
+import { formatRestaurantRatingSummary } from '../../global';
 
 export default function About(props) {
   const {restaurant} = props.route.params
@@ -13,7 +14,7 @@ export default function About(props) {
   const [categories, setCategories] = useState()
 let description;
  if(categories)
-description = `⭐${parseFloat(rating).toFixed(1)} (${review_count}+ ratings) • ${categories[0].name} •${price}• 🎫`
+description = `⭐${formatRestaurantRatingSummary(rating, review_count)} • ${categories[0].name} •${price}• 🎫`
 useEffect(()=> {
   getCategoriesFromRestaurant(restaurant.restaurantId)
   .then(categories => {
