@@ -6,7 +6,8 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import SearchBar from '../components/home/SearchBar'
 import RestaurantItems from '../components/home/RestaurantItems'
 import { Divider } from 'react-native-elements'
-import { colors, getDistanceFromLatLonInKm } from '../global'
+import { colors } from '../global'
+import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
 
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
@@ -340,14 +341,9 @@ export default function Home({navigation}) {
   const restaurantsWithDistance = React.useMemo(() => {
     if (!restaurantData) return []
   
-    return restaurantData.map(restaurant => ({
+    return restaurantData.map((restaurant) => ({
       ...restaurant,
-      distance: userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude
-        ? getDistanceFromLatLonInKm(
-          userLocation.lat, userLocation.lng,
-          parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
-        )
-        : null
+      distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userLocation),
     }))
   }, [restaurantData, userLocation])  
 

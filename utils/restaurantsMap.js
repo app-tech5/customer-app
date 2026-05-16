@@ -1,4 +1,5 @@
-import { getDistanceFromLatLonInKm } from './geoUtils'
+import { isUsableGeoCoordinate, parseGeoCoordinate } from './geoUtils'
+import { getDistanceKmBetweenUserAndRestaurant } from './deliveryTime'
 
 export const DEFAULT_REGION = {
   latitude: 48.8566,
@@ -34,10 +35,10 @@ export const createFocusedState = (length, index) => ([
 ])
 
 export const getRestaurantCoordinates = (restaurant) => {
-  const latitude = Number(restaurant?.latitude ?? restaurant?.lat)
-  const longitude = Number(restaurant?.longitude ?? restaurant?.lng)
+  const latitude = parseGeoCoordinate(restaurant?.latitude ?? restaurant?.lat)
+  const longitude = parseGeoCoordinate(restaurant?.longitude ?? restaurant?.lng)
 
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+  if (!isUsableGeoCoordinate(latitude, longitude)) {
     return null
   }
 
@@ -56,14 +57,7 @@ const buildRestaurantWithMeta = (restaurant, originalIndex, userLocation) => {
     originalIndex,
     latitude: coordinates.latitude,
     longitude: coordinates.longitude,
-    distance: userLocation?.lat && userLocation?.lng
-      ? getDistanceFromLatLonInKm(
-        userLocation.lat,
-        userLocation.lng,
-        coordinates.latitude,
-        coordinates.longitude
-      )
-      : null,
+    distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userLocation),
   }
 }
 
@@ -102,16 +96,9 @@ export const getNearbyRestaurantsRegion = (restaurantData, userLocation) => {
         return null
       }
 
-      const distance = userLocation?.lat && userLocation?.lng
-        ? getDistanceFromLatLonInKm(
-          userLocation.lat,
-          userLocation.lng,
-          coordinates.latitude,
-          coordinates.longitude
-        )
-        : 0
+      const distance = getDistanceKmBetweenUserAndRestaurant(restaurant, userLocation) ?? 0
 
-      return distance < 5 ? coordinates : null
+      return distance > 0 && distance < 5 ? coordinates : null
     })
     .filter(Boolean)
 

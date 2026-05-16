@@ -10,6 +10,21 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
+/** Parse une coordonnée (évite parseFloat("75001 Paris") → 75001). */
+export function parseGeoCoordinate(value) {
+  if (value == null || value === '') return NaN;
+  const n = Number(String(value).trim());
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/** Lat/lon utilisables pour haversine (pas 0,0 ni hors bornes). */
+export function isUsableGeoCoordinate(lat, lon) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return false;
+  if (lat === 0 && lon === 0) return false;
+  return true;
+}
+
 export function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);

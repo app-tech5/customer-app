@@ -5,7 +5,8 @@ import {RestaurantImage, RestaurantInfo} from '../components/home/RestaurantItem
 import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
-import { colors, getDistanceFromLatLonInKm } from '../global'
+import { colors } from '../global'
+import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
@@ -119,16 +120,13 @@ export default function SearchResults({route, navigation}) {
           const allRestaurants = await getRestaurants()
           console.warn(`🏪 ${allRestaurants.length} restaurants récupérés`);
           
+          const userCoords = { lat: userLat, lng: userLon }
           restaurantsResult = allRestaurants
-            .filter(restaurant => restaurant.latitude && restaurant.longitude) 
-            .map(restaurant => ({
+            .map((restaurant) => ({
               ...restaurant,
-              distance: getDistanceFromLatLonInKm(
-                userLat, userLon,
-                restaurant.latitude, restaurant.longitude
-              )
+              distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userCoords),
             }))
-            .filter(restaurant => restaurant.distance <= distanceFilter) 
+            .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
             .sort((a, b) => a.distance - b.distance) 
         }
         
@@ -272,16 +270,13 @@ export default function SearchResults({route, navigation}) {
 
           const allRestaurants = await getRestaurants()
 
+          const userCoords = { lat: userLat, lng: userLon }
           const filteredRestaurants = allRestaurants
-            .filter(restaurant => restaurant.latitude && restaurant.longitude)
-            .map(restaurant => ({
+            .map((restaurant) => ({
               ...restaurant,
-              distance: getDistanceFromLatLonInKm(
-                userLat, userLon,
-                restaurant.latitude, restaurant.longitude
-              )
+              distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userCoords),
             }))
-            .filter(restaurant => restaurant.distance <= distanceFilter)
+            .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
             .sort((a, b) => a.distance - b.distance)
 
           setRestaurantData(filteredRestaurants)

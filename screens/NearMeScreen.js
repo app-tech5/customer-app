@@ -5,7 +5,8 @@ import { RestaurantImage, RestaurantInfo } from '../components/home/RestaurantIt
 import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
-import { colors, getDistanceFromLatLonInKm } from '../global'
+import { colors } from '../global'
+import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
@@ -56,16 +57,13 @@ export default function NearMeScreen({ route, navigation }) {
       
       const allRestaurants = await getRestaurants()
 
+      const userCoords = { lat: userLat, lng: userLon }
       const nearbyRestaurants = allRestaurants
-        .filter(restaurant => restaurant.latitude && restaurant.longitude)
-        .map(restaurant => ({
+        .map((restaurant) => ({
           ...restaurant,
-          distance: getDistanceFromLatLonInKm(
-            userLat, userLon,
-            restaurant.latitude, restaurant.longitude
-          )
+          distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userCoords),
         }))
-        .filter(restaurant => restaurant.distance <= distanceFilter)
+        .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
         .sort((a, b) => a.distance - b.distance)
 
       setRestaurantData(nearbyRestaurants)

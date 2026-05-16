@@ -12,7 +12,7 @@ import PromotionCard from '../components/restaurantDetail/PromotionCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
 import { colors, formatRestaurantRatingDisplay } from '../global'
 import { config } from '../config'
-import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime } from '../utils'
+import { getRestaurantDeliveryTime } from '../utils'
 import * as Location from 'expo-location'
 import { getRestaurantReviews, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
 import i18n from '../lang/i18n'
@@ -47,10 +47,12 @@ export default function RestaurantDetail({ route, navigation }) {
         const userData = await AsyncStorage.getItem("userData");
         if (userData) {
           const user = JSON.parse(userData);
-          setUserLocation({
-            latitude: user.lat,
-            longitude: user.lng
-          });
+          if (user.location?.latitude != null && user.location?.longitude != null) {
+            setUserLocation({
+              latitude: user.location.latitude,
+              longitude: user.location.longitude,
+            });
+          }
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -140,41 +142,21 @@ export default function RestaurantDetail({ route, navigation }) {
     getUserLocation();
   }, [])
   
-  const distance = useMemo(() => {
-    if (!userLocation || !restaurant.latitude || !restaurant.longitude) return null;
-    const lat1 = parseFloat(userLocation.latitude);
-    const lon1 = parseFloat(userLocation.longitude);
-    const lat2 = parseFloat(restaurant.latitude);
-    const lon2 = parseFloat(restaurant.longitude);
-
-    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
-
-    return getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2);
-  }, [userLocation, restaurant.latitude, restaurant.longitude]);
-  
   const deliveryTime = useMemo(() => {
-    
+    const prepTime = parseInt(restaurant.collectTime, 10) || 25;
+
     if (config.DEMO_MODE) {
-      const prepTime = parseInt(restaurant.collectTime) || 25;
-      const result = {
-        min: prepTime + 10,  
-        max: prepTime + 20,  
-        distance: 0  
+      return {
+        min: prepTime + 10,
+        max: prepTime + 20,
+        distance: 0,
       };
-      
-      return result;
     }
-    
-    if (userLocation) {
-      const result = getRestaurantDeliveryTime(restaurant, userLocation);
-      
-      return result;
-    }
-    
-    const result = { min: 25, max: 35, distance: 0 };
-    
-    return result;
+
+    return getRestaurantDeliveryTime(restaurant, userLocation);
   }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
+
+  const distance = deliveryTime.distance > 0 ? deliveryTime.distance : null;
   
   const getRestaurantStatus = useMemo(() => {
     const now = new Date();
