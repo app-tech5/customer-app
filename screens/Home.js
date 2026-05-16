@@ -337,21 +337,35 @@ export default function Home({navigation}) {
     setAppliedFilters(filters)
   }
   
+  const restaurantsWithDistance = React.useMemo(() => {
+    if (!restaurantData) return []
+  
+    return restaurantData.map(restaurant => ({
+      ...restaurant,
+      distance: userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude
+        ? getDistanceFromLatLonInKm(
+          userLocation.lat, userLocation.lng,
+          parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
+        )
+        : null
+    }))
+  }, [restaurantData, userLocation])  
+
   const createDynamicSections = React.useMemo(() => {
     if (!restaurantData || restaurantData.length === 0) return []
     
-    const restaurantsWithDistance = restaurantData.map(restaurant => {
-      const distance = userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude ?
-        getDistanceFromLatLonInKm(
-          userLocation.lat, userLocation.lng,
-          parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
-        ) : null
+    // const restaurantsWithDistance = restaurantData.map(restaurant => {
+    //   const distance = userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude ?
+    //     getDistanceFromLatLonInKm(
+    //       userLocation.lat, userLocation.lng,
+    //       parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
+    //     ) : null
 
-      return {
-        ...restaurant,
-        distance
-      }
-    })
+    //   return {
+    //     ...restaurant,
+    //     distance
+    //   }
+    // })
     
     const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantsWithDistance) : restaurantsWithDistance
     const sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
@@ -504,7 +518,7 @@ export default function Home({navigation}) {
       <View style={{ backgroundColor: "white", padding: 15 }}>
         <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} navigation={navigation} restaurantData={restaurantData} setCity={setCity} searchbar={searchbar}/>
        <HomeHeader navigation={navigation} onApplyFilters={handleApplyFilters}/>
-        <SearchBar cityHandler={setCity} navigation={navigation} restaurantData={restaurantData} searchbar={searchbar}/>
+        <SearchBar cityHandler={setCity} navigation={navigation} restaurantData={restaurantsWithDistance} searchbar={searchbar}/>
       </View>
         <ScrollView showsVerticalScrollIndicator={false}>
           {}

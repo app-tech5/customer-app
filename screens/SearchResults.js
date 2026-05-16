@@ -412,7 +412,9 @@ export default function SearchResults({route, navigation}) {
                 rating={item.rating}
                 review_count={item.review_count}
                 city={item.city}
-                distance={route.params?.name === 'NEAR_ME_SPECIAL' ? item.distance : undefined}
+                collectTime={item.collectTime}
+                // distance={route.params?.name === 'NEAR_ME_SPECIAL' ? item.distance : undefined}
+                distance={ item?.distance }
               />
             </TouchableOpacity>
           )}
