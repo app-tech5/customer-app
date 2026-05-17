@@ -8,6 +8,7 @@ import RestaurantItems from '../components/home/RestaurantItems'
 import { Divider } from 'react-native-elements'
 import { colors } from '../global'
 import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
+import { calculateDeliveryFeeFromSetting } from '../utils/deliverySetting'
 
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
@@ -141,21 +142,13 @@ export default function Home({navigation}) {
     if (appliedFilters.maxDeliveryFee && appliedFilters.maxDeliveryFee < 15) {
       filtered = filtered.filter(restaurant => {
         
-        let deliveryFee = 2.5 
+        const deliveryFee = calculateDeliveryFeeFromSetting(
+          restaurant.deliverySetting,
+          restaurant.distance
+        )
 
-        if (restaurant.deliveryOptions) {
-          const options = restaurant.deliveryOptions
-          deliveryFee = options.fixedFee || 0
-          
-          if (restaurant.distance && options.distanceFee) {
-            const baseDistanceFee = parseFloat(options.distanceFee.base) || 0
-            const perKmFee = parseFloat(options.distanceFee.perKm) || 0
-            deliveryFee += baseDistanceFee + (restaurant.distance * perKmFee)
-          }
-          
-          if (options.isFreeDelivery && options.isFreeDelivery.enabled) {
-            deliveryFee = 0
-          }
+        if (deliveryFee == null) {
+          return true
         }
 
         return deliveryFee <= appliedFilters.maxDeliveryFee
@@ -206,7 +199,7 @@ export default function Home({navigation}) {
           switch (feature) {
             case 'free_delivery':
               
-              if (restaurant.deliveryOptions?.isFreeDelivery?.enabled) {
+              if (restaurant.deliverySetting?.freeDeliveryEnabled) {
                 return true
               }
               

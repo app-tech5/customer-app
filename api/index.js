@@ -112,6 +112,8 @@ export const createReview = (restaurantId, data) =>
 export const updateReview = (reviewId, data) => api.updateReview(reviewId, data);
 export const deleteReview = (reviewId) => api.deleteReview(reviewId);
 export const getDeliverySettings = () => api.getDeliverySettings();
+export const getRestaurantDeliverySettings = (restaurantId) =>
+  api.getRestaurantDeliverySettings(restaurantId);
 export const estimateDeliveryFee = (addressId, restaurantId, cartAmount) =>
   api.estimateDeliveryFee(addressId, restaurantId, cartAmount);
 export const getAllActiveOffers = () => api.getAllActiveOffers();

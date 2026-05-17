@@ -13,19 +13,22 @@ import RestaurantName from './RestaurantName'
 import RestaurantDescription from './RestaurantDescription'
 import { colors, currency, formatRestaurantRatingSummary } from '../global'
 import i18n from '../lang/i18n'
-import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
+import {
+  calculateDeliveryFeeFromSetting,
+  hasDeliverySetting,
+  usesDynamicDeliveryFee,
+} from '../utils/deliverySetting'
 
 const { height } = Dimensions.get('window')
 
 export default function RestaurantDetailComponent({
   restaurant,
+  deliverySetting = null,
   visible,
   setVisible,
   deliveryTime,
-  distance = null
+  distance = null,
 }) {
-  const { deliverySettings: _deliverySettings } = useDeliverySettings()
-
   const {
     name,
     description,
@@ -33,7 +36,7 @@ export default function RestaurantDetailComponent({
     rating,
     collectTime,
     openingTime,
-    closingTime
+    closingTime,
   } = restaurant
 
   const formatTime = (timeString) => {
@@ -48,39 +51,19 @@ export default function RestaurantDetailComponent({
 
   const openingTimeFormatted = formatTime(openingTime)
   const closingTimeFormatted = formatTime(closingTime)
-  
-  const calculateDeliveryFee = () => {
-    if (!restaurant.deliveryOptions) {
-      return 2.99 
-    }
 
-    const options = restaurant.deliveryOptions
-    let fee = options.fixedFee || 0
-    
-    if (restaurant.distance && options.distanceFee) {
-      const baseDistanceFee = parseFloat(options.distanceFee.base) || 0
-      const perKmFee = parseFloat(options.distanceFee.perKm) || 0
-      const distanceFee = restaurant.distance * perKmFee
-      fee += baseDistanceFee + distanceFee
-    }
-    
-    if (options.isFreeDelivery && options.isFreeDelivery.enabled) {
-      return 0
-    }
-    
-    if (distance && distance < 2) {
-      return 0
-    }
-
-    return fee
-  }
-
-  const deliveryFee = calculateDeliveryFee()
+  const distanceKm = distance ?? restaurant.distance ?? null
+  const deliveryFee = calculateDeliveryFeeFromSetting(deliverySetting, distanceKm)
+  const dynamicFee = usesDynamicDeliveryFee(deliverySetting)
+  const dyn = deliverySetting?.dynamicDeliveryFee || {}
 
   const restaurantDescription =
     description && description.trim() !== ''
       ? description
       : 'Restaurant description not available'
+
+  const formatMoney = (amount) =>
+    Number(amount).toLocaleString('en', { style: 'currency', currency })
 
   return (
     <Modal
@@ -90,15 +73,12 @@ export default function RestaurantDetailComponent({
       statusBarTranslucent
     >
       <View style={styles.modalRoot}>
-
-        {}
         <TouchableOpacity
           activeOpacity={1}
           onPress={() => setVisible(false)}
           style={styles.backdrop}
         />
 
-        {}
         <View style={styles.container}>
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -120,9 +100,7 @@ export default function RestaurantDetailComponent({
             </View>
 
             <View style={styles.descriptionWrapper}>
-              <RestaurantDescription
-                description={restaurantDescription}
-              />
+              <RestaurantDescription description={restaurantDescription} />
             </View>
 
             <Divider style={styles.divider} />
@@ -155,7 +133,6 @@ export default function RestaurantDetailComponent({
               text={`Delivery time: ${deliveryTime.min}-${deliveryTime.max} min`}
             />
 
-            {}
             <View style={styles.deliveryDetailsContainer}>
               <View style={styles.deliveryDetailsHeader}>
                 <Icon
@@ -164,52 +141,71 @@ export default function RestaurantDetailComponent({
                   color={colors.primary}
                   size={20}
                 />
-                <Text style={styles.deliveryDetailsTitle}>{i18n.t('restaurant.deliveryFeeDetails')}</Text>
+                <Text style={styles.deliveryDetailsTitle}>
+                  {i18n.t('restaurant.deliveryFeeDetails')}
+                </Text>
               </View>
 
-              {restaurant.deliveryOptions ? (
+              {hasDeliverySetting(deliverySetting) ? (
                 <View style={styles.deliveryBreakdown}>
-                  <View style={styles.feeRow}>
-                    <Text style={styles.feeLabel}>{i18n.t('restaurant.fixedFee')}</Text>
-                    <Text style={styles.feeValue}>
-                      {Number(restaurant.deliveryOptions.fixedFee || 0).toLocaleString('en', { style: 'currency', currency: currency })}
-                    </Text>
-                  </View>
+                  {!dynamicFee ? (
+                    <View style={styles.feeRow}>
+                      <Text style={styles.feeLabel}>{i18n.t('restaurant.fixedFee')}</Text>
+                      <Text style={styles.feeValue}>
+                        {formatMoney(deliverySetting.fixedDeliveryFee || 0)}
+                      </Text>
+                    </View>
+                  ) : null}
 
-                  {restaurant.distance && restaurant.deliveryOptions.distanceFee && (
+                  {dynamicFee && distanceKm != null && (
                     <>
                       <View style={styles.feeRow}>
-                        <Text style={styles.feeLabel}>{i18n.t('restaurant.baseDistanceFee')}</Text>
+                        <Text style={styles.feeLabel}>
+                          {i18n.t('restaurant.baseDistanceFee')}
+                        </Text>
                         <Text style={styles.feeValue}>
-                          {Number(parseFloat(restaurant.deliveryOptions.distanceFee.base) || 0).toLocaleString('en', { style: 'currency', currency: currency })}
+                          {formatMoney(dyn.baseFee || 0)}
                         </Text>
                       </View>
 
                       <View style={styles.feeRow}>
                         <Text style={styles.feeLabel}>
-                          {i18n.t('restaurant.distanceFee', { distance: restaurant.distance.toFixed(1), rate: parseFloat(restaurant.deliveryOptions.distanceFee.perKm) || 0 })}
+                          {i18n.t('restaurant.distanceFee', {
+                            distance: Number(distanceKm).toFixed(1),
+                            rate: Number(dyn.perKmFee) || 0,
+                          })}
                         </Text>
                         <Text style={styles.feeValue}>
-                          {Number((restaurant.distance * parseFloat(restaurant.deliveryOptions.distanceFee.perKm)) || 0).toLocaleString('en', { style: 'currency', currency: currency })}
+                          {formatMoney((Number(distanceKm) || 0) * (Number(dyn.perKmFee) || 0))}
                         </Text>
                       </View>
                     </>
                   )}
 
-                  {restaurant.deliveryOptions.isFreeDelivery?.enabled && (
+                  {deliverySetting.freeDeliveryEnabled ? (
                     <View style={styles.freeDeliveryRow}>
-                      <Icon name="check-circle" type="material-community" color="#4CAF50" size={16} />
-                      <Text style={styles.freeDeliveryText}>{i18n.t('restaurant.freeDelivery')}</Text>
+                      <Icon
+                        name="check-circle"
+                        type="material-community"
+                        color="#4CAF50"
+                        size={16}
+                      />
+                      <Text style={styles.freeDeliveryText}>
+                        {i18n.t('restaurant.freeDelivery')}
+                        {deliverySetting.freeDeliveryThreshold > 0
+                          ? ` (${formatMoney(deliverySetting.freeDeliveryThreshold)}+)`
+                          : ''}
+                      </Text>
                     </View>
-                  )}
+                  ) : null}
 
                   <Divider style={styles.feeDivider} />
 
                   <View style={[styles.feeRow, styles.totalRow]}>
-                    <Text style={styles.totalLabel}>{i18n.t('restaurant.totalDeliveryFee')}</Text>
-                    <Text style={styles.totalValue}>
-                      {Number(deliveryFee).toLocaleString('en', { style: 'currency', currency: currency })}
+                    <Text style={styles.totalLabel}>
+                      {i18n.t('restaurant.totalDeliveryFee')}
                     </Text>
+                    <Text style={styles.totalValue}>{formatMoney(deliveryFee)}</Text>
                   </View>
                 </View>
               ) : (
@@ -237,7 +233,7 @@ const RestaurantInfo = ({ iconName, iconType, iconSize, text }) => (
 
 const styles = StyleSheet.create({
   modalRoot: {
-    flex: 1
+    flex: 1,
   },
 
   backdrop: {
@@ -246,7 +242,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: '100%',
     height,
-    backgroundColor: 'rgba(0,0,0,0.6)'
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
 
   container: {
@@ -254,18 +250,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '85%'
+    maxHeight: '85%',
   },
 
   scrollContent: {
-    paddingBottom: 40
+    paddingBottom: 40,
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 18
+    paddingVertical: 18,
   },
 
   closeButton: {
@@ -275,31 +271,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.08)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14
+    marginRight: 14,
   },
 
   descriptionWrapper: {
     paddingHorizontal: 20,
-    paddingBottom: 24
+    paddingBottom: 24,
   },
 
   restaurantInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 18
+    paddingVertical: 18,
   },
 
   restaurantInfoText: {
     marginLeft: 14,
     fontSize: 16,
-    color: colors.text.primary
+    color: colors.text.primary,
   },
 
   divider: {
-    marginHorizontal: 20
+    marginHorizontal: 20,
   },
-  
+
   deliveryDetailsContainer: {
     marginHorizontal: 20,
     marginVertical: 10,
@@ -307,43 +303,43 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: colors.border.light
+    borderColor: colors.border.light,
   },
 
   deliveryDetailsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 12,
   },
 
   deliveryDetailsTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
-    marginLeft: 8
+    marginLeft: 8,
   },
 
   deliveryBreakdown: {
-    gap: 8
+    gap: 8,
   },
 
   feeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4
+    paddingVertical: 4,
   },
 
   feeLabel: {
     fontSize: 14,
     color: colors.text.secondary,
-    flex: 1
+    flex: 1,
   },
 
   feeValue: {
     fontSize: 14,
     color: colors.text.primary,
-    fontWeight: '500'
+    fontWeight: '500',
   },
 
   freeDeliveryRow: {
@@ -352,43 +348,44 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: '#E8F5E8',
     borderRadius: 6,
-    paddingHorizontal: 8
+    paddingHorizontal: 8,
   },
 
   freeDeliveryText: {
     fontSize: 14,
     color: '#4CAF50',
     fontWeight: '600',
-    marginLeft: 6
+    marginLeft: 6,
+    flex: 1,
   },
 
   feeDivider: {
     marginVertical: 8,
-    backgroundColor: colors.border.medium
+    backgroundColor: colors.border.medium,
   },
 
   totalRow: {
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: colors.border.medium
+    borderTopColor: colors.border.medium,
   },
 
   totalLabel: {
     fontSize: 16,
     color: colors.text.primary,
-    fontWeight: '600'
+    fontWeight: '600',
   },
 
   totalValue: {
     fontSize: 16,
     color: colors.primary,
-    fontWeight: '700'
+    fontWeight: '700',
   },
 
   noDeliveryOptions: {
     fontSize: 14,
     color: colors.text.muted,
     textAlign: 'center',
-    paddingVertical: 8
-  }
+    paddingVertical: 8,
+  },
 })

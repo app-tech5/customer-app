@@ -14,7 +14,14 @@ import { colors, formatRestaurantRatingDisplay } from '../global'
 import { config } from '../config'
 import { getRestaurantDeliveryTime } from '../utils'
 import * as Location from 'expo-location'
-import { getRestaurantReviews, getFavorites, addToFavorites, removeFromFavorites, getRestaurantPromotions } from '../api'
+import {
+  getRestaurantReviews,
+  getFavorites,
+  addToFavorites,
+  removeFromFavorites,
+  getRestaurantPromotions,
+  getRestaurantDeliverySettings,
+} from '../api'
 import i18n from '../lang/i18n'
 
 const { width, height } = Dimensions.get('window')
@@ -35,6 +42,7 @@ export default function RestaurantDetail({ route, navigation }) {
   const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false)
   const [promotions, setPromotions] = useState([])
   const [loadingPromotions, setLoadingPromotions] = useState(false)
+  const [deliverySetting, setDeliverySetting] = useState(null)
 
   const foodsRef = useRef(null)
   const { loading, setLoading } = useContext(LoaderContext)
@@ -113,6 +121,29 @@ export default function RestaurantDetail({ route, navigation }) {
 
     loadPromotions();
   }, [restaurant])
+
+  useEffect(() => {
+    const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+    if (!restaurantId) {
+      setDeliverySetting(null);
+      return undefined;
+    }
+    let cancelled = false;
+    setDeliverySetting(null);
+    (async () => {
+      try {
+        const doc = await getRestaurantDeliverySettings(restaurantId);
+        if (!cancelled) {
+          setDeliverySetting(doc);
+        }
+      } catch (error) {
+        console.warn('Could not load restaurant delivery settings:', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [restaurant]);
   
   useEffect(() => {
     
@@ -408,6 +439,7 @@ export default function RestaurantDetail({ route, navigation }) {
       
       <RestaurantDetailComponent
         restaurant={restaurant}
+        deliverySetting={deliverySetting}
         visible={restaurantDetailVisible}
         setVisible={setRestaurantDetailVisible}
         deliveryTime={deliveryTime}

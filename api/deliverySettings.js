@@ -21,6 +21,21 @@ ApiClient.prototype.getDeliverySettings = async function () {
   }
 };
 
+ApiClient.prototype.getRestaurantDeliverySettings = async function (restaurantId) {
+  if (!restaurantId) {
+    return null;
+  }
+  try {
+    const params = new URLSearchParams({ type: String(restaurantId) });
+    const raw = await this.apiCall(`/resource/deliverysettings?${params}`);
+    const list = Array.isArray(raw) ? raw : [];
+    return list[0] || null;
+  } catch (error) {
+    console.error('Error fetching restaurant delivery settings:', error);
+    return null;
+  }
+};
+
 ApiClient.prototype.estimateDeliveryFee = async function (addressId, restaurantId, cartAmount) {
   try {
     const params = new URLSearchParams();
