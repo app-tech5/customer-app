@@ -15,6 +15,7 @@ import { colors, currency, formatRestaurantRatingSummary } from '../global'
 import i18n from '../lang/i18n'
 import {
   calculateDeliveryFeeFromSetting,
+  getDynamicDeliveryFeeBreakdown,
   hasDeliverySetting,
   usesDynamicDeliveryFee,
 } from '../utils/deliverySetting'
@@ -55,7 +56,9 @@ export default function RestaurantDetailComponent({
   const distanceKm = distance ?? restaurant.distance ?? null
   const deliveryFee = calculateDeliveryFeeFromSetting(deliverySetting, distanceKm)
   const dynamicFee = usesDynamicDeliveryFee(deliverySetting)
-  const dyn = deliverySetting?.dynamicDeliveryFee || {}
+  const dynamicBreakdown = dynamicFee
+    ? getDynamicDeliveryFeeBreakdown(deliverySetting, distanceKm)
+    : null
 
   const restaurantDescription =
     description && description.trim() !== ''
@@ -157,30 +160,68 @@ export default function RestaurantDetailComponent({
                     </View>
                   ) : null}
 
-                  {dynamicFee && distanceKm != null && (
+                  {dynamicFee && dynamicBreakdown ? (
                     <>
                       <View style={styles.feeRow}>
-                        <Text style={styles.feeLabel}>
-                          {i18n.t('restaurant.baseDistanceFee')}
-                        </Text>
+                        <Text style={styles.feeLabel}>{i18n.t('restaurant.baseDistanceFee')}</Text>
                         <Text style={styles.feeValue}>
-                          {formatMoney(dyn.baseFee || 0)}
+                          {formatMoney(dynamicBreakdown.baseFee)}
                         </Text>
                       </View>
 
-                      <View style={styles.feeRow}>
-                        <Text style={styles.feeLabel}>
-                          {i18n.t('restaurant.distanceFee', {
-                            distance: Number(distanceKm).toFixed(1),
-                            rate: Number(dyn.perKmFee) || 0,
-                          })}
+                      {dynamicBreakdown.distanceKm != null ? (
+                        <View style={styles.feeRow}>
+                          <Text style={styles.feeLabel}>
+                            {i18n.t('restaurant.distanceFee', {
+                              distance: dynamicBreakdown.distanceKm.toFixed(1),
+                              rate: dynamicBreakdown.perKmFee,
+                            })}
+                          </Text>
+                          <Text style={styles.feeValue}>
+                            {formatMoney(dynamicBreakdown.distancePart)}
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text style={styles.feeHint}>
+                          {i18n.t('restaurant.dynamicNeedsDistance')}
                         </Text>
-                        <Text style={styles.feeValue}>
-                          {formatMoney((Number(distanceKm) || 0) * (Number(dyn.perKmFee) || 0))}
-                        </Text>
-                      </View>
+                      )}
+
+                      {dynamicBreakdown.subtotal != null ? (
+                        <View style={styles.feeRow}>
+                          <Text style={styles.feeLabel}>{i18n.t('restaurant.dynamicSubtotal')}</Text>
+                          <Text style={styles.feeValue}>
+                            {formatMoney(dynamicBreakdown.subtotal)}
+                          </Text>
+                        </View>
+                      ) : null}
+
+                      {dynamicBreakdown.minFee != null ? (
+                        <View style={styles.feeRow}>
+                          <Text style={styles.feeLabel}>{i18n.t('restaurant.minDeliveryFee')}</Text>
+                          <Text style={styles.feeValue}>
+                            {formatMoney(dynamicBreakdown.minFee)}
+                          </Text>
+                        </View>
+                      ) : null}
+
+                      {dynamicBreakdown.maxFee != null ? (
+                        <View style={styles.feeRow}>
+                          <Text style={styles.feeLabel}>{i18n.t('restaurant.maxDeliveryFee')}</Text>
+                          <Text style={styles.feeValue}>
+                            {formatMoney(dynamicBreakdown.maxFee)}
+                          </Text>
+                        </View>
+                      ) : null}
+
+                      {dynamicBreakdown.minApplied ? (
+                        <Text style={styles.feeHint}>{i18n.t('restaurant.feeMinApplied')}</Text>
+                      ) : null}
+                      {dynamicBreakdown.maxApplied ? (
+                        <Text style={styles.feeHint}>{i18n.t('restaurant.feeMaxApplied')}</Text>
+                      ) : null}
                     </>
-                  )}
+                  ) : null}
 
                   {deliverySetting.freeDeliveryEnabled ? (
                     <View style={styles.freeDeliveryRow}>
@@ -387,5 +428,13 @@ const styles = StyleSheet.create({
     color: colors.text.muted,
     textAlign: 'center',
     paddingVertical: 8,
+  },
+
+  feeHint: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    fontStyle: 'italic',
+    marginBottom: 4,
+    paddingVertical: 2,
   },
 })

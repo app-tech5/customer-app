@@ -45,3 +45,45 @@ export function usesDynamicDeliveryFee(setting) {
 export function hasDeliverySetting(setting) {
   return !!(setting && (setting._id || setting.deliveryFeeType != null));
 }
+
+/** Détail affichage DYNAMIC : tous les champs de `dynamicDeliveryFee` + total après min/max. */
+export function getDynamicDeliveryFeeBreakdown(setting, distanceKm = null) {
+  const dyn = setting?.dynamicDeliveryFee;
+  if (!dyn || typeof dyn !== 'object') {
+    return null;
+  }
+
+  const baseFee = Number(dyn.baseFee);
+  const perKmFee = Number(dyn.perKmFee);
+  const minFee = Number(dyn.minFee);
+  const maxFee = Number(dyn.maxFee);
+
+  const base = Number.isFinite(baseFee) ? baseFee : 0;
+  const perKm = Number.isFinite(perKmFee) ? perKmFee : 0;
+  const min = Number.isFinite(minFee) ? minFee : null;
+  const max = Number.isFinite(maxFee) ? maxFee : null;
+
+  const km = distanceKm != null && Number.isFinite(Number(distanceKm)) ? Number(distanceKm) : null;
+  const distancePart = km != null ? km * perKm : null;
+  const subtotal = km != null ? base + distancePart : null;
+
+  let total = subtotal;
+  if (subtotal != null) {
+    const floor = min != null ? min : subtotal;
+    const ceiling = max != null ? max : subtotal;
+    total = Math.min(Math.max(subtotal, floor), ceiling);
+  }
+
+  return {
+    baseFee: base,
+    perKmFee: perKm,
+    minFee: min,
+    maxFee: max,
+    distanceKm: km,
+    distancePart,
+    subtotal,
+    total,
+    minApplied: subtotal != null && min != null && total === min && subtotal < min,
+    maxApplied: subtotal != null && max != null && total === max && subtotal > max,
+  };
+}
