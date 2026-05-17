@@ -186,7 +186,7 @@
     "deliveryFeeDetails": "Détails des frais de livraison",
     "fixedFee": "Frais fixes:",
     "baseDistanceFee": "Frais de base distance:",
-    "distanceFee": "Distance: {distance}km × {rate}/km",
+    "distanceFee": "Distance : {{distance}} km × {{rate}}/km",
     "freeDelivery": "Livraison gratuite disponible",
     "totalDeliveryFee": "Total frais de livraison:",
     "noDeliveryOptions": "Options de livraison non disponibles",
