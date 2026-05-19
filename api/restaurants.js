@@ -2,12 +2,18 @@ import { ApiClient } from './client';
 
 ApiClient.prototype.getRestaurants = async function () {
   const response = await this.apiCall('/resource/restaurants');
-  return response.map((restaurant) => this.normalizeRestaurant(restaurant));
+  return response
+    .map((restaurant) => this.normalizeRestaurant(restaurant))
+    .filter((restaurant) => restaurant.isActivated === true);
 };
 
 ApiClient.prototype.getRestaurantById = async function (id) {
   const restaurant = await this.apiCall(`/resource/restaurants/${id}`);
-  return this.normalizeRestaurant(restaurant);
+  const normalized = this.normalizeRestaurant(restaurant);
+  if (normalized.isActivated !== true) {
+    throw new Error('Restaurant not available');
+  }
+  return normalized;
 };
 
 ApiClient.prototype.normalizeRestaurant = function (restaurant) {
