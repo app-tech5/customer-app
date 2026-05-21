@@ -1,7 +1,8 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import i18n from '../../lang/i18n'
+import { RestaurantsContext } from '../../contexts/RestaurantsContext'
 
 export default function SearchBar({
   searchbar,
@@ -9,10 +10,10 @@ export default function SearchBar({
   style,
   setAddress: _setAddress,
   navigation,
-  restaurantData,
   inputTestID,
   submitTestID,
 }) {
+  const { restaurantData } = useContext(RestaurantsContext)
   const [searchText, setSearchText] = useState('')
   
   useEffect(() => {
@@ -32,18 +33,19 @@ export default function SearchBar({
       return
     }
 
+    const query = searchText.trim().toLowerCase()
     const filteredRestaurants = restaurantData.filter(restaurant =>
-      restaurant?.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      restaurant?.city?.toLowerCase().includes(searchText.toLowerCase())
+      restaurant?.name?.toLowerCase().includes(query) ||
+      restaurant?.city?.toLowerCase().includes(query)
     )
 
     navigation.navigate('SearchFlow', {
       screen: 'SearchResults',
       params: {
-        searchTerm: searchText,
+        searchTerm: searchText.trim(),
         restaurantData: filteredRestaurants,
-        totalResults: filteredRestaurants.length
-      }
+        totalResults: filteredRestaurants.length,
+      },
     })
   }
 

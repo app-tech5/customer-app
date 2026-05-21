@@ -11,7 +11,7 @@ import SignIn from '../screens/SignIn'
 import OnboardingScreen from '../screens/Onboarding'
 import SignUp from '../screens/SignUp'
 import { LoaderContext } from '../contexts/LoaderContext'
-import { RestaurantsContext } from '../contexts/RestaurantsContext'
+import { RestaurantsProvider } from '../contexts/RestaurantsContext'
 import { CategoriesContextProvider } from '../contexts/CategoriesContext'
 import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
 import { SettingProvider } from '../contexts/SettingContext'
@@ -48,7 +48,6 @@ function StripeWrappedNavigation({ children }) {
 export default function RootNavigation({ statusBarColor }) {
   const Stack = createStackNavigator();
   const [loading, setLoading] = useState(false)
-  const [restaurantData, setRestaurantData] = useState()
   const { signedIn } = useContext(SignInContext)
   const screenOptions = {
     headerShown: false,
@@ -73,7 +72,7 @@ export default function RootNavigation({ statusBarColor }) {
                   <StripeWrappedNavigation>
                     <PaymentMethodsProvider>
                       <DeliverySettingsProvider>
-                        <RestaurantsContext.Provider value={{ restaurantData, setRestaurantData }}>
+                        <RestaurantsProvider>
                           <OrdersProvider>
                             <CategoriesContextProvider>
                               <Stack.Navigator screenOptions={screenOptions}>
@@ -89,7 +88,7 @@ export default function RootNavigation({ statusBarColor }) {
                               </Stack.Navigator>
                             </CategoriesContextProvider>
                           </OrdersProvider>
-                        </RestaurantsContext.Provider>
+                        </RestaurantsProvider>
                       </DeliverySettingsProvider>
                     </PaymentMethodsProvider>
                   </StripeWrappedNavigation>

@@ -8,7 +8,6 @@ import RestaurantItems from '../components/home/RestaurantItems'
 import { Divider } from 'react-native-elements'
 import { colors } from '../global'
 import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
-import { calculateDeliveryFeeFromSetting } from '../utils/deliverySetting'
 
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
@@ -507,7 +506,7 @@ export default function Home({navigation}) {
       <View style={{ backgroundColor: "white", padding: 15 }}>
         <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} navigation={navigation} restaurantData={restaurantData} setCity={setCity} searchbar={searchbar}/>
        <HomeHeader navigation={navigation} onApplyFilters={handleApplyFilters}/>
-        <SearchBar cityHandler={setCity} navigation={navigation} restaurantData={restaurantsWithDistance} searchbar={searchbar}/>
+        <SearchBar cityHandler={setCity} navigation={navigation} searchbar={searchbar}/>
       </View>
         <ScrollView showsVerticalScrollIndicator={false}>
           {}

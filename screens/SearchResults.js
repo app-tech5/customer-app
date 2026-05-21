@@ -1,16 +1,17 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { RestaurantsContext } from '../contexts/RestaurantsContext'
  import { getRestaurants, searchRestaurantsByCategory, getFavorites } from '../api'
 import {RestaurantImage, RestaurantInfo} from '../components/home/RestaurantItems'
 import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
 export default function SearchResults({route, navigation}) {
+  const { restaurantData: catalogRestaurants } = useContext(RestaurantsContext)
   const [restaurantData, setRestaurantData] = useState([])
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
@@ -117,17 +118,10 @@ export default function SearchResults({route, navigation}) {
             userLon = userLocation.coords.longitude
           }
           
-          const allRestaurants = await getRestaurants()
-          console.warn(`🏪 ${allRestaurants.length} restaurants récupérés`);
-          
-          const userCoords = { lat: userLat, lng: userLon }
+          const allRestaurants = catalogRestaurants?.length ? catalogRestaurants : await getRestaurants()
           restaurantsResult = allRestaurants
-            .map((restaurant) => ({
-              ...restaurant,
-              distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userCoords),
-            }))
             .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
-            .sort((a, b) => a.distance - b.distance) 
+            .sort((a, b) => a.distance - b.distance)
         }
         
         else if (name === 'ALL_RESTAURANTS') {
@@ -268,14 +262,8 @@ export default function SearchResults({route, navigation}) {
             userLon = userLocation.coords.longitude
           }
 
-          const allRestaurants = await getRestaurants()
-
-          const userCoords = { lat: userLat, lng: userLon }
+          const allRestaurants = catalogRestaurants?.length ? catalogRestaurants : await getRestaurants()
           const filteredRestaurants = allRestaurants
-            .map((restaurant) => ({
-              ...restaurant,
-              distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userCoords),
-            }))
             .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
             .sort((a, b) => a.distance - b.distance)
 
