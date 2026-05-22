@@ -26,6 +26,7 @@ export default function Home({navigation}) {
   const [allMenus, setAllMenus] = useState([])
   const [appliedFilters, setAppliedFilters] = useState(null)
   const [userLocation, setUserLocation] = useState(null)
+  const [restaurantsLoading, setRestaurantsLoading] = useState(true)
   const flatlist = useRef(null)
   const searchbar = useRef(null)
   const { settings } = useContext(SettingContext)
@@ -72,20 +73,16 @@ export default function Home({navigation}) {
     
     if(settings) {
     loadRestaurantsWithSmartCache(
-      
       async () => {
         return await getRestaurants();
       },
-      
-      (restaurants, fromCache) => {
+      (restaurants) => {
         setRestaurantData(restaurants);
       },
-      
       (freshRestaurants) => {
         setRestaurantData(freshRestaurants);
       },
-      
-      null
+      setRestaurantsLoading
     );
     
     loadPromotionsWithSmartCache(
@@ -494,8 +491,9 @@ export default function Home({navigation}) {
 
     return sections
   }, [restaurantData, allPromotions, appliedFilters, userLocation])
-  if(!restaurantData)
-  return <Loader />
+  if (restaurantsLoading && !restaurantData?.length) {
+    return <Loader />
+  }
   return (
     <SafeAreaView style={{
       paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
