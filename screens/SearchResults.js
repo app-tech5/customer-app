@@ -1,8 +1,8 @@
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar} from 'react-native'
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
- import { getRestaurants, searchRestaurantsByCategory, getFavorites } from '../api'
-import {RestaurantImage, RestaurantInfo} from '../components/home/RestaurantItems'
+import { getRestaurants, searchRestaurantsByCategory, getFavorites } from '../api'
+import { RestaurantImage, RestaurantInfo } from '../components/home/RestaurantItems'
 import Loader from './Loader'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
@@ -10,7 +10,7 @@ import { colors } from '../global'
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
-export default function SearchResults({route, navigation}) {
+export default function SearchResults({ route, navigation }) {
   const { restaurantData: catalogRestaurants } = useContext(RestaurantsContext)
   const [restaurantData, setRestaurantData] = useState([])
   const [loader, setLoader] = useState(true)
@@ -18,29 +18,33 @@ export default function SearchResults({route, navigation}) {
   const [searchQuery, setSearchQuery] = useState('')
   const [cameFromOffers, setCameFromOffers] = useState(false)
   const [displayMode, setDisplayMode] = useState('restaurants')
-  const [distanceFilter, setDistanceFilter] = useState(10) 
+  const [distanceFilter, setDistanceFilter] = useState(10)
 
-  useEffect(()=>{
-    const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope, searchTerm, restaurantData: prefilteredData, totalResults } = route.params
-    
+  useEffect(() => {
+    const { categoryId, categoryName, name, type, fromOffers, fromCategoryResults, categoryResultsParams, applicableRestaurants, promotionScope, searchTerm, restaurantData: listFromParams } = route.params
+
     setCameFromOffers(fromOffers === true)
-    
+
     setLoader(true)
     setError(null)
     setRestaurantData([])
-    
+
     const loadData = async () => {
+      const baseRestaurants =
+        catalogRestaurants?.length > 0
+          ? catalogRestaurants
+          : await getRestaurants()
       try {
         let restaurantsResult = []
-        
+
         if (promotionScope === 'restaurant' && applicableRestaurants && applicableRestaurants.length > 0) {
           console.warn('🏪 Loading specific restaurants for promotion - IDs reçus:', applicableRestaurants)
-          
-          const allRestaurants = await getRestaurants()
-          
+
+          const allRestaurants = baseRestaurants
+
           console.warn('📋 IDs de tous les restaurants en DB:', allRestaurants.map(r => r._id || r.restaurantId))
           console.warn('🔍 IDs recherchés dans applicableRestaurants:', applicableRestaurants)
-          
+
           restaurantsResult = allRestaurants.filter(restaurant => {
             const restaurantId = restaurant._id || restaurant.restaurantId
             return applicableRestaurants.some(promoRestId => {
@@ -56,39 +60,38 @@ export default function SearchResults({route, navigation}) {
           console.warn('📱 Setting restaurant data - Count:', restaurantsResult.length, 'Mode: restaurants')
           setRestaurantData(restaurantsResult)
           setDisplayMode('restaurants')
-          return 
+          return
         }
-        
+
         if (categoryName) {
           restaurantsResult = await searchRestaurantsByCategory(categoryName)
         }
-        
+
         else if (name === 'TOP_RATED_SPECIAL') {
-          const allRestaurants = await getRestaurants()
-          
+          const allRestaurants = baseRestaurants
+
           restaurantsResult = allRestaurants
-            .filter(restaurant => restaurant.rating) 
-            .sort((a, b) => (b.rating || 0) - (a.rating || 0)) 
+            .filter(restaurant => restaurant.rating)
+            .sort((a, b) => (b.rating || 0) - (a.rating || 0))
         }
-        
+
         else if (name === 'FAVORITES_SPECIAL') {
           const favoritesResponse = await getFavorites()
           if (favoritesResponse.success && favoritesResponse.favorites) {
-            
-            const allRestaurants = await getRestaurants()
+
             const favoriteIds = favoritesResponse.favorites.map(fav => fav._id || fav.id)
-            
-            restaurantsResult = allRestaurants.filter(restaurant =>
+
+            restaurantsResult = baseRestaurants.filter(restaurant =>
               favoriteIds.includes(restaurant._id || restaurant.id)
             )
           } else {
-            restaurantsResult = [] 
+            restaurantsResult = []
           }
         }
-        
+
         else if (name === 'NEAR_ME_SPECIAL') {
           let userLat, userLon;
-          
+
           try {
             const userData = await AsyncStorage.getItem('userData');
             if (userData) {
@@ -102,7 +105,7 @@ export default function SearchResults({route, navigation}) {
           } catch (error) {
             console.error('Erreur récupération coordonnées utilisateur:', error);
           }
-          
+
           if (!userLat || !userLon) {
             console.warn('📍 Aucune coordonnée utilisateur, demande géolocalisation...');
             const { status } = await Location.requestForegroundPermissionsAsync()
@@ -117,25 +120,33 @@ export default function SearchResults({route, navigation}) {
             userLat = userLocation.coords.latitude
             userLon = userLocation.coords.longitude
           }
-          
-          const allRestaurants = catalogRestaurants?.length ? catalogRestaurants : await getRestaurants()
-          restaurantsResult = allRestaurants
+
+          restaurantsResult = baseRestaurants
             .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
             .sort((a, b) => a.distance - b.distance)
         }
-        
+
         else if (name === 'ALL_RESTAURANTS') {
-          restaurantsResult = await getRestaurants()
+          restaurantsResult = baseRestaurants
         }
-        
-        else if (prefilteredData && Array.isArray(prefilteredData)) {
-          console.warn('🔍 Using prefiltered data from SearchBar - Count:', prefilteredData.length)
-          restaurantsResult = prefilteredData
+
+        else if (listFromParams?.length) {
+          const ids = new Set(listFromParams.map((r) => String(r._id || r.restaurantId)))
+          restaurantsResult = baseRestaurants.filter((r) => ids.has(String(r._id || r.restaurantId)))
         }
-        
+
+        else if (searchTerm) {
+          const q = searchTerm.trim().toLowerCase()
+          restaurantsResult = baseRestaurants.filter(
+            (r) =>
+              r.name?.toLowerCase().includes(q) ||
+              r.city?.toLowerCase().includes(q)
+          )
+        }
+
         else if (name) {
-          const allRestaurants = await getRestaurants()
-          
+          const allRestaurants = baseRestaurants
+
           const filtered = allRestaurants.filter(restaurant =>
             restaurant.name?.toLowerCase().includes(name.toLowerCase()) ||
             restaurant.description?.toLowerCase().includes(name.toLowerCase()) ||
@@ -143,27 +154,27 @@ export default function SearchResults({route, navigation}) {
           )
           restaurantsResult = filtered.length > 0 ? filtered : allRestaurants
         }
-        
+
         else {
-          
-          restaurantsResult = await getRestaurants()
+
+          restaurantsResult = baseRestaurants
         }
 
         console.warn('📱 Setting restaurant data - Count:', restaurantsResult?.length || 0, 'Mode: restaurants')
         setRestaurantData(restaurantsResult || [])
       } catch (err) {
         console.error('Error loading search results:', err)
-        
+
         if (name === 'NEAR_ME_SPECIAL' && err.message === 'Location permission denied') {
           setError(i18n.t('search.locationPermissionDenied'))
-          
-          const allRestaurants = await getRestaurants()
+
+          const allRestaurants = baseRestaurants
           console.warn('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else if (name === 'NEAR_ME_SPECIAL') {
           setError(i18n.t('search.locationError'))
-          
-          const allRestaurants = await getRestaurants()
+
+          const allRestaurants = baseRestaurants
           console.warn('📱 Setting restaurant data (location denied) - Count:', allRestaurants?.length || 0)
           setRestaurantData(allRestaurants)
         } else {
@@ -171,12 +182,12 @@ export default function SearchResults({route, navigation}) {
           setRestaurantData([])
         }
       } finally {
-        setTimeout(() => setLoader(false), 800) 
+        setTimeout(() => setLoader(false), 800)
       }
     }
 
     loadData()
-    
+
     let title = i18n.t ? i18n.t('search.results') : 'Search Results'
     let displayQuery = ''
 
@@ -204,20 +215,20 @@ export default function SearchResults({route, navigation}) {
     }
 
     setSearchQuery(displayQuery)
-    
+
     navigation.setOptions({
       title,
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
             if (cameFromOffers) {
-              
+
               navigation.navigate('Offers')
             } else if (fromCategoryResults) {
-              
+
               navigation.navigate('CategoryResults', route.params?.categoryResultsParams || {})
             } else {
-              
+
               navigation.goBack()
             }
           }}
@@ -230,15 +241,15 @@ export default function SearchResults({route, navigation}) {
       )
     })
 
-  }, [route.params, cameFromOffers])
-  
+  }, [route.params, cameFromOffers, catalogRestaurants])
+
   useEffect(() => {
     if (route.params?.name === 'NEAR_ME_SPECIAL') {
       const reloadData = async () => {
         setLoader(true)
         setError(null)
         try {
-          
+
           let userLat, userLon;
 
           const userData = await AsyncStorage.getItem('userData');
@@ -262,7 +273,10 @@ export default function SearchResults({route, navigation}) {
             userLon = userLocation.coords.longitude
           }
 
-          const allRestaurants = catalogRestaurants?.length ? catalogRestaurants : await getRestaurants()
+          const allRestaurants =
+            catalogRestaurants?.length > 0
+              ? catalogRestaurants
+              : await getRestaurants()
           const filteredRestaurants = allRestaurants
             .filter((restaurant) => restaurant.distance != null && restaurant.distance <= distanceFilter)
             .sort((a, b) => a.distance - b.distance)
@@ -277,8 +291,8 @@ export default function SearchResults({route, navigation}) {
 
       reloadData()
     }
-  }, [distanceFilter])
-  
+  }, [distanceFilter, catalogRestaurants])
+
   const EmptyState = ({ query, isError }) => (
     <View style={styles.emptyContainer}>
       <Ionicons
@@ -308,7 +322,7 @@ export default function SearchResults({route, navigation}) {
       )}
     </View>
   )
-  
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.resultInfo}>
@@ -323,7 +337,7 @@ export default function SearchResults({route, navigation}) {
         )}
       </View>
 
-      {}
+      { }
       {route.params?.name === 'NEAR_ME_SPECIAL' && (
         <View style={styles.nearMeControls}>
           <Text style={styles.distanceLabel}>{i18n.t('search.distance', 'Distance')}:</Text>
@@ -377,7 +391,7 @@ export default function SearchResults({route, navigation}) {
         <FlatList
           data={restaurantData}
           keyExtractor={(item, index) => String(index)}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('RestaurantDetail', {
@@ -397,7 +411,7 @@ export default function SearchResults({route, navigation}) {
                 city={item.city}
                 collectTime={item.collectTime}
                 // distance={route.params?.name === 'NEAR_ME_SPECIAL' ? item.distance : undefined}
-                distance={ item?.distance }
+                distance={item?.distance}
               />
             </TouchableOpacity>
           )}
@@ -416,7 +430,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 32, 
+    paddingBottom: 32,
   },
   header: {
     marginBottom: 16,
