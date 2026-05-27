@@ -1,7 +1,7 @@
 import { ApiClient } from './client';
 
 ApiClient.prototype.login = async function (email, password) {
-  const response = await this.apiCall('/auth/login', {
+  const response = await this.apiCall('/auth/customer-login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });

@@ -16,6 +16,7 @@ export default function SignIn({ navigation }) {
 
   const [email, setEmail] = useState(config.DEMO_MODE ? config.DEMO_EMAIL : '')
   const [password, setPassword] = useState(config.DEMO_MODE ? config.DEMO_PASSWORD : '')
+  const [showPassword, setShowPassword] = useState(false)
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(false)
   const { setSignedIn } = useContext(SignInContext)
@@ -24,7 +25,7 @@ export default function SignIn({ navigation }) {
     const loadSavedEmail = async () => {
       const savedData = await getSignInData();
       if (savedData && savedData.email && !config.DEMO_MODE) {
-        setEmail(savedData.email);
+        setEmail(savedData.email.trim());
       }
     };
     loadSavedEmail();
@@ -35,7 +36,8 @@ export default function SignIn({ navigation }) {
     setLoginState(true)
 
     try {
-      const result = await api.login(email, password)
+      const normalizedEmail = email.trim()
+      const result = await api.login(normalizedEmail, password)
       
       await AsyncStorage.setItem('userToken', result.token)
       
@@ -51,7 +53,7 @@ export default function SignIn({ navigation }) {
       
       await AsyncStorage.setItem('userData', JSON.stringify(userInfo))
       
-      await saveSignInData(email, true);
+      await saveSignInData(normalizedEmail, true);
       
       setSignedIn(result.token)
 
@@ -102,8 +104,19 @@ export default function SignIn({ navigation }) {
             placeholder={i18n.t('auth.password')}
             value={password}
             onChangeText={(text) => setPassword(text)}
-            style={styles.textInput}
-            secureTextEntry />
+            style={[styles.textInput, styles.textInputFlex]}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeButton}
+          >
+            <MaterialIcons
+              name={showPassword ? 'visibility-off' : 'visibility'}
+              size={20}
+              color="#3d5c5c"
+            />
+          </TouchableOpacity>
 
         </View>
 
@@ -180,9 +193,15 @@ const styles = StyleSheet.create({
 
   },
   textInput: {
-
     width: "90%",
     padding: 10
+  },
+  textInputFlex: {
+    flex: 1,
+    width: undefined,
+  },
+  eyeButton: {
+    padding: 10,
   },
   signInButton: {
     width: "100%",

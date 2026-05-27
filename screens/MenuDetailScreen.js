@@ -180,7 +180,7 @@ export default function MenuDetailScreen({route}) {
 
           {}
           <View style={styles.priceContainer}>
-            {priceInfo.discountPercentage > 0 ? (
+            {menu.discount?.isActive && priceInfo.discountPercentage > 0 ? (
               <>
                 <Text style={styles.originalPrice}>
                   {formatPrice(priceInfo.originalPrice)}

@@ -23,17 +23,45 @@ export const isCacheExpired = (timestamp, expiryTime = CACHE_CONFIG.FOODS_EXPIRY
 
 export const hasDataChanged = (oldData, newData) => {
   if (!oldData || !newData) return true;
+
+  // Vérifie que ce sont bien des tableaux
+  if (!Array.isArray(oldData) || !Array.isArray(newData)) {
+    return true;
+  }
+
+  // Taille différente = changement
   if (oldData.length !== newData.length) return true;
 
-  const buildIds = (items) =>
-    items.map(
-      (item) => `${item.id || item._id}_${item.updatedAt || item.createdAt}`,
-    );
+  // Fonction pour trier les clés des objets récursivement
+  const sortObject = (obj) => {
+    if (Array.isArray(obj)) {
+      return obj.map(sortObject);
+    }
 
-  const oldIds = buildIds(oldData);
-  const newIds = buildIds(newData);
+    if (obj !== null && typeof obj === "object") {
+      return Object.keys(obj)
+        .sort()
+        .reduce((acc, key) => {
+          acc[key] = sortObject(obj[key]);
+          return acc;
+        }, {});
+    }
 
-  return JSON.stringify(oldIds.sort()) !== JSON.stringify(newIds.sort());
+    return obj;
+  };
+
+  // Normalisation complète des données
+  const normalize = (data) =>
+    data.map(sortObject).sort((a, b) => {
+      const aStr = JSON.stringify(a);
+      const bStr = JSON.stringify(b);
+      return aStr.localeCompare(bStr);
+    });
+
+  const normalizedOld = normalize(oldData);
+  const normalizedNew = normalize(newData);
+
+  return JSON.stringify(normalizedOld) !== JSON.stringify(normalizedNew);
 };
 
 export const cacheI18n = i18n;
