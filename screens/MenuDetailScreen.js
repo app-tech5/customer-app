@@ -6,21 +6,55 @@ import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
-import { getVariants } from '../api'
+import { getVariants, getFoods } from '../api'
 import i18n from '../lang/i18n'
 import { useSettings } from '../contexts/SettingContext'
+import { loadFoodsWithSmartCache } from '../utils/cacheUtils'
 
 export default function MenuDetailScreen({route}) {
   const navigation = useNavigation()
   
   const routeParams = route?.params || {}
-  const menu = routeParams.food
+  const initialMenu = routeParams.food
   const restaurant = routeParams.restaurant
   const { settings } = useSettings()
+  const [menu, setMenu] = React.useState(initialMenu)
   
   const [selectedVariants, setSelectedVariants] = React.useState({})
   
   const [variantDetails, setVariantDetails] = React.useState({})
+
+  React.useEffect(() => {
+    setMenu(initialMenu)
+  }, [initialMenu])
+
+  React.useEffect(() => {
+    const restaurantId = restaurant?.restaurantId || restaurant?.id
+    const foodId = initialMenu?._id || initialMenu?.id
+
+    if (!restaurantId || !foodId) {
+      return
+    }
+
+    loadFoodsWithSmartCache(
+      restaurantId,
+      async (id) => await getFoods(id),
+      () => {},
+      (freshFoods) => {
+        const updatedFood = freshFoods.find(
+          (item) => String(item?._id || item?.id) === String(foodId)
+        )
+
+        if (updatedFood) {
+          setMenu({
+            ...updatedFood,
+            id: updatedFood.id || updatedFood._id,
+            price: Number(updatedFood.price),
+          })
+        }
+      }
+    )
+  }, [initialMenu, restaurant])
   
   React.useEffect(() => {
     const fetchVariantDetails = async () => {
@@ -73,6 +107,7 @@ export default function MenuDetailScreen({route}) {
 
     return {
       ...menu,
+      id: menu.id || menu._id,
       selectedVariants: safeSelectedVariants,
       totalPrice: finalPrice
     }
