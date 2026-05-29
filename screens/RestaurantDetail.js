@@ -170,7 +170,7 @@ export default function RestaurantDetail({ route, navigation }) {
       }
     };
 
-    getUserLocation();
+    // getUserLocation();
   }, [])
   
   const deliveryTime = useMemo(() => {

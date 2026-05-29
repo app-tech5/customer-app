@@ -55,6 +55,11 @@ export default function SignUp({ navigation }) {
         return;
       }
 
+      if (!normalizedAddress) {
+        Alert.alert(i18n.t('common.error'), i18n.t('auth.addressRequired'));
+        return;
+      }
+
       if ((!lat && !lng) && normalizedAddress) {
         const geocoded = await geocodeAddress(normalizedAddress)
         if (geocoded) {

@@ -174,7 +174,8 @@
     "serverError": "Server error",
     "loading": "Loading...",
     "pleaseWait": "Please wait...",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "addressRequired": "Address is required"
   },
   "home": {
     "title": "Welcome to Good Food",
