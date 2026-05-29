@@ -18,11 +18,6 @@ ApiClient.prototype.register = async function (userData) {
     method: 'POST',
     body: JSON.stringify(userData),
   });
-  if (response.token) {
-    this.token = response.token;
-    this.user = response.user;
-    await this.saveToStorage();
-  }
   return response;
 };
 

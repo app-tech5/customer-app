@@ -18,6 +18,7 @@ import RestaurantSearchResults from '../screens/RestaurantSearchResults'
 import AccountScreen from '../screens/AccountScreen'
 import EditProfileScreen from '../screens/EditProfileScreen'
 import AddressesScreen from '../screens/AddressesScreen'
+import EditAddressScreen from '../screens/EditAddressScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
 import Wallet from '../screens/Wallet'
 import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
@@ -122,6 +123,12 @@ export function AccountNavigator() {
           title: 'Addresses',
           headerShown: true
         }}
+      />
+
+      <AccountStack.Screen
+        name="EditAddress"
+        component={EditAddressScreen}
+        options={{ headerShown: true }}
       />
 
       <AccountStack.Screen

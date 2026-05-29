@@ -13,8 +13,15 @@ export default function SearchBar({
   inputTestID,
   submitTestID,
 }) {
-  const { restaurantData } = useContext(RestaurantsContext)
+  const { restaurantData = [] } = useContext(RestaurantsContext) || {}
   const [searchText, setSearchText] = useState('')
+
+  const handleTextChange = (text) => {
+    setSearchText(text)
+    if (_setAddress) {
+      _setAddress(text)
+    }
+  }
   
   useEffect(() => {
     if (searchbar && searchbar.current) {
@@ -26,6 +33,9 @@ export default function SearchBar({
 
   const handleSearch = () => {
     if (!searchText.trim()) {
+      return
+    }
+    if (!navigation) {
       return
     }
 
@@ -83,7 +93,7 @@ export default function SearchBar({
           placeholder={!style ? i18n.t('search.restaurantOrCity') : i18n.t('search.address')}
           placeholderTextColor="#999"
           value={searchText}
-          onChangeText={setSearchText}
+          onChangeText={handleTextChange}
           onSubmitEditing={handleSubmitEditing}
           returnKeyType="search"
         />

@@ -12,7 +12,7 @@ import Loader from './Loader'
 import { saveSignInData, getSignInData } from '../utils/cacheUtils'
 import { SignInContext } from '../contexts/authContext'
 
-export default function SignIn({ navigation }) {
+export default function SignIn({ navigation, route }) {
 
   const [email, setEmail] = useState(config.DEMO_MODE ? config.DEMO_EMAIL : '')
   const [password, setPassword] = useState(config.DEMO_MODE ? config.DEMO_PASSWORD : '')
@@ -23,13 +23,18 @@ export default function SignIn({ navigation }) {
   
   useEffect(() => {
     const loadSavedEmail = async () => {
+      const routeEmail = route?.params?.prefilledEmail;
+      if (routeEmail) {
+        setEmail(routeEmail.trim());
+        return;
+      }
       const savedData = await getSignInData();
       if (savedData && savedData.email && !config.DEMO_MODE) {
         setEmail(savedData.email.trim());
       }
     };
     loadSavedEmail();
-  }, [])
+  }, [route?.params?.prefilledEmail])
 
   const SignInUser = async () => {
 

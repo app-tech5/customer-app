@@ -1,26 +1,34 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { useFocusEffect } from '@react-navigation/native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
+import { getUserAddresses, updateUser } from '../api'
 
 export default function AddressesScreen({ navigation }) {
   const user = useSelector((state) => state.userReducer)
+  const dispatch = useDispatch()
   const [addresses, setAddresses] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadAddresses()
+  const userId = user.id || user.userId
 
+  useFocusEffect(
+    useCallback(() => {
+      loadAddresses()
+    }, [userId, user.address, user.location])
+  )
+
+  React.useEffect(() => {
     navigation.setOptions({
       title: i18n.t('addresses.title'),
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{ padding: 10, marginLeft: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
@@ -29,8 +37,6 @@ export default function AddressesScreen({ navigation }) {
         <TouchableOpacity
           onPress={handleAddAddress}
           style={{ padding: 10, marginRight: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Add address"
         >
           <Ionicons name="add" size={24} color={colors.primary} />
         </TouchableOpacity>
@@ -38,62 +44,17 @@ export default function AddressesScreen({ navigation }) {
     })
   }, [navigation])
 
-  const loadAddresses = () => {
+  const loadAddresses = async () => {
     try {
       setLoading(true)
-      
-      let addressesData = []
-      
-      if (user.address && user.address.trim()) {
-        
-        let addressParts = user.address.split(',')
-        let address = user.address
-        let city = ''
-        let postalCode = ''
-        let country = 'France' 
 
-        if (addressParts.length >= 2) {
-          address = addressParts[0].trim()
-          city = addressParts[1].trim()
-
-          if (addressParts.length >= 3) {
-            postalCode = addressParts[2].trim()
-          }
-        }
-
-        addressesData.push({
-          id: 'user_default',
-          type: 'home',
-          name: 'My Address',
-          address: address,
-          city: city,
-          postalCode: postalCode,
-          country: country,
-          isDefault: true,
-          coordinates: user.location ? {
-            lat: user.location.latitude,
-            lng: user.location.longitude
-          } : null
-        })
+      if (userId) {
+        const data = await getUserAddresses(userId)
+        setAddresses(Array.isArray(data) ? data : [])
+        return
       }
-      
-      const mockAddresses = [
-        {
-          id: '1',
-          type: 'work',
-          name: 'Work',
-          address: '456 Business Avenue, Floor 15',
-          city: 'Paris',
-          postalCode: '75002',
-          country: 'France',
-          isDefault: !user.address || !user.address.trim(),
-          coordinates: { lat: 48.8584, lng: 2.2945 }
-        }
-      ]
 
-      addressesData = [...addressesData, ...mockAddresses]
-
-      setAddresses(addressesData)
+      setAddresses([])
     } catch (error) {
       console.error('Error loading addresses:', error)
       Alert.alert(i18n.t('common.error'), i18n.t('addresses.loadError'))
@@ -103,24 +64,28 @@ export default function AddressesScreen({ navigation }) {
   }
 
   const handleAddAddress = () => {
-    
-    Alert.alert('Not implemented', 'Add address screen will be implemented')
+    navigation.navigate('EditAddress', {
+      mode: 'add',
+      initialAddress: '',
+    })
   }
 
   const handleEditAddress = (address) => {
-    
-    Alert.alert('Not implemented', 'Edit address screen will be implemented', [
-      { text: i18n.t('common.cancel') },
-      {
-        text: i18n.t('common.edit'),
-        onPress: () => {
-          
-        }
-      }
-    ])
+    if (address.id !== 'user_default') {
+      return
+    }
+
+    navigation.navigate('EditAddress', {
+      mode: 'edit',
+      initialAddress: address.address || user.address || '',
+    })
   }
 
   const handleDeleteAddress = (address) => {
+    if (address.id !== 'user_default') {
+      return
+    }
+
     Alert.alert(
       i18n.t('addresses.deleteConfirm'),
       i18n.t('addresses.deleteMessage'),
@@ -131,39 +96,35 @@ export default function AddressesScreen({ navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              
-              setAddresses(prev => prev.filter(addr => addr.id !== address.id))
-
-              Alert.alert(
-                i18n.t('common.success'),
-                i18n.t('addresses.deleted')
+              const updatedUser = await updateUser(
+                { address: '', location: { latitude: 0, longitude: 0 } },
+                userId
               )
+
+              const payload = {
+                address: '',
+                location: { latitude: 0, longitude: 0 },
+                lat: 0,
+                lng: 0,
+              }
+
+              dispatch({ type: 'UPDATE_USER', payload })
+
+              await AsyncStorage.setItem(
+                'userData',
+                JSON.stringify({ ...user, ...updatedUser, ...payload, userId })
+              )
+
+              setAddresses([])
+              Alert.alert(i18n.t('common.success'), i18n.t('addresses.deleted'))
             } catch (error) {
               console.error('Error deleting address:', error)
               Alert.alert(i18n.t('common.error'), i18n.t('addresses.deleteError'))
             }
-          }
-        }
+          },
+        },
       ]
     )
-  }
-
-  const handleSetDefaultAddress = async (address) => {
-    try {
-      
-      setAddresses(prev => prev.map(addr => ({
-        ...addr,
-        isDefault: addr.id === address.id
-      })))
-
-      Alert.alert(
-        i18n.t('common.success'),
-        i18n.t('addresses.setDefault')
-      )
-    } catch (error) {
-      console.error('Error setting default address:', error)
-      Alert.alert(i18n.t('common.error'), i18n.t('addresses.setDefaultError'))
-    }
   }
 
   const getAddressTypeIcon = (type) => {
@@ -172,14 +133,12 @@ export default function AddressesScreen({ navigation }) {
         return 'home'
       case 'work':
         return 'briefcase'
-      case 'other':
-        return 'location'
       default:
         return 'location'
     }
   }
 
-  const AddressItem = ({ address, index }) => (
+  const AddressItem = ({ address }) => (
     <View style={[styles.addressItem, address.isDefault && styles.defaultAddress]}>
       <View style={styles.addressLeft}>
         <View style={[styles.addressIcon, address.isDefault && styles.defaultAddressIcon]}>
@@ -193,52 +152,33 @@ export default function AddressesScreen({ navigation }) {
         <View style={styles.addressInfo}>
           <View style={styles.addressHeader}>
             <Text style={[styles.addressName, address.isDefault && styles.defaultAddressText]}>
-              {address.name}
+              {address.name || i18n.t('addresses.default')}
             </Text>
             {address.isDefault && (
               <View style={styles.defaultBadge}>
-                <Text style={styles.defaultBadgeText}>
-                  {i18n.t('addresses.default')}
-                </Text>
+                <Text style={styles.defaultBadgeText}>{i18n.t('addresses.default')}</Text>
               </View>
             )}
           </View>
 
-          <Text style={styles.addressText}>
-            {address.address}
-          </Text>
-          <Text style={styles.addressText}>
-            {address.city}, {address.postalCode}
-          </Text>
-          <Text style={styles.addressText}>
-            {address.country}
-          </Text>
+          <Text style={styles.addressText}>{address.address}</Text>
+          {address.city ? (
+            <Text style={styles.addressText}>
+              {address.city}
+              {address.postalCode ? `, ${address.postalCode}` : ''}
+            </Text>
+          ) : null}
         </View>
       </View>
 
       <View style={styles.addressActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleEditAddress(address)}
-        >
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleEditAddress(address)}>
           <Ionicons name="pencil" size={20} color={colors.text.secondary} />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleDeleteAddress(address)}
-        >
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleDeleteAddress(address)}>
           <Ionicons name="trash" size={20} color={colors.error} />
         </TouchableOpacity>
-
-        {!address.isDefault && (
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => handleSetDefaultAddress(address)}
-          >
-            <Ionicons name="star" size={20} color={colors.warning} />
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   )
@@ -247,9 +187,7 @@ export default function AddressesScreen({ navigation }) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>
-            {i18n.t('common.loading')}
-          </Text>
+          <Text style={styles.loadingText}>{i18n.t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     )
@@ -260,35 +198,19 @@ export default function AddressesScreen({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {}
         <View style={styles.headerInfo}>
-          <Text style={styles.headerText}>
-            {i18n.t('addresses.description')}
-          </Text>
+          <Text style={styles.headerText}>{i18n.t('addresses.description')}</Text>
         </View>
 
-        {}
         {addresses.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="location-outline" size={80} color={colors.text.secondary} />
-            <Text style={styles.emptyStateTitle}>
-              {i18n.t('addresses.noAddresses')}
-            </Text>
-          <Text style={styles.emptyStateText}>
-            {user.address && user.address.trim()
-              ? i18n.t('addresses.addressFromProfile')
-              : i18n.t('addresses.addFirstAddress')
-            }
-          </Text>
+            <Text style={styles.emptyStateTitle}>{i18n.t('addresses.noAddresses')}</Text>
+            <Text style={styles.emptyStateText}>{i18n.t('addresses.addFirstAddress')}</Text>
 
-            <TouchableOpacity
-              style={styles.addFirstButton}
-              onPress={handleAddAddress}
-            >
+            <TouchableOpacity style={styles.addFirstButton} onPress={handleAddAddress}>
               <Ionicons name="add" size={20} color={colors.text.white} />
-              <Text style={styles.addFirstButtonText}>
-                {i18n.t('addresses.addAddress')}
-              </Text>
+              <Text style={styles.addFirstButtonText}>{i18n.t('addresses.addAddress')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -296,42 +218,28 @@ export default function AddressesScreen({ navigation }) {
             <FlatList
               data={addresses}
               keyExtractor={(item) => item.id}
-              renderItem={({ item, index }) => <AddressItem address={item} index={index} />}
+              renderItem={({ item }) => <AddressItem address={item} />}
               scrollEnabled={false}
               ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
             />
 
-            <TouchableOpacity
-              style={styles.addMoreButton}
-              onPress={handleAddAddress}
-            >
+            <TouchableOpacity style={styles.addMoreButton} onPress={handleAddAddress}>
               <Ionicons name="add" size={20} color={colors.primary} />
-              <Text style={styles.addMoreButtonText}>
-                {i18n.t('addresses.addNewAddress')}
-              </Text>
+              <Text style={styles.addMoreButtonText}>{i18n.t('addresses.addNewAddress')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {}
         <View style={styles.tipsContainer}>
           <View style={styles.tipsHeader}>
             <Ionicons name="information-circle" size={20} color={colors.primary} />
-            <Text style={styles.tipsTitle}>
-              {i18n.t('addresses.tips')}
-            </Text>
+            <Text style={styles.tipsTitle}>{i18n.t('addresses.tips')}</Text>
           </View>
 
           <View style={styles.tipsList}>
-            <Text style={styles.tipItem}>
-              • {i18n.t('addresses.tip1')}
-            </Text>
-            <Text style={styles.tipItem}>
-              • {i18n.t('addresses.tip2')}
-            </Text>
-            <Text style={styles.tipItem}>
-              • {i18n.t('addresses.tip3')}
-            </Text>
+            <Text style={styles.tipItem}>• {i18n.t('addresses.tip1')}</Text>
+            <Text style={styles.tipItem}>• {i18n.t('addresses.tip2')}</Text>
+            <Text style={styles.tipItem}>• {i18n.t('addresses.tip3')}</Text>
           </View>
         </View>
       </ScrollView>
@@ -390,11 +298,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
   },
   addFirstButtonText: {
     fontSize: 16,
@@ -407,11 +310,6 @@ const styles = StyleSheet.create({
     margin: 20,
     marginTop: 0,
     borderRadius: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
     padding: 20,
   },
   addressItem: {
@@ -510,11 +408,6 @@ const styles = StyleSheet.create({
     marginTop: 0,
     padding: 20,
     borderRadius: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
   },
   tipsHeader: {
     flexDirection: 'row',
