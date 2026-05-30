@@ -6,6 +6,7 @@ import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
+import { getRestaurantDeliverySettings } from '../api'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=>{
@@ -15,7 +16,27 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
     const [_loader, setLoader] = useState(false)
     const slideAnim = useRef(new Animated.Value(500)).current
     const dispatch = useDispatch()
-    const { deliverySettings, calculateTotal } = useDeliverySettings()
+    const { calculateTotal } = useDeliverySettings()
+    const [deliverySetting, setDeliverySetting] = useState(null)
+
+    useEffect(() => {
+        const restaurantId = restaurant?.restaurantId || restaurant?.id || restaurant?._id
+        if (!restaurantId) {
+            setDeliverySetting(null)
+            return undefined
+        }
+        let cancelled = false
+        setDeliverySetting(null)
+        ;(async () => {
+            try {
+                const doc = await getRestaurantDeliverySettings(restaurantId)
+                if (!cancelled) setDeliverySetting(doc)
+            } catch (error) {
+                console.warn('Could not load restaurant delivery settings:', error)
+            }
+        })()
+        return () => { cancelled = true }
+    }, [restaurant])
 
     useEffect(() => {
         Animated.spring(slideAnim, {
@@ -53,7 +74,8 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
         return acc
     }, [])
     
-    const totals = calculateTotal(total, restaurant?.taxRate) || {
+    const distance = restaurant?.distance > 0 ? restaurant.distance : null
+    const totals = calculateTotal(deliverySetting, total, restaurant?.taxRate, distance) || {
       subtotal: total,
       deliveryFee: 2.99,
       taxAmount: total * 0.08,
@@ -304,7 +326,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                                     setViewCartButton={setViewCartButton}
                                     setModalVisible={setModalVisible}
                                     closeModal={closeModal}
-                                    deliverySettings={deliverySettings}
+                                    deliverySetting={deliverySetting}
                                     restaurant={restaurant}
                                 />
                             </View>

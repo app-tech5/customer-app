@@ -20,6 +20,7 @@ ApiClient.prototype.normalizeRestaurant = function (restaurant) {
   return {
     restaurantId: restaurant._id || restaurant.id,
     ...restaurant,
+    taxRate: (restaurant.tax?.rate / 100) || 0,
   };
 };
 

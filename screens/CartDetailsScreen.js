@@ -6,6 +6,7 @@ import { language, currency, colors } from '../global'
 import Checkout from '../components/Checkout'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
+import { getRestaurantDeliverySettings } from '../api'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const CartDetailsScreen = () => {
@@ -17,7 +18,27 @@ const CartDetailsScreen = () => {
     const total = items.reduce((prev, curr) => prev + (curr.totalPrice || curr.price), 0)
     const [loader, setLoader] = useState(false)
     const dispatch = useDispatch()
-    const { deliverySettings, calculateTotal } = useDeliverySettings()
+    const { calculateTotal } = useDeliverySettings()
+    const [deliverySetting, setDeliverySetting] = useState(null)
+
+    useEffect(() => {
+        const restaurantId = restaurant?.restaurantId || restaurant?.id || restaurant?._id
+        if (!restaurantId) {
+            setDeliverySetting(null)
+            return undefined
+        }
+        let cancelled = false
+        setDeliverySetting(null)
+        ;(async () => {
+            try {
+                const doc = await getRestaurantDeliverySettings(restaurantId)
+                if (!cancelled) setDeliverySetting(doc)
+            } catch (error) {
+                console.warn('Could not load restaurant delivery settings:', error)
+            }
+        })()
+        return () => { cancelled = true }
+    }, [restaurant])
 
     useEffect(() => {
         
@@ -53,7 +74,8 @@ const CartDetailsScreen = () => {
         return acc
     }, [])
     
-    const totals = calculateTotal(total, restaurant?.taxRate) || {
+    const distance = restaurant?.distance > 0 ? restaurant.distance : null
+    const totals = calculateTotal(deliverySetting, total, restaurant?.taxRate, distance) || {
         subtotal: total,
         deliveryFee: 2.99,
         taxAmount: total * 0.08,
@@ -330,7 +352,7 @@ const CartDetailsScreen = () => {
                                 setViewCartButton={() => {}}
                                 setModalVisible={() => {}}
                                 closeModal={() => navigation.goBack()}
-                                deliverySettings={deliverySettings}
+                                deliverySetting={deliverySetting}
                                 restaurant={restaurant}
                                 isFullScreen={true}
                             />

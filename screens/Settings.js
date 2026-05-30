@@ -94,10 +94,10 @@ export default function Settings({ navigation }) {
           onPress: async () => {
             try {
               
+              dispatch({ type: 'CLEAR' })
+
               await AsyncStorage.removeItem('userToken')
               await AsyncStorage.removeItem('userData')
-              
-              dispatch({ type: 'LOGOUT' })
               
               Alert.alert(
                 i18n.t('settings.loggedOut', 'Logged Out'),

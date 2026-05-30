@@ -455,6 +455,7 @@
     "addCard": "Add card",
     "addCreditOrDebit": "Credit or debit card",
     "addCardSubtitle": "Visa, Mastercard, etc.",
+    "removePaymentMethodConfirm": "Do you really want to remove this payment method?",
     "paypal": "PayPal",
     "applePay": "Apple Pay",
     "googlePay": "Google Pay",

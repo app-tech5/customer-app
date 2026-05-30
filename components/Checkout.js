@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native'
 import { LoaderContext } from '../contexts/LoaderContext'
 import i18n from '../lang/i18n'
 import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
-export default function Checkout({ restaurantName, setLoader: _setLoader, setViewCartButton, setModalVisible, closeModal, restaurant }) {
+export default function Checkout({ restaurantName, setLoader: _setLoader, setViewCartButton, setModalVisible, closeModal, deliverySetting, restaurant }) {
     const { setLoading } = useContext(LoaderContext)
     const { name: _name, phone: _phone, address, id, lat, lng } = useSelector((state) => state.userReducer)
      const navigation = useNavigation()
@@ -18,7 +18,8 @@ export default function Checkout({ restaurantName, setLoader: _setLoader, setVie
     
     const cartTotal = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
     
-    const totals = calculateTotal(cartTotal, restaurant?.taxRate) || {
+    const distance = restaurant?.distance > 0 ? restaurant.distance : null
+    const totals = calculateTotal(deliverySetting, cartTotal, restaurant?.taxRate, distance) || {
       subtotal: cartTotal,
       deliveryFee: 2.99,
       taxAmount: cartTotal * 0.08,
@@ -114,6 +115,7 @@ export default function Checkout({ restaurantName, setLoader: _setLoader, setVie
                             restaurant,
                             restaurantName,
                             totals,
+                            deliverySetting,
                             lat,
                             lng,
                           },

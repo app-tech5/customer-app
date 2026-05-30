@@ -27,10 +27,12 @@ export default function CheckoutScreen({ navigation, route }) {
   const [specialInstructions, setSpecialInstructions] = useState('')
   const [loading, setLoading] = useState(true)
   
-  const { deliverySettings, calculateTotal } = useDeliverySettings()
+  const { calculateTotal } = useDeliverySettings()
+  const deliverySetting = route.params?.deliverySetting || null
   const cartTotal = cartItems.reduce((total, item) => total + (item.totalPrice || item.price), 0)
+  const distance = restaurant?.distance > 0 ? restaurant.distance : null
 
-  const totals = totalsFromParams || calculateTotal(cartTotal, restaurant?.taxRate) || {
+  const totals = totalsFromParams || calculateTotal(deliverySetting, cartTotal, restaurant?.taxRate, distance) || {
     subtotal: cartTotal,
     deliveryFee: 2.99,
     taxAmount: cartTotal * 0.08,

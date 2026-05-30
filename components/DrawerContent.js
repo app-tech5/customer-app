@@ -12,7 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { MaterialIcons } from '@expo/vector-icons'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { config } from '../config'
 import { SignInContext } from '../contexts/authContext'
 
@@ -22,8 +22,10 @@ export default function DrawerContent(props) {
     const { name, email, image } = useSelector((state) => state.userReducer)
     const { setSignedIn } = useContext(SignInContext)
     const navigation = useNavigation()
+    const dispatch = useDispatch()
 
     const signOutUser = () => {
+        dispatch({ type: 'CLEAR' })
         AsyncStorage.getAllKeys().then(k => AsyncStorage.multiRemove(k))
         .then(()=>{
         api.logout();

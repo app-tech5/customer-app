@@ -81,6 +81,11 @@ export function CartNavigator() {
         name="Carts"
         component={CartScreen}
         options={{ headerShown: true, headerLeft: null }} />
+        
+      <CartStack.Screen
+        name="CartDetails"
+        component={CartDetailsScreen}
+        options={{ headerShown: true }} />
 
       <CartStack.Screen
         name="OrderDetails"

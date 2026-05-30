@@ -42,34 +42,67 @@ export function DeliverySettingsProvider({ children }) {
     loadDeliverySettings()
   }
   
-  const activeDeliverySettings = Array.isArray(deliverySettings)
-    ? deliverySettings[0]
-    : deliverySettings
-  
-  const calculateDeliveryFee = (subtotal, distance = null) => {
-    if (!activeDeliverySettings) return 2.99
-
-    if (activeDeliverySettings.deliveryFeeType === 'FIXED') {
-      return parseFloat(activeDeliverySettings.fixedDeliveryFee || 2.99)
-    }
-
-    if (activeDeliverySettings.deliveryFeeType === 'DYNAMIC' && distance) {
-      const { baseFee, perKmFee, minFee, maxFee } = activeDeliverySettings.dynamicDeliveryFee || {}
-      const calculatedFee = (baseFee || 1.5) + (distance * (perKmFee || 0.5))
-      return Math.min(Math.max(calculatedFee, minFee || 1.5), maxFee || 10)
-    }
-
-    if (activeDeliverySettings.deliveryFeeType === 'FREE') {
-      return 0
-    }
-
-    return parseFloat(activeDeliverySettings.fixedDeliveryFee || 2.99)
-  }
-
-  const calculateTotal = (subtotal, taxRate = null, distance = null) => {
-    const deliveryFee = calculateDeliveryFee(subtotal, distance)
+    const calculateDeliveryFee = (deliverySetting, subtotal, distance = null) => {
+      if (!deliverySetting) return 2.99
     
-    const finalDeliveryFee = subtotal > (activeDeliverySettings?.freeDeliveryThreshold || 25)
+      // Livraison désactivée
+      if (deliverySetting.isDeliveryEnabled === false) {
+        return null
+      }
+    
+      // Livraison gratuite globale
+      if (
+        deliverySetting.deliveryFeeType === 'FREE' ||
+        deliverySetting.freeDeliveryEnabled
+      ) {
+        return 0
+      }
+    
+      // Livraison gratuite selon le seuil
+      if (
+        subtotal >=
+        (deliverySetting.freeDeliveryThreshold || 25)
+      ) {
+        return 0
+      }
+    
+      // Livraison dynamique
+      if (
+        ['DYNAMIC', 'RESTAURANT_DEFINED'].includes(
+          deliverySetting.deliveryFeeType
+        ) &&
+        distance != null
+      ) {
+        const {
+          baseFee,
+          perKmFee,
+          minFee,
+          maxFee
+        } = deliverySetting.dynamicDeliveryFee || {}
+    
+        const calculatedFee =
+          (Number(baseFee) || 1.5) +
+          distance * (Number(perKmFee) || 0.5)
+    
+        return Math.min(
+          Math.max(
+            calculatedFee,
+            Number(minFee) || 1.5
+          ),
+          Number(maxFee) || 10
+        )
+      }
+    
+      // Livraison fixe
+      return parseFloat(
+        deliverySetting.fixedDeliveryFee || 2.99
+      )
+    }
+
+  const calculateTotal = (deliverySetting, subtotal, taxRate = null, distance = null) => {
+    const deliveryFee = calculateDeliveryFee(deliverySetting, subtotal, distance)
+    
+    const finalDeliveryFee = subtotal > (deliverySetting?.freeDeliveryThreshold || 25)
       ? 0
       : deliveryFee
 
@@ -81,18 +114,16 @@ export function DeliverySettingsProvider({ children }) {
       deliveryFee: finalDeliveryFee,
       taxAmount,
       total,
-      isFreeDelivery: subtotal > (activeDeliverySettings?.freeDeliveryThreshold || 25)
+      isFreeDelivery: subtotal > (deliverySetting?.freeDeliveryThreshold || 25)
     }
   }
 
   const value = {
-    deliverySettings: activeDeliverySettings, 
-    deliverySettingsArray: deliverySettings, 
     loading,
     error,
     refreshDeliverySettings,
     calculateDeliveryFee,
-    calculateTotal
+    calculateTotal,
   }
 
   return (
