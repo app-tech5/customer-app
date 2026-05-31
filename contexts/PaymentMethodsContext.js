@@ -1,7 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { removeStripePaymentMethod, getUserPaymentMethods } from '../api'
-import { addPaymentMethod as addPaymentMethodApi } from '../api'
+import {
+  removeStripePaymentMethod,
+  getUserPaymentMethods,
+  addPaymentMethod as addPaymentMethodApi,
+  removePaymentMethod as removePaymentMethodApi,
+} from '../api'
 
 const PaymentMethodsContext = createContext()
 
@@ -48,7 +52,13 @@ export function PaymentMethodsProvider({ children }) {
   }, [paymentMethods])
 
   const removePaymentMethod = useCallback(async (methodId) => {
-    await removeStripePaymentMethod(methodId)
+    const method = paymentMethods.find((item) => item.id === methodId)
+    if (methodId.startsWith('pm_')) {
+      await removeStripePaymentMethod(methodId)
+    }
+    if (method?._id) {
+      await removePaymentMethodApi(method._id)
+    }
     const filtered = paymentMethods.filter((method) => method.id !== methodId)
 
     const hasDefault = filtered.some((method) => method.isDefault)

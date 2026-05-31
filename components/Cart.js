@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Image }
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigation } from '@react-navigation/native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
 import { Ionicons } from '@expo/vector-icons'
@@ -11,6 +12,7 @@ import { useDeliverySettings } from '../contexts/DeliverySettingsContext'
 
 const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=>{
     const navigation = useNavigation()
+    const insets = useSafeAreaInsets()
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurantName)
     const total = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
     const [_loader, setLoader] = useState(false)
@@ -183,7 +185,7 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
 
     return (
         <TouchableOpacity
-            style={styles.modalContainer}
+            style={[styles.modalContainer, { paddingBottom: 230 + insets.bottom }]}
             onPress={closeModal}
             activeOpacity={1}
         >
@@ -342,7 +344,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "flex-end",
         backgroundColor: "rgba(0,0,0,0.7)",
-        paddingBottom: 120, 
     },
     modalCheckoutContainer: {
         backgroundColor: "white",

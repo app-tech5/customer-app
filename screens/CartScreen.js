@@ -31,7 +31,12 @@ const CartScreen = ({navigation}) => {
        :
     <View>
       
-      <CartModal modalVisible={modalVisible} setModalVisible={setModalVisible} restaurantName={restaurantName}/>
+      <CartModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        restaurantName={restaurantName}
+        restaurant={items.find(item => item.restaurantName === restaurantName)?.restaurant}
+      />
 
 {Object.entries(items.map(item => item.restaurantName).reduce((acc, curr) => (acc[curr] = (acc[curr] || 0) + 1, acc), {}))
          .map(([restaurantName, quantity], index)=>(
