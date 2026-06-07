@@ -375,6 +375,7 @@ export default function Home({navigation}) {
         id: 'special_offers',
         title: i18n.t('home.sections.specialOffers'),
         icon: 'local-offer',
+        iconType: 'material',
         restaurants: restaurantsWithPromotions.slice(0, 8),
         type: 'promotions'
       })
@@ -515,7 +516,7 @@ export default function Home({navigation}) {
                   {section.icon && (
                     <Icon
                       name={section.icon}
-                      type="material-community"
+                      type={section.iconType || 'material-community'}
                       size={20}
                       color={colors.primary}
                       style={styles.sectionIcon}

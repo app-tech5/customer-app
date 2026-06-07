@@ -1,14 +1,14 @@
 import { ApiClient } from './client';
 
 ApiClient.prototype.getFoods = async function (restaurantId) {
-  return await this.apiCall(`/products?type=${restaurantId}`);
+  return await this.apiCall(`/resource/products?type=${encodeURIComponent(String(restaurantId))}`);
 };
 
 ApiClient.prototype.getFoodById = async function (foodId, restaurantId) {
   try {
     const endpoint = restaurantId
-      ? `/products/${foodId}?restaurantId=${restaurantId}`
-      : `/products/${foodId}`;
+      ? `/resource/products/${foodId}?restaurantId=${encodeURIComponent(String(restaurantId))}`
+      : `/resource/products/${foodId}`;
     return await this.apiCall(endpoint);
   } catch (error) {
     console.error('Error fetching food by id:', error);

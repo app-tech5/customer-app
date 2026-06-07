@@ -262,7 +262,10 @@
     "ctaText": "Add this product to your order and customize it to your taste!",
     "minutesAbbrev": "min",
     "uncategorized": "Uncategorized",
-    "noImage": "No Image"
+    "noImage": "No Image",
+    "menuTitle": "Menu",
+    "noItemsFoundForFilter": "No items match this filter",
+    "tryAdjustingFilter": "Try another filter or clear the selected tags"
   },
     "cart": {
     "title": "Your Cart",

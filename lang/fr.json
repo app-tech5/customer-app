@@ -222,7 +222,10 @@
     "ctaText": "Ajoutez ce produit à votre commande et personnalisez-le selon vos goûts !",
     "minutesAbbrev": "min",
     "uncategorized": "Non catégorisé",
-    "noImage": "Pas d'image"
+    "noImage": "Pas d'image",
+    "menuTitle": "Menu",
+    "noItemsFoundForFilter": "Aucun plat ne correspond à ce filtre",
+    "tryAdjustingFilter": "Essayez un autre filtre ou désélectionnez les tags"
   },
   "cart": {
     "title": "Votre panier",

@@ -173,13 +173,13 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
     );
 
   }, [activeTab, restaurantData])
-  
+
   const availableFilters = [
     { id: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
     { id: 'vegan', label: 'Vegan', icon: 'leaf-circle' },
     { id: 'spicy', label: 'Spicy', icon: 'fire' },
     { id: 'popular', label: 'Popular', icon: 'star' },
-  ]
+  ];
   
   const filteredFoods = useMemo(() => {
     let result = foods;
@@ -194,10 +194,10 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
     
     if (activeFilters.length > 0) {
       result = result.filter(food => {
-        if (activeFilters.includes('vegetarian') && !food.tags?.includes('végétarien')) return false;
+        if (activeFilters.includes('vegetarian') && !food.tags?.includes('vegetarian')) return false;
         if (activeFilters.includes('vegan') && !food.tags?.includes('vegan')) return false;
-        if (activeFilters.includes('spicy') && !food.tags?.includes('épicé')) return false;
-        if (activeFilters.includes('popular') && (!food.rating?.average || food.rating.average < 4)) return false;
+        if (activeFilters.includes('spicy') && !food.tags?.includes('spicy')) return false;
+        if (activeFilters.includes('popular') && ((food.rating?.average ?? 0) < 3 || (food.rating?.count ?? 0) < 20)) return false;
         return true;
       });
     }
@@ -285,13 +285,22 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       {filteredFoods.length === 0 && foods.length > 0 && (
         <View style={styles.noResultsContainer}>
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={48} />
-          <Text style={styles.noResultsText}>{i18n.t('menu.noItemsFound')}</Text>
-          <Text style={styles.noResultsSubtext}>{i18n.t('menu.tryAdjustingSearch')}</Text>
+          {activeFilters.length > 0 ? (
+            <>
+              <Text style={styles.noResultsText}>{i18n.t('menu.noItemsFoundForFilter')}</Text>
+              <Text style={styles.noResultsSubtext}>{i18n.t('menu.tryAdjustingFilter')}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.noResultsText}>No items found</Text>
+              <Text style={styles.noResultsSubtext}>Try adjusting your search</Text>
+            </>
+          )}
         </View>
       )}
 
       {}
-      {filteredFoods.length > 0 && categories && categories.length > 0 ? (
+      {filteredFoods.length > 0 && (categories && categories.length > 0 ? (
         <FlatList
           ref={foodsRef}
           data={categories}
@@ -418,7 +427,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             }}
           />
         </View>
-      )}
+      ))}
     </View>
   )
 }
