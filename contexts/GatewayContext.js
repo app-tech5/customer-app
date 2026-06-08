@@ -35,7 +35,7 @@ export function GatewayProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    if (signedIn.userToken) {
+    if (signedIn) {
       loadGateways()
     } else {
       setGateways([])
