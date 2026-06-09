@@ -176,15 +176,9 @@ export const attachStripePaymentMethod = (paymentMethodId) =>
   api.attachStripePaymentMethod(paymentMethodId);
 export const removeStripePaymentMethod = (paymentMethodId) =>
   api.removeStripePaymentMethod(paymentMethodId);
-export const getUserTransactions = (userId, page, limit) =>
-  api.getUserTransactions(userId, page, limit);
-export const getTransactionById = (userId, transactionId) =>
-  api.getTransactionById(userId, transactionId);
-export const getWalletBalance = (userId) => api.getWalletBalance(userId);
-export const addMoneyToWallet = (userId, amount, paymentMethodId) =>
-  api.addMoneyToWallet(userId, amount, paymentMethodId);
-export const withdrawFromWallet = (userId, amount, paymentMethodId) =>
-  api.withdrawFromWallet(userId, amount, paymentMethodId);
+export const getUserTransactions = () => api.getUserTransactions();
+export const addMoneyToWallet = (transactionData) =>
+  api.addMoneyToWallet(transactionData);
 export const updatePaymentMethod = (paymentMethodId, paymentMethodData) =>
   api.updatePaymentMethod(paymentMethodId, paymentMethodData);      
 export const restaurantsCol = 'restaurants';

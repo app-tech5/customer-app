@@ -23,6 +23,7 @@ import CheckoutScreen from '../screens/CheckoutScreen'
 import Wallet from '../screens/Wallet'
 import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
 import AddCard from '../screens/AddCard'
+import AddMoneyScreen from '../screens/AddMoneyScreen'
 import Settings from '../screens/Settings'
 import { colors } from '../global'
 
@@ -207,6 +208,11 @@ export function WalletSectionNavigator({ navigation }) {
         component={AddCard}
         options={{ headerShown: true }}
       />
+      <WalletStack.Screen
+        name="AddMoney"
+        component={AddMoneyScreen}
+        options={{ headerShown: true }}
+      />
     </WalletStack.Navigator>
   )
 }
@@ -239,6 +245,11 @@ export function WalletFlowNavigator({ navigation }) {
       <WalletStack.Screen
         name="AddCard"
         component={AddCard}
+        options={{ headerShown: true }}
+      />
+      <WalletStack.Screen
+        name="AddMoney"
+        component={AddMoneyScreen}
         options={{ headerShown: true }}
       />
     </WalletStack.Navigator>

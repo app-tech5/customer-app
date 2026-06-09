@@ -7,6 +7,8 @@ import { colors } from '../global'
 import Loader from './Loader'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
+import { getUserTransactions } from '../api'
+import { useSettings } from '../contexts/SettingContext'
 
 export default function WalletScreen({ navigation, route}) {
   const {
@@ -14,6 +16,7 @@ export default function WalletScreen({ navigation, route}) {
     setDefaultPaymentMethod,
     removePaymentMethod,
   } = usePaymentMethods()
+  const { currency } = useSettings()
   const [transactions, setTransactions] = useState([])
   const [balance, setBalance] = useState(0)
   const [loader, setLoader] = useState(true)
@@ -43,18 +46,10 @@ export default function WalletScreen({ navigation, route}) {
         }
       ]
 
-      setTransactions(transactionsData.slice(0, 5)) 
-      
-      const calculatedBalance = transactionsData.reduce((acc, transaction) => {
-        if (transaction.transaction_type === 'refund' || transaction.transaction_type === 'adjustment') {
-          return acc + transaction.amount
-        } else if (transaction.transaction_type === 'customer_payment') {
-          return acc - transaction.amount
-        }
-        return acc
-      }, 0)
+      setTransactions(transactionsData.slice(0, 5))
 
-      setBalance(calculatedBalance)
+      const { balance } = await getUserTransactions()
+      setBalance(Number(balance) || 0)
     } catch (err) {
       console.error('Error loading wallet data:', err)
       setError(i18n.t('wallet.loadError', 'Error loading wallet data'))
@@ -84,16 +79,13 @@ export default function WalletScreen({ navigation, route}) {
       </View>
 
       <Text style={styles.balanceAmount}>
-        ${balance.toFixed(2)}
+        {currency.symbol}{balance.toFixed(2)}
       </Text>
 
       <View style={styles.balanceActions}>
         <TouchableOpacity
           style={styles.balanceActionButton}
-          onPress={() => {
-            
-            Alert.alert('Not implemented', 'Add money functionality will be implemented')
-          }}
+          onPress={() => navigation.navigate('AddMoney')}
         >
           <Ionicons name="add-circle" size={20} color={colors.primary} />
           <Text style={styles.balanceActionText}>
