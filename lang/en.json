@@ -459,6 +459,8 @@
     "refund": "Refund",
     "tip": "Tip",
     "adjustment": "Adjustment",
+    "topUp": "Top up",
+    "paymentMethodDisabledInDemo": "Adding or removing payment methods is not available in demo mode.",
     "loadError": "Error loading wallet data",
     "errorTitle": "Unable to load wallet",
     "addPaymentMethod": "Add payment method",

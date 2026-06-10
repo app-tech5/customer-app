@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   footer: {
-    flex: 3,
+    flex: 2,
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,

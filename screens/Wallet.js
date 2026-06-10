@@ -26,29 +26,11 @@ export default function WalletScreen({ navigation, route}) {
     try {
       setLoader(true)
       setError(null)
-      
-      let transactionsData = []
-      
-      transactionsData = [
-        {
-          id: '1',
-          transaction_type: 'customer_payment',
-          amount: 25.99,
-          createdAt: new Date(Date.now() - 86400000), 
-          description: 'Order payment'
-        },
-        {
-          id: '2',
-          transaction_type: 'refund',
-          amount: 15.50,
-          createdAt: new Date(Date.now() - 172800000), 
-          description: 'Order refund'
-        }
-      ]
 
-      setTransactions(transactionsData.slice(0, 5))
+      const { transactions, balance } = await getUserTransactions()
+      const list = Array.isArray(transactions) ? transactions : []
 
-      const { balance } = await getUserTransactions()
+      setTransactions(list.slice(0, 5))
       setBalance(Number(balance) || 0)
     } catch (err) {
       console.error('Error loading wallet data:', err)
@@ -198,6 +180,8 @@ export default function WalletScreen({ navigation, route}) {
           return 'heart'
         case 'adjustment':
           return 'settings'
+        case 'customer_top_up':
+          return 'add-circle'
         default:
           return 'swap-horizontal'
       }
@@ -209,6 +193,7 @@ export default function WalletScreen({ navigation, route}) {
           return colors.error
         case 'refund':
         case 'tip':
+        case 'customer_top_up':
           return colors.success
         case 'adjustment':
           return colors.warning
@@ -227,6 +212,8 @@ export default function WalletScreen({ navigation, route}) {
           return i18n.t('wallet.tip', 'Tip')
         case 'adjustment':
           return i18n.t('wallet.adjustment', 'Adjustment')
+        case 'customer_top_up':
+          return i18n.t('wallet.topUp', 'Top up')
         default:
           return type
       }
@@ -236,6 +223,9 @@ export default function WalletScreen({ navigation, route}) {
       const date = new Date(dateString)
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
+
+    const isCredit = ['refund', 'tip', 'adjustment', 'customer_top_up'].includes(transaction.transaction_type)
+    const transactionDate = transaction.createdAt || transaction.date_created
 
     return (
       <View style={styles.transactionItem}>
@@ -248,13 +238,13 @@ export default function WalletScreen({ navigation, route}) {
               {getTransactionTitle(transaction.transaction_type)}
             </Text>
             <Text style={styles.transactionDate}>
-              {formatDate(transaction.createdAt)}
+              {formatDate(transactionDate)}
             </Text>
           </View>
         </View>
 
         <Text style={[styles.transactionAmount, { color: getTransactionColor(transaction.transaction_type) }]}>
-          {transaction.transaction_type === 'customer_payment' ? '-' : '+'}${transaction.amount?.toFixed(2)}
+          {isCredit ? '+' : '-'}{currency.symbol}{transaction.amount?.toFixed(2)}
         </Text>
       </View>
     )
@@ -291,7 +281,7 @@ export default function WalletScreen({ navigation, route}) {
       ) : (
         <FlatList
           data={transactions}
-          keyExtractor={(item, index) => item.id || index.toString()}
+          keyExtractor={(item, index) => String(item._id || item.id || index)}
           renderItem={({ item }) => <TransactionItem transaction={item} />}
           scrollEnabled={false}
           ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}

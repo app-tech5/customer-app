@@ -413,6 +413,8 @@
     "refund": "Remboursement",
     "tip": "Pourboire",
     "adjustment": "Ajustement",
+    "topUp": "Rechargement",
+    "paymentMethodDisabledInDemo": "L'ajout ou la suppression de moyens de paiement n'est pas disponible en mode démo.",
     "loadError": "Erreur lors du chargement des données du portefeuille",
     "errorTitle": "Impossible de charger le portefeuille",
     "addPaymentMethod": "Ajouter un moyen de paiement",
