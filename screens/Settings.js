@@ -1,5 +1,6 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native'
+import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native'
 import React, { useState, useEffect } from 'react'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo, Feather } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import i18n from '../lang/i18n'
@@ -9,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function Settings({ navigation }) {
   const dispatch = useDispatch()
+  const insets = useSafeAreaInsets()
   const { language } = useSelector((state) => state.settings || {})
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
@@ -154,7 +156,10 @@ export default function Settings({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 24 }}
+      >
         {}
         <SettingSection title={i18n.t('settings.account', 'Account')}>
           <SettingItem
@@ -166,8 +171,7 @@ export default function Settings({ navigation }) {
           />
 
           <SettingItem
-            icon="card"
-            iconType="MaterialIcons"
+            icon="wallet-outline"
             title={i18n.t('drawer.wallet', 'Wallet')}
             subtitle={i18n.t('settings.manageWallet', 'Manage payment methods and balance')}
             onPress={() => navigation.navigate('WalletFlow', {

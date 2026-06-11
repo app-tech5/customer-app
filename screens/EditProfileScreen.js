@@ -1,11 +1,12 @@
-import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons, MaterialIcons, Entypo, FontAwesome } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
-import { userInfos, updateUser } from '../api'
+import { userInfos, updateUser, uploadPublicFile } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-import { config } from '../config'
+import { config, PUBLIC_UPLOAD_FOLDERS } from '../config'
+import { pickImageFromLibrary, pickImageFromCamera } from '../utils/pickImage'
 import Loader from './Loader'
 
 export default function EditProfileScreen({ navigation }) {
@@ -23,6 +24,7 @@ export default function EditProfileScreen({ navigation }) {
   const [originalData, setOriginalData] = useState({})
   const [loader, setLoader] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -147,17 +149,34 @@ export default function EditProfileScreen({ navigation }) {
       }
       
       const updateData = {}
-      Object.keys(userData).forEach(key => {
-        if (userData[key] !== originalData[key]) {
-          updateData[key] = userData[key]
+      const dataToSave = { ...userData }
+
+      if (
+        dataToSave.image?.startsWith('file://') ||
+        dataToSave.image?.startsWith('content://')
+      ) {
+        dataToSave.image = await uploadPublicFile(
+          {
+            uri: dataToSave.image,
+            mimeType: 'image/jpeg',
+            fileName: 'upload.jpg',
+          },
+          PUBLIC_UPLOAD_FOLDERS.AVATARS
+        )
+        setUserData(dataToSave)
+      }
+
+      Object.keys(dataToSave).forEach(key => {
+        if (dataToSave[key] !== originalData[key]) {
+          updateData[key] = dataToSave[key]
         }
       })
 
       await updateUser(updateData, userId)
       
-      dispatch({ type: 'UPDATE_USER', payload: userData })
+      dispatch({ type: 'UPDATE_USER', payload: dataToSave })
       
-      setOriginalData({ ...userData })
+      setOriginalData({ ...dataToSave })
 
       Alert.alert(
         i18n.t('profile.updateSuccess', 'Success'),
@@ -206,29 +225,72 @@ export default function EditProfileScreen({ navigation }) {
     }
   }
 
+  const processPickedImage = async (asset) => {
+    if (!asset) return
+
+    setUserData((prev) => ({ ...prev, image: asset.uri }))
+    setUploadingAvatar(true)
+
+    try {
+      const url = await uploadPublicFile(asset, PUBLIC_UPLOAD_FOLDERS.AVATARS)
+      setUserData((prev) => ({ ...prev, image: url }))
+    } catch (err) {
+      console.error('Photo upload error:', err)
+      setUserData((prev) => ({ ...prev, image: originalData.image }))
+      Alert.alert(
+        i18n.t('profile.updateError', 'Error'),
+        i18n.t('profile.uploadError', 'Failed to upload photo. Please try again.')
+      )
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  const handlePickFromCamera = async () => {
+    try {
+      const asset = await pickImageFromCamera()
+      await processPickedImage(asset)
+    } catch (err) {
+      console.error('Camera error:', err)
+      Alert.alert(
+        i18n.t('common.error', 'Error'),
+        err.message || i18n.t('profile.uploadError', 'Failed to upload photo. Please try again.')
+      )
+    }
+  }
+
+  const handlePickFromGallery = async () => {
+    try {
+      const asset = await pickImageFromLibrary()
+      await processPickedImage(asset)
+    } catch (err) {
+      console.error('Gallery error:', err)
+      Alert.alert(
+        i18n.t('common.error', 'Error'),
+        err.message || i18n.t('profile.uploadError', 'Failed to upload photo. Please try again.')
+      )
+    }
+  }
+
   const handleAvatarChange = () => {
+    if (uploadingAvatar) return
+
     Alert.alert(
       i18n.t('profile.changePhoto', 'Change Photo'),
       i18n.t('profile.changePhotoMessage', 'Choose how you want to change your profile photo'),
       [
         {
           text: i18n.t('profile.takePhoto', 'Take Photo'),
-          onPress: () => {
-            
-            Alert.alert('Not implemented', 'Camera functionality will be implemented')
-          }
+          onPress: handlePickFromCamera,
         },
         {
           text: i18n.t('profile.chooseFromGallery', 'Choose from Gallery'),
-          onPress: () => {
-            
-            Alert.alert('Not implemented', 'Gallery picker will be implemented')
-          }
+          onPress: handlePickFromGallery,
         },
         {
           text: i18n.t('common.cancel', 'Cancel'),
-          style: 'cancel'
-        }
+          style: 'cancel',
+        },
       ]
     )
   }
@@ -308,9 +370,15 @@ export default function EditProfileScreen({ navigation }) {
                 style={styles.avatar}
                 resizeMode="cover"
               />
+              {uploadingAvatar && (
+                <View style={styles.avatarOverlay}>
+                  <ActivityIndicator size="small" color={colors.text.white} />
+                </View>
+              )}
               <TouchableOpacity
                 style={styles.editAvatarButton}
                 onPress={handleAvatarChange}
+                disabled={uploadingAvatar}
               >
                 <Ionicons name="camera" size={16} color={colors.text.white} />
               </TouchableOpacity>
@@ -418,6 +486,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 3,
     borderColor: colors.primary,
+  },
+  avatarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   editAvatarButton: {
     position: 'absolute',

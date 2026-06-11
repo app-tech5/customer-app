@@ -55,19 +55,30 @@ export default function OrderTracking() {
 
   const orderIdFromParams = orderParam?.id || orderParam?._id
 
+  const resetToDrawer = (drawerScreen = 'BottomTabs') => {
+    let root = navigation
+    while (root.getParent()) {
+      root = root.getParent()
+    }
+    root.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'DrawerNavigator',
+          state: {
+            routes: [{ name: drawerScreen }],
+            index: 0,
+          },
+        },
+      ],
+    })
+  }
+
   useEffect(() => {
     navigation.setOptions({
       title: i18n.t('order.tracking', 'Track Order'),
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ padding: 10, marginLeft: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-      ),
+      headerBackVisible: false,
+      headerLeft: () => null,
     })
 
     if (orderIdFromParams) {
@@ -370,7 +381,7 @@ export default function OrderTracking() {
               }
             </Text>
           </View>
-          {order.delivery?.deliveryFee && (
+          {order.delivery?.deliveryFee != null && (
             <View style={styles.detailsRow}>
               <Text style={styles.detailsLabel}>
                 {i18n.t('order.deliveryFee', 'Delivery Fee')}:
@@ -380,7 +391,7 @@ export default function OrderTracking() {
               </Text>
             </View>
           )}
-          {order.tax?.amount && (
+          {order.tax?.amount != null && (
             <View style={styles.detailsRow}>
               <Text style={styles.detailsLabel}>
                 {i18n.t('order.tax', 'Tax')}:
@@ -409,6 +420,26 @@ export default function OrderTracking() {
           <Ionicons name="refresh" size={20} color={colors.primary} />
           <Text style={styles.refreshButtonText}>
             {i18n.t('order.refresh', 'Refresh Status')}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => resetToDrawer('BottomTabs')}
+        >
+          <Ionicons name="home" size={20} color={colors.text.white} />
+          <Text style={styles.homeButtonText}>
+            {i18n.t('order.backToHome', 'Back to home')}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.ordersButton}
+          onPress={() => resetToDrawer('Orders')}
+        >
+          <Ionicons name="receipt-outline" size={20} color={colors.primary} />
+          <Text style={styles.ordersButtonText}>
+            {i18n.t('order.viewMyOrders', 'View my orders')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -597,6 +628,38 @@ const styles = StyleSheet.create({
   refreshButtonText: {
     fontSize: 16,
     fontWeight: '500',
+    color: colors.primary,
+    marginLeft: 8,
+  },
+  homeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  homeButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.white,
+    marginLeft: 8,
+  },
+  ordersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background.primary,
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  ordersButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: colors.primary,
     marginLeft: 8,
   },

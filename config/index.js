@@ -16,5 +16,9 @@ export const config = {
   assetUrls,
 };
 
+export const PUBLIC_UPLOAD_FOLDERS = {
+  AVATARS: 'avatars',
+};
+
 export { assetUrls };
 

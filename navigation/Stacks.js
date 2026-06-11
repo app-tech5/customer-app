@@ -347,16 +347,8 @@ export function OrderStatusNavigator({ navigation, route }) {
         initialParams={initialRouteName === 'OrderTracking' ? initialParams : undefined}
         options={{
           headerShown: true,
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{ padding: 10, marginLeft: 5 }}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-            >
-              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-          ),
+          headerBackVisible: false,
+          headerLeft: () => null,
         }}
       />
     </OrderStatusStack.Navigator>
@@ -384,6 +376,14 @@ export function SettingsSectionNavigator({ navigation }) {
               <Ionicons name="menu" size={24} color={colors.text.primary} />
             </TouchableOpacity>
           ),
+        }}
+      />
+      <SettingsStack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: 'Edit Profile',
+          headerShown: true,
         }}
       />
     </SettingsStack.Navigator>

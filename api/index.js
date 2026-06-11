@@ -17,6 +17,7 @@ import './drivers';
 import './deliverySettings';
 import './promotions';
 import './cart';
+import './upload';
 import { filterRestaurantPromotions } from './promotions';
 
 export const api = new ApiClient();
@@ -92,6 +93,8 @@ export const updateProfile = (userId, userData) =>
   api.updateProfile(userId, userData);
 export const updateAvatar = (userId, imageUriOrFormData) =>
   api.updateAvatar(userId, imageUriOrFormData);
+export const uploadPublicFile = (asset, folder) =>
+  api.uploadPublicFile(asset, folder);
 export const getFoods = (restaurantId) => api.getFoods(restaurantId);
 export const getFoodById = (foodId, restaurantId) =>
   api.getFoodById(foodId, restaurantId);

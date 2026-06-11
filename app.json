@@ -26,6 +26,13 @@
       "expo-font",
       "expo-localization",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Good Food to access your photos to update your profile picture.",
+          "cameraPermission": "Allow Good Food to access your camera to take a profile photo."
+        }
+      ],
+      [
         "@stripe/stripe-react-native",
         {
           "merchantIdentifier": "merchant.com.goodfoods.goodfoods"

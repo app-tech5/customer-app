@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from './constants';
+import { API_BASE_URL, API_TIMEOUT } from './constants';
 
 export class ApiClient {
   constructor() {
@@ -39,6 +39,38 @@ export class ApiClient {
       }
       return await response.json();
     } catch (error) {
+      console.error(`API call failed: ${endpoint}`, error);
+      throw error;
+    }
+  }
+
+  async apiCallMultipart(endpoint, options = {}) {
+    try {
+      const url = `${API_BASE_URL}${endpoint}`;
+      const headers = {};
+      if (this.token) {
+        headers.Authorization = `Bearer ${this.token}`;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+
+      const response = await fetch(url, {
+        ...options,
+        headers: { ...headers, ...options.headers },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - check your connection');
+      }
       console.error(`API call failed: ${endpoint}`, error);
       throw error;
     }
