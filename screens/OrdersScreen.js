@@ -1,9 +1,10 @@
-import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native'
+import { View, Text, FlatList, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native'
 import React, { useEffect, useState, useMemo, useContext } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { getOrders } from '../api'
+import { getOrders, cancelOrder } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
+import { config } from '../config'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
@@ -55,27 +56,35 @@ export default function OrdersScreen({ navigation }) {
     }
   }
 
+  const showDemoCancelBlockAlert = () => {
+    Alert.alert(i18n.t('common.info'), i18n.t('order.cancelDisabledInDemo'))
+  }
+
   const handleCancelOrder = async (order) => {
     try {
-      
+      if (config.DEMO_MODE) {
+        showDemoCancelBlockAlert()
+        return
+      }
+
       if (order.status?.toLowerCase() !== 'pending') {
         Alert.alert(
-          i18n.t('order.cancelError', 'Cancel Error'),
-          i18n.t('order.cannotCancel', 'This order cannot be cancelled')
+          i18n.t('order.cancelError'),
+          i18n.t('order.cannotCancel')
         )
         return
       }
       
       Alert.alert(
-        i18n.t('order.confirmCancel', 'Confirm Cancellation'),
-        i18n.t('order.cancelMessage', 'Are you sure you want to cancel this order? This action cannot be undone.'),
+        i18n.t('order.confirmCancel'),
+        i18n.t('order.cancelMessage'),
         [
           {
-            text: i18n.t('common.cancel', 'Cancel'),
+            text: i18n.t('common.cancel'),
             style: 'cancel'
           },
           {
-            text: i18n.t('order.confirmCancelButton', 'Cancel Order'),
+            text: i18n.t('order.confirmCancelButton'),
             style: 'destructive',
             onPress: () => proceedWithCancel(order)
           }
@@ -84,8 +93,8 @@ export default function OrdersScreen({ navigation }) {
     } catch (error) {
       console.error('Error cancelling order:', error)
       Alert.alert(
-        i18n.t('order.cancelError', 'Cancel Error'),
-        i18n.t('order.cancelFailed', 'Failed to cancel order')
+        i18n.t('order.cancelError'),
+        i18n.t('order.cancelFailed')
       )
     }
   }
@@ -104,14 +113,14 @@ export default function OrdersScreen({ navigation }) {
       )
 
       Alert.alert(
-        i18n.t('order.cancelSuccess', 'Order Cancelled'),
-        i18n.t('order.cancelSuccessMessage', 'Your order has been successfully cancelled')
+        i18n.t('order.cancelSuccess'),
+        i18n.t('order.cancelSuccessMessage')
       )
     } catch (error) {
       console.error('Error cancelling order:', error)
       Alert.alert(
-        i18n.t('order.cancelError', 'Cancel Error'),
-        i18n.t('order.cancelFailed', 'Failed to cancel order')
+        i18n.t('order.cancelError'),
+        i18n.t('order.cancelFailed')
       )
     }
   }

@@ -67,7 +67,7 @@ export default function CategoryResults({route, navigation}) {
           onPress={() => {
             
             if (cameFromOffers || promotionName) {
-              navigation.navigate('Offers')
+              navigation.navigate('DrawerNavigator', { screen: 'Offers' })
             } else {
               
               navigation.goBack()

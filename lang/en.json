@@ -413,7 +413,16 @@
     "transactionId": "Transaction ID",
     "reorder": "Reorder",
     "delivered": "Delivered",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "confirmCancel": "Confirm Cancellation",
+    "cancelMessage": "Are you sure you want to cancel this order? This action cannot be undone.",
+    "confirmCancelButton": "Cancel Order",
+    "cancelError": "Cancel Error",
+    "cannotCancel": "This order cannot be cancelled.",
+    "cancelFailed": "Failed to cancel order. Please try again.",
+    "cancelSuccess": "Order Cancelled",
+    "cancelSuccessMessage": "Your order has been successfully cancelled.",
+    "cancelDisabledInDemo": "Cancelling orders is not available in demo mode."
   },
   "payment": {
     "credit_card": "Card",
@@ -559,6 +568,7 @@
     "tapToChangePhoto": "Tap to change profile photo",
     "uploadError": "Failed to upload photo. Please try again.",
     "uploadDisabledInDemo": "Changing your profile photo is not available in demo mode.",
+    "updateDisabledInDemo": "Updating your profile is not available in demo mode.",
     "photoPermissionDenied": "Photo access is required to change your profile picture.",
     "defaultUserName": "User",
     "avatarChangeMessage": "Avatar change will be implemented",

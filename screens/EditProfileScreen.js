@@ -129,7 +129,16 @@ export default function EditProfileScreen({ navigation }) {
     return true
   }
 
+  const showDemoProfileBlockAlert = () => {
+    Alert.alert(i18n.t('common.info', 'Info'), i18n.t('profile.updateDisabledInDemo'))
+  }
+
   const handleSave = async () => {
+    if (config.DEMO_MODE) {
+      showDemoProfileBlockAlert()
+      return
+    }
+
     if (!hasChanges()) {
       Alert.alert(i18n.t('common.info', 'Info'), i18n.t('profile.noChanges', 'No changes to save'))
       return
@@ -208,6 +217,11 @@ export default function EditProfileScreen({ navigation }) {
   }
 
   const handleGoBack = () => {
+    if (config.DEMO_MODE) {
+      navigation.goBack()
+      return
+    }
+
     if (hasChanges()) {
       Alert.alert(
         i18n.t('profile.unsavedChanges', 'Unsaved Changes'),

@@ -222,8 +222,7 @@ export default function SearchResults({ route, navigation }) {
         <TouchableOpacity
           onPress={() => {
             if (cameFromOffers) {
-
-              navigation.navigate('Offers')
+              navigation.navigate('DrawerNavigator', { screen: 'Offers' })
             } else if (fromCategoryResults) {
 
               navigation.navigate('CategoryResults', route.params?.categoryResultsParams || {})

@@ -176,7 +176,7 @@ export default function OrderDetails() {
           <Ionicons name="cash-outline" size={20} color={colors.text.secondary} />
           <Text style={styles.summaryLabel}>{i18n.t('order.total', 'Total')}</Text>
           <Text style={styles.summaryValue}>
-            {order.totalPrice && !isNaN(order.totalPrice) ?
+            {order.totalPrice != null && !isNaN(order.totalPrice) ?
               `${order.totalPrice.toFixed(2)}${currency.symbol}` : 'N/A'
             }
           </Text>
@@ -196,7 +196,7 @@ export default function OrderDetails() {
         <View style={styles.itemInfo}>
           <Text style={styles.itemName}>{item.name}</Text>
           <Text style={styles.itemPrice}>
-            {item.price && !isNaN(item.price) ?
+            {item.price != null && !isNaN(item.price) ?
               `${item.price.toFixed(2)}${currency.symbol}` : 'N/A'
             }
           </Text>
@@ -240,7 +240,7 @@ export default function OrderDetails() {
 
       <View style={styles.itemTotal}>
         <Text style={styles.itemTotalText}>
-          {i18n.t('order.subtotal', 'Subtotal')}: {item.total && !isNaN(item.total) ?
+          {i18n.t('order.subtotal', 'Subtotal')}:           {item.total != null && !isNaN(item.total) ?
             `${item.total.toFixed(2)}${currency.symbol}` : 'N/A'
           }
         </Text>
@@ -297,7 +297,7 @@ export default function OrderDetails() {
           </View>
         )}
 
-        {order.delivery?.deliveryFee && (
+        {order.delivery?.deliveryFee != null && !isNaN(order.delivery.deliveryFee) && (
           <View style={styles.infoItem}>
             <Ionicons name="cash-outline" size={20} color={colors.primary} />
             <View style={styles.infoContent}>
@@ -305,9 +305,7 @@ export default function OrderDetails() {
                 {i18n.t('order.deliveryFee', 'Delivery Fee')}
               </Text>
               <Text style={styles.infoValue}>
-                {order.delivery.deliveryFee && !isNaN(order.delivery.deliveryFee) ?
-                  `${order.delivery.deliveryFee.toFixed(2)}${currency.symbol}` : 'N/A'
-                }
+                {`${order.delivery.deliveryFee.toFixed(2)}${currency.symbol}`}
               </Text>
             </View>
           </View>
@@ -379,32 +377,28 @@ export default function OrderDetails() {
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>{i18n.t('order.subtotal', 'Subtotal')}</Text>
           <Text style={styles.totalValue}>
-            {order.subtotal && !isNaN(order.subtotal) ?
+            {order.subtotal != null && !isNaN(order.subtotal) ?
               `${order.subtotal.toFixed(2)}${currency.symbol}` : 'N/A'
             }
           </Text>
         </View>
 
-        {order.delivery?.deliveryFee && (
+        {order.delivery?.deliveryFee != null && !isNaN(order.delivery.deliveryFee) && (
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>{i18n.t('order.deliveryFee', 'Delivery Fee')}</Text>
             <Text style={styles.totalValue}>
-              {order.delivery.deliveryFee && !isNaN(order.delivery.deliveryFee) ?
-                `${order.delivery.deliveryFee.toFixed(2)}${currency.symbol}` : 'N/A'
-              }
+              {`${order.delivery.deliveryFee.toFixed(2)}${currency.symbol}`}
             </Text>
           </View>
         )}
 
-        {order.tax?.amount && (
+        {order.tax?.amount != null && !isNaN(order.tax.amount) && (
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>
-              {i18n.t('order.tax', 'Tax')} ({order.tax.rate ? (order.tax.rate * 100).toFixed(1) : 0}%)
+              {i18n.t('order.tax', 'Tax')} ({order.tax.rate != null ? (order.tax.rate * 100).toFixed(1) : 0}%)
             </Text>
             <Text style={styles.totalValue}>
-              {order.tax.amount && !isNaN(order.tax.amount) ?
-                `${order.tax.amount.toFixed(2)}${currency.symbol}` : 'N/A'
-              }
+              {`${order.tax.amount.toFixed(2)}${currency.symbol}`}
             </Text>
           </View>
         )}
@@ -412,7 +406,7 @@ export default function OrderDetails() {
         <View style={[styles.totalRow, styles.finalTotal]}>
           <Text style={styles.finalTotalLabel}>{i18n.t('order.total', 'Total')}</Text>
           <Text style={styles.finalTotalValue}>
-            {order.totalPrice && !isNaN(order.totalPrice) ?
+            {order.totalPrice != null && !isNaN(order.totalPrice) ?
               `${order.totalPrice.toFixed(2)}${currency.symbol}` : 'N/A'
             }
           </Text>

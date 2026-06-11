@@ -59,6 +59,11 @@ export default function AccountScreen({ navigation }) {
   }
 
   const handleUpdateProfile = async (field, value) => {
+    if (config.DEMO_MODE) {
+      Alert.alert(i18n.t('common.info'), i18n.t('profile.updateDisabledInDemo'))
+      return
+    }
+
     try {
       const updateData = { [field]: value }
       await updateUser(updateData, user.id || user.userId)

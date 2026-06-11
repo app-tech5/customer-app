@@ -368,7 +368,16 @@
     "transactionId": "ID de transaction",
     "reorder": "Commander à nouveau",
     "delivered": "Livrée",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "confirmCancel": "Confirmer l'annulation",
+    "cancelMessage": "Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible.",
+    "confirmCancelButton": "Annuler la commande",
+    "cancelError": "Erreur d'annulation",
+    "cannotCancel": "Cette commande ne peut pas être annulée.",
+    "cancelFailed": "Échec de l'annulation de la commande. Veuillez réessayer.",
+    "cancelSuccess": "Commande annulée",
+    "cancelSuccessMessage": "Votre commande a été annulée avec succès.",
+    "cancelDisabledInDemo": "L'annulation de commande n'est pas disponible en mode démo."
   },
   "payment": {
     "credit_card": "Carte bancaire",
@@ -554,6 +563,7 @@
     "tapToChangePhoto": "Appuyez pour changer la photo de profil",
     "uploadError": "Échec de l'envoi de la photo. Veuillez réessayer.",
     "uploadDisabledInDemo": "Le changement de photo de profil n'est pas disponible en mode démo.",
+    "updateDisabledInDemo": "La mise à jour du profil n'est pas disponible en mode démo.",
     "photoPermissionDenied": "L'accès aux photos est requis pour changer votre photo de profil.",
     "defaultUserName": "Utilisateur",
     "avatarChangeMessage": "Changement de photo à venir",
