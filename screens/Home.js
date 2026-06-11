@@ -8,6 +8,7 @@ import RestaurantItems from '../components/home/RestaurantItems'
 import { Divider } from 'react-native-elements'
 import { colors } from '../global'
 import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
+import { calculateDeliveryFeeFromSetting } from '../utils/deliverySetting'
 
 import HomeHeader from '../components/home/HomeHeader'
 import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'

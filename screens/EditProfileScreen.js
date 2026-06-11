@@ -155,6 +155,10 @@ export default function EditProfileScreen({ navigation }) {
         dataToSave.image?.startsWith('file://') ||
         dataToSave.image?.startsWith('content://')
       ) {
+        if (config.DEMO_MODE) {
+          showDemoUploadBlockAlert()
+          return
+        }
         dataToSave.image = await uploadPublicFile(
           {
             uri: dataToSave.image,
@@ -199,6 +203,10 @@ export default function EditProfileScreen({ navigation }) {
     }
   }
 
+  const showDemoUploadBlockAlert = () => {
+    Alert.alert(i18n.t('common.info', 'Info'), i18n.t('profile.uploadDisabledInDemo'))
+  }
+
   const handleGoBack = () => {
     if (hasChanges()) {
       Alert.alert(
@@ -227,6 +235,10 @@ export default function EditProfileScreen({ navigation }) {
 
   const processPickedImage = async (asset) => {
     if (!asset) return
+    if (config.DEMO_MODE) {
+      showDemoUploadBlockAlert()
+      return
+    }
 
     setUserData((prev) => ({ ...prev, image: asset.uri }))
     setUploadingAvatar(true)
@@ -274,6 +286,10 @@ export default function EditProfileScreen({ navigation }) {
 
   const handleAvatarChange = () => {
     if (uploadingAvatar) return
+    if (config.DEMO_MODE) {
+      showDemoUploadBlockAlert()
+      return
+    }
 
     Alert.alert(
       i18n.t('profile.changePhoto', 'Change Photo'),

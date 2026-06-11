@@ -2,6 +2,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView,
 import React, { useState } from 'react'
 import { Entypo, MaterialIcons } from '@expo/vector-icons'
 import { api } from '../api'
+import { config } from '../config'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as Animatable from "react-native-animatable"
 import { useDispatch } from 'react-redux'
@@ -29,6 +30,11 @@ export default function SignUp({ navigation }) {
   const [loginState, setLoginState] = useState(false)
 
   const signUp = async () => {
+    if (config.DEMO_MODE) {
+      Alert.alert(i18n.t('common.info'), i18n.t('auth.signUpDisabledInDemo'))
+      return
+    }
+
     setLoginState(true)
     try {
       const normalizedEmail = email.trim()
@@ -106,6 +112,9 @@ export default function SignUp({ navigation }) {
     >
       <View style={styles.header}>
         <Text style={styles.title}>{i18n.t('auth.registerNow')}</Text>
+        {config.DEMO_MODE && (
+          <Text style={styles.demoText}>{i18n.t('auth.signUpDisabledInDemo')}</Text>
+        )}
       </View>
 
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
@@ -204,11 +213,15 @@ export default function SignUp({ navigation }) {
 
           </View>
 
-          <TouchableOpacity onPress={() => { signUp() }}>
-
+          <TouchableOpacity
+            onPress={signUp}
+            disabled={config.DEMO_MODE}
+            style={config.DEMO_MODE && styles.signUpButtonDisabled}
+          >
             <LinearGradient
-              colors={['#948E99', '#2E1437']}
-              style={styles.signInButton} >
+              colors={config.DEMO_MODE ? ['#bdbdbd', '#9e9e9e'] : ['#948E99', '#2E1437']}
+              style={styles.signInButton}
+            >
               <Text style={{ ...styles.signInText, color: 'white' }}>{i18n.t('auth.signUp')}</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -247,6 +260,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25, fontWeight: "bold", color: "#3d5c5c",
     letterSpacing: 5
+  },
+  demoText: {
+    fontSize: 12,
+    color: "#ff6b35",
+    fontWeight: "600",
+    marginTop: 8,
+    textAlign: "center",
+    paddingHorizontal: 24,
   },
   footer: {
     flex: 3,
@@ -290,6 +311,9 @@ const styles = StyleSheet.create({
 
     marginTop: 50
 
+  },
+  signUpButtonDisabled: {
+    opacity: 0.6,
   },
   signInText: {
     fontSize: 18,
