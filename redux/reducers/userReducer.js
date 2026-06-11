@@ -17,7 +17,9 @@ let userReducer = (state={}, action)=>{
             return {...state, favorites: newFavorites}
             }
         case "REMOVE_FAVORITE": {
-            const newFavorites = (state.favorites || []).filter(id => id !== action.payload);
+            const newFavorites = (state.favorites || []).filter(
+                (id) => String(id) !== String(action.payload)
+            );
             return {...state, favorites: newFavorites}
             }
         default:

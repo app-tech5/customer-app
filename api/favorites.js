@@ -1,7 +1,13 @@
 import { ApiClient } from './client';
 
 ApiClient.prototype.getFavorites = async function () {
-  return await this.apiCall('/users/favorites');
+  const response = await this.apiCall('/users/favorites');
+  if (response?.success && Array.isArray(response.favorites)) {
+    response.favorites = response.favorites.map((restaurant) =>
+      this.normalizeRestaurant(restaurant)
+    );
+  }
+  return response;
 };
 
 ApiClient.prototype.addToFavorites = async function (restaurantId) {

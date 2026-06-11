@@ -17,6 +17,7 @@ import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
 import RestaurantSearchResults from '../screens/RestaurantSearchResults'
 import AccountScreen from '../screens/AccountScreen'
 import EditProfileScreen from '../screens/EditProfileScreen'
+import FavoritesScreen from '../screens/FavoritesScreen'
 import AddressesScreen from '../screens/AddressesScreen'
 import EditAddressScreen from '../screens/EditAddressScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
@@ -119,6 +120,33 @@ export function AccountNavigator() {
         options={{
           title: 'Edit Profile',
           headerShown: true
+        }}
+      />
+
+      <AccountStack.Screen
+        name="Favorites"
+        component={FavoritesScreen}
+        options={{ headerShown: true }}
+      />
+
+      <AccountStack.Screen
+        name="RestaurantDetail"
+        component={RestaurantDetail}
+        options={{ headerShown: false }}
+      />
+
+      <AccountStack.Screen
+        name="MenuDetailScreen"
+        component={MenuDetailScreen}
+        options={{ headerShown: false }}
+      />
+
+      <AccountStack.Screen
+        name="CartDetails"
+        component={CartDetailsScreen}
+        options={{
+          title: 'Détails du panier',
+          headerShown: true,
         }}
       />
 

@@ -60,6 +60,7 @@ export const changePassword = (currentPassword, newPassword) =>
   api.changePassword(currentPassword, newPassword);
 
 export const getRestaurants = () => api.getRestaurants();
+export { getRestaurantMongoId } from './restaurants';
 export const searchRestaurants = (query) => api.searchRestaurants(query);
 export const getNearbyRestaurants = (lat, lng, radiusKm) =>
   api.getNearbyRestaurants(lat, lng, radiusKm);

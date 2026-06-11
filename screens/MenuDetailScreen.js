@@ -6,7 +6,7 @@ import ViewCart from '../components/restaurantDetail/ViewCart'
 import { AntDesign, MaterialIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import BackButton from '../components/BackButton'
-import { getVariants, getFoods } from '../api'
+import { getVariants, getFoods, getRestaurantMongoId } from '../api'
 import i18n from '../lang/i18n'
 import { useSettings } from '../contexts/SettingContext'
 import { loadFoodsWithSmartCache } from '../utils/cacheUtils'
@@ -29,7 +29,7 @@ export default function MenuDetailScreen({route}) {
   }, [initialMenu])
 
   React.useEffect(() => {
-    const restaurantId = restaurant?.restaurantId || restaurant?.id
+    const restaurantId = getRestaurantMongoId(restaurant)
     const foodId = initialMenu?._id || initialMenu?.id
 
     if (!restaurantId || !foodId) {

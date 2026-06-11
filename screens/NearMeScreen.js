@@ -181,7 +181,10 @@ export default function NearMeScreen({ route, navigation }) {
               }}
               activeOpacity={0.7}
             >
-              <RestaurantImage image={item.image} />
+              <RestaurantImage
+                image={item.image}
+                restaurantId={item._id || item.id || item.restaurantId}
+              />
               <RestaurantInfo
                 name={item.name}
                 rating={item.rating}

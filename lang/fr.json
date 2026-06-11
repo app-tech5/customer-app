@@ -491,6 +491,13 @@
     "account": "Compte",
     "viewOrderHistory": "Voir l'historique des commandes",
     "manageFavorites": "Gérer vos restaurants favoris",
+    "favoritesCount": "{{count}} restaurant(s) favori(s)",
+    "noFavoritesTitle": "Aucun favori",
+    "noFavoritesSubtitle": "Appuyez sur le cœur d'un restaurant pour l'ajouter ici.",
+    "exploreRestaurants": "Explorer les restaurants",
+    "removeFavorite": "Retirer des favoris",
+    "favoritesLoadError": "Impossible de charger vos favoris.",
+    "favoritesRemoveError": "Impossible de retirer ce favori. Veuillez réessayer.",
     "managePayments": "Gérer les méthodes de paiement",
     "manageAddresses": "Gérer les adresses de livraison",
     "addresses": {

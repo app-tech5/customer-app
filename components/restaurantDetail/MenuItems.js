@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { language } from '../../global'
 import { AntDesign } from '@expo/vector-icons';
 import { Icon } from 'react-native-elements';
-import { getFoods, getCategoriesFromRestaurant } from '../../api';
+import { getFoods, getCategoriesFromRestaurant, getRestaurantMongoId } from '../../api';
 import { colors } from '../../global';
 import AddToCartButton from '../AddToCartButton';
 import { FlatList } from 'react-native-gesture-handler';
@@ -142,8 +142,12 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
       return;
     }
 
-    const restaurantId = restaurantData.restaurantId || restaurantData.id;
-    
+    const restaurantId = getRestaurantMongoId(restaurantData);
+    if (!restaurantId) {
+      setLoader(false);
+      return;
+    }
+
     getCategoriesFromRestaurant(restaurantId).then((restaurantCategories) => {
       setCategories(restaurantCategories)
     }).catch(error => {

@@ -1,5 +1,6 @@
 import { View, Text, ImageBackground, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Platform, Dimensions, Linking } from 'react-native'
 import React, { useContext, useEffect, useRef, useState, useMemo } from 'react'
+import { useDispatch } from 'react-redux'
 import { Icon, Divider } from 'react-native-elements'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LoaderContext } from "../contexts/LoaderContext"
@@ -21,6 +22,7 @@ import {
   removeFromFavorites,
   getRestaurantPromotions,
   getRestaurantDeliverySettings,
+  getRestaurantMongoId,
 } from '../api'
 import i18n from '../lang/i18n'
 
@@ -29,6 +31,7 @@ const { width, height } = Dimensions.get('window')
 export default function RestaurantDetail({ route, navigation }) {
   const { restaurant } = route.params
   const { image } = restaurant
+  const dispatch = useDispatch()
 
   const scrollViewRef = useRef(null)
 
@@ -73,16 +76,18 @@ export default function RestaurantDetail({ route, navigation }) {
       if (response.success && response.favorites) {
         const favoriteIds = response.favorites.map(fav => fav._id || fav.id);
         setUserFavorites(favoriteIds);
+        dispatch({ type: 'SET_FAVORITES', payload: favoriteIds });
       }
     }).catch(error => {
       console.error('Error loading favorites:', error);
-      setUserFavorites([]); 
+      setUserFavorites([]);
+      dispatch({ type: 'SET_FAVORITES', payload: [] });
     });
   }, [])
   
   useEffect(() => {
     const loadReviews = async () => {
-      const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+      const restaurantId = getRestaurantMongoId(restaurant);
       if (!restaurantId) return;
 
       setLoadingReviews(true);
@@ -103,7 +108,7 @@ export default function RestaurantDetail({ route, navigation }) {
   
   useEffect(() => {
     const loadPromotions = async () => {
-      const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+      const restaurantId = getRestaurantMongoId(restaurant);
       if (!restaurantId) return;
 
       setLoadingPromotions(true);
@@ -123,7 +128,7 @@ export default function RestaurantDetail({ route, navigation }) {
   }, [restaurant])
 
   useEffect(() => {
-    const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
+    const restaurantId = getRestaurantMongoId(restaurant);
     if (!restaurantId) {
       setDeliverySetting(null);
       return undefined;
@@ -240,17 +245,19 @@ export default function RestaurantDetail({ route, navigation }) {
     ? restaurant.categories.map(cat => cat.title || cat.name).join(' • ')
     : 'Restaurant';
   
-  const restaurantId = restaurant.restaurantId || restaurant.id || restaurant._id;
-  const isFavorite = userFavorites.includes(restaurantId);
+  const restaurantId = getRestaurantMongoId(restaurant);
+  const isFavorite = userFavorites.some((id) => String(id) === String(restaurantId));
   
   const toggleFavorite = async () => {
     try {
       if (isFavorite) {
         await removeFromFavorites(restaurantId);
-        setUserFavorites(prev => prev.filter(id => id !== restaurantId));
+        setUserFavorites((prev) => prev.filter((id) => String(id) !== String(restaurantId)));
+        dispatch({ type: 'REMOVE_FAVORITE', payload: restaurantId });
       } else {
         await addToFavorites(restaurantId);
-        setUserFavorites(prev => [...prev, restaurantId]);
+        setUserFavorites((prev) => [...prev, restaurantId]);
+        dispatch({ type: 'ADD_FAVORITE', payload: restaurantId });
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);

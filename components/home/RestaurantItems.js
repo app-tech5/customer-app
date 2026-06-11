@@ -1,10 +1,15 @@
 import { View, Text,Image, TouchableOpacity, FlatList, useWindowDimensions, StyleSheet} from 'react-native'
-import React, {useState} from 'react'
+import React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import PromotionBadge from '../PromotionBadge';
 import { colors, formatRestaurantRatingDisplay } from '../../global';
 import i18n from '../../lang/i18n';
+import { addToFavorites, removeFromFavorites } from '../../api';
+
+const isFavoriteId = (favoriteIds, restaurantId) =>
+  favoriteIds.some((id) => String(id) === String(restaurantId))
 
 export default function RestaurantItems({navigation,...props}) {
     const { width } = useWindowDimensions();
@@ -14,7 +19,13 @@ export default function RestaurantItems({navigation,...props}) {
               <FlatList 
                   ref={props.flatlist}
                   data={props.reward?props.restaurantData.filter(restaurant => restaurant.reward === props.reward):props.ads?props.restaurantData.filter(restaurant => restaurant.ads ):props.restaurantData}
-                  keyExtractor={(item, index)=>index}
+                  keyExtractor={(item, index)=> String(item?._id || item?.id || index)}
+                  ListHeaderComponent={props.ListHeaderComponent}
+                  ListEmptyComponent={props.ListEmptyComponent}
+                  refreshing={props.refreshing}
+                  onRefresh={props.onRefresh}
+                  contentContainerStyle={props.contentContainerStyle}
+                  showsVerticalScrollIndicator={props.showsVerticalScrollIndicator ?? !props.horizontal}
                   renderItem={({item, index})=> {
                     return (
                         <TouchableOpacity
@@ -48,7 +59,11 @@ export default function RestaurantItems({navigation,...props}) {
                                     overflow: 'hidden'
                                 }}>
                                 {props.reward || item.reward ?<PromotionBadge restaurant={item} allPromotions={props.promotions} allMenus={props.allMenus}/>:<></>}
-                                <RestaurantImage image={item.image} />
+                                <RestaurantImage
+                                    image={item.image}
+                                    restaurantId={item._id || item.id || item.restaurantId}
+                                    onFavoriteChange={props.onFavoriteChange}
+                                />
                                 {props.ads && <Affiche ads={item.ads} adsColor={item.adsColor}/>}
                                 <RestaurantInfo
                                     name={item.name.substring(0,25)}
@@ -68,39 +83,59 @@ export default function RestaurantItems({navigation,...props}) {
       </View>
   )
 }
-export const RestaurantImage= (props)=>{
-    const [liked, setLiked] = useState(false)
-    return(
-    <>
-        <Image
-            source={{
-                uri: props.image
-            }}
-            style={{
-                width: "100%",
-                height: 120,
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10
-            }}
-        />
-        <TouchableOpacity style={{position: 'absolute', right: 20, top: 20}}>
-            {liked?(<AntDesign
-                name='heart' 
-                size={25}
-                color="red"
-                onPress={()=>setLiked(false)}
-                />
-            ):(
-                <MaterialCommunityIcons 
-                name="heart-outline" 
-                size={25} 
-                color='#fff'
-                onPress={()=>setLiked(true)}
-                />
-            )}
-        </TouchableOpacity>
-    </>
-)}
+export const RestaurantImage = (props) => {
+    const dispatch = useDispatch()
+    const favoriteIds = useSelector((state) => state.userReducer?.favorites || [])
+    const restaurantId = props.restaurantId
+    const isFavorite = restaurantId
+        ? isFavoriteId(favoriteIds, restaurantId)
+        : Boolean(props.isFavorite)
+
+    const handleToggleFavorite = async () => {
+        if (!restaurantId) return
+
+        try {
+            if (isFavorite) {
+                await removeFromFavorites(restaurantId)
+                dispatch({ type: 'REMOVE_FAVORITE', payload: restaurantId })
+                props.onFavoriteChange?.(restaurantId, false)
+            } else {
+                await addToFavorites(restaurantId)
+                dispatch({ type: 'ADD_FAVORITE', payload: restaurantId })
+                props.onFavoriteChange?.(restaurantId, true)
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error)
+        }
+    }
+
+    return (
+        <>
+            <Image
+                source={{
+                    uri: props.image
+                }}
+                style={{
+                    width: "100%",
+                    height: 120,
+                    borderTopLeftRadius: 10,
+                    borderTopRightRadius: 10
+                }}
+            />
+            <TouchableOpacity
+                style={{ position: 'absolute', right: 20, top: 20 }}
+                onPress={handleToggleFavorite}
+                activeOpacity={0.7}
+            >
+                {isFavorite ? (
+                    <AntDesign name="heart" size={25} color="red" />
+                ) : (
+                    <MaterialCommunityIcons name="heart-outline" size={25} color="#fff" />
+                )}
+            </TouchableOpacity>
+        </>
+    )
+}
 export const RestaurantInfo = (props)=>(
     <View style={{
         flexDirection: "row",

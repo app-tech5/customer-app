@@ -18,10 +18,15 @@ ApiClient.prototype.getRestaurantById = async function (id) {
 
 ApiClient.prototype.normalizeRestaurant = function (restaurant) {
   return {
-    restaurantId: restaurant._id || restaurant.id,
     ...restaurant,
+    restaurantId: restaurant._id || restaurant.restaurantId || restaurant.id,
     taxRate: (restaurant.tax?.rate / 100) || 0,
   };
+};
+
+export const getRestaurantMongoId = (restaurant) => {
+  if (!restaurant) return null;
+  return restaurant._id || restaurant.restaurantId || restaurant.id || null;
 };
 
 ApiClient.prototype.searchRestaurants = async function (query) {

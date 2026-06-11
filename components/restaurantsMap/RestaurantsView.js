@@ -112,7 +112,10 @@ export default function RestaurantsView({
                   elevation: horizontal ? 3 : 0,
                 }}
               >
-                <RestaurantImage image={item.image} />
+                <RestaurantImage
+                  image={item.image}
+                  restaurantId={item._id || item.id || item.restaurantId}
+                />
                 <RestaurantInfo
                   name={item.name}
                   rating={item.rating}

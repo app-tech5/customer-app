@@ -208,10 +208,7 @@ export default function AccountScreen({ navigation }) {
         icon="heart"
         title={i18n.t('drawer.favorites')}
         subtitle={i18n.t('profile.manageFavorites')}
-        onPress={() => {
-          
-          Alert.alert(i18n.t('common.notImplemented'), i18n.t('profile.favoritesScreenMessage'))
-        }}
+        onPress={() => navigation.navigate('Favorites')}
       />
 
       <MenuItem
