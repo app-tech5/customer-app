@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { Avatar, Divider } from 'react-native-elements'
 import {
     DrawerContentScrollView,
@@ -15,8 +15,16 @@ import i18n from '../lang/i18n'
 import { useSelector, useDispatch } from 'react-redux'
 import { config } from '../config'
 import { SignInContext } from '../contexts/authContext'
+import { getDrawerIndexForState } from '../navigation/navigationHelpers'
 
 export default function DrawerContent(props) {
+    const drawerState = useMemo(() => {
+        const activeIndex = getDrawerIndexForState(props.state)
+        if (activeIndex === props.state.index) {
+            return props.state
+        }
+        return { ...props.state, index: activeIndex }
+    }, [props.state])
 
     const [_isSignedIn, _setIsSignedIn] = useState(true)
     const { name, email, image } = useSelector((state) => state.userReducer)
@@ -55,7 +63,7 @@ export default function DrawerContent(props) {
 
             {}
             <View style={styles.menuContainer}>
-                <DrawerItemList {...props} />
+                <DrawerItemList {...props} state={drawerState} />
             </View>
         </DrawerContentScrollView>
 

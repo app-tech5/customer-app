@@ -584,7 +584,39 @@
     "favoritesScreenMessage": "Écran Favoris à venir",
     "notificationsScreenMessage": "Écran Notifications à venir",
     "helpScreenMessage": "Écran Aide à venir",
-    "logoutNotImplementedMessage": "Déconnexion à venir"
+    "logout": "Déconnexion",
+    "logoutConfirm": "Déconnexion",
+    "logoutError": "Échec de la déconnexion"
+  },
+  "help": {
+    "title": "Aide & Support",
+    "intro": "Consultez les réponses ci-dessous ou contactez notre équipe.",
+    "faqSection": "Questions fréquentes",
+    "faq1q": "Comment suivre ma commande ?",
+    "faq1a": "Ouvrez Commandes depuis votre profil ou l'onglet du bas, puis appuyez sur une commande active pour voir son statut et le suivi.",
+    "faq2q": "Comment modifier mon adresse de livraison ?",
+    "faq2a": "Allez dans Profil > Adresses pour ajouter ou modifier votre adresse avant le paiement.",
+    "faq3q": "Comment ajouter un moyen de paiement ?",
+    "faq3a": "Ouvrez Portefeuille depuis votre profil, appuyez sur Ajouter et suivez les étapes pour enregistrer une carte ou un autre moyen de paiement.",
+    "faq4q": "Puis-je annuler une commande ?",
+    "faq4a": "Vous pouvez annuler une commande en attente depuis l'écran Commandes avant que le restaurant ne commence la préparation.",
+    "contactTitle": "Contacter le support",
+    "contactDescription": "Notre équipe répond généralement sous 24 h les jours ouvrés.",
+    "contactButton": "Envoyer un e-mail",
+    "emailSubject": "Good Food — Demande de support",
+    "emailError": "Impossible d'ouvrir l'application e-mail",
+    "contactUnavailable": "L'e-mail du support n'est pas configuré. Veuillez réessayer plus tard."
+  },
+  "about": {
+    "title": "À propos",
+    "tagline": "Votre application de livraison préférée",
+    "versionLabel": "Version",
+    "descriptionTitle": "À propos de Good Food",
+    "description": "Good Food vous connecte aux restaurants proches pour une livraison rapide et des commandes simples. Parcourez les menus, enregistrez vos favoris, suivez vos commandes et payez en toute sécurité.",
+    "featureOrders": "Commandez dans vos restaurants favoris",
+    "featureTracking": "Suivez les livraisons en temps réel",
+    "featurePayments": "Payez en toute sécurité avec votre portefeuille",
+    "footer": "Merci d'utiliser Good Food."
   },
   "settings": {
     "title": "Paramètres",

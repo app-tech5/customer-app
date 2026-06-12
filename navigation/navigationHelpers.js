@@ -1,3 +1,38 @@
+export function getDrawerIndexForState(state) {
+  if (!state?.routes?.length) {
+    return state?.index ?? 0
+  }
+
+  const drawerRoute = state.routes[state.index]
+  if (drawerRoute?.name !== 'BottomTabs' || !drawerRoute.state) {
+    return state.index
+  }
+
+  const tabName = drawerRoute.state.routes[drawerRoute.state.index]?.name
+  const tabToDrawerScreen = {
+    Account: 'Account',
+    Orders: 'Orders',
+    Search: 'Search',
+  }
+  const drawerScreen = tabToDrawerScreen[tabName]
+
+  if (!drawerScreen) {
+    return state.routes.findIndex((route) => route.name === 'BottomTabs')
+  }
+
+  const drawerIndex = state.routes.findIndex((route) => route.name === drawerScreen)
+  return drawerIndex >= 0 ? drawerIndex : state.index
+}
+
+export function navigateToTabHome(navigation) {
+  navigation.navigate('BottomTabs', {
+    screen: 'Home',
+    params: {
+      screen: 'HomeScreen',
+    },
+  })
+}
+
 export function navigateToTabSearch(navigation, screen = 'SearchScreen', params) {
   navigation.navigate('BottomTabs', {
     screen: 'Search',

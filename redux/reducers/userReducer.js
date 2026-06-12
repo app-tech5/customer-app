@@ -22,6 +22,8 @@ let userReducer = (state={}, action)=>{
             );
             return {...state, favorites: newFavorites}
             }
+        case "LOGOUT_USER":
+            return {}
         default:
         return state
     }

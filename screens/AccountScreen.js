@@ -1,9 +1,10 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons'
 import { useFocusEffect } from '@react-navigation/native'
-import { useSelector } from 'react-redux'
-import { userInfos, updateUser, getOrders } from '../api'
+import { useDispatch, useSelector } from 'react-redux'
+import { api, userInfos, updateUser, getOrders } from '../api'
+import { SignInContext } from '../contexts/authContext'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { config } from '../config'
@@ -12,6 +13,8 @@ import Loader from './Loader'
 import { RefreshControl } from 'react-native'
 
 export default function AccountScreen({ navigation }) {
+  const dispatch = useDispatch()
+  const { setSignedIn } = useContext(SignInContext)
   const user = useSelector((state) => state.userReducer)
   const [userData, setUserData] = useState(null)
   const [totalOrders, setTotalOrders] = useState(0)
@@ -24,6 +27,11 @@ export default function AccountScreen({ navigation }) {
   const userId = user.id || user.userId
 
   const loadUserData = useCallback(async () => {
+    if (!userId) {
+      setLoader(false)
+      return
+    }
+
     const fallback = userRef.current
 
     try {
@@ -52,8 +60,9 @@ export default function AccountScreen({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      if (!userId) return
       loadUserData()
-    }, [loadUserData])
+    }, [userId, loadUserData])
   )
 
   useEffect(() => {
@@ -71,6 +80,31 @@ export default function AccountScreen({ navigation }) {
       ),
     })
   }, [navigation])
+
+  const handleLogout = () => {
+    Alert.alert(
+      i18n.t('profile.logoutConfirm'),
+      i18n.t('profile.logoutMessage'),
+      [
+        { text: i18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: i18n.t('profile.logout'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.logout()
+              setSignedIn(null)
+              dispatch({ type: 'CLEAR' })
+              dispatch({ type: 'LOGOUT_USER' })
+            } catch (err) {
+              console.error('Error during logout:', err)
+              Alert.alert(i18n.t('common.error'), i18n.t('profile.logoutError'))
+            }
+          },
+        },
+      ]
+    )
+  }
 
   const handleUpdateProfile = async (field, value) => {
     try {
@@ -254,49 +288,24 @@ export default function AccountScreen({ navigation }) {
         icon="help-circle"
         title={i18n.t('profile.help')}
         subtitle={i18n.t('profile.getHelp')}
-        onPress={() => {
-          
-          Alert.alert(i18n.t('common.notImplemented'), i18n.t('profile.helpScreenMessage'))
-        }}
+        onPress={() => navigation.navigate('HelpSupport')}
       />
 
       <MenuItem
         icon="information-circle"
         title={i18n.t('profile.about')}
         subtitle={i18n.t('profile.appInfo')}
-        onPress={() => {
-          
-          Alert.alert(
-            i18n.t('profile.about'),
-            `${i18n.t('app.name')}\n${i18n.t('settings.version')} ${i18n.t('app.version')}`
-          )
-        }}
+        onPress={() => navigation.navigate('About')}
       />
 
       <View style={styles.logoutContainer}>
         <TouchableOpacity
           style={styles.logoutButton}
-          onPress={() => {
-            Alert.alert(
-              i18n.t('drawer.logout'),
-              i18n.t('profile.logoutMessage'),
-              [
-                { text: i18n.t('common.cancel'), style: 'cancel' },
-                {
-                  text: i18n.t('drawer.logout'),
-                  style: 'destructive',
-                  onPress: () => {
-                    
-                    Alert.alert(i18n.t('common.notImplemented'), i18n.t('profile.logoutNotImplementedMessage'))
-                  }
-                }
-              ]
-            )
-          }}
+          onPress={handleLogout}
         >
           <Ionicons name="log-out" size={20} color={colors.error} />
           <Text style={styles.logoutText}>
-            {i18n.t('drawer.logout')}
+            {i18n.t('profile.logout')}
           </Text>
         </TouchableOpacity>
       </View>

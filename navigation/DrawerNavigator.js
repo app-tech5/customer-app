@@ -7,6 +7,12 @@ import TabSearchRedirect from './TabSearchRedirect';
 import TabAccountRedirect from './TabAccountRedirect';
 import TabOrdersRedirect from './TabOrdersRedirect';
 import NearMeScreen from '../screens/NearMeScreen';
+import {
+    navigateToTabHome,
+    navigateToTabAccount,
+    navigateToTabSearch,
+    navigateToTabOrders,
+} from './navigationHelpers';
 
 import Offers from '../screens/Offers'
 import { Ionicons, MaterialIcons, Entypo, Feather } from '@expo/vector-icons'
@@ -45,6 +51,12 @@ export default function DrawerNavigator() {
         <Drawer.Screen
             name = "BottomTabs"
             component={BottomTabs}
+            listeners={({ navigation }) => ({
+                drawerItemPress: (e) => {
+                    e.preventDefault()
+                    navigateToTabHome(navigation)
+                },
+            })}
             options={{
                 title: i18n.t('drawer.home'),
                 drawerIcon: ({focused, size}) => (
@@ -60,6 +72,12 @@ export default function DrawerNavigator() {
         <Drawer.Screen
             name = "Search"
             component={TabSearchRedirect}
+            listeners={({ navigation }) => ({
+                drawerItemPress: (e) => {
+                    e.preventDefault()
+                    navigateToTabSearch(navigation, 'SearchScreen')
+                },
+            })}
             options={{
                 title: i18n.t('drawer.search'),
                 drawerIcon: ({focused, size}) => (
@@ -106,6 +124,12 @@ export default function DrawerNavigator() {
         <Drawer.Screen
             name = "Orders"
             component={TabOrdersRedirect}
+            listeners={({ navigation }) => ({
+                drawerItemPress: (e) => {
+                    e.preventDefault()
+                    navigateToTabOrders(navigation, 'Orders')
+                },
+            })}
             options={{
                 title: i18n.t('drawer.orderHistory'),
                 headerShown: false,
@@ -122,6 +146,12 @@ export default function DrawerNavigator() {
         <Drawer.Screen
             name = "Account"
             component={TabAccountRedirect}
+            listeners={({ navigation }) => ({
+                drawerItemPress: (e) => {
+                    e.preventDefault()
+                    navigateToTabAccount(navigation, 'AccountScreen')
+                },
+            })}
             options={{
                 title: i18n.t('drawer.account'),
                 drawerIcon: ({focused, size}) => (

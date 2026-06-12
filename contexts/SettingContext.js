@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { getSettings } from '../api'
+import { getSettings, getAppConfig } from '../api'
 import { SignInContext } from './authContext'
 import i18n from '../lang/i18n'
 
@@ -7,6 +7,7 @@ const SettingContext = createContext()
 
 export function SettingProvider({ children }) {
   const [settings, setSettings] = useState(null)
+  const [appConfig, setAppConfig] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const { signedIn } = useContext(SignInContext)
@@ -21,11 +22,15 @@ export function SettingProvider({ children }) {
   const loadSettings = async () => {
     try {
       setLoading(true)
-      const settingsData = await getSettings()
-      
+      const [settingsData, appConfigData] = await Promise.all([
+        getSettings(),
+        getAppConfig().catch(() => null),
+      ])
+
       const appSettings = Array.isArray(settingsData) ? settingsData[0] : settingsData
 
       setSettings(appSettings)
+      setAppConfig(appConfigData)
       setError(null)
     } catch (err) {
       console.error(i18n.t('errors.settingsLoad'), err)
@@ -64,7 +69,9 @@ export function SettingProvider({ children }) {
     refreshSettings,
     currency: defaultCurrency,
     language: defaultLanguage,
-    appName: settings?.appName || 'Good Food'
+    appName: settings?.appName || appConfig?.appName || 'Good Food',
+    appConfig,
+    supportEmail: appConfig?.supportEmail || null,
   }
 
   return (

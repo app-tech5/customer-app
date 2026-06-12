@@ -1,6 +1,9 @@
 import { ApiClient } from './client';
 
 ApiClient.prototype.getUserInfo = async function (userId) {
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
   return await this.apiCall(`/resource/users/${userId}`);
 };
 

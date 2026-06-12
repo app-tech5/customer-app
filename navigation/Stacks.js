@@ -22,6 +22,8 @@ import EditProfileScreen from '../screens/EditProfileScreen'
 import FavoritesScreen from '../screens/FavoritesScreen'
 import AddressesScreen from '../screens/AddressesScreen'
 import EditAddressScreen from '../screens/EditAddressScreen'
+import HelpSupportScreen from '../screens/HelpSupportScreen'
+import AboutScreen from '../screens/AboutScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
 import Wallet from '../screens/Wallet'
 import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
@@ -175,6 +177,18 @@ export function AccountNavigator() {
           title: 'Settings',
           headerShown: true
         }}
+      />
+
+      <AccountStack.Screen
+        name="HelpSupport"
+        component={HelpSupportScreen}
+        options={{ headerShown: true }}
+      />
+
+      <AccountStack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{ headerShown: true }}
       />
     </AccountStack.Navigator>
   )
