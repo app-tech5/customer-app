@@ -28,11 +28,15 @@ export default function WalletScreen({ navigation, route}) {
       setLoader(true)
       setError(null)
 
-      const { transactions, balance } = await getUserTransactions()
-      const list = Array.isArray(transactions) ? transactions : []
+      const response = await getUserTransactions()
+      const list = Array.isArray(response?.transactions)
+        ? response.transactions
+        : Array.isArray(response)
+          ? response
+          : []
 
       setTransactions(list.slice(0, 5))
-      setBalance(Number(balance) || 0)
+      setBalance(Number(response?.balance) || 0)
     } catch (err) {
       console.error('Error loading wallet data:', err)
       setError(i18n.t('wallet.loadError', 'Error loading wallet data'))

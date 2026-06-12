@@ -17,7 +17,6 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-import { config } from '../config'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useStripe } from '@stripe/stripe-react-native'
 import { createCardPaymentMethod } from '../api/paymentMethods'
@@ -40,11 +39,6 @@ function AddCard({ navigation }) {
   }, [navigation])
 
   const handleSave = async () => {
-    if (config.DEMO_MODE) {
-      Alert.alert(i18n.t('common.info'), i18n.t('wallet.paymentMethodDisabledInDemo'))
-      return
-    }
-
     if (!holderName.trim()) {
       Alert.alert(
         i18n.t('common.error'),

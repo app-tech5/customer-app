@@ -172,20 +172,7 @@ export default function OrderRequest({ route, navigation }) {
         }
       };
 
-      if (config.DEMO_MODE) {
-        createdOrder = {
-          _id: `demo_order_${Date.now()}`,
-          id: `demo_order_${Date.now()}`,
-          ...orderData,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          orderId: `DEMO-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-        };
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        createdOrder = await api.createOrder(orderData);
-      }
+      createdOrder = await api.createOrder(orderData);
 
       dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName });
 

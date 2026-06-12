@@ -30,42 +30,45 @@ export default function SignUp({ navigation }) {
   const [loginState, setLoginState] = useState(false)
 
   const signUp = async () => {
-    if (config.DEMO_MODE) {
-      Alert.alert(i18n.t('common.info'), i18n.t('auth.signUpDisabledInDemo'))
+    const normalizedEmail = email.trim()
+    const normalizedName = name.trim()
+    const normalizedPhone = phone.trim()
+    const normalizedPassword = password.trim()
+    const normalizedConfirmPassword = confirmPassword.trim()
+    const normalizedAddress = typeof address === 'string' ? address.trim() : (address?.description || '').trim()
+    const initialLat = Number(address?.location?.lat)
+    const initialLng = Number(address?.location?.lng)
+    let lat = Number.isFinite(initialLat) ? initialLat : 0
+    let lng = Number.isFinite(initialLng) ? initialLng : 0
+
+    if (!normalizedEmail) {
+      Alert.alert(i18n.t('common.error'), i18n.t('auth.emailRequired'))
+      return
+    }
+
+    if (!normalizedName) {
+      Alert.alert(i18n.t('common.error'), i18n.t('auth.nameRequired'))
+      return
+    }
+
+    if (!normalizedPassword) {
+      Alert.alert(i18n.t('common.error'), i18n.t('auth.passwordRequired'))
+      return
+    }
+
+    if (normalizedPassword !== normalizedConfirmPassword) {
+      Alert.alert(i18n.t('common.error'), i18n.t('auth.passwordsDoNotMatch'))
+      return
+    }
+
+    if (!normalizedAddress) {
+      Alert.alert(i18n.t('common.error'), i18n.t('auth.addressRequired'))
       return
     }
 
     setLoginState(true)
+
     try {
-      const normalizedEmail = email.trim()
-      const normalizedName = name.trim()
-      const normalizedPhone = phone.trim()
-      const normalizedPassword = password.trim()
-      const normalizedConfirmPassword = confirmPassword.trim()
-      const normalizedAddress = typeof address === 'string' ? address.trim() : (address?.description || '').trim()
-      const initialLat = Number(address?.location?.lat)
-      const initialLng = Number(address?.location?.lng)
-      let lat = Number.isFinite(initialLat) ? initialLat : 0
-      let lng = Number.isFinite(initialLng) ? initialLng : 0
-
-      if (!normalizedEmail || !normalizedName) {
-        Alert.alert(i18n.t('common.error'), i18n.t('auth.emailRequired'))
-        return
-      }
-      if (!normalizedPassword) {
-        Alert.alert(i18n.t('common.error'), i18n.t('auth.passwordRequired'));
-        return;
-      }
-      if (normalizedPassword !== normalizedConfirmPassword) {
-        Alert.alert(i18n.t('common.error'), i18n.t('auth.passwordsDoNotMatch'));
-        return;
-      }
-
-      if (!normalizedAddress) {
-        Alert.alert(i18n.t('common.error'), i18n.t('auth.addressRequired'));
-        return;
-      }
-
       if ((!lat && !lng) && normalizedAddress) {
         const geocoded = await geocodeAddress(normalizedAddress)
         if (geocoded) {
@@ -90,8 +93,11 @@ export default function SignUp({ navigation }) {
 
       await api.register(userData);
       await saveSignInData(normalizedEmail, true);
-      console.warn("USER ACCOUNT CREATED");
-      navigation.navigate("SignIn", { prefilledEmail: normalizedEmail });
+      Alert.alert(
+        i18n.t('auth.registerSuccess'),
+        i18n.t('auth.signInAfterRegister', 'You can now sign in with your new account.')
+      );
+      navigation.navigate('SignIn', { prefilledEmail: normalizedEmail });
     } catch (error) {
       console.error(error);
       Alert.alert(i18n.t('common.error'), i18n.t('auth.registerError'));
@@ -113,7 +119,7 @@ export default function SignUp({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>{i18n.t('auth.registerNow')}</Text>
         {config.DEMO_MODE && (
-          <Text style={styles.demoText}>{i18n.t('auth.signUpDisabledInDemo')}</Text>
+          <Text style={styles.demoText}>{i18n.t('auth.demoSignupHint')}</Text>
         )}
       </View>
 
@@ -213,13 +219,9 @@ export default function SignUp({ navigation }) {
 
           </View>
 
-          <TouchableOpacity
-            onPress={signUp}
-            disabled={config.DEMO_MODE}
-            style={config.DEMO_MODE && styles.signUpButtonDisabled}
-          >
+          <TouchableOpacity onPress={signUp}>
             <LinearGradient
-              colors={config.DEMO_MODE ? ['#bdbdbd', '#9e9e9e'] : ['#948E99', '#2E1437']}
+              colors={['#948E99', '#2E1437']}
               style={styles.signInButton}
             >
               <Text style={{ ...styles.signInText, color: 'white' }}>{i18n.t('auth.signUp')}</Text>

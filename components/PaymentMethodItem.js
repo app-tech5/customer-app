@@ -17,7 +17,15 @@ export default function PaymentMethodItem({
   const IconComponent = methodType?.includes('paypal') ? FontAwesome : Ionicons
   const Container = onPress ? TouchableOpacity : View
 
-  const iconName = methodType?.includes('card') ? 'card' : methodType?.includes('paypal') ? 'paypal' : methodType?.includes('cash') ? 'cash' : methodType?.includes('google_pay') ? 'card-outline' : methodType?.includes('apple_pay') ? 'apple_pay' : 'card'
+  const iconName = methodType?.includes('paypal')
+    ? 'paypal'
+    : methodType?.includes('cash')
+      ? 'cash'
+      : methodType?.includes('google_pay')
+        ? 'logo-google'
+        : methodType?.includes('apple_pay')
+          ? 'logo-apple'
+          : 'card-outline'
   const firstLetter = method?.cardDetails?.cardBrand?.charAt(0).toUpperCase()
   
   const title = methodType?.includes('cash') ? 'Cash' : methodType?.includes('paypal') ? 'Paypal' : methodType?.includes('google_pay') ? 'Google Pay' : methodType?.includes('apple_pay') ? 'Apple Pay' : firstLetter + method?.cardDetails?.cardBrand?.slice(1) || method?.cardDetails?.label

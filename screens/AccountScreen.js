@@ -1,6 +1,7 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo } from '@expo/vector-icons'
+import { useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 import { userInfos, updateUser, getOrders } from '../api'
 import i18n from '../lang/i18n'
@@ -16,10 +17,46 @@ export default function AccountScreen({ navigation }) {
   const [totalOrders, setTotalOrders] = useState(0)
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
+  const isFirstLoad = useRef(true)
+  const userRef = useRef(user)
+  userRef.current = user
+
+  const userId = user.id || user.userId
+
+  const loadUserData = useCallback(async () => {
+    const fallback = userRef.current
+
+    try {
+      if (isFirstLoad.current) {
+        setLoader(true)
+      }
+      setError(null)
+
+      const [userInfo, ordersData] = await Promise.all([
+        userInfos(userId).catch(() => fallback),
+        getOrders().catch(() => []),
+      ])
+
+      setUserData({ ...fallback, ...userInfo })
+      setTotalOrders(ordersData?.length || 0)
+    } catch (err) {
+      console.error('Error loading user data:', err)
+      setError(i18n.t('profile.loadError'))
+      setUserData(fallback)
+      setTotalOrders(0)
+    } finally {
+      setLoader(false)
+      isFirstLoad.current = false
+    }
+  }, [userId])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData()
+    }, [loadUserData])
+  )
 
   useEffect(() => {
-    loadUserData()
-    
     navigation.setOptions({
       title: i18n.t('profile.title'),
       headerLeft: () => (
@@ -35,36 +72,7 @@ export default function AccountScreen({ navigation }) {
     })
   }, [navigation])
 
-  const loadUserData = async () => {
-    try {
-      setLoader(true)
-      setError(null)
-      
-      const [userInfo, ordersData] = await Promise.all([
-        userInfos(user.id || user.userId).catch(() => user), 
-        getOrders().catch(() => []) 
-      ])
-
-      setUserData(userInfo)
-      console.log("userInfo", userInfo)
-      setTotalOrders(ordersData?.length || 0)
-    } catch (err) {
-      console.error('Error loading user data:', err)
-      setError(i18n.t('profile.loadError'))
-      
-      setUserData(user)
-      setTotalOrders(0)
-    } finally {
-      setLoader(false)
-    }
-  }
-
   const handleUpdateProfile = async (field, value) => {
-    if (config.DEMO_MODE) {
-      Alert.alert(i18n.t('common.info'), i18n.t('profile.updateDisabledInDemo'))
-      return
-    }
-
     try {
       const updateData = { [field]: value }
       await updateUser(updateData, user.id || user.userId)
@@ -94,10 +102,7 @@ export default function AccountScreen({ navigation }) {
         />
         <TouchableOpacity
           style={styles.editAvatarButton}
-          onPress={() => {
-            
-            Alert.alert(i18n.t('common.notImplemented'), i18n.t('profile.avatarChangeMessage'))
-          }}
+          onPress={() => navigation.navigate('EditProfile')}
         >
           <Ionicons name="camera" size={16} color={colors.text.white} />
         </TouchableOpacity>
@@ -213,8 +218,7 @@ export default function AccountScreen({ navigation }) {
       />
 
       <MenuItem
-        icon="card"
-        iconType="MaterialIcons"
+        icon="wallet-outline"
         title={i18n.t('drawer.wallet')}
         subtitle={i18n.t('profile.managePayments')}
         onPress={() => navigation.navigate('WalletFlow', {

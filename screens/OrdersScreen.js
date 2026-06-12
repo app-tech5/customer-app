@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons'
 import { getOrders, cancelOrder } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-import { config } from '../config'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
@@ -56,17 +55,8 @@ export default function OrdersScreen({ navigation }) {
     }
   }
 
-  const showDemoCancelBlockAlert = () => {
-    Alert.alert(i18n.t('common.info'), i18n.t('order.cancelDisabledInDemo'))
-  }
-
   const handleCancelOrder = async (order) => {
     try {
-      if (config.DEMO_MODE) {
-        showDemoCancelBlockAlert()
-        return
-      }
-
       if (order.status?.toLowerCase() !== 'pending') {
         Alert.alert(
           i18n.t('order.cancelError'),

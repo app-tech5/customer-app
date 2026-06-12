@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { Ionicons, MaterialIcons, Entypo, FontAwesome } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
 import { userInfos, updateUser, uploadPublicFile } from '../api'
@@ -27,58 +27,36 @@ export default function EditProfileScreen({ navigation }) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    loadUserData()
+  const userDataRef = useRef(userData)
+  const originalDataRef = useRef(originalData)
+  const userRef = useRef(user)
+  userDataRef.current = userData
+  originalDataRef.current = originalData
+  userRef.current = user
 
-    navigation.setOptions({
-      title: i18n.t('profile.edit', 'Edit Profile'),
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => handleGoBack()}
-          style={{ padding: 10, marginLeft: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={handleSave}
-          style={{ padding: 10, marginRight: 5 }}
-          accessibilityRole="button"
-          accessibilityLabel="Save changes"
-          disabled={saving}
-        >
-          <Ionicons
-            name="checkmark"
-            size={24}
-            color={hasChanges() ? colors.primary : colors.text.secondary}
-          />
-        </TouchableOpacity>
-      ),
-    })
-  }, [navigation])
+  const userId = user.id || user.userId
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
       setLoader(true)
       setError(null)
       
       let data
+      const fallback = userRef.current
+
       try {
-        data = await userInfos(user.id || user.userId)
+        data = await userInfos(userId)
       } catch (apiError) {
         console.warn('API error, using Redux store data:', apiError)
-        data = user
+        data = fallback
       }
 
       const userInfo = {
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        address: data.address || '',
-        image: data.image || ''
+        name: data.name || fallback.name || '',
+        email: data.email || fallback.email || '',
+        phone: data.phone || fallback.phone || '',
+        address: data.address || fallback.address || '',
+        image: data.image || fallback.image || '',
       }
 
       setUserData(userInfo)
@@ -89,7 +67,13 @@ export default function EditProfileScreen({ navigation }) {
     } finally {
       setLoader(false)
     }
-  }
+  }, [userId])
+
+  useEffect(() => {
+    if (userId) {
+      loadUserData()
+    }
+  }, [userId, loadUserData])
 
   const handleInputChange = (field, value) => {
     setUserData(prev => ({
@@ -98,19 +82,15 @@ export default function EditProfileScreen({ navigation }) {
     }))
   }
 
-  const hasChanges = () => {
-    return JSON.stringify(userData) !== JSON.stringify(originalData)
-  }
+  const validateForm = useCallback((data) => {
+    const { name, email, phone } = data
 
-  const validateForm = () => {
-    const { name, email, phone } = userData
-
-    if (!name.trim()) {
+    if (!String(name || '').trim()) {
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('profile.nameRequired', 'Name is required'))
       return false
     }
 
-    if (!email.trim()) {
+    if (!String(email || '').trim()) {
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('profile.emailRequired', 'Email is required'))
       return false
     }
@@ -121,30 +101,24 @@ export default function EditProfileScreen({ navigation }) {
       return false
     }
 
-    if (!phone.trim()) {
+    if (!String(phone || '').trim()) {
       Alert.alert(i18n.t('common.error', 'Error'), i18n.t('profile.phoneRequired', 'Phone number is required'))
       return false
     }
 
     return true
-  }
+  }, [])
 
-  const showDemoProfileBlockAlert = () => {
-    Alert.alert(i18n.t('common.info', 'Info'), i18n.t('profile.updateDisabledInDemo'))
-  }
+  const handleSave = useCallback(async () => {
+    const currentUserData = userDataRef.current
+    const currentOriginal = originalDataRef.current
 
-  const handleSave = async () => {
-    if (config.DEMO_MODE) {
-      showDemoProfileBlockAlert()
-      return
-    }
-
-    if (!hasChanges()) {
+    if (JSON.stringify(currentUserData) === JSON.stringify(currentOriginal)) {
       Alert.alert(i18n.t('common.info', 'Info'), i18n.t('profile.noChanges', 'No changes to save'))
       return
     }
 
-    if (!validateForm()) {
+    if (!validateForm(currentUserData)) {
       return
     }
 
@@ -152,22 +126,17 @@ export default function EditProfileScreen({ navigation }) {
       setSaving(true)
       setError(null)
 
-      const userId = user.id || user.userId
       if (!userId) {
         throw new Error('User ID not found')
       }
       
       const updateData = {}
-      const dataToSave = { ...userData }
+      const dataToSave = { ...currentUserData }
 
       if (
         dataToSave.image?.startsWith('file://') ||
         dataToSave.image?.startsWith('content://')
       ) {
-        if (config.DEMO_MODE) {
-          showDemoUploadBlockAlert()
-          return
-        }
         dataToSave.image = await uploadPublicFile(
           {
             uri: dataToSave.image,
@@ -180,7 +149,7 @@ export default function EditProfileScreen({ navigation }) {
       }
 
       Object.keys(dataToSave).forEach(key => {
-        if (dataToSave[key] !== originalData[key]) {
+        if (dataToSave[key] !== currentOriginal[key]) {
           updateData[key] = dataToSave[key]
         }
       })
@@ -189,7 +158,9 @@ export default function EditProfileScreen({ navigation }) {
       
       dispatch({ type: 'UPDATE_USER', payload: dataToSave })
       
-      setOriginalData({ ...dataToSave })
+      const saved = { ...dataToSave }
+      setOriginalData(saved)
+      originalDataRef.current = saved
 
       Alert.alert(
         i18n.t('profile.updateSuccess', 'Success'),
@@ -210,19 +181,13 @@ export default function EditProfileScreen({ navigation }) {
     } finally {
       setSaving(false)
     }
-  }
+  }, [userId, dispatch, navigation, validateForm])
 
-  const showDemoUploadBlockAlert = () => {
-    Alert.alert(i18n.t('common.info', 'Info'), i18n.t('profile.uploadDisabledInDemo'))
-  }
+  const handleGoBack = useCallback(() => {
+    const hasChanges =
+      JSON.stringify(userDataRef.current) !== JSON.stringify(originalDataRef.current)
 
-  const handleGoBack = () => {
-    if (config.DEMO_MODE) {
-      navigation.goBack()
-      return
-    }
-
-    if (hasChanges()) {
+    if (hasChanges) {
       Alert.alert(
         i18n.t('profile.unsavedChanges', 'Unsaved Changes'),
         i18n.t('profile.unsavedChangesMessage', 'You have unsaved changes. Do you want to save them before leaving?'),
@@ -245,14 +210,37 @@ export default function EditProfileScreen({ navigation }) {
     } else {
       navigation.goBack()
     }
-  }
+  }, [navigation, handleSave])
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: i18n.t('profile.edit', 'Edit Profile'),
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={handleGoBack}
+          style={{ padding: 10, marginLeft: 5 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleSave}
+          style={{ padding: 10, marginRight: 5 }}
+          accessibilityRole="button"
+          accessibilityLabel="Save changes"
+          disabled={saving}
+        >
+          <Ionicons name="checkmark" size={24} color={colors.primary} />
+        </TouchableOpacity>
+      ),
+    })
+  }, [navigation, handleSave, handleGoBack, saving])
 
   const processPickedImage = async (asset) => {
     if (!asset) return
-    if (config.DEMO_MODE) {
-      showDemoUploadBlockAlert()
-      return
-    }
 
     setUserData((prev) => ({ ...prev, image: asset.uri }))
     setUploadingAvatar(true)
@@ -300,10 +288,6 @@ export default function EditProfileScreen({ navigation }) {
 
   const handleAvatarChange = () => {
     if (uploadingAvatar) return
-    if (config.DEMO_MODE) {
-      showDemoUploadBlockAlert()
-      return
-    }
 
     Alert.alert(
       i18n.t('profile.changePhoto', 'Change Photo'),
@@ -322,35 +306,6 @@ export default function EditProfileScreen({ navigation }) {
           style: 'cancel',
         },
       ]
-    )
-  }
-
-  const FormField = ({ icon, iconType, label, value, onChangeText, placeholder, keyboardType = 'default', secureTextEntry = false, editable = true }) => {
-    const IconComponent = iconType === 'MaterialIcons' ? MaterialIcons :
-                         iconType === 'Entypo' ? Entypo :
-                         iconType === 'FontAwesome' ? FontAwesome : Ionicons
-
-    return (
-      <View style={styles.formField}>
-        <Text style={styles.fieldLabel}>{label}</Text>
-        <View style={[styles.inputContainer, !editable && styles.inputDisabled]}>
-          <View style={styles.inputIcon}>
-            <IconComponent name={icon} size={20} color={editable ? colors.primary : colors.text.secondary} />
-          </View>
-          <TextInput
-            style={[styles.textInput, !editable && styles.textInputDisabled]}
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            placeholderTextColor={colors.text.secondary}
-            keyboardType={keyboardType}
-            secureTextEntry={secureTextEntry}
-            editable={editable}
-            autoCapitalize={keyboardType === 'email-address' ? 'none' : 'words'}
-            autoCorrect={false}
-          />
-        </View>
-      </View>
     )
   }
 
@@ -420,7 +375,7 @@ export default function EditProfileScreen({ navigation }) {
 
           {}
           <View style={styles.formContainer}>
-            <FormField
+            <ProfileFormField
               icon="person"
               iconType="MaterialIcons"
               label={i18n.t('profile.name', 'Name')}
@@ -429,7 +384,7 @@ export default function EditProfileScreen({ navigation }) {
               placeholder={i18n.t('profile.namePlaceholder', 'Enter your full name')}
             />
 
-            <FormField
+            <ProfileFormField
               icon="email"
               iconType="Entypo"
               label={i18n.t('profile.email', 'Email')}
@@ -439,7 +394,7 @@ export default function EditProfileScreen({ navigation }) {
               keyboardType="email-address"
             />
 
-            <FormField
+            <ProfileFormField
               icon="phone"
               iconType="Entypo"
               label={i18n.t('profile.phone', 'Phone')}
@@ -449,7 +404,7 @@ export default function EditProfileScreen({ navigation }) {
               keyboardType="phone-pad"
             />
 
-            <FormField
+            <ProfileFormField
               icon="location"
               label={i18n.t('profile.address', 'Address')}
               value={userData.address}
@@ -459,7 +414,7 @@ export default function EditProfileScreen({ navigation }) {
           </View>
 
           {}
-          {hasChanges() && (
+          {JSON.stringify(userData) !== JSON.stringify(originalData) && (
             <View style={styles.saveButtonContainer}>
               <TouchableOpacity
                 style={[styles.saveButton, saving && styles.saveButtonDisabled]}
@@ -654,4 +609,48 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 })
+
+function ProfileFormField({
+  icon,
+  iconType,
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType = 'default',
+  secureTextEntry = false,
+  editable = true,
+}) {
+  const IconComponent =
+    iconType === 'MaterialIcons' ? MaterialIcons :
+    iconType === 'Entypo' ? Entypo :
+    iconType === 'FontAwesome' ? FontAwesome : Ionicons
+
+  return (
+    <View style={styles.formField}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <View style={[styles.inputContainer, !editable && styles.inputDisabled]}>
+        <View style={styles.inputIcon}>
+          <IconComponent
+            name={icon}
+            size={20}
+            color={editable ? colors.primary : colors.text.secondary}
+          />
+        </View>
+        <TextInput
+          style={[styles.textInput, !editable && styles.textInputDisabled]}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.text.secondary}
+          keyboardType={keyboardType}
+          secureTextEntry={secureTextEntry}
+          editable={editable}
+          autoCapitalize={keyboardType === 'email-address' ? 'none' : 'words'}
+          autoCorrect={false}
+        />
+      </View>
+    </View>
+  )
+}
 

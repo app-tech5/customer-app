@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { Alert } from 'react-native'
 import { useSelector } from 'react-redux'
-import { config } from '../config'
 import i18n from '../lang/i18n'
 import {
   removeStripePaymentMethod,
@@ -50,16 +49,7 @@ export function PaymentMethodsProvider({ children }) {
     refreshPaymentMethods()
   }, [refreshPaymentMethods])
 
-  const showDemoBlockAlert = () => {
-    Alert.alert(i18n.t('common.info'), i18n.t('wallet.paymentMethodDisabledInDemo'))
-  }
-
   const addPaymentMethod = useCallback(async (method) => {
-    if (config.DEMO_MODE) {
-      showDemoBlockAlert()
-      return
-    }
-
     const isFirstPaymentMethod = paymentMethods.length === 0
     const nextMethod = {
       ...method,
@@ -75,11 +65,6 @@ export function PaymentMethodsProvider({ children }) {
   }, [paymentMethods])
 
   const setDefaultPaymentMethod = useCallback(async (methodId) => {
-    if (config.DEMO_MODE) {
-      Alert.alert(i18n.t('common.info'), i18n.t('wallet.setDefaultDisabledInDemo'))
-      return
-    }
-
     const method = paymentMethods.find(
       (item) => getPaymentMethodKey(item) === methodId || item.id === methodId
     )
@@ -96,11 +81,6 @@ export function PaymentMethodsProvider({ children }) {
   }, [paymentMethods, refreshPaymentMethods])
 
   const removePaymentMethod = useCallback(async (methodId) => {
-    if (config.DEMO_MODE) {
-      showDemoBlockAlert()
-      return
-    }
-
     const method = paymentMethods.find((item) => item.id === methodId)
     if (methodId.startsWith('pm_')) {
       await removeStripePaymentMethod(methodId)

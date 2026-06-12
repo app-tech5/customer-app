@@ -26,6 +26,7 @@ export default function SignIn({ navigation, route }) {
       const routeEmail = route?.params?.prefilledEmail;
       if (routeEmail) {
         setEmail(routeEmail.trim());
+        setPassword('');
         return;
       }
       const savedData = await getSignInData();

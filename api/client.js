@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { config } from '../config';
 import { API_BASE_URL, API_TIMEOUT } from './constants';
+import { handleDemoWrite, handleDemoRead, mergeDemoRead } from './demo/handlers';
 
 export class ApiClient {
   constructor() {
@@ -27,7 +29,23 @@ export class ApiClient {
   }
 
   async apiCall(endpoint, options = {}) {
+    const method = (options.method || 'GET').toUpperCase();
+
     try {
+      if (config.DEMO_MODE) {
+        const localResult = await handleDemoWrite(this, endpoint, method, options);
+        if (localResult !== null) {
+          return localResult;
+        }
+
+        if (method === 'GET') {
+          const localRead = await handleDemoRead(this, endpoint, method);
+          if (localRead !== null) {
+            return localRead;
+          }
+        }
+      }
+
       const url = `${API_BASE_URL}${endpoint}`;
       const fetchConfig = {
         headers: this.getHeaders(),
@@ -37,7 +55,13 @@ export class ApiClient {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      const data = await response.json();
+
+      if (config.DEMO_MODE && method === 'GET') {
+        return mergeDemoRead(this, endpoint, data);
+      }
+
+      return data;
     } catch (error) {
       console.error(`API call failed: ${endpoint}`, error);
       throw error;
@@ -45,7 +69,16 @@ export class ApiClient {
   }
 
   async apiCallMultipart(endpoint, options = {}) {
+    const method = (options.method || 'POST').toUpperCase();
+
     try {
+      if (config.DEMO_MODE) {
+        const localResult = await handleDemoWrite(this, endpoint, method, options);
+        if (localResult !== null) {
+          return localResult;
+        }
+      }
+
       const url = `${API_BASE_URL}${endpoint}`;
       const headers = {};
       if (this.token) {

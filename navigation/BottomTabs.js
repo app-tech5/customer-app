@@ -6,13 +6,17 @@ import { CartNavigator } from './Stacks'
 import { useSelector } from 'react-redux'
 import { Ionicons, Feather } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
+import { colors } from '../global'
 const Tab = createBottomTabNavigator() 
 export default function BottomTabs() {
-  const BadgeIcon = withBadge(useSelector((state)=>state.cartReducer).length)(Icon)
+  const cartCount = useSelector((state) => state.cartReducer.length)
+  const BadgeIcon = withBadge(cartCount)(Icon)
+
   return (
        <Tab.Navigator
               screenOptions={{
-                tabBarActiveTintColor: "black",
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.grey[700],
               }}
            >
          <Tab.Screen 
@@ -48,14 +52,14 @@ export default function BottomTabs() {
          component={CartNavigator} 
          options ={{
            headerShown: false,
-           tabBarIcon: ({color, size}) =>(
+           tabBarIcon: ({ color, size }) => (
             <BadgeIcon
-                type = "material-community"
-                name = 'cart'
-                size={size}
-                color="black"
-              />
-           ) 
+              type="material-community"
+              name="cart"
+              size={size}
+              color={color}
+            />
+           )
          }}
          />
       <Tab.Screen

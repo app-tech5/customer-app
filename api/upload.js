@@ -1,7 +1,12 @@
 import { ApiClient } from './client';
+import { config } from '../config';
 
 ApiClient.prototype.uploadPublicFile = async function (asset, folder = 'avatars') {
   const uri = typeof asset === 'string' ? asset : asset.uri;
+
+  if (config.DEMO_MODE) {
+    return uri;
+  }
   const formData = new FormData();
   formData.append('folder', folder);
   formData.append('image', {
