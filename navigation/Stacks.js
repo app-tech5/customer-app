@@ -8,6 +8,8 @@ import MenuDetailScreen from '../screens/MenuDetailScreen'
 import OrderDetails from '../screens/OrderDetails'
 import SearchResults from '../screens/SearchResults'
 import SearchScreen from '../screens/SearchScreen'
+import CategoryResults from '../screens/CategoryResults'
+import ItemResults from '../screens/ItemResults'
 import OrdersScreen from '../screens/OrdersScreen'
 import OrderTracking from '../screens/OrderTracking'
 import OrderRequest from '../screens/OrderRequest'
@@ -82,7 +84,8 @@ export function CartNavigator() {
       <CartStack.Screen
         name="Carts"
         component={CartScreen}
-        options={{ headerShown: true, headerLeft: null }} />
+        options={{ headerShown: true }}
+      />
         
       <CartStack.Screen
         name="CartDetails"
@@ -199,6 +202,14 @@ export function SearchNavigator() {
         name="MenuDetailScreen"
         component={MenuDetailScreen}
         options={{ headerShown: false }} />
+      <SearchStack.Screen
+        name="CategoryResults"
+        component={CategoryResults}
+        options={{ headerShown: true }} />
+      <SearchStack.Screen
+        name="ItemResults"
+        component={ItemResults}
+        options={{ headerShown: true }} />
     </SearchStack.Navigator>
   )
 

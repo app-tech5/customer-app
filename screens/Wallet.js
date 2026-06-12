@@ -15,6 +15,7 @@ export default function WalletScreen({ navigation, route}) {
     paymentMethods,
     setDefaultPaymentMethod,
     removePaymentMethod,
+    refreshPaymentMethods,
   } = usePaymentMethods()
   const { currency } = useSettings()
   const [transactions, setTransactions] = useState([])
@@ -43,7 +44,8 @@ export default function WalletScreen({ navigation, route}) {
   useFocusEffect(
     useCallback(() => {
       loadWalletData()
-    }, [loadWalletData])
+      refreshPaymentMethods()
+    }, [loadWalletData, refreshPaymentMethods])
   )
 
   const BalanceCard = () => (
@@ -121,7 +123,7 @@ export default function WalletScreen({ navigation, route}) {
       ) : (
         <FlatList
           data={paymentMethods}
-          keyExtractor={(item, index) => String(item.id || index)}
+          keyExtractor={(item, index) => String(item._id || item.id || index)}
           renderItem={({ item }) => (
             <PaymentMethodItem
               method={item}
@@ -137,7 +139,7 @@ export default function WalletScreen({ navigation, route}) {
                     { text: i18n.t('common.cancel', 'Cancel'), style: 'cancel' },
                     {
                       text: i18n.t('wallet.setAsDefault', 'Set as Default'),
-                      onPress: () => setDefaultPaymentMethod(item.id)
+                      onPress: () => setDefaultPaymentMethod(item._id || item.id)
                     },
                     {
                       text: i18n.t('wallet.remove', 'Remove'),

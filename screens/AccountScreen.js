@@ -6,6 +6,7 @@ import { userInfos, updateUser, getOrders } from '../api'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { config } from '../config'
+import { navigateToTabOrders } from '../navigation/navigationHelpers'
 import Loader from './Loader'
 import { RefreshControl } from 'react-native'
 
@@ -201,7 +202,7 @@ export default function AccountScreen({ navigation }) {
         icon="receipt"
         title={i18n.t('drawer.myOrders')}
         subtitle={i18n.t('profile.viewOrderHistory')}
-        onPress={() => navigation.navigate('Orders')}
+        onPress={() => navigateToTabOrders(navigation)}
       />
 
       <MenuItem

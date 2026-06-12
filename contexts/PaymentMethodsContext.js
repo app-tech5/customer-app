@@ -8,26 +8,47 @@ import {
   getUserPaymentMethods,
   addPaymentMethod as addPaymentMethodApi,
   removePaymentMethod as removePaymentMethodApi,
+  setDefaultPaymentMethod as setDefaultPaymentMethodApi,
 } from '../api'
 
 const PaymentMethodsContext = createContext()
+
+const getPaymentMethodKey = (method) => method?._id || method?.id
+
+export const normalizePaymentMethods = (methods) => {
+  if (!Array.isArray(methods) || methods.length === 0) return []
+
+  const list = methods.map((method) => ({
+    ...method,
+    id: method.id || method._id,
+  }))
+
+  if (list.some((method) => method.isDefault)) {
+    return list
+  }
+
+  return list.map((method, index) => ({
+    ...method,
+    isDefault: index === 0,
+  }))
+}
 
 export function PaymentMethodsProvider({ children }) {
   const user = useSelector((state) => state.userReducer)
   const [paymentMethods, setPaymentMethods] = useState([])
 
-  useEffect(() => {
-    const fetchPaymentMethods = async () => {
-      try {
-        const paymentMethods = await getUserPaymentMethods()
-        setPaymentMethods(paymentMethods)
-      } catch (error) {
-        console.warn('Failed to load payment methods from API', error)
-      }
+  const refreshPaymentMethods = useCallback(async () => {
+    try {
+      const methods = await getUserPaymentMethods()
+      setPaymentMethods(normalizePaymentMethods(methods))
+    } catch (error) {
+      console.warn('Failed to load payment methods from API', error)
     }
-  
-    fetchPaymentMethods()
   }, [])
+
+  useEffect(() => {
+    refreshPaymentMethods()
+  }, [refreshPaymentMethods])
 
   const showDemoBlockAlert = () => {
     Alert.alert(i18n.t('common.info'), i18n.t('wallet.paymentMethodDisabledInDemo'))
@@ -50,17 +71,29 @@ export function PaymentMethodsProvider({ children }) {
       isActive: true,
       verificationStatus: 'unverified',
     })
-    setPaymentMethods([...paymentMethods, paymentMethod])
+    setPaymentMethods(normalizePaymentMethods([...paymentMethods, paymentMethod]))
   }, [paymentMethods])
 
-  const setDefaultPaymentMethod = useCallback((methodId) => {
-    const next = paymentMethods.map((method) => ({
-      ...method,
-      isDefault: method.id === methodId,
-    }))
+  const setDefaultPaymentMethod = useCallback(async (methodId) => {
+    if (config.DEMO_MODE) {
+      Alert.alert(i18n.t('common.info'), i18n.t('wallet.setDefaultDisabledInDemo'))
+      return
+    }
 
-    setPaymentMethods(next)
-  }, [paymentMethods])
+    const method = paymentMethods.find(
+      (item) => getPaymentMethodKey(item) === methodId || item.id === methodId
+    )
+    const apiId = getPaymentMethodKey(method)
+    if (!apiId) return
+
+    try {
+      await setDefaultPaymentMethodApi(apiId)
+      await refreshPaymentMethods()
+    } catch (error) {
+      console.warn('Failed to set default payment method', error)
+      Alert.alert(i18n.t('common.error'), i18n.t('wallet.setDefaultError'))
+    }
+  }, [paymentMethods, refreshPaymentMethods])
 
   const removePaymentMethod = useCallback(async (methodId) => {
     if (config.DEMO_MODE) {
@@ -85,7 +118,7 @@ export function PaymentMethodsProvider({ children }) {
           isDefault: index === 0,
         }))
 
-    setPaymentMethods(next)
+    setPaymentMethods(normalizePaymentMethods(next))
   }, [paymentMethods])
 
   const value = useMemo(() => ({
@@ -94,11 +127,13 @@ export function PaymentMethodsProvider({ children }) {
     addPaymentMethod,
     setDefaultPaymentMethod,
     removePaymentMethod,
+    refreshPaymentMethods,
   }), [
     paymentMethods,
     addPaymentMethod,
     setDefaultPaymentMethod,
     removePaymentMethod,
+    refreshPaymentMethods,
   ])
 
   return (

@@ -4,6 +4,7 @@ import { Icon } from 'react-native-elements';
 import RestaurantDetailComponent from '../RestaurantDetailComponent';
 import { getCategoriesFromRestaurant } from '../../api';
 import i18n from '../../lang/i18n';
+import { navigateToTabSearch } from '../../navigation/navigationHelpers';
 import { formatRestaurantRatingSummary } from '../../global';
 
 export default function About(props) {
@@ -53,7 +54,7 @@ export const ArrowBack = (props)=>{
           return
         }
 
-        props.navigation.navigate('SearchFlow', { screen: 'SearchScreen' })
+        navigateToTabSearch(props.navigation, 'SearchScreen')
       }}
 
     />

@@ -258,7 +258,9 @@
     "addItemsToStartCart": "Ajoutez des articles pour créer un panier",
     "emptySubtitle": "Une fois que vous ajoutez des articles d'un restaurant ou d'un magasin, votre panier apparaîtra ici",
     "startShopping": "Commencer mes achats",
-    "deliverTo": "livrer à {{address}}"
+    "deliverTo": "Livrer à {{address}}",
+    "summaryCount": "{{items}} article(s) • {{restaurants}} restaurant(s)",
+    "noAddress": "Ajoutez une adresse de livraison dans votre profil"
   },
   "order": {
     "placeOrder": "Passer la commande",
@@ -432,6 +434,8 @@
     "adjustment": "Ajustement",
     "topUp": "Rechargement",
     "paymentMethodDisabledInDemo": "L'ajout ou la suppression de moyens de paiement n'est pas disponible en mode démo.",
+    "setDefaultDisabledInDemo": "Définir un moyen de paiement par défaut n'est pas disponible en mode démo.",
+    "setDefaultError": "Impossible de définir le moyen de paiement par défaut. Veuillez réessayer.",
     "loadError": "Erreur lors du chargement des données du portefeuille",
     "errorTitle": "Impossible de charger le portefeuille",
     "addPaymentMethod": "Ajouter un moyen de paiement",

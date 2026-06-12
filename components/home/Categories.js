@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { FlatList } from 'react-native-gesture-handler';
 import { getCategories } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
+import { navigateToTabSearch } from '../../navigation/navigationHelpers';
 
 const defaultImage = require('../../assets/images/category-placeholder.jpg');
 
@@ -36,12 +37,9 @@ export default function Categories({navigation}) {
         renderItem={({ item, index: _index }) => {
           return (
             <TouchableOpacity
-            onPress={()=>navigation.navigate("SearchFlow",{
-              screen: "SearchResults",
-              params: {
-                categoryId: item.id,
-                categoryName: item.name
-              }
+            onPress={() => navigateToTabSearch(navigation, 'SearchResults', {
+              categoryId: item.id,
+              categoryName: item.name,
             })}
             style={{ alignItems: "center", marginRight: 30 }}>
               <Image

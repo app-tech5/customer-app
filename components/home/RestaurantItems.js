@@ -33,10 +33,13 @@ export default function RestaurantItems({navigation,...props}) {
                         activeOpacity={1}
                         style={{
                         }}
-                        onPress={()=>navigation.navigate("RestaurantDetail",
-                        {
-                          restaurant: item
-                        })}
+                        onPress={() => {
+                          if (props.onRestaurantPress) {
+                            props.onRestaurantPress(item)
+                            return
+                          }
+                          navigation.navigate('RestaurantDetail', { restaurant: item })
+                        }}
                         >
                             <View
                                 style={{

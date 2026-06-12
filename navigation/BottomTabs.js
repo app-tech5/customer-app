@@ -1,11 +1,11 @@
 import React from 'react'
 import { Icon, withBadge} from 'react-native-elements'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { HomeNavigator, SearchNavigator } from './Stacks'
+import { HomeNavigator, SearchNavigator, AccountNavigator, OrdersNavigator } from './Stacks'
 import { CartNavigator } from './Stacks'
 import { useSelector } from 'react-redux'
-import RestaurantsMapScreen from '../screens/RestaurantsMapScreen'
-import { FontAwesome } from '@expo/vector-icons'
+import { Ionicons, Feather } from '@expo/vector-icons'
+import i18n from '../lang/i18n'
 const Tab = createBottomTabNavigator() 
 export default function BottomTabs() {
   const BadgeIcon = withBadge(useSelector((state)=>state.cartReducer).length)(Icon)
@@ -58,20 +58,28 @@ export default function BottomTabs() {
            ) 
          }}
          />
-      <Tab.Screen 
-         name = "Map" 
-         initialParams={{visible: true}}
-          component={RestaurantsMapScreen} 
-         options ={{
+      <Tab.Screen
+        name="Orders"
+        component={OrdersNavigator}
+        options={{
           headerShown: false,
-           tabBarIcon: ({color, size}) =>(
-            <FontAwesome 
-            name="map-marker" 
-            color={color}
-            size={size}/>
-           ) 
-         }}
-         />
+          title: i18n.t('drawer.orderHistory'),
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="clock" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Account"
+        component={AccountNavigator}
+        options={{
+          headerShown: false,
+          title: i18n.t('drawer.account'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" color={color} size={size} />
+          ),
+        }}
+      />
        </Tab.Navigator>
   )
 }

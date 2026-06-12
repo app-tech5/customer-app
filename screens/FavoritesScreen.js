@@ -15,6 +15,7 @@ import RestaurantItems from '../components/home/RestaurantItems'
 import Loader from './Loader'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
+import { navigateToTabSearch } from '../navigation/navigationHelpers'
 
 export default function FavoritesScreen({ navigation }) {
   const dispatch = useDispatch()
@@ -67,8 +68,18 @@ export default function FavoritesScreen({ navigation }) {
   }, [navigation])
 
   const handleExplore = () => {
-    navigation.navigate('Search', { screen: 'SearchScreen' })
+    navigateToTabSearch(navigation, 'SearchScreen')
   }
+
+  const openRestaurant = useCallback((restaurant) => {
+    navigation.navigate('BottomTabs', {
+      screen: 'Home',
+      params: {
+        screen: 'RestaurantDetail',
+        params: { restaurant },
+      },
+    })
+  }, [navigation])
 
   const handleFavoriteChange = useCallback((restaurantId, isFavorite) => {
     if (!isFavorite) {
@@ -130,6 +141,7 @@ export default function FavoritesScreen({ navigation }) {
           restaurantData={favorites}
           navigation={navigation}
           size={0.92}
+          onRestaurantPress={openRestaurant}
           onFavoriteChange={handleFavoriteChange}
           ListHeaderComponent={favorites.length > 0 ? renderHeader : null}
           ListEmptyComponent={renderEmpty}

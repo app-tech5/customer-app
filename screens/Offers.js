@@ -9,6 +9,7 @@ import { colors } from '../global'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getAllActiveOffers } from '../api'
 import i18n from '../lang/i18n'
+import { navigateToTabSearch } from '../navigation/navigationHelpers'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -176,46 +177,38 @@ export default function Offers({ navigation }) {
     if (promotion.scope === 'restaurant' && promotion.applicableRestaurants.length >= 1) {
       
       const restaurantIds = promotion.applicableRestaurants.map(rest => rest._id || rest.restaurantId || rest.id)
-      navigation.navigate('SearchFlow', {
-        screen: 'SearchResults',
-        params: {
-          applicableRestaurants: restaurantIds, 
-          name: promotion.name,
-          type: 'restaurant',
-          fromOffers: true,
-          promotionScope: 'restaurant'
-        }
-      });
+      navigateToTabSearch(navigation, 'SearchResults', {
+        applicableRestaurants: restaurantIds,
+        name: promotion.name,
+        type: 'restaurant',
+        fromOffers: true,
+        promotionScope: 'restaurant',
+      })
     } else if (promotion.scope === 'platform') {
       
-      navigation.navigate('SearchFlow', {
-        screen: 'SearchResults',
-        params: {
-          name: 'ALL_RESTAURANTS',
-          type: 'restaurant',
-          fromOffers: true
-        }
-      });
+      navigateToTabSearch(navigation, 'SearchResults', {
+        name: 'ALL_RESTAURANTS',
+        type: 'restaurant',
+        fromOffers: true,
+      })
     } else if (promotion.scope === 'category') {
       
-      navigation.navigate('CategoryResults', {
+      navigateToTabSearch(navigation, 'CategoryResults', {
         applicableCategories: promotion.applicableCategories,
         name: promotion.name,
         promotionName: promotion.name,
-        fromOffers: true
-      });
+        fromOffers: true,
+      })
     } else if (promotion.scope === 'item') {
       
-      navigation.navigate('ItemResults', {
+      navigateToTabSearch(navigation, 'ItemResults', {
         applicableItems: promotion.applicableItems,
         name: promotion.name,
         promotionName: promotion.name,
-        fromOffers: true
-      });
+        fromOffers: true,
+      })
     } else {
-      navigation.navigate('SearchFlow', {
-        screen: 'SearchScreen'
-      });
+      navigateToTabSearch(navigation, 'SearchScreen')
     }
   }
 
@@ -360,7 +353,7 @@ export default function Offers({ navigation }) {
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => navigation.navigate('SearchFlow', { screen: 'SearchScreen' })}
+            onPress={() => navigateToTabSearch(navigation, 'SearchScreen')}
             accessibilityRole="button"
             accessibilityLabel="Search offers"
             accessibilityHint="Navigate to search screen"

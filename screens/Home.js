@@ -18,6 +18,7 @@ import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import * as Location from 'expo-location'
 import SettingContext from '../contexts/SettingContext'
+import { navigateToTabSearch } from '../navigation/navigationHelpers'
 
 export default function Home({navigation}) {
   const {restaurantData, setRestaurantData} = useContext(RestaurantsContext)
@@ -528,14 +529,11 @@ export default function Home({navigation}) {
                 <TouchableOpacity
                   onPress={() => {
                     
-                    navigation.navigate('SearchFlow', {
-                      screen: 'SearchResults',
-                      params: {
-                        searchTerm: section.title,
-                        restaurantData: section.restaurants,
-                        totalResults: section.restaurants.length,
-                        sectionType: section.id
-                      }
+                    navigateToTabSearch(navigation, 'SearchResults', {
+                      searchTerm: section.title,
+                      restaurantData: section.restaurants,
+                      totalResults: section.restaurants.length,
+                      sectionType: section.id,
                     })
                   }}
                 >

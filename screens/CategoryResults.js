@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
 import { getCategories } from '../api'
+import { navigateToTabSearch } from '../navigation/navigationHelpers'
 
 export default function CategoryResults({route, navigation}) {
   const [categoryData, setCategoryData] = useState([])
@@ -67,7 +68,7 @@ export default function CategoryResults({route, navigation}) {
           onPress={() => {
             
             if (cameFromOffers || promotionName) {
-              navigation.navigate('DrawerNavigator', { screen: 'Offers' })
+              navigation.navigate('Offers')
             } else {
               
               navigation.goBack()
@@ -147,15 +148,12 @@ export default function CategoryResults({route, navigation}) {
           keyExtractor={(item, index) => String(index)}
           renderItem={({item}) => (
             <TouchableOpacity
-              onPress={() => navigation.navigate('SearchFlow', {
-                screen: 'SearchResults',
-                params: {
-                  categoryName: item.name,
-                  name: item.name,
-                  type: 'restaurant',
-                  fromCategoryResults: true,
-                  categoryResultsParams: route.params 
-                }
+              onPress={() => navigateToTabSearch(navigation, 'SearchResults', {
+                categoryName: item.name,
+                name: item.name,
+                type: 'restaurant',
+                fromCategoryResults: true,
+                categoryResultsParams: route.params,
               })}
               style={styles.categoryItem}
               activeOpacity={0.7}

@@ -2,7 +2,10 @@ import React from 'react'
 import {createDrawerNavigator} from '@react-navigation/drawer'
 import BottomTabs from './BottomTabs'
 import DrawerContent from '../components/DrawerContent';
-import { SearchNavigator, AccountNavigator, OrdersNavigator, WalletSectionNavigator, SettingsSectionNavigator } from './Stacks';
+import { WalletSectionNavigator, SettingsSectionNavigator } from './Stacks';
+import TabSearchRedirect from './TabSearchRedirect';
+import TabAccountRedirect from './TabAccountRedirect';
+import TabOrdersRedirect from './TabOrdersRedirect';
 import NearMeScreen from '../screens/NearMeScreen';
 
 import Offers from '../screens/Offers'
@@ -56,7 +59,7 @@ export default function DrawerNavigator() {
 
         <Drawer.Screen
             name = "Search"
-            component={SearchNavigator}
+            component={TabSearchRedirect}
             options={{
                 title: i18n.t('drawer.search'),
                 drawerIcon: ({focused, size}) => (
@@ -102,7 +105,7 @@ export default function DrawerNavigator() {
 
         <Drawer.Screen
             name = "Orders"
-            component={OrdersNavigator}
+            component={TabOrdersRedirect}
             options={{
                 title: i18n.t('drawer.orderHistory'),
                 headerShown: false,
@@ -118,7 +121,7 @@ export default function DrawerNavigator() {
         
         <Drawer.Screen
             name = "Account"
-            component={AccountNavigator}
+            component={TabAccountRedirect}
             options={{
                 title: i18n.t('drawer.account'),
                 drawerIcon: ({focused, size}) => (

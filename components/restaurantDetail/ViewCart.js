@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import { useSelector } from 'react-redux'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, language, currency } from '../../global'
@@ -14,6 +16,10 @@ export default function ViewCart({ navigation: _navigation, route, params, deliv
     const [viewCartButton, setViewCartButton] = useState(true)
     const slideAnim = useRef(new Animated.Value(100)).current
     
+    const insets = useSafeAreaInsets()
+    const tabBarHeight = useContext(BottomTabBarHeightContext) ?? 0
+    const bottomOffset = tabBarHeight > 0 ? 0 : Math.max(insets.bottom, 12)
+
     const items = useSelector((state)=>state.cartReducer).filter(item => item.restaurantName === restaurant.name)
     const total = items.reduce((prev, curr)=> prev + (curr.totalPrice || curr.price), 0)
     const itemCount = items.length
@@ -61,7 +67,7 @@ export default function ViewCart({ navigation: _navigation, route, params, deliv
                 <Animated.View
                     style={{
                         position: 'absolute',
-                        bottom: 0,
+                        bottom: bottomOffset,
                         left: 0,
                         right: 0,
                         zIndex: 999,

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import i18n from '../../lang/i18n'
 import { RestaurantsContext } from '../../contexts/RestaurantsContext'
+import { navigateToTabSearch } from '../../navigation/navigationHelpers'
 
 export default function SearchBar({
   searchbar,
@@ -49,13 +50,10 @@ export default function SearchBar({
       restaurant?.city?.toLowerCase().includes(query)
     )
 
-    navigation.navigate('SearchFlow', {
-      screen: 'SearchResults',
-      params: {
-        searchTerm: searchText.trim(),
-        restaurantData: filteredRestaurants,
-        totalResults: filteredRestaurants.length,
-      },
+    navigateToTabSearch(navigation, 'SearchResults', {
+      searchTerm: searchText.trim(),
+      restaurantData: filteredRestaurants,
+      totalResults: filteredRestaurants.length,
     })
   }
 

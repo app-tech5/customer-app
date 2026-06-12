@@ -298,7 +298,9 @@
     "addItemsToStartCart": "Add items to start a cart",
     "emptySubtitle": "Once you add items from a restaurant or store, your cart will appear here",
     "startShopping": "Start shopping",
-    "deliverTo": "deliver to {{address}}"
+    "deliverTo": "Deliver to {{address}}",
+    "summaryCount": "{{items}} item(s) • {{restaurants}} restaurant(s)",
+    "noAddress": "Add a delivery address in your profile"
   },
   "order": {
     "placeOrder": "Place Order",
@@ -478,6 +480,8 @@
     "adjustment": "Adjustment",
     "topUp": "Top up",
     "paymentMethodDisabledInDemo": "Adding or removing payment methods is not available in demo mode.",
+    "setDefaultDisabledInDemo": "Setting a default payment method is not available in demo mode.",
+    "setDefaultError": "Could not set the default payment method. Please try again.",
     "loadError": "Error loading wallet data",
     "errorTitle": "Unable to load wallet",
     "addPaymentMethod": "Add payment method",

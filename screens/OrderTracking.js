@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { getOrderById } from '../api'
 import i18n from '../lang/i18n'
+import { resetToTabOrders } from '../navigation/navigationHelpers'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
@@ -435,7 +436,7 @@ export default function OrderTracking() {
 
         <TouchableOpacity
           style={styles.ordersButton}
-          onPress={() => resetToDrawer('Orders')}
+          onPress={() => resetToTabOrders(navigation)}
         >
           <Ionicons name="receipt-outline" size={20} color={colors.primary} />
           <Text style={styles.ordersButtonText}>
