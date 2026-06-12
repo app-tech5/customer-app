@@ -17,18 +17,30 @@ export default function PaymentMethodItem({
   const IconComponent = methodType?.includes('paypal') ? FontAwesome : Ionicons
   const Container = onPress ? TouchableOpacity : View
 
-  const iconName = methodType?.includes('paypal')
-    ? 'paypal'
-    : methodType?.includes('cash')
-      ? 'cash'
-      : methodType?.includes('google_pay')
-        ? 'logo-google'
-        : methodType?.includes('apple_pay')
-          ? 'logo-apple'
-          : 'card-outline'
+  const iconName = methodType?.includes('platform_credit')
+    ? 'wallet-outline'
+    : methodType?.includes('paypal')
+      ? 'paypal'
+      : methodType?.includes('cash')
+        ? 'cash'
+        : methodType?.includes('google_pay')
+          ? 'logo-google'
+          : methodType?.includes('apple_pay')
+            ? 'logo-apple'
+            : 'card-outline'
   const firstLetter = method?.cardDetails?.cardBrand?.charAt(0).toUpperCase()
-  
-  const title = methodType?.includes('cash') ? 'Cash' : methodType?.includes('paypal') ? 'Paypal' : methodType?.includes('google_pay') ? 'Google Pay' : methodType?.includes('apple_pay') ? 'Apple Pay' : firstLetter + method?.cardDetails?.cardBrand?.slice(1) || method?.cardDetails?.label
+
+  const title = methodType?.includes('platform_credit')
+    ? i18n.t('payment.platform_credit')
+    : methodType?.includes('cash')
+      ? i18n.t('payment.cash')
+      : methodType?.includes('paypal')
+        ? i18n.t('payment.paypal')
+        : methodType?.includes('google_pay')
+          ? i18n.t('payment.google_pay')
+          : methodType?.includes('apple_pay')
+            ? i18n.t('payment.apple_pay')
+            : firstLetter + method?.cardDetails?.cardBrand?.slice(1) || method?.cardDetails?.label
   const isCheckout = variant === 'checkout'
 
   return (
@@ -49,6 +61,11 @@ export default function PaymentMethodItem({
           <Text style={[styles.name, isCheckout && isSelected && styles.selectedName]}>
             {title}
           </Text>
+          {methodType?.includes('platform_credit') && method?.walletBalance != null ? (
+            <Text style={[styles.details, isCheckout && isSelected && styles.selectedDetails]}>
+              {i18n.t('wallet.balance')}: {method.walletBalance}
+            </Text>
+          ) : null}
           {method?.cardDetails?.cardNumberLast4 ? (
             <Text style={[styles.details, isCheckout && isSelected && styles.selectedDetails]}>
               •••• {method.cardDetails.cardNumberLast4}

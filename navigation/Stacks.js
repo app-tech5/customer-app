@@ -439,6 +439,16 @@ export function SettingsSectionNavigator({ navigation }) {
           headerShown: true,
         }}
       />
+      <SettingsStack.Screen
+        name="HelpSupport"
+        component={HelpSupportScreen}
+        options={{ headerShown: true }}
+      />
+      <SettingsStack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{ headerShown: true }}
+      />
     </SettingsStack.Navigator>
   )
 }

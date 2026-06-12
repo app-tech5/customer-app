@@ -183,6 +183,7 @@ export const removeStripePaymentMethod = (paymentMethodId) =>
 export const getUserTransactions = () => api.getUserTransactions();
 export const addMoneyToWallet = (transactionData) =>
   api.addMoneyToWallet(transactionData);
+export const recordOrderPayment = (payload) => api.recordOrderPayment(payload);
 export const updatePaymentMethod = (paymentMethodId, paymentMethodData) =>
   api.updatePaymentMethod(paymentMethodId, paymentMethodData);      
 export const restaurantsCol = 'restaurants';

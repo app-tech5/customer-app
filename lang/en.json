@@ -452,6 +452,13 @@
   "wallet": {
     "title": "Wallet",
     "balance": "Balance",
+    "walletBalanceSubtitle": "Available: {{amount}}",
+    "walletBalanceEmpty": "Top up your wallet to pay with balance",
+    "walletBalanceAdded": "You can now pay orders with your wallet balance.",
+    "balanceEmptyTitle": "No balance",
+    "balanceEmptyMessage": "Add money to your wallet before using it as a payment method.",
+    "insufficientBalanceTitle": "Insufficient balance",
+    "insufficientBalance": "Your wallet balance is not enough for this order.",
     "addMoney": "Add Money",
     "addMoneyAmountLabel": "Amount",
     "addMoneyConfirm": "Add to balance",

@@ -1,5 +1,5 @@
 import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo, Feather } from '@expo/vector-icons'
 import { useSelector, useDispatch } from 'react-redux'
@@ -7,9 +7,12 @@ import i18n from '../lang/i18n'
 import { config } from '../config'
 import { colors } from '../global'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { api } from '../api'
+import { SignInContext } from '../contexts/authContext'
 
 export default function Settings({ navigation }) {
   const dispatch = useDispatch()
+  const { setSignedIn } = useContext(SignInContext)
   const insets = useSafeAreaInsets()
   const { language } = useSelector((state) => state.settings || {})
 
@@ -95,16 +98,10 @@ export default function Settings({ navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              
+              await api.logout()
+              setSignedIn(null)
               dispatch({ type: 'CLEAR' })
-
-              await AsyncStorage.removeItem('userToken')
-              await AsyncStorage.removeItem('userData')
-              
-              Alert.alert(
-                i18n.t('settings.loggedOut', 'Logged Out'),
-                i18n.t('settings.loggedOutMessage', 'You have been successfully logged out')
-              )
+              dispatch({ type: 'LOGOUT_USER' })
             } catch (error) {
               console.error('Error during logout:', error)
               Alert.alert(i18n.t('common.error', 'Error'), i18n.t('settings.logoutError', 'Failed to logout'))
@@ -213,8 +210,9 @@ export default function Settings({ navigation }) {
               />
             }
             onPress={() => {
-              
-              Alert.alert('Not implemented', 'Detailed notification settings will be implemented')
+              const value = !notificationsEnabled
+              setNotificationsEnabled(value)
+              saveSetting('notificationsEnabled', value)
             }}
             showArrow={false}
           />
@@ -299,20 +297,14 @@ export default function Settings({ navigation }) {
             icon="help-circle"
             title={i18n.t('settings.help', 'Help Center')}
             subtitle={i18n.t('settings.helpDescription', 'Find answers to common questions')}
-            onPress={() => {
-              
-              Alert.alert('Not implemented', 'Help center will be implemented')
-            }}
+            onPress={() => navigation.navigate('HelpSupport')}
           />
 
           <SettingItem
             icon="chatbubble-ellipses"
             title={i18n.t('settings.contactSupport', 'Contact Support')}
             subtitle={i18n.t('settings.contactSupportDescription', 'Get help from our support team')}
-            onPress={() => {
-              
-              Alert.alert('Not implemented', 'Contact support will be implemented')
-            }}
+            onPress={() => navigation.navigate('HelpSupport')}
           />
 
           <SettingItem
@@ -332,12 +324,7 @@ export default function Settings({ navigation }) {
             icon="information-circle"
             title={i18n.t('settings.aboutApp', 'About Good Food')}
             subtitle={`${i18n.t('settings.version', 'Version')} ${config.VERSION}`}
-            onPress={() => {
-              Alert.alert(
-                i18n.t('profile.about', 'About'),
-                `${i18n.t('app.name', 'Good Food')}\n${i18n.t('settings.version', 'Version')} ${config.VERSION}\n\n${i18n.t('settings.aboutDescription', 'Your favorite food delivery app')}`
-              )
-            }}
+            onPress={() => navigation.navigate('About')}
           />
 
           <SettingItem

@@ -407,6 +407,13 @@
   "wallet": {
     "title": "Portefeuille",
     "balance": "Solde",
+    "walletBalanceSubtitle": "Disponible : {{amount}}",
+    "walletBalanceEmpty": "Rechargez votre portefeuille pour payer avec le solde",
+    "walletBalanceAdded": "Vous pouvez maintenant payer vos commandes avec le solde du portefeuille.",
+    "balanceEmptyTitle": "Solde insuffisant",
+    "balanceEmptyMessage": "Ajoutez de l'argent à votre portefeuille avant de l'utiliser comme moyen de paiement.",
+    "insufficientBalanceTitle": "Solde insuffisant",
+    "insufficientBalance": "Votre solde portefeuille est insuffisant pour cette commande.",
     "addMoney": "Ajouter de l'argent",
     "addMoneyAmountLabel": "Montant",
     "addMoneyConfirm": "Ajouter au solde",

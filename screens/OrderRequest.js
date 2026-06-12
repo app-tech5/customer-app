@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import i18n from '../lang/i18n'
 import { colors, language } from '../global'
 import Loader from './Loader'
-import { api, createStripePaymentIntent } from '../api'
+import { api, createStripePaymentIntent, recordOrderPayment, getUserTransactions } from '../api'
 import { config } from '../config'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useSettings } from '../contexts/SettingContext'
@@ -65,18 +65,44 @@ export default function OrderRequest({ route, navigation }) {
     );
 
     if (!defaultPaymentMethod) {
-      throw new Error("No default payment method found");
+      Alert.alert(
+        i18n.t('common.error', 'Error'),
+        i18n.t('checkout.selectPayment', 'Select payment method'),
+        [{ text: i18n.t('common.ok', 'OK') }]
+      )
+      return
     }
 
-    const paymentMethodId = defaultPaymentMethod.id;
-
-    console.log('💳 Processing payment with method ID:', defaultPaymentMethod);
+    const paymentMethodId = defaultPaymentMethod.id
 
     try {
-      setLoading(true);
+      setLoading(true)
+
+      if (defaultPaymentMethod.methodType === 'platform_credit') {
+        const walletResponse = await getUserTransactions()
+        const availableBalance = Number(walletResponse?.balance) || 0
+        if (availableBalance < Number(totals?.total)) {
+          Alert.alert(
+            i18n.t('wallet.insufficientBalanceTitle'),
+            i18n.t('wallet.insufficientBalance'),
+            [
+              { text: i18n.t('common.cancel'), style: 'cancel' },
+              {
+                text: i18n.t('wallet.addMoney'),
+                onPress: () =>
+                  navigation.navigate('WalletFlow', { screen: 'AddMoney' }),
+              },
+            ]
+          )
+          return
+        }
+      }
 
       if (!config.DEMO_MODE) {
-        if (defaultPaymentMethod.methodType === 'cash_on_delivery') {
+        if (
+          defaultPaymentMethod.methodType === 'cash_on_delivery' ||
+          defaultPaymentMethod.methodType === 'platform_credit'
+        ) {
 
         } else {
           const response = await createStripePaymentIntent({
@@ -173,6 +199,16 @@ export default function OrderRequest({ route, navigation }) {
       };
 
       createdOrder = await api.createOrder(orderData);
+
+      if (!config.DEMO_MODE) {
+        const orderId = createdOrder?._id || createdOrder?.id;
+        await recordOrderPayment({
+          userId: currentUserId,
+          amount: totals.total,
+          paymentMethod: defaultPaymentMethod.methodType,
+          orderId,
+        });
+      }
 
       dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName });
 

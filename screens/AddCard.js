@@ -104,7 +104,7 @@ function AddCard({ navigation }) {
       Alert.alert(
         i18n.t('wallet.cardAddedTitle'),
         i18n.t('wallet.cardAddedMessage'),
-        [{ text: i18n.t('common.ok'), onPress: () => navigation.goBack() }]
+        [{ text: i18n.t('common.ok'), onPress: () => navigation.navigate('Wallet') }]
       )
     } finally {
       setSaving(false)

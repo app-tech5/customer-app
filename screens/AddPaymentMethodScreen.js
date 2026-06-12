@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import {
   View,
   Text,
@@ -15,11 +16,15 @@ import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
+import { useSettings } from '../contexts/SettingContext'
+import { getUserTransactions } from '../api'
 
 export default function AddPaymentMethodScreen({ navigation }) {
   const user = useSelector((state) => state.userReducer)
   const { paymentMethods, addPaymentMethod } = usePaymentMethods()
+  const { currency } = useSettings()
   const currentUserId = user?.userId || user?.id
+  const [walletBalance, setWalletBalance] = useState(0)
 
   const existingTypes = useMemo(
     () => new Set(paymentMethods.map((method) => method.methodType)),
@@ -31,6 +36,58 @@ export default function AddPaymentMethodScreen({ navigation }) {
       title: i18n.t('wallet.addPaymentMethod'),
     })
   }, [navigation])
+
+  const loadWalletBalance = useCallback(async () => {
+    try {
+      const response = await getUserTransactions()
+      setWalletBalance(Number(response?.balance) || 0)
+    } catch {
+      setWalletBalance(0)
+    }
+  }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadWalletBalance()
+    }, [loadWalletBalance])
+  )
+
+  const addWalletBalanceMethod = async () => {
+    if (existingTypes.has('platform_credit')) {
+      Alert.alert(
+        i18n.t('wallet.alreadyAdded', 'Already added'),
+        i18n.t('wallet.alreadyAddedMessage', 'This payment method is already in your wallet.')
+      )
+      return
+    }
+
+    if (walletBalance <= 0) {
+      Alert.alert(
+        i18n.t('wallet.balanceEmptyTitle'),
+        i18n.t('wallet.balanceEmptyMessage'),
+        [
+          { text: i18n.t('common.cancel'), style: 'cancel' },
+          {
+            text: i18n.t('wallet.addMoney'),
+            onPress: () => navigation.navigate('AddMoney'),
+          },
+        ]
+      )
+      return
+    }
+
+    await addPaymentMethod({
+      id: `platform_credit_${currentUserId}`,
+      user: currentUserId,
+      methodType: 'platform_credit',
+      cardDetails: { label: i18n.t('payment.platform_credit') },
+      walletBalance: `${currency.symbol}${walletBalance.toFixed(2)}`,
+    })
+
+    Alert.alert(i18n.t('wallet.added'), i18n.t('wallet.walletBalanceAdded'), [
+      { text: i18n.t('common.ok'), onPress: () => navigation.navigate('Wallet') },
+    ])
+  }
 
   const addSimpleMethod = (type, label) => {
     if (existingTypes.has(type)) {
@@ -55,6 +112,18 @@ export default function AddPaymentMethodScreen({ navigation }) {
   }
   
   const rows = [
+    {
+      id: 'platform_credit',
+      title: i18n.t('payment.platform_credit'),
+      subtitle: walletBalance > 0
+        ? i18n.t('wallet.walletBalanceSubtitle', {
+            amount: `${currency.symbol}${walletBalance.toFixed(2)}`,
+          })
+        : i18n.t('wallet.walletBalanceEmpty'),
+      Icon: Ionicons,
+      iconName: 'wallet-outline',
+      onPress: addWalletBalanceMethod,
+    },
     {
       id: 'card',
       title: i18n.t('wallet.addCreditOrDebit'),

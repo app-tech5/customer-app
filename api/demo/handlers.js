@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../constants';
+import { buildOrderPaymentTransaction } from '../walletUtils';
 import { getDemoState, updateDemoState } from './localStore';
 
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -170,9 +171,23 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
       updatedAt: new Date().toISOString(),
       orderId: `DEMO-${Math.random().toString(36).slice(2, 11).toUpperCase()}`,
     };
+    const paymentMethod = body.payment?.method || body.paymentMethod;
+    const transactionPayload = buildOrderPaymentTransaction({
+      userId: body.user,
+      amount: body.totalPrice,
+      paymentMethod,
+      orderId,
+    });
+    const transaction = {
+      _id: newId('demo_tx'),
+      ...transactionPayload,
+      createdAt: new Date().toISOString(),
+      date_created: new Date().toISOString(),
+    };
     await updateDemoState((state) => ({
       ...state,
       localOrders: [order, ...state.localOrders],
+      transactions: [transaction, ...state.transactions],
     }));
     return order;
   }
