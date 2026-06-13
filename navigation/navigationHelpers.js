@@ -24,13 +24,25 @@ export function getDrawerIndexForState(state) {
   return drawerIndex >= 0 ? drawerIndex : state.index
 }
 
-const BOTTOM_TAB_NAMES = new Set(['Home', 'Search', 'Cart', 'Orders', 'Account'])
+function findBottomTabNavigator(navigation) {
+  let nav = navigation
+
+  while (nav) {
+    const routeNames = nav.getState?.()?.routeNames
+    if (routeNames?.includes('Home') && routeNames?.includes('Cart')) {
+      return nav
+    }
+    nav = nav.getParent?.()
+  }
+
+  return null
+}
 
 export function navigateToTabHome(navigation) {
-  const state = navigation.getState?.()
+  const tabNav = findBottomTabNavigator(navigation)
 
-  if (state?.routeNames?.some((name) => BOTTOM_TAB_NAMES.has(name))) {
-    navigation.navigate('Home', { screen: 'HomeScreen' })
+  if (tabNav) {
+    tabNav.navigate('Home', { screen: 'HomeScreen' })
     return
   }
 

@@ -792,6 +792,10 @@
     "loadingDeals": "Loading amazing deals..."
   },
   "promotion": {
+    "expired": "Expired",
+    "expiresToday": "Expires today",
+    "expiresInDays": "Expires in {{days}} days",
+    "minOrder": "Min. order: {{price}}",
     "untilDate": "Valid until {{date}}",
     "specialOffer": "Special Offer",
     "limitedTime": "Limited Time",

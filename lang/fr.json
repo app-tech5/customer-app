@@ -185,6 +185,8 @@
     "noReviewsYet": "Pas encore d'avis",
     "reviewsCount": "avis",
     "ratingWithReviews": "{{rating}} ({{count}} avis)",
+    "availableOffers": "Offres disponibles",
+    "recentReviews": "Avis récents",
     "addToCart": "Ajouter au panier",
     "viewCart": "Voir le panier",
     "total": "Total",
@@ -742,6 +744,10 @@
     "loadingDeals": "Chargement des offres..."
   },
   "promotion": {
+    "expired": "Expirée",
+    "expiresToday": "Expire aujourd'hui",
+    "expiresInDays": "Expire dans {{days}} jours",
+    "minOrder": "Commande min. : {{price}}",
     "untilDate": "Valable jusqu'au {{date}}",
     "specialOffer": "Offre spéciale",
     "limitedTime": "Durée limitée",

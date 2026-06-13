@@ -121,6 +121,9 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
     await updateDemoState((state) => ({
       ...state,
       profilePatch: { ...state.profilePatch, ...body },
+      registeredUsers: state.registeredUsers.map((user) =>
+        String(user.id) === String(userId) ? { ...user, ...body } : user
+      ),
     }));
     if (client.user && String(client.user.id || client.user.userId) === String(userId)) {
       client.user = { ...client.user, ...body };
@@ -348,12 +351,79 @@ const toPublicDemoUser = (user, profilePatch = {}) => {
   return { ...safeUser, ...profilePatch };
 };
 
+const getDemoProfile = (state, userId, client) => {
+  const demoUser = state.registeredUsers.find(
+    (user) => String(user.id) === String(userId)
+  );
+
+  if (demoUser) {
+    return toPublicDemoUser(demoUser, state.profilePatch);
+  }
+
+  if (String(client.user?.id) === String(userId)) {
+    return { ...client.user, ...state.profilePatch };
+  }
+
+  return null;
+};
+
+const buildDemoAddresses = (profile) => {
+  const address = profile?.address?.trim();
+  if (!address) return [];
+
+  const lat = profile.location?.latitude ?? profile.lat;
+  const lng = profile.location?.longitude ?? profile.lng;
+
+  return [
+    {
+      id: 'user_default',
+      type: 'home',
+      name: 'My Address',
+      address,
+      city: '',
+      postalCode: '',
+      country: 'France',
+      isDefault: true,
+      coordinates:
+        lat != null && lng != null && Number.isFinite(Number(lat))
+          ? { lat: Number(lat), lng: Number(lng) }
+          : null,
+    },
+  ];
+};
+
+const getLocalDemoOrder = async (client, state, orderId) => {
+  const local = state.localOrders.find(
+    (order) => String(order._id || order.id) === String(orderId)
+  );
+
+  if (!local) return null;
+
+  const status = state.orderStatusById[orderId];
+  const withStatus = status ? { ...local, status } : local;
+  return enrichOrderRestaurant(client, withStatus);
+};
+
 export async function handleDemoRead(client, endpoint, method) {
-  if (method !== 'GET' || !client.token?.startsWith('demo_token_')) {
+  if (method !== 'GET') {
     return null;
   }
 
   const state = await getDemoState();
+
+  const orderGet = matchPath(endpoint, '/resource/orders/:orderId');
+  if (orderGet) {
+    const orderId = orderGet[1];
+    if (String(orderId).startsWith('demo_order_')) {
+      const order = await getLocalDemoOrder(client, state, orderId);
+      if (order) return order;
+      throw new Error('Order not found');
+    }
+  }
+
+  if (!client.token?.startsWith('demo_token_')) {
+    return null;
+  }
 
   const userGet = matchPath(endpoint, '/resource/users/:userId');
   if (userGet) {
@@ -364,6 +434,16 @@ export async function handleDemoRead(client, endpoint, method) {
     if (demoUser) {
       return toPublicDemoUser(demoUser, state.profilePatch);
     }
+  }
+
+  const addressesGet = matchPath(endpoint, '/users/:userId/addresses');
+  if (addressesGet) {
+    const userId = addressesGet[1];
+    if (String(client.user?.id) !== String(userId)) {
+      return [];
+    }
+    const profile = getDemoProfile(state, userId, client);
+    return buildDemoAddresses(profile);
   }
 
   if (endpoint === '/users/favorites') {
@@ -519,14 +599,9 @@ export async function mergeDemoRead(client, endpoint, data) {
   const orderGet = matchPath(endpoint, '/resource/orders/:orderId');
   if (orderGet) {
     const orderId = orderGet[1];
+    const order = await getLocalDemoOrder(client, state, orderId);
+    if (order) return order;
     const status = state.orderStatusById[orderId];
-    const local = state.localOrders.find(
-      (o) => String(o._id || o.id) === String(orderId)
-    );
-    if (local) {
-      const withStatus = status ? { ...local, status } : local;
-      return enrichOrderRestaurant(client, withStatus);
-    }
     if (status && data) return enrichOrderRestaurant(client, { ...data, status });
     if (data) return enrichOrderRestaurant(client, data);
     return data;
