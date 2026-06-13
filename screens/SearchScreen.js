@@ -233,11 +233,14 @@ export default function SearchScreen({ navigation }) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{i18n.t('search.browseByCategory')}</Text>
             <FlatList
-              data={categories.slice(0, 6)} 
-              keyExtractor={(item, index) => String(index)}
+              data={categories.filter((category) => category.type !== 'food').slice(0, 6)}
+              keyExtractor={(item, index) => String(item.id || index)}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  onPress={() => performSearch(item.name, 'category')}
+                  onPress={() => navigation.navigate('SearchResults', {
+                    categoryId: item.id,
+                    categoryName: item.name,
+                  })}
                   style={styles.categoryItem}
                 >
                   <ImageBackground

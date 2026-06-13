@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { Ionicons } from '@expo/vector-icons'
+import { navigateToRestaurantsMap } from '../navigation/navigationHelpers'
 import * as Location from 'expo-location'
 
 export default function SearchResults({ route, navigation }) {
@@ -65,6 +66,10 @@ export default function SearchResults({ route, navigation }) {
 
         if (categoryName) {
           restaurantsResult = await searchRestaurantsByCategory(categoryName)
+        }
+
+        else if (categoryId) {
+          restaurantsResult = await searchRestaurantsByCategory(categoryId)
         }
 
         else if (name === 'TOP_RATED_SPECIAL') {
@@ -221,12 +226,13 @@ export default function SearchResults({ route, navigation }) {
       headerLeft: () => (
         <TouchableOpacity
           onPress={() => {
-            if (cameFromOffers) {
+            if (route.params?.fromRestaurantsMap) {
+              navigateToRestaurantsMap(navigation)
+            } else if (cameFromOffers) {
               navigation.navigate('Offers')
             } else if (fromCategoryResults) {
               navigation.goBack()
             } else {
-
               navigation.goBack()
             }
           }}

@@ -15,14 +15,26 @@ ApiClient.prototype.getCategoriesFromRestaurant = async function (restaurantId) 
 ApiClient.prototype.searchRestaurantsByCategory = async function (categoryIdentifier) {
   const restaurants = await this.getRestaurants();
   if (categoryIdentifier && restaurants) {
+    const identifier = String(categoryIdentifier);
+
     return restaurants.filter((restaurant) =>
-      restaurant.categories?.some(
-        (cat) =>
+      restaurant.categories?.some((cat) => {
+        if (typeof cat === 'string') {
+          return cat === categoryIdentifier;
+        }
+
+        const categoryValue = cat.value?._id || cat.value?.id || cat.value;
+
+        return (
           cat._id === categoryIdentifier ||
           cat.id === categoryIdentifier ||
+          String(categoryValue) === identifier ||
           cat.title === categoryIdentifier ||
+          cat.name === categoryIdentifier ||
+          cat.label === categoryIdentifier ||
           cat === categoryIdentifier
-      )
+        );
+      })
     );
   }
   return restaurants || [];

@@ -139,7 +139,11 @@ export const RestaurantImage = (props) => {
         </>
     )
 }
-export const RestaurantInfo = (props)=>(
+export const RestaurantInfo = (props) => {
+  const distanceValue = Number(props.distance)
+  const hasDistance = Number.isFinite(distanceValue)
+
+  return (
     <View style={{
         flexDirection: "row",
         justifyContent: "space-between",
@@ -174,10 +178,10 @@ export const RestaurantInfo = (props)=>(
                     fontSize: 12,
                     color: colors.text.secondary
                 }}>
-                    {props.distance ? `${props.distance.toFixed(1)} km • ` : ''}
+                    {hasDistance ? `${distanceValue.toFixed(1)} km • ` : ''}
                     {props.deliveryTime ? `${props.deliveryTime} ${i18n.t('restaurant.deliveryTime')}` : props.collectTime ? `${props.collectTime} ${i18n.t('restaurant.collectTime')}` : i18n.t('restaurant.unknownTime')}
                 </Text>
-                {props.distance && (
+                {hasDistance && (
                     <Ionicons
                         name="location"
                         size={11}
@@ -218,7 +222,8 @@ export const RestaurantInfo = (props)=>(
             </View>
         </View>
     </View>
-)
+  )
+}
 const Affiche = (props)=> {
     return (
       <View style={styles.container}>

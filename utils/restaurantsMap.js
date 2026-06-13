@@ -1,5 +1,5 @@
 import { isUsableGeoCoordinate, parseGeoCoordinate } from './geoUtils'
-import { getDistanceKmBetweenUserAndRestaurant } from './deliveryTime'
+import { getDistanceKmBetweenUserAndRestaurant, getRestaurantDeliveryTime } from './deliveryTime'
 
 export const DEFAULT_REGION = {
   latitude: 48.8566,
@@ -52,12 +52,16 @@ const buildRestaurantWithMeta = (restaurant, originalIndex, userLocation) => {
     return null
   }
 
+  const distance = getDistanceKmBetweenUserAndRestaurant(restaurant, userLocation)
+  const deliveryEstimate = getRestaurantDeliveryTime(restaurant, userLocation)
+
   return {
     ...restaurant,
     originalIndex,
     latitude: coordinates.latitude,
     longitude: coordinates.longitude,
-    distance: getDistanceKmBetweenUserAndRestaurant(restaurant, userLocation),
+    distance,
+    deliveryTime: `${deliveryEstimate.min}-${deliveryEstimate.max}`,
   }
 }
 

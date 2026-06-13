@@ -17,18 +17,9 @@ export default function OrderDetails() {
   const navigation = useNavigation()
   const { currency } = useSettings()
 
-  const orderData = route.params?.order
-
   useEffect(() => {
-    if (orderData) {
-      
-      setOrder(orderData)
-      setLoader(false)
-    } else {
-      
-      loadOrderDetails()
-    }
-    
+    loadOrderDetails()
+
     navigation.setOptions({
       title: i18n.t('order.details', 'Order Details'),
       headerLeft: () => (
@@ -42,7 +33,7 @@ export default function OrderDetails() {
         </TouchableOpacity>
       ),
     })
-  }, [navigation, orderData])
+  }, [navigation, route.params?.id, route.params?.order?._id, route.params?.order?.id])
 
   const loadOrderDetails = async () => {
     try {

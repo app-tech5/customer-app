@@ -1,13 +1,16 @@
 import { View, Text, Image, TouchableOpacity, Platform } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { FlatList } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native'
 import { getCategories } from '../../api';
 import { CategoriesContext } from '../../contexts/CategoriesContext';
 import { navigateToTabSearch } from '../../navigation/navigationHelpers';
 
 const defaultImage = require('../../assets/images/category-placeholder.jpg');
 
-export default function Categories({navigation}) {
+export default function Categories({ navigation: navigationProp, searchResultParams = {} }) {
+  const navigationFromHook = useNavigation()
+  const navigation = navigationProp ?? navigationFromHook
   
   const {categories, setCategories} = useContext(CategoriesContext)
 
@@ -40,6 +43,7 @@ export default function Categories({navigation}) {
             onPress={() => navigateToTabSearch(navigation, 'SearchResults', {
               categoryId: item.id,
               categoryName: item.name,
+              ...searchResultParams,
             })}
             style={{ alignItems: "center", marginRight: 30 }}>
               <Image

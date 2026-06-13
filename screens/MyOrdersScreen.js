@@ -6,6 +6,7 @@ import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
+import { navigateToTabHome } from '../navigation/navigationHelpers'
 
 export default function MyOrdersScreen({ navigation }) {
   const [orders, setOrders] = useState([])
@@ -184,7 +185,7 @@ export default function MyOrdersScreen({ navigation }) {
       </Text>
       <TouchableOpacity
         style={styles.shopButton}
-        onPress={() => navigation.navigate('BottomTabs')}
+        onPress={() => navigateToTabHome(navigation)}
       >
         <Text style={styles.shopButtonText}>
           {i18n.t('order.startOrdering', 'Start Ordering')}

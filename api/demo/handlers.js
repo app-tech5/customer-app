@@ -23,6 +23,57 @@ const parseBody = (options) => {
 
 const newId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
+const getRestaurantId = (restaurantRef) => {
+  if (!restaurantRef) return null;
+  if (typeof restaurantRef === 'string' || typeof restaurantRef === 'number') {
+    return String(restaurantRef);
+  }
+  return String(restaurantRef._id || restaurantRef.id || '');
+};
+
+const enrichOrderRestaurant = async (client, order) => {
+  if (!order) return order;
+
+  const existing = order.restaurant;
+  if (existing && typeof existing === 'object' && existing.name) {
+    return order;
+  }
+
+  const restaurantId = getRestaurantId(existing || order.restaurantId);
+  if (!restaurantId) return order;
+
+  try {
+    const restaurant = await fetchFromApi(client, `/resource/restaurants/${restaurantId}`);
+    const normalized =
+      typeof client.normalizeRestaurant === 'function'
+        ? client.normalizeRestaurant(restaurant)
+        : restaurant;
+
+    return {
+      ...order,
+      restaurant: {
+        _id: normalized._id || normalized.id || restaurantId,
+        id: normalized._id || normalized.id || restaurantId,
+        name: normalized.name || order.restaurantName || 'Restaurant',
+        image: normalized.image || normalized.image_url || null,
+      },
+    };
+  } catch {
+    return {
+      ...order,
+      restaurant: {
+        _id: restaurantId,
+        id: restaurantId,
+        name: order.restaurantName || 'Restaurant',
+        image: null,
+      },
+    };
+  }
+};
+
+const enrichOrdersRestaurants = async (client, orders) =>
+  Promise.all((orders || []).map((order) => enrichOrderRestaurant(client, order)));
+
 export async function fetchFromApi(client, endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const response = await fetch(url, {
@@ -162,7 +213,7 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
 
   if (endpoint === '/resource/orders' && method === 'POST') {
     const orderId = newId('demo_order');
-    const order = {
+    let order = {
       _id: orderId,
       id: orderId,
       ...body,
@@ -171,6 +222,7 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
       updatedAt: new Date().toISOString(),
       orderId: `DEMO-${Math.random().toString(36).slice(2, 11).toUpperCase()}`,
     };
+    order = await enrichOrderRestaurant(client, order);
     const paymentMethod = body.payment?.method || body.paymentMethod;
     const transactionPayload = buildOrderPaymentTransaction({
       userId: body.user,
@@ -332,7 +384,7 @@ export async function handleDemoRead(client, endpoint, method) {
   }
 
   if (endpoint === '/resource/orders') {
-    return applyOrderOverrides([], state);
+    return enrichOrdersRestaurants(client, applyOrderOverrides([], state));
   }
 
   if (endpoint === '/resource/paymentMethods/byUserId') {
@@ -461,7 +513,7 @@ export async function mergeDemoRead(client, endpoint, data) {
   }
 
   if (endpoint === '/resource/orders') {
-    return applyOrderOverrides(data, state);
+    return enrichOrdersRestaurants(client, applyOrderOverrides(data, state));
   }
 
   const orderGet = matchPath(endpoint, '/resource/orders/:orderId');
@@ -471,8 +523,12 @@ export async function mergeDemoRead(client, endpoint, data) {
     const local = state.localOrders.find(
       (o) => String(o._id || o.id) === String(orderId)
     );
-    if (local) return local;
-    if (status && data) return { ...data, status };
+    if (local) {
+      const withStatus = status ? { ...local, status } : local;
+      return enrichOrderRestaurant(client, withStatus);
+    }
+    if (status && data) return enrichOrderRestaurant(client, { ...data, status });
+    if (data) return enrichOrderRestaurant(client, data);
     return data;
   }
 

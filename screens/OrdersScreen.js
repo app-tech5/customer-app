@@ -7,6 +7,7 @@ import { colors } from '../global'
 import { useSettings } from '../contexts/SettingContext'
 import Loader from './Loader'
 import { OrdersContext } from '../contexts/OrdersContext'
+import { navigateToTabHome } from '../navigation/navigationHelpers'
 
 export default function OrdersScreen({ navigation }) {
   //const [orders, setOrders] = useState([])
@@ -397,7 +398,7 @@ export default function OrdersScreen({ navigation }) {
       </Text>
       <TouchableOpacity
         style={styles.shopButton}
-        onPress={() => navigation.navigate('BottomTabs')}
+        onPress={() => navigateToTabHome(navigation)}
       >
         <Ionicons name="restaurant" size={20} color={colors.text.white} />
         <Text style={styles.shopButtonText}>

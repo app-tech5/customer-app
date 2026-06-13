@@ -29,6 +29,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   const [scrollEnabled, setScrollEnabled] = useState(false)
   const [offset, setOffset] = useState(0)
   const [direction, setDirection] = useState('')
+  const [targetCarouselIndex, setTargetCarouselIndex] = useState(null)
+  const pendingCarouselIndexRef = useRef(null)
   const { width, height } = useWindowDimensions()
   const restaurantsRef = useRef(null)
 
@@ -155,27 +157,33 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     const restaurant = restaurantData?.[originalIndex]
     if (!restaurant) return
 
-    if (visible) {
-      setVisible(false)
+    const sortedRestaurants = buildSortedRestaurants(restaurantData || [], userLocation)
+    const carouselIndex = sortedRestaurants.findIndex((item) => item.originalIndex === originalIndex)
+
+    if (carouselIndex === -1) {
+      console.warn(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
+      return
     }
 
-    setTimeout(() => {
-      const sortedRestaurants = buildSortedRestaurants(restaurantData || [], userLocation)
-      const carouselIndex = sortedRestaurants.findIndex((item) => item.originalIndex === originalIndex)
+    console.warn(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
+    setFocusFunction(originalIndex)
 
-      if (carouselIndex !== -1) {
-        console.warn(`🎯 Marker cliqué: ${restaurant.name} → Index carrousel: ${carouselIndex}`)
-        setFocusFunction(originalIndex)
-        restaurantsRef.current?.scrollToIndex({
-          index: carouselIndex,
-          animated: true,
-          viewPosition: 0.5,
-        })
-      } else {
-        console.warn(`❌ Restaurant ${restaurant.name} pas dans le carrousel (< 10km)`)
-      }
-    }, 300)
-  }, [restaurantData, setVisible, setFocusFunction, userLocation, visible])
+    if (visible) {
+      pendingCarouselIndexRef.current = carouselIndex
+      setVisible(false)
+      return
+    }
+
+    setTargetCarouselIndex(carouselIndex)
+  }, [restaurantData, setFocusFunction, userLocation, visible])
+
+  useEffect(() => {
+    if (visible || pendingCarouselIndexRef.current === null) return
+
+    const carouselIndex = pendingCarouselIndexRef.current
+    pendingCarouselIndexRef.current = null
+    setTargetCarouselIndex(carouselIndex)
+  }, [visible])
   
   if (!restaurantData || restaurantData.length === 0) {
     return (
@@ -269,6 +277,8 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           navigation={navigation}
           userLocation={userLocation}
           onSelectRestaurant={centerMapOnRestaurant}
+          targetCarouselIndex={targetCarouselIndex}
+          onTargetCarouselIndexHandled={() => setTargetCarouselIndex(null)}
         />
       )}
     </View>

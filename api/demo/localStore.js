@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = 'demo_local_state';
 
+export const DEMO_LOCAL_STATE_KEY = STORAGE_KEY;
+
 const emptyState = () => ({
   favoriteAddedIds: [],
   favoriteRemovedIds: [],

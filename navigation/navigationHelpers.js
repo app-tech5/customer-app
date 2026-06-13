@@ -24,11 +24,29 @@ export function getDrawerIndexForState(state) {
   return drawerIndex >= 0 ? drawerIndex : state.index
 }
 
+const BOTTOM_TAB_NAMES = new Set(['Home', 'Search', 'Cart', 'Orders', 'Account'])
+
 export function navigateToTabHome(navigation) {
+  const state = navigation.getState?.()
+
+  if (state?.routeNames?.some((name) => BOTTOM_TAB_NAMES.has(name))) {
+    navigation.navigate('Home', { screen: 'HomeScreen' })
+    return
+  }
+
   navigation.navigate('BottomTabs', {
     screen: 'Home',
     params: {
       screen: 'HomeScreen',
+    },
+  })
+}
+
+export function navigateToRestaurantsMap(navigation) {
+  navigation.navigate('BottomTabs', {
+    screen: 'Home',
+    params: {
+      screen: 'RestaurantsMapScreen',
     },
   })
 }

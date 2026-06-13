@@ -46,21 +46,49 @@ export default function RestaurantsView({
   navigation,
   userLocation,
   onSelectRestaurant,
+  targetCarouselIndex,
+  onTargetCarouselIndexHandled,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollTimeout = useRef(null)
+  const programmaticScrollRef = useRef(false)
+  const snapInterval = width * 0.85 + 16
+  const listPaddingLeft = 20
 
   const sortedRestaurants = React.useMemo(() => {
     console.warn('🏪 RestaurantsView - Filtrage restaurants proches, horizontal:', horizontal)
     return buildSortedRestaurants(restaurantData, userLocation)
   }, [horizontal, restaurantData, userLocation])
 
-  const calculateIndexFromScroll = useCallback((scrollX, containerWidth) => {
-    const itemWidth = containerWidth
-    const rawIndex = scrollX / itemWidth
-    return Math.max(0, Math.min(sortedRestaurants.length - 1, Math.round(rawIndex)))
-  }, [sortedRestaurants.length])
+  const calculateIndexFromScroll = useCallback((scrollX) => {
+    const adjusted = Math.max(0, scrollX - listPaddingLeft + snapInterval / 2)
+    return Math.max(
+      0,
+      Math.min(sortedRestaurants.length - 1, Math.round(adjusted / snapInterval))
+    )
+  }, [listPaddingLeft, snapInterval, sortedRestaurants.length])
+
+  const scrollToCarouselIndex = useCallback((index) => {
+    if (!horizontal || index < 0 || index >= sortedRestaurants.length) return
+
+    programmaticScrollRef.current = true
+    setCurrentIndex(index)
+
+    requestAnimationFrame(() => {
+      restaurantsRef.current?.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5,
+      })
+    })
+  }, [horizontal, restaurantsRef, sortedRestaurants.length])
+
+  useEffect(() => {
+    if (!horizontal || targetCarouselIndex == null) return
+    scrollToCarouselIndex(targetCarouselIndex)
+    onTargetCarouselIndexHandled?.()
+  }, [horizontal, onTargetCarouselIndexHandled, scrollToCarouselIndex, targetCarouselIndex])
 
   useEffect(() => {
     return () => {
@@ -121,6 +149,9 @@ export default function RestaurantsView({
                   rating={item.rating}
                   review_count={item.review_count}
                   city={item.city}
+                  distance={item.distance}
+                  deliveryTime={item.deliveryTime}
+                  collectTime={item.collectTime}
                 />
                 {!horizontal && <Reward restaurant={item} />}
               </View>
@@ -145,13 +176,12 @@ export default function RestaurantsView({
           }, 100)
         } : undefined}
         onMomentumScrollEnd={horizontal ? (event) => {
-          const { contentOffset, layoutMeasurement } = event.nativeEvent
-          const scrollX = contentOffset.x
-          const containerWidth = layoutMeasurement.width || width * 0.85
-          const finalIndex = calculateIndexFromScroll(scrollX, containerWidth)
+          const scrollX = event.nativeEvent.contentOffset.x
+          const finalIndex = calculateIndexFromScroll(scrollX)
 
           setCurrentIndex(finalIndex)
           setIsScrolling(false)
+          programmaticScrollRef.current = false
 
           const originalIndex = sortedRestaurants[finalIndex]?.originalIndex
           if (originalIndex !== undefined) {
@@ -159,18 +189,11 @@ export default function RestaurantsView({
           }
         } : () => {}}
         onScroll={horizontal ? (event) => {
-          const { contentOffset, layoutMeasurement } = event.nativeEvent
-          const scrollX = contentOffset.x
-          const containerWidth = layoutMeasurement.width || width * 0.85
-          const newIndex = calculateIndexFromScroll(scrollX, containerWidth)
+          const scrollX = event.nativeEvent.contentOffset.x
+          const newIndex = calculateIndexFromScroll(scrollX)
 
-          if (newIndex !== currentIndex && !isScrolling) {
+          if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex)
-
-            const originalIndex = sortedRestaurants[newIndex]?.originalIndex
-            if (originalIndex !== undefined) {
-              setFocusFunction(originalIndex)
-            }
           }
         } : (event) => {
           setDirection(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
@@ -180,9 +203,18 @@ export default function RestaurantsView({
             setScrollEnabled(false)
           }
         }}
+        onScrollToIndexFailed={horizontal ? (info) => {
+          restaurantsRef.current?.scrollToOffset({
+            offset: Math.max(0, info.index * snapInterval),
+            animated: true,
+          })
+        } : undefined}
         ListHeaderComponent={!horizontal ? () => (
           <View style={styles.categories}>
-            <Categories />
+            <Categories
+              navigation={navigation}
+              searchResultParams={{ fromRestaurantsMap: true }}
+            />
           </View>
         ) : <></>}
       />
@@ -199,12 +231,7 @@ export default function RestaurantsView({
               ]}
               onPress={() => {
                 setCurrentIndex(index)
-                restaurantsRef.current?.scrollToIndex({
-                  index,
-                  animated: true,
-                  viewPosition: 0.5,
-                })
-
+                scrollToCarouselIndex(index)
                 onSelectRestaurant?.(restaurant)
                 setFocusFunction(restaurant.originalIndex)
               }}

@@ -15,6 +15,7 @@ import i18n from '../lang/i18n'
 import { useSelector, useDispatch } from 'react-redux'
 import { config } from '../config'
 import { SignInContext } from '../contexts/authContext'
+import { DEMO_LOCAL_STATE_KEY } from '../api/demo/localStore'
 import { getDrawerIndexForState } from '../navigation/navigationHelpers'
 
 export default function DrawerContent(props) {
@@ -32,15 +33,21 @@ export default function DrawerContent(props) {
     const navigation = useNavigation()
     const dispatch = useDispatch()
 
-    const signOutUser = () => {
+    const signOutUser = async () => {
         dispatch({ type: 'CLEAR' })
-        AsyncStorage.getAllKeys().then(k => AsyncStorage.multiRemove(k))
-        .then(()=>{
-        api.logout();
-        setSignedIn(null)
-        // navigation.navigate('SignIn');
-    })
-        .catch((err) => console.error(err))
+        try {
+            const keys = await AsyncStorage.getAllKeys()
+            const keysToRemove = config.DEMO_MODE
+                ? keys.filter((key) => key !== DEMO_LOCAL_STATE_KEY)
+                : keys
+            if (keysToRemove.length > 0) {
+                await AsyncStorage.multiRemove(keysToRemove)
+            }
+            await api.logout()
+            setSignedIn(null)
+        } catch (err) {
+            console.error(err)
+        }
     }
   return (
     <SafeAreaView style={styles.container}>
