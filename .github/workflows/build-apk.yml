@@ -12,7 +12,7 @@ on:
         type: boolean
         default: false
       build_id:
-        description: EAS build ID (required when skip_eas_build is true)
+        description: EAS build ID (optional when skip_eas_build is true — uses latest finished Android build if empty)
         type: string
         required: false
 
@@ -65,12 +65,16 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_eas_build }}" = "true" ]; then
             BUILD_ID="${{ inputs.build_id }}"
+            if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
+              echo "No build_id provided, using latest finished Android build..."
+              BUILD_ID=$(eas build:list -p android --status finished --limit 1 --json --non-interactive | jq -r '.[0].id')
+            fi
           else
             BUILD_ID="${{ steps.eas_build.outputs.build_id }}"
           fi
 
           if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
-            echo "build_id is required (provide inputs.build_id when skip_eas_build is true)"
+            echo "No EAS build found. Provide inputs.build_id or run a full build first."
             exit 1
           fi
 
