@@ -1,0 +1,77 @@
+name: Build and publish APK
+
+on:
+  push:
+    branches: [dev-clean-1]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      APK_FILENAME: ${{ vars.APK_FILENAME }}
+      VPS_DOWNLOADS_DIR: ${{ vars.VPS_DOWNLOADS_DIR }}
+      PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build APK (EAS)
+        env:
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_DEMO_MODE: ${{ vars.EXPO_PUBLIC_DEMO_MODE }}
+          EXPO_PUBLIC_DEMO_EMAIL: ${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
+          EXPO_PUBLIC_DEMO_PASSWORD: ${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_MAPTILER_API_KEY: ${{ secrets.EXPO_PUBLIC_MAPTILER_API_KEY }}
+        run: eas build -p android --profile release --non-interactive --wait
+
+      - name: Download APK from EAS
+        run: |
+          BUILD_ID=$(eas build:list -p android --status finished --limit 1 --json --non-interactive | jq -r '.[0].id')
+          echo "Build ID: $BUILD_ID"
+          eas build:download --id "$BUILD_ID" --output "$APK_FILENAME"
+
+      - name: Prepare downloads directory on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: VPS_DOWNLOADS_DIR
+          script: |
+            mkdir -p "$VPS_DOWNLOADS_DIR"
+            chmod 755 "$VPS_DOWNLOADS_DIR"
+
+      - name: Upload APK to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: ${{ env.APK_FILENAME }}
+          target: ${{ env.VPS_DOWNLOADS_DIR }}/
+          overwrite: true
+
+      - name: APK published
+        run: |
+          BASE="${PUBLIC_SITE_URL%/}"
+          echo "APK available at ${BASE}/downloads/${APK_FILENAME}"

@@ -31,8 +31,23 @@ Source: `config/index.js`.
 | `DEMO_MODE` | `boolean` | Enables demo behaviour (pre-filled credentials, demo flows) |
 | `DEMO_EMAIL` | `string` | Demo login email |
 | `DEMO_PASSWORD` | `string` | Demo login password |
-| `API_TIMEOUT` | `number` | Default API timeout in ms (available for fetch wrappers) |
+| `MAPTILER_API_KEY` | `string` | MapTiler key (from `EXPO_PUBLIC_MAPTILER_API_KEY`) |
 | `assetUrls` | `object` | Central asset URLs (see below) |
+
+Runtime values use `EXPO_PUBLIC_*` environment variables (see `.env.example`). Release builds on CI: GitHub Variables/Secrets → `eas build` → EAS cloud (`$EXPO_PUBLIC_*` substitution in `eas.json`).
+
+## Deploy / CI
+
+Source: `config/deploy.js`, `.env.example`.
+
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `PUBLIC_SITE_URL` | GitHub Variable | Base URL for public APK link |
+| `APK_FILENAME` | GitHub Variable | APK file name on VPS |
+| `VPS_DOWNLOADS_DIR` | GitHub Variable | Directory on VPS |
+| `EXPO_TOKEN` | GitHub Secret | EAS authentication |
+| `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` | GitHub Secrets | APK upload to VPS |
+| `EXPO_PUBLIC_*` | GitHub Variables / Secrets | Passed to `eas build` on CI |
 
 ## `assetUrls`
 
