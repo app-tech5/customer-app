@@ -8,7 +8,7 @@ This repo is the **updated Good Food customer app**: self-hosted API and databas
 
 ## Table of Contents
 
-- [Features](#features)
+- [Features](#features) 
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
 - [Configuration](#configuration)
