@@ -3,7 +3,18 @@ name: Build and publish APK
 on:
   push:
     branches: [dev-clean-1]
+    paths-ignore:
+      - '.github/workflows/**'
   workflow_dispatch:
+    inputs:
+      skip_eas_build:
+        description: Skip EAS build and publish an existing build only
+        type: boolean
+        default: false
+      build_id:
+        description: EAS build ID (required when skip_eas_build is true)
+        type: string
+        required: false
 
 jobs:
   build-and-publish:
@@ -32,9 +43,12 @@ jobs:
         run: npm ci
 
       - name: Lint
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_eas_build != true }}
         run: npm run lint
 
       - name: Build APK (EAS)
+        id: eas_build
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_eas_build != true }}
         env:
           EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
           EXPO_PUBLIC_DEMO_MODE: ${{ vars.EXPO_PUBLIC_DEMO_MODE }}
@@ -42,13 +56,32 @@ jobs:
           EXPO_PUBLIC_DEMO_PASSWORD: ${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
           EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           EXPO_PUBLIC_MAPTILER_API_KEY: ${{ secrets.EXPO_PUBLIC_MAPTILER_API_KEY }}
-        run: eas build -p android --profile release --non-interactive --wait
+        run: |
+          BUILD_ID=$(eas build -p android --profile release --non-interactive --wait --json | jq -r 'if type == "array" then .[-1].id else .id end')
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+          echo "EAS build id: $BUILD_ID"
 
       - name: Download APK from EAS
         run: |
-          BUILD_ID=$(eas build:list -p android --status finished --limit 1 --json --non-interactive | jq -r '.[0].id')
-          echo "Build ID: $BUILD_ID"
-          eas build:download --id "$BUILD_ID" --output "$APK_FILENAME"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_eas_build }}" = "true" ]; then
+            BUILD_ID="${{ inputs.build_id }}"
+          else
+            BUILD_ID="${{ steps.eas_build.outputs.build_id }}"
+          fi
+
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
+            echo "build_id is required (provide inputs.build_id when skip_eas_build is true)"
+            exit 1
+          fi
+
+          echo "Using EAS build id: $BUILD_ID"
+          APK_URL=$(eas build:view "$BUILD_ID" --json --non-interactive | jq -r '.artifacts.buildUrl // .artifacts.applicationArchiveUrl')
+          if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
+            echo "No APK URL for build $BUILD_ID"
+            exit 1
+          fi
+          curl -fsSL "$APK_URL" -o "$APK_FILENAME"
+          ls -lh "$APK_FILENAME"
 
       - name: Prepare downloads directory on VPS
         uses: appleboy/ssh-action@v1.2.0
