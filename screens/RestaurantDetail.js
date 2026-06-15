@@ -174,8 +174,7 @@ export default function RestaurantDetail({ route, navigation }) {
         
       }
     };
-
-    // getUserLocation();
+    
   }, [])
   
   const deliveryTime = useMemo(() => {

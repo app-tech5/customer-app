@@ -21,7 +21,6 @@ import {
 const DRIVER_ICON_SIZE = 36
 const MOTION_MIN_KM = 1e-5
 
-/** Visual defaults only — user-facing strings come from the parent (i18n). */
 const KIND_DEFAULTS = {
   driver: { icon: 'car-outline', color: '#2563eb' },
   customer: { icon: 'home-outline', color: '#16a34a' },
@@ -30,9 +29,6 @@ const KIND_DEFAULTS = {
 
 const MapMarkerCalloutContext = createContext(null)
 
-/**
- * Wrap `MapEntityMarker` siblings that should share a single open callout (one active id at a time).
- */
 export function MapMarkerCalloutScope({ children }) {
   const [activeId, setActiveId] = useState(null)
 
@@ -54,9 +50,6 @@ export function MapMarkerCalloutScope({ children }) {
   )
 }
 
-/**
- * Map pin + callout. Toggle logic lives here (with `MapMarkerCalloutScope`) or falls back to local state if no scope.
- */
 export function MapEntityMarker({
   latitude,
   longitude,

@@ -88,7 +88,7 @@ function AddCard({ navigation }) {
       await attachStripePaymentMethod(paymentMethod.id)
 
       const entry = {
-        // id: `card_${Date.now()}`,
+        
         id:paymentMethod.id,
         user: currentUserId,
         methodType: 'credit_card',

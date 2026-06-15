@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 
 const fs = require("fs");
 
@@ -37,15 +36,7 @@ function generatePointsFromRoutePath(routeCoordinates, stepsPerSegment = 20) {
 }
 
 function printUsage() {
-  console.log(
-    "Usage: node scripts/generate-route-points.js <driverLat> <driverLng> <customerLat> <customerLng> [stepsPerSegment] [outputFile]"
-  );
-  console.log(
-    "Example: node scripts/generate-route-points.js 33.5899 -7.6039 33.595 -7.61 15 postman-runner-data.json"
-  );
-  console.log(
-    "Output is a JSON array [{ latitude, longitude }, ...] — use as Postman Collection Runner data file."
-  );
+  
 }
 
 async function main() {
@@ -104,7 +95,7 @@ async function main() {
   if (outputFile) {
     fs.writeFileSync(outputFile, runnerJson, "utf8");
     console.error(meta);
-    console.log(`Wrote ${points.length} rows -> ${outputFile} (Postman Runner data: root JSON array)`);
+    
   } else {
     console.error(meta);
     process.stdout.write(`${runnerJson}\n`);
@@ -116,4 +107,3 @@ main().catch((error) => {
   process.exit(1);
 });
 
-// Output: JSON array for Postman Runner — body uses {{latitude}} and {{longitude}}.

@@ -417,7 +417,7 @@ export default function SearchResults({ route, navigation }) {
                 review_count={item.review_count}
                 city={item.city}
                 collectTime={item.collectTime}
-                // distance={route.params?.name === 'NEAR_ME_SPECIAL' ? item.distance : undefined}
+                
                 distance={item?.distance}
               />
             </TouchableOpacity>

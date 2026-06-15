@@ -162,20 +162,7 @@ export default function NativeTrackingMap({
         mapStyle={FALLBACK_STYLE_URL}
         onDidFinishLoadingMap={() => {
           setIsMapReady(true)
-          console.log('[MapLibre] map loaded')
         }}
-        // onRegionIsChanging={(e) => {
-        //   const n = e?.nativeEvent;
-        //   console.log('region changing', n?.center, n?.zoom);
-        // }}
-        // onRegionDidChange={(e) => {
-        //   const n = e?.nativeEvent;
-        //   console.log('region did change', n?.center, n?.zoom);
-        // }}
-        onDidFinishLoadingStyle={() => console.log('[MapLibre] style loaded')}
-        onDidFailLoadingMap={(e) => console.log('[MapLibre] map failed', e?.nativeEvent)}
-        onDidFinishRenderingMapFully={() => console.log('[MapLibre] map fully rendered')}
-
       >
         <Camera
           ref={cameraRef}

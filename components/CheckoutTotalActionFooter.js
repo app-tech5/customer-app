@@ -9,10 +9,6 @@ const VARIANTS = {
   success: colors.success,
 }
 
-/**
- * Barre fixe en bas : montant + libellé à gauche, bouton d’action à droite.
- * Gère le padding safe-area inférieur pour éviter le chevauchement avec la barre système.
- */
 export default function CheckoutTotalActionFooter({
   totalAmount,
   totalCaption,

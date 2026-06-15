@@ -71,8 +71,6 @@ export function HomeNavigator() {
         component={RestaurantsMapScreen}
         options={{ headerShown: false }} />
 
-
-
     </HomeStack.Navigator>
 
   )

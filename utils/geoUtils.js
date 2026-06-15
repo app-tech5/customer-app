@@ -10,14 +10,12 @@ function deg2rad(deg) {
   return deg * (Math.PI / 180);
 }
 
-/** Parse une coordonnée (évite parseFloat("75001 Paris") → 75001). */
 export function parseGeoCoordinate(value) {
   if (value == null || value === '') return NaN;
   const n = Number(String(value).trim());
   return Number.isFinite(n) ? n : NaN;
 }
 
-/** Lat/lon utilisables pour haversine (pas 0,0 ni hors bornes). */
 export function isUsableGeoCoordinate(lat, lon) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
   if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return false;
@@ -90,7 +88,6 @@ export function getGeoJsonPointFromSocketPayload(payload) {
   };
 }
 
-/** Distance in km from (lat, lng) to segment (lat1, lon1)-(lat2, lon2); local planar approx. */
 function distancePointToSegmentKm(lat, lng, lat1, lon1, lat2, lon2) {
   const refLat = deg2rad((lat1 + lat2 + lat) / 3);
   const ky = 111.32;
@@ -112,10 +109,6 @@ function distancePointToSegmentKm(lat, lng, lat1, lon1, lat2, lon2) {
   return Math.hypot(cx, cy);
 }
 
-/**
- * Bearing (0–360°) of the polyline segment closest to (lat, lng).
- * @param {Array<{ latitude: number, longitude: number }>} points — order along the route (e.g. driver → dropoff).
- */
 export function bearingAlongPolylineNearPoint(lat, lng, points) {
   if (!Array.isArray(points) || points.length < 2) return null;
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;

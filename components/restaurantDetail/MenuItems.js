@@ -296,8 +296,8 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
             </>
           ) : (
             <>
-              <Text style={styles.noResultsText}>No items found</Text>
-              <Text style={styles.noResultsSubtext}>Try adjusting your search</Text>
+              <Text style={styles.noResultsText}>{i18n.t('search.noItemsTitle')}</Text>
+              <Text style={styles.noResultsSubtext}>{i18n.t('search.noResultsSubtitle')}</Text>
             </>
           )}
         </View>

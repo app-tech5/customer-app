@@ -32,7 +32,6 @@ export function calculateDeliveryTime(distanceKm, prepTime = 25) {
   };
 }
 
-/** Distance km user ↔ restaurant, ou `null` si coords invalides / trop loin. */
 export function getDistanceKmBetweenUserAndRestaurant(restaurant, userLocation) {
   const user = normalizeUserLocation(userLocation);
   const restLat = parseGeoCoordinate(restaurant?.latitude);

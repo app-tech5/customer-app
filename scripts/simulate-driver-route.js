@@ -1,22 +1,7 @@
-#!/usr/bin/env node
-/**
- * Simule un déplacement driver :
- * login puis PUT /api/resource/drivers/<_id> à chaque point.
- *
- * Identifiants alignés sur config/index.js (DEMO_EMAIL / DEMO_PASSWORD).
- *
- * Usage :
- *   node scripts/simulate-driver-route.js postman-runner-data.json <driverMongoId>
- *
- * Optionnel :
- *   - API_BASE_URL (défaut http://localhost:5000/api)
- *   - SLEEP_MS (défaut 250)
- */
 
 const fs = require("fs");
 const path = require("path");
 
-// Même valeurs que customer-app/config/index.js (DEMO_* et API_BASE_URL)
 const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
 const DEMO_EMAIL = "demo@customer.com";
 const DEMO_PASSWORD = "demo123";

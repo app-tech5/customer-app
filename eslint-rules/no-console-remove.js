@@ -1,7 +1,3 @@
-/**
- * Wrapper around no-console that adds a fixer to remove the statement.
- * Respects the same options as no-console (e.g. allow: ["warn", "error"]).
- */
 
 const ALLOWED_BY_DEFAULT = ["warn", "error"];
 

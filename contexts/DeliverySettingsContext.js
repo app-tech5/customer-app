@@ -44,29 +44,25 @@ export function DeliverySettingsProvider({ children }) {
   
     const calculateDeliveryFee = (deliverySetting, subtotal, distance = null) => {
       if (!deliverySetting) return 2.99
-    
-      // Livraison désactivée
+      
       if (deliverySetting.isDeliveryEnabled === false) {
         return null
       }
-    
-      // Livraison gratuite globale
+      
       if (
         deliverySetting.deliveryFeeType === 'FREE' ||
         deliverySetting.freeDeliveryEnabled
       ) {
         return 0
       }
-    
-      // Livraison gratuite selon le seuil
+      
       if (
         subtotal >=
         (deliverySetting.freeDeliveryThreshold || 25)
       ) {
         return 0
       }
-    
-      // Livraison dynamique
+      
       if (
         ['DYNAMIC', 'RESTAURANT_DEFINED'].includes(
           deliverySetting.deliveryFeeType
@@ -92,8 +88,7 @@ export function DeliverySettingsProvider({ children }) {
           Number(maxFee) || 10
         )
       }
-    
-      // Livraison fixe
+      
       return parseFloat(
         deliverySetting.fixedDeliveryFee || 2.99
       )

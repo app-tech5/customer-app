@@ -23,16 +23,13 @@ export const isCacheExpired = (timestamp, expiryTime = CACHE_CONFIG.FOODS_EXPIRY
 
 export const hasDataChanged = (oldData, newData) => {
   if (!oldData || !newData) return true;
-
-  // Vérifie que ce sont bien des tableaux
+  
   if (!Array.isArray(oldData) || !Array.isArray(newData)) {
     return true;
   }
-
-  // Taille différente = changement
+  
   if (oldData.length !== newData.length) return true;
-
-  // Fonction pour trier les clés des objets récursivement
+  
   const sortObject = (obj) => {
     if (Array.isArray(obj)) {
       return obj.map(sortObject);
@@ -49,8 +46,7 @@ export const hasDataChanged = (oldData, newData) => {
 
     return obj;
   };
-
-  // Normalisation complète des données
+  
   const normalize = (data) =>
     data.map(sortObject).sort((a, b) => {
       const aStr = JSON.stringify(a);

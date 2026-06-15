@@ -341,19 +341,6 @@ export default function Home({navigation}) {
   const createDynamicSections = React.useMemo(() => {
     if (!restaurantData || restaurantData.length === 0) return []
     
-    // const restaurantsWithDistance = restaurantData.map(restaurant => {
-    //   const distance = userLocation?.lat && userLocation?.lng && restaurant.latitude && restaurant.longitude ?
-    //     getDistanceFromLatLonInKm(
-    //       userLocation.lat, userLocation.lng,
-    //       parseFloat(restaurant.latitude), parseFloat(restaurant.longitude)
-    //     ) : null
-
-    //   return {
-    //     ...restaurant,
-    //     distance
-    //   }
-    // })
-    
     const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantsWithDistance) : restaurantsWithDistance
     const sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
 

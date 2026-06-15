@@ -38,20 +38,17 @@ export const RestaurantsProvider = ({ children }) => {
     })
     socket.on('restaurant-updated', (data) => {
       setRestaurantData(prev => {
-
-        // Désactivé → supprimer
+        
         if (data.restaurant.isActivated !== true) {
           return prev.filter(
             restaurant => restaurant._id !== data.restaurant._id
           )
         }
-
-        // Vérifie si le restaurant existe déjà
+        
         const exists = prev.some(
           restaurant => restaurant._id === data.restaurant._id
         )
-
-        // S'il existe → update
+        
         if (exists) {
           return prev.map(
             restaurant =>
@@ -60,8 +57,7 @@ export const RestaurantsProvider = ({ children }) => {
                 : restaurant
           )
         }
-
-        // Sinon → ajouter
+        
         return [...prev, data.restaurant]
       })
     })

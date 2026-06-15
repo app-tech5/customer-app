@@ -1,6 +1,5 @@
 import i18n from '../lang/i18n';
 
-/** Note affichée sur les cartes (ex. « Pas encore d'avis » si review_count === 0). */
 export function formatRestaurantRatingDisplay(rating, reviewCount) {
   const count = parseInt(reviewCount, 10) || 0;
   if (count === 0) {
@@ -13,7 +12,6 @@ export function formatRestaurantRatingDisplay(rating, reviewCount) {
   return i18n.t('restaurant.noReviewsYet');
 }
 
-/** Ligne détail type « 4.5 (12 avis) ». */
 export function formatRestaurantRatingSummary(rating, reviewCount) {
   const count = parseInt(reviewCount, 10) || 0;
   if (count === 0) {

@@ -63,8 +63,6 @@ export default function SignIn({ navigation, route }) {
       
       setSignedIn(result.token)
 
-      // navigation.navigate('DrawerNavigator')
-
     } catch (e) {
       console.error(e)
       setLoginState(false)

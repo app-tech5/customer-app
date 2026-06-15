@@ -10,7 +10,7 @@ import { OrdersContext } from '../contexts/OrdersContext'
 import { navigateToTabHome } from '../navigation/navigationHelpers'
 
 export default function OrdersScreen({ navigation }) {
-  //const [orders, setOrders] = useState([])
+  
   const { orders, setOrders } = useContext(OrdersContext)
   const [loader, setLoader] = useState(true)
   const [error, setError] = useState(null)
