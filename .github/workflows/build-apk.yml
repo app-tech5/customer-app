@@ -79,9 +79,10 @@ jobs:
           fi
 
           echo "Using EAS build id: $BUILD_ID"
-          APK_URL=$(eas build:view "$BUILD_ID" --json --non-interactive | jq -r '.artifacts.buildUrl // .artifacts.applicationArchiveUrl')
+          APK_URL=$(eas build:list -p android --json --non-interactive --limit 30 | jq -r --arg id "$BUILD_ID" '.[] | select(.id == $id) | .artifacts.buildUrl // .artifacts.applicationArchiveUrl' | head -1)
           if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
             echo "No APK URL for build $BUILD_ID"
+            eas build:list -p android --json --non-interactive --limit 5 | jq '.[0] | {id, status, artifacts}'
             exit 1
           fi
           curl -fsSL "$APK_URL" -o "$APK_FILENAME"
