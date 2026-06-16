@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Good Foods",
+    "name": "Good Foods Demo",
     "icon": "./assets/images/logo512.png",
     "splash": {
       "image": "./assets/images/splash-screen.png",
@@ -19,7 +19,7 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
-      "package": "com.goodfoods.goodfoods",
+      "package": "com.goodfoods.demo",
       "versionCode": 2
     },
     "plugins": [
