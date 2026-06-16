@@ -72,7 +72,13 @@ jobs:
 
       - name: Prepare APK artifact
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk "$APK_FILENAME"
+          APK_PATH=$(find android/app/build/outputs/apk/release -name '*-release.apk' -type f | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No release APK found"
+            find android/app/build/outputs/apk -name '*.apk' -type f
+            exit 1
+          fi
+          cp "$APK_PATH" "$APK_FILENAME"
           ls -lh "$APK_FILENAME"
 
       - name: Prepare downloads directory on VPS
