@@ -6,15 +6,6 @@ on:
     paths-ignore:
       - '.github/workflows/**'
   workflow_dispatch:
-    inputs:
-      skip_eas_build:
-        description: Skip EAS build and publish an existing build only
-        type: boolean
-        default: false
-      build_id:
-        description: EAS build ID (optional when skip_eas_build is true — uses latest finished Android build if empty)
-        type: string
-        required: false
 
 jobs:
   build-and-publish:
@@ -23,6 +14,12 @@ jobs:
       APK_FILENAME: ${{ vars.APK_FILENAME }}
       VPS_DOWNLOADS_DIR: ${{ vars.VPS_DOWNLOADS_DIR }}
       PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+      EXPO_PUBLIC_DEMO_MODE: ${{ vars.EXPO_PUBLIC_DEMO_MODE }}
+      EXPO_PUBLIC_DEMO_EMAIL: ${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
+      EXPO_PUBLIC_DEMO_PASSWORD: ${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
+      EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      EXPO_PUBLIC_MAPTILER_API_KEY: ${{ secrets.EXPO_PUBLIC_MAPTILER_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,59 +30,42 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Install dependencies
         run: npm ci
 
       - name: Lint
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_eas_build != true }}
         run: npm run lint
 
-      - name: Build APK (EAS)
-        id: eas_build
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_eas_build != true }}
-        env:
-          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
-          EXPO_PUBLIC_DEMO_MODE: ${{ vars.EXPO_PUBLIC_DEMO_MODE }}
-          EXPO_PUBLIC_DEMO_EMAIL: ${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
-          EXPO_PUBLIC_DEMO_PASSWORD: ${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
-          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-          EXPO_PUBLIC_MAPTILER_API_KEY: ${{ secrets.EXPO_PUBLIC_MAPTILER_API_KEY }}
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Build APK (Gradle)
         run: |
-          BUILD_ID=$(eas build -p android --profile release --non-interactive --wait --json | jq -r 'if type == "array" then .[-1].id else .id end')
-          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
-          echo "EAS build id: $BUILD_ID"
+          chmod +x android/gradlew
+          cd android
+          ./gradlew :app:assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+          ls -lh app/build/outputs/apk/release/
 
-      - name: Download APK from EAS
+      - name: Prepare APK artifact
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.skip_eas_build }}" = "true" ]; then
-            BUILD_ID="${{ inputs.build_id }}"
-            if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
-              echo "No build_id provided, using latest finished Android build..."
-              BUILD_ID=$(eas build:list -p android --status finished --limit 1 --json --non-interactive | jq -r '.[0].id')
-            fi
-          else
-            BUILD_ID="${{ steps.eas_build.outputs.build_id }}"
-          fi
-
-          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "null" ]; then
-            echo "No EAS build found. Provide inputs.build_id or run a full build first."
-            exit 1
-          fi
-
-          echo "Using EAS build id: $BUILD_ID"
-          APK_URL=$(eas build:list -p android --json --non-interactive --limit 30 | jq -r --arg id "$BUILD_ID" '.[] | select(.id == $id) | .artifacts.buildUrl // .artifacts.applicationArchiveUrl' | head -1)
-          if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
-            echo "No APK URL for build $BUILD_ID"
-            eas build:list -p android --json --non-interactive --limit 5 | jq '.[0] | {id, status, artifacts}'
-            exit 1
-          fi
-          curl -fsSL "$APK_URL" -o "$APK_FILENAME"
+          cp android/app/build/outputs/apk/release/app-release.apk "$APK_FILENAME"
           ls -lh "$APK_FILENAME"
 
       - name: Prepare downloads directory on VPS
