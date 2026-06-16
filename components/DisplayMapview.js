@@ -1,22 +1,27 @@
 import React from 'react'
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
+import { Camera, Map, Marker } from '@maplibre/maplibre-react-native'
 
-const DisplayMapview = ({ userLocation: _userLocation, mapRef, apikey: _apikey, restaurant, height }) => {
+const FALLBACK_STYLE_URL = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+
+const DisplayMapview = ({ restaurant, height }) => {
+  const latitude = Number(restaurant?.coordinates?.latitude) || 0
+  const longitude = Number(restaurant?.coordinates?.longitude) || 0
+  const lngLat = [longitude, latitude]
+
   return (
-    <MapView
-        provider={PROVIDER_GOOGLE}
-        ref={mapRef}
-        initialRegion={{
-          
-          latitude: restaurant.coordinates?.latitude || 0,
-          longitude: restaurant.coordinates?.longitude || 0,
-          latitudeDelta: 0.09,
-          longitudeDelta: 0.04
+    <Map
+      style={{ height: height || 200, width: '100%' }}
+      mapStyle={FALLBACK_STYLE_URL}
+    >
+      <Camera
+        defaultSettings={{
+          centerCoordinate: lngLat,
+          zoomLevel: 14,
         }}
-       style={{height: height?height:200, width: "100%",
-       }} showsUserLocation={true}
-       >
-       </MapView>
+      />
+      <Marker id="restaurant-marker" lngLat={lngLat} />
+    </Map>
   )
 }
+
 export default DisplayMapview

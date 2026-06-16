@@ -12,16 +12,14 @@ import {
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
-import { confirmPayment, confirmPlatformPayPayment } from '@stripe/stripe-react-native'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-import { config } from '../config'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useSettings } from '../contexts/SettingContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import CheckoutPaymentSelector from '../components/CheckoutPaymentSelector'
 import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
-import { addMoneyToWallet, createStripePaymentIntent, updatePaymentMethod } from '../api'
+import { addMoneyToWallet, updatePaymentMethod } from '../api'
 
 const TOP_UP_AMOUNTS = [10, 20, 50]
 
@@ -31,7 +29,6 @@ export default function AddMoneyScreen({ navigation }) {
   const { paymentMethods } = usePaymentMethods()
   const { currency } = useSettings()
   const currencyCode = currency?.code || 'EUR'
-  const stripeCurrency = currencyCode.toLowerCase().slice(0, 3)
 
   const [amount, setAmount] = useState('')
   const [selectedMethod, setSelectedMethod] = useState(
@@ -64,61 +61,6 @@ export default function AddMoneyScreen({ navigation }) {
     }
   }, [payableMethods, selectedMethod])
 
-  const confirmStripePayment = async (paymentMethod, numericAmount) => {
-    const response = await createStripePaymentIntent({
-      amount: Math.round(numericAmount * 100),
-      currency: stripeCurrency,
-    })
-    const clientSecret = response.client_secret
-    const paymentMethodId = paymentMethod.id
-    let paymentIntent
-    let error
-
-    if (paymentMethod.methodType === 'google_pay') {
-      ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
-        googlePay: {
-          testEnv: true,
-          merchantName: 'Good Foods',
-          countryCode: 'FR',
-          currencyCode: stripeCurrency.toUpperCase(),
-        },
-      }))
-    } else if (paymentMethod.methodType === 'apple_pay') {
-      ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
-        applePay: {
-          testEnv: true,
-          merchantName: 'Good Foods',
-          countryCode: 'FR',
-          currencyCode: stripeCurrency.toUpperCase(),
-        },
-      }))
-    } else if (paymentMethod.methodType === 'paypal') {
-      ({ paymentIntent, error } = await confirmPayment(clientSecret, {
-        paymentMethodType: 'Paypal',
-        paymentMethodData: { paymentMethodId },
-      }))
-    } else {
-      ({ paymentIntent, error } = await confirmPayment(clientSecret, {
-        paymentMethodType: 'Card',
-        paymentMethodData: { paymentMethodId },
-      }))
-    }
-
-    if (error) {
-      throw new Error(error.message || i18n.t('payment.confirmationError'))
-    }
-    if (paymentIntent.status !== 'Succeeded') {
-      throw new Error(i18n.t('payment.notSuccessful'))
-    }
-
-    if (paymentMethod.verificationStatus === 'unverified' && paymentMethod._id) {
-      await updatePaymentMethod(paymentMethod._id, {
-        verificationStatus: 'verified',
-        verificationDate: new Date(),
-      })
-    }
-  }
-
   const handleAddMoney = async () => {
     const numericAmount = Number.parseFloat(amount)
 
@@ -135,8 +77,11 @@ export default function AddMoneyScreen({ navigation }) {
     setLoading(true)
 
     try {
-      if (!config.DEMO_MODE) {
-        await confirmStripePayment(selectedMethod, numericAmount)
+      if (selectedMethod?.verificationStatus === 'unverified' && selectedMethod?._id) {
+        await updatePaymentMethod(selectedMethod._id, {
+          verificationStatus: 'verified',
+          verificationDate: new Date(),
+        })
       }
 
       await addMoneyToWallet({

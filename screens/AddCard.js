@@ -12,25 +12,21 @@ import {
   Alert,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { CardField } from '@stripe/stripe-react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { useSelector } from 'react-redux'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
-import { useStripe } from '@stripe/stripe-react-native'
 import { createCardPaymentMethod } from '../api/paymentMethods'
-import { attachStripePaymentMethod } from '../api'
 
 function AddCard({ navigation }) {
   const user = useSelector((state) => state.userReducer)
   const currentUserId = user?.userId
   const { paymentMethods, addPaymentMethod } = usePaymentMethods()
-  const { createPaymentMethod } = useStripe()
 
   const [holderName, setHolderName] = useState('')
+  const [cardNumber, setCardNumber] = useState('')
   const [saving, setSaving] = useState(false)
-  const [cardComplete, setCardComplete] = useState(false)
 
   useEffect(() => {
     navigation.setOptions({
@@ -47,7 +43,8 @@ function AddCard({ navigation }) {
       return
     }
 
-    if (!cardComplete) {
+    const digits = cardNumber.replace(/\D/g, '')
+    if (digits.length < 4) {
       Alert.alert(
         i18n.t('common.error'),
         i18n.t('wallet.cardInvalid')
@@ -59,12 +56,13 @@ function AddCard({ navigation }) {
 
     try {
       const { paymentMethod, error } = await createCardPaymentMethod(
-        createPaymentMethod,
-        holderName
+        null,
+        holderName,
+        cardNumber
       )
 
       if (error) {
-        Alert.alert('Error', error.message)
+        Alert.alert(i18n.t('common.error'), error.message)
         return
       }
 
@@ -85,20 +83,17 @@ function AddCard({ navigation }) {
         return
       }
 
-      await attachStripePaymentMethod(paymentMethod.id)
-
       const entry = {
-        
-        id:paymentMethod.id,
+        id: paymentMethod.id,
         user: currentUserId,
         methodType: 'credit_card',
         cardDetails: {
           cardholderName: holderName.trim(),
           cardNumberLast4,
           cardBrand: cardBrand.toLowerCase(),
-        }
+        },
       }
-      
+
       addPaymentMethod(entry)
 
       Alert.alert(
@@ -130,6 +125,7 @@ function AddCard({ navigation }) {
             <Text style={styles.title}>
               {i18n.t('wallet.addCreditOrDebit')}
             </Text>
+            <Text style={styles.demoHint}>{i18n.t('auth.demoMode')}</Text>
           </View>
 
           <View style={styles.field}>
@@ -156,19 +152,14 @@ function AddCard({ navigation }) {
             </Text>
 
             <View style={styles.inputWrap}>
-              <CardField
-                postalCodeEnabled={false}
-                style={{
-                  width: '100%',
-                  height: 50,
-                }}
-                cardStyle={{
-                  backgroundColor: colors.background.primary,
-                  textColor: colors.text.primary,
-                }}
-                onCardChange={(card) => {
-                  setCardComplete(card.complete)
-                }}
+              <TextInput
+                style={styles.input}
+                value={cardNumber}
+                onChangeText={setCardNumber}
+                placeholder="4242 4242 4242 4242"
+                placeholderTextColor={colors.text.secondary}
+                keyboardType="number-pad"
+                maxLength={19}
               />
             </View>
           </View>
@@ -214,10 +205,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.secondary,
   },
-  gatewayLoading: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   flex: {
     flex: 1,
   },
@@ -243,6 +230,11 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     color: colors.text.primary,
+  },
+  demoHint: {
+    marginTop: 8,
+    fontSize: 13,
+    color: colors.text.secondary,
   },
   field: {
     marginBottom: 18,

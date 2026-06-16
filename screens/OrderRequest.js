@@ -6,14 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import i18n from '../lang/i18n'
 import { colors, language } from '../global'
 import Loader from './Loader'
-import { api, createStripePaymentIntent, recordOrderPayment, getUserTransactions } from '../api'
-import { config } from '../config'
+import { api, getUserTransactions } from '../api'
 import { usePaymentMethods } from '../contexts/PaymentMethodsContext'
 import { useSettings } from '../contexts/SettingContext'
 import PaymentMethodItem from '../components/PaymentMethodItem'
 import CheckoutTotalActionFooter from '../components/CheckoutTotalActionFooter'
-import { confirmPayment, confirmPlatformPayPayment } from '@stripe/stripe-react-native'
-import { updatePaymentMethod as updatePaymentMethodApi } from '../api'
 
 export default function OrderRequest({ route, navigation }) {
   const dispatch = useDispatch()
@@ -22,7 +19,6 @@ export default function OrderRequest({ route, navigation }) {
   const { paymentMethods } = usePaymentMethods()
   const { currency: appCurrency } = useSettings()
   const currencyCode = appCurrency?.code || 'EUR'
-  const stripeCurrency = currencyCode.toLowerCase().slice(0, 3)
 
   const {
     restaurantName,
@@ -73,8 +69,6 @@ export default function OrderRequest({ route, navigation }) {
       return
     }
 
-    const paymentMethodId = defaultPaymentMethod.id
-
     try {
       setLoading(true)
 
@@ -95,70 +89,6 @@ export default function OrderRequest({ route, navigation }) {
             ]
           )
           return
-        }
-      }
-
-      if (!config.DEMO_MODE) {
-        if (
-          defaultPaymentMethod.methodType === 'cash_on_delivery' ||
-          defaultPaymentMethod.methodType === 'platform_credit'
-        ) {
-
-        } else {
-          const response = await createStripePaymentIntent({
-            amount: Math.round(Number(totals?.total) * 100),
-            currency: stripeCurrency,
-          });
-          const clientSecret = response.client_secret;
-          let paymentIntent;
-          let error;
-          if (defaultPaymentMethod.methodType === 'google_pay') {
-            ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
-              googlePay: {
-                testEnv: true,
-                merchantName: 'Good Foods',
-                countryCode: 'FR',
-                currencyCode: stripeCurrency.toUpperCase(),
-              },
-            }));
-          } else if (defaultPaymentMethod.methodType === 'apple_pay') {
-            ({ paymentIntent, error } = await confirmPlatformPayPayment(clientSecret, {
-              applePay: {
-                testEnv: true,
-                merchantName: 'Good Foods',
-                countryCode: 'FR',
-                currencyCode: stripeCurrency.toUpperCase(),
-              },
-            }));
-          }
-          else if (defaultPaymentMethod.methodType === 'paypal') {
-            ({ paymentIntent, error } = await confirmPayment(clientSecret, {
-              paymentMethodType: 'Paypal',
-              paymentMethodData: {
-                paymentMethodId
-              }
-            }));
-          } else {
-            ({ paymentIntent, error } = await confirmPayment(clientSecret, {
-              paymentMethodType: 'Card',
-              paymentMethodData: {
-                paymentMethodId
-              }
-            }));
-          }
-          if (error) {
-            throw new Error(error.message || i18n.t('payment.confirmationError', 'Payment confirmation failed. Please try again.'));
-          }
-          if (paymentIntent.status !== 'Succeeded') {
-            
-            throw new Error(i18n.t('payment.notSuccessful', 'Payment was not successful. Please try again.'));
-          }
-          if (defaultPaymentMethod.verificationStatus === 'unverified') {
-            await updatePaymentMethodApi(defaultPaymentMethod._id, {
-              verificationStatus: 'verified',
-              verificationDate: new Date(),
-            });
-          }
         }
       }
 
@@ -199,16 +129,6 @@ export default function OrderRequest({ route, navigation }) {
       };
 
       createdOrder = await api.createOrder(orderData);
-
-      if (!config.DEMO_MODE) {
-        const orderId = createdOrder?._id || createdOrder?.id;
-        await recordOrderPayment({
-          userId: currentUserId,
-          amount: totals.total,
-          paymentMethod: defaultPaymentMethod.methodType,
-          orderId,
-        });
-      }
 
       dispatch({ type: 'CLEAR_RESTAURANT', payload: restaurantName });
 

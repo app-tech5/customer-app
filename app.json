@@ -32,12 +32,7 @@
           "cameraPermission": "Allow Good Food to access your camera to take a profile photo."
         }
       ],
-      [
-        "@stripe/stripe-react-native",
-        {
-          "merchantIdentifier": "merchant.com.goodfoods.goodfoods"
-        }
-      ]
+      "@maplibre/maplibre-react-native"
     ],
     "extra": {
       "eas": {

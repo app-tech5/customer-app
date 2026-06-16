@@ -1,14 +1,22 @@
 import { ApiClient } from './client';
 
-export const createCardPaymentMethod = async (createPaymentMethod, holderName) => {
-  const { paymentMethod, error } = await createPaymentMethod({
-    paymentMethodType: 'Card',
-    billingDetails: {
-      name: holderName.trim(),
-    },
-  });
+export const createCardPaymentMethod = async (_createPaymentMethod, holderName, cardNumber = '') => {
+  const digits = String(cardNumber).replace(/\D/g, '')
+  const last4 = digits.slice(-4) || '4242'
 
-  return { paymentMethod, error };
+  return {
+    paymentMethod: {
+      id: `demo_pm_${Date.now()}`,
+      Card: {
+        last4,
+        brand: 'visa',
+      },
+      billingDetails: {
+        name: holderName.trim(),
+      },
+    },
+    error: null,
+  };
 };
 
 ApiClient.prototype.getUserPaymentMethods = async function () {

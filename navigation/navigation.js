@@ -17,7 +17,6 @@ import { DeliverySettingsProvider } from '../contexts/DeliverySettingsContext'
 import { SettingProvider } from '../contexts/SettingContext'
 import { GatewayProvider } from '../contexts/GatewayContext'
 import { PaymentMethodsProvider } from '../contexts/PaymentMethodsContext'
-import { StripeProvider } from '@stripe/stripe-react-native'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import {
@@ -27,23 +26,7 @@ import {
   OrderStatusNavigator,
 } from './Stacks'
 import { SignInContext, SignInContextProvider } from '../contexts/authContext'
-import { useGateway } from '../contexts/GatewayContext'
-import { config } from '../config'
 import { OrdersProvider } from '../contexts/OrdersContext'
-
-const FALLBACK_STRIPE_PUBLISHABLE_KEY = config.FALLBACK_STRIPE_PUBLISHABLE_KEY
-
-function StripeWrappedNavigation({ children }) {
-  const { stripePublishableKey } = useGateway()
-  return (
-    <StripeProvider
-      publishableKey={stripePublishableKey || FALLBACK_STRIPE_PUBLISHABLE_KEY}
-      urlScheme="goodfoods"
-    >
-      {children}
-    </StripeProvider>
-  )
-}
 
 export default function RootNavigation({ statusBarColor }) {
   const Stack = createStackNavigator();
@@ -69,7 +52,6 @@ export default function RootNavigation({ statusBarColor }) {
             <LoaderContext.Provider value={{ loading, setLoading }}>
               <SettingProvider>
                 <GatewayProvider>
-                  <StripeWrappedNavigation>
                     <PaymentMethodsProvider>
                       <DeliverySettingsProvider>
                         <RestaurantsProvider>
@@ -91,7 +73,6 @@ export default function RootNavigation({ statusBarColor }) {
                         </RestaurantsProvider>
                       </DeliverySettingsProvider>
                     </PaymentMethodsProvider>
-                  </StripeWrappedNavigation>
                 </GatewayProvider>
               </SettingProvider>
             </LoaderContext.Provider>

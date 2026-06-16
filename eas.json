@@ -14,6 +14,19 @@
         "buildType": "apk"
       }
     },
+    "envato-demo": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "$EXPO_PUBLIC_API_URL",
+        "EXPO_PUBLIC_DEMO_MODE": "true",
+        "EXPO_PUBLIC_DEMO_EMAIL": "$EXPO_PUBLIC_DEMO_EMAIL",
+        "EXPO_PUBLIC_DEMO_PASSWORD": "$EXPO_PUBLIC_DEMO_PASSWORD",
+        "EXPO_PUBLIC_MAPTILER_API_KEY": "$EXPO_PUBLIC_MAPTILER_API_KEY"
+      }
+    },
     "release": {
       "distribution": "internal",
       "android": {
