@@ -30,8 +30,8 @@ export default function Categories({ navigation: navigationProp, searchResultPar
     <View style={{
       marginTop: 5,
       backgroundColor: "#fff",
-      paddingVertical: 10,
-      paddingLeft: 10,
+      paddingVertical: 14,
+      paddingLeft: 16,
     }}>
       {categories?<FlatList
         horizontal
@@ -45,20 +45,27 @@ export default function Categories({ navigation: navigationProp, searchResultPar
               categoryName: item.name,
               ...searchResultParams,
             })}
-            style={{ alignItems: "center", marginRight: 30 }}>
+            style={{ alignItems: "center", marginRight: 22, width: 72 }}>
               <Image
                 source={imageErrors[item.id || item.name] ? defaultImage : {uri: item.image}}
                 style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  borderWidth: 1,
+                  borderColor: "#ececec",
                 }}
                 onError={() => handleImageError(item.id || item.name)}
               />
-              <Text style={{
-                fontSize: 13,
-                fontWeight: Platform.OS === "android" ? "bold" : "900"
-              }}
+              <Text
+                numberOfLines={1}
+                style={{
+                  marginTop: 8,
+                  fontSize: 12,
+                  fontWeight: Platform.OS === "android" ? "bold" : "700",
+                  color: "#111",
+                  textAlign: "center",
+                }}
               >
                 {item.name}
               </Text>

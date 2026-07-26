@@ -218,7 +218,12 @@ function matchesItemScopeForRestaurant(promotion, restaurantMenuIds) {
   return hasMatchingItem;
 }
 
-function doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds) {
+function doesPromotionMatchRestaurant(
+  promotion,
+  restaurantId,
+  restaurantMenuIds,
+  { includePlatform = true } = {}
+) {
   if (!isPromotionActive(promotion)) return false;
 
   if (promotion.scope === 'restaurant') {
@@ -227,7 +232,7 @@ function doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds
   if (promotion.scope === 'item') {
     return matchesItemScopeForRestaurant(promotion, restaurantMenuIds);
   }
-  if (promotion.scope === 'platform') return true;
+  if (promotion.scope === 'platform') return includePlatform;
   if (promotion.scope === 'category') return false;
   return false;
 }
@@ -235,9 +240,10 @@ function doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds
 export function filterPromotionsByRestaurant(
   allPromotions,
   restaurantId,
-  restaurantMenuIds
+  restaurantMenuIds,
+  options = {}
 ) {
   return allPromotions.filter((promotion) =>
-    doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds)
+    doesPromotionMatchRestaurant(promotion, restaurantId, restaurantMenuIds, options)
   );
 }

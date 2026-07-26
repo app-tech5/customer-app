@@ -61,7 +61,13 @@ export default function RestaurantItems({navigation,...props}) {
                                     borderColor: colors.border.light,
                                     overflow: 'hidden'
                                 }}>
-                                {props.reward || item.reward ?<PromotionBadge restaurant={item} allPromotions={props.promotions} allMenus={props.allMenus}/>:<></>}
+                                {(props.showPromotionBadges || props.reward || item.reward) ? (
+                                  <PromotionBadge
+                                    restaurant={item}
+                                    allPromotions={props.promotions}
+                                    allMenus={props.allMenus}
+                                  />
+                                ) : null}
                                 <RestaurantImage
                                     image={item.image}
                                     restaurantId={item._id || item.id || item.restaurantId}

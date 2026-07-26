@@ -166,6 +166,17 @@
       "italianCuisine": "Cuisine italienne",
       "americanCuisine": "Cuisine américaine",
       "discover": "Découvrir"
+    },
+    "promoBanner": {
+      "defaultHeadline": "Livraison 0 € + 5 % de réduction",
+      "defaultSubheadline": "avec Good Food",
+      "freeDeliveryHeadline": "Livraison offerte",
+      "percentHeadline": "{{value}} % de réduction",
+      "weekendHeadline": "Offre week-end",
+      "weekendSubheadline": "Économies limitées sur toute la marketplace",
+      "newUsersHeadline": "Offre de bienvenue",
+      "newUsersSubheadline": "Promos exclusives pour les nouveaux utilisateurs",
+      "browseOffers": "Voir les offres"
     }
   },
   "tabs": {

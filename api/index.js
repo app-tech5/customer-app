@@ -128,8 +128,8 @@ export const validatePromoCode = (code, restaurantId, cartAmount) =>
   api.validatePromoCode(code, restaurantId, cartAmount);
 
 export { filterRestaurantPromotions };
-export const getRestaurantPromotions = (restaurantId) =>
-  api.getRestaurantPromotions(restaurantId);
+export const getRestaurantPromotions = (restaurantId, options) =>
+  api.getRestaurantPromotions(restaurantId, options);
 
 export const getCart = () => api.getCart();
 export const addToCart = (itemData) => api.addToCart(itemData);

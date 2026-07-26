@@ -11,6 +11,8 @@ import { getDistanceKmBetweenUserAndRestaurant } from '../utils/deliveryTime'
 import { calculateDeliveryFeeFromSetting } from '../utils/deliverySetting'
 
 import HomeHeader from '../components/home/HomeHeader'
+import Categories from '../components/home/Categories'
+import HomePromoBanner from '../components/home/HomePromoBanner'
 import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusWithSmartCache } from '../utils/cacheUtils'
@@ -19,6 +21,7 @@ import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import * as Location from 'expo-location'
 import SettingContext from '../contexts/SettingContext'
 import { navigateToTabSearch } from '../navigation/navigationHelpers'
+import { getRestaurantId, restaurantIdsMatch } from '../utils/restaurantId'
 
 export default function Home({navigation}) {
   const {restaurantData, setRestaurantData} = useContext(RestaurantsContext)
@@ -346,15 +349,15 @@ export default function Home({navigation}) {
 
     const sections = []
     
-    const restaurantsWithPromotions = sortedData.filter(restaurant => {
-      const restaurantId = restaurant._id || restaurant.id || restaurant.restaurantId
-      return allPromotions?.some(promotion =>
+    const restaurantsWithPromotions = sortedData.filter((restaurant) => {
+      const restaurantId = getRestaurantId(restaurant)
+      return allPromotions?.some((promotion) =>
         promotion.scope === 'restaurant' &&
         promotion.isActive &&
         new Date() >= new Date(promotion.startDate) &&
         new Date() <= new Date(promotion.endDate) &&
-        promotion.applicableRestaurants?.some(restId =>
-          restId.toString() === restaurantId.toString()
+        promotion.applicableRestaurants?.some((restId) =>
+          restaurantIdsMatch(restId, restaurantId)
         )
       )
     })
@@ -497,7 +500,11 @@ export default function Home({navigation}) {
         <SearchBar cityHandler={setCity} navigation={navigation} searchbar={searchbar}/>
       </View>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {}
+          <Categories navigation={navigation} />
+          <HomePromoBanner
+            promotions={allPromotions}
+            navigation={navigation}
+          />
           {createDynamicSections.map((section) => (
             <View key={section.id} style={styles.sectionContainer}>
               <View style={styles.sectionHeader}>
@@ -535,6 +542,7 @@ export default function Home({navigation}) {
                   navigation={navigation}
                   horizontal={true}
                   size={0.75}
+                  showPromotionBadges={true}
                 />
               </View>
             </View>

@@ -44,7 +44,8 @@ ApiClient.prototype.getAllActiveOffers = async function () {
 export function filterRestaurantPromotions(
   allPromotions,
   restaurantId,
-  allMenus = null
+  allMenus = null,
+  options = {}
 ) {
   if (!allPromotions || !Array.isArray(allPromotions) || !restaurantId) return [];
   const restaurantMenuIds = allMenus
@@ -53,14 +54,15 @@ export function filterRestaurantPromotions(
   const restaurantPromotions = filterPromotionsByRestaurant(
     allPromotions,
     restaurantId,
-    restaurantMenuIds
+    restaurantMenuIds,
+    options
   );
   return restaurantPromotions
     .sort((a, b) => (b.priority || 1) - (a.priority || 1))
     .slice(0, 3);
 }
 
-ApiClient.prototype.getRestaurantPromotions = async function (restaurantId) {
+ApiClient.prototype.getRestaurantPromotions = async function (restaurantId, options = {}) {
   try {
     const [allPromotions, allMenus] = await Promise.all([
       this.apiCall('/resource/promotions'),
@@ -88,7 +90,8 @@ ApiClient.prototype.getRestaurantPromotions = async function (restaurantId) {
     const restaurantPromotions = filterPromotionsByRestaurant(
       allPromotions,
       restaurantId,
-      restaurantMenuIds
+      restaurantMenuIds,
+      options
     );
     return restaurantPromotions
       .sort((a, b) => (b.priority || 1) - (a.priority || 1))

@@ -200,6 +200,17 @@
       "italianCuisine": "Italian Cuisine",
       "americanCuisine": "American Cuisine",
       "discover": "Discover"
+    },
+    "promoBanner": {
+      "defaultHeadline": "$0 Delivery Fee + 5% off",
+      "defaultSubheadline": "with Good Food",
+      "freeDeliveryHeadline": "$0 Delivery Fee",
+      "percentHeadline": "{{value}}% off",
+      "weekendHeadline": "Weekend Flash Deal",
+      "weekendSubheadline": "Limited-time savings across the marketplace",
+      "newUsersHeadline": "Welcome offer",
+      "newUsersSubheadline": "Exclusive deals for new Good Food users",
+      "browseOffers": "Browse Offers"
     }
   },
   "tabs": {
