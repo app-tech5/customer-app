@@ -4,6 +4,8 @@
  * sélectionne la meilleure pour le visuel marketing "4 apps".
  *
  *   node scripts/hermes-home-best-screenshot.js
+ *   node scripts/hermes-home-best-screenshot.js --score-only   # re-score les PNG déjà capturés (nécessite app sur la même position — relancer sans --score-only de préférence)
+ *   node scripts/hermes-home-best-screenshot.js --test-score   # teste le scoring Hermes sans capture
  */
 
 const fs = require('fs');
@@ -143,7 +145,11 @@ const SCORE_VIEWPORT = `(function(){
     if (!fiber || !fiber.type) return '';
     var t = fiber.type;
     if (typeof t === 'string') return t;
-    return t.displayName || t.name || '';
+    if (t && typeof t === 'object' && t.type) {
+      var inner = t.type;
+      return inner.displayName || inner.name || 'Memo';
+    }
+    return t.displayName || t.name || (t.render && t.render.displayName) || '';
   }
 
   function walk(fiber, depth, ctx) {
@@ -165,49 +171,12 @@ const SCORE_VIEWPORT = `(function(){
       if (text.indexOf('Top Rated') >= 0 || text.indexOf('Mieux notés') >= 0) ctx.hasTopRated = true;
       if (text.indexOf('Quick Cuisine') >= 0 || text.indexOf('Cuisine rapide') >= 0) ctx.hasQuickCuisine = true;
       if (text.indexOf('%') >= 0 && text.indexOf('off') >= 0) ctx.badgeTexts.push(text);
-      if (text.indexOf('Delivery Fee') >= 0 || text.indexOf('Livraison') >= 0) ctx.promoTexts.push(text);
+      if (text.indexOf('Delivery Fee') >= 0 || text.indexOf('Livraison offerte') >= 0) ctx.promoTexts.push(text);
+      if (text.indexOf('Buy 1') >= 0 || text.indexOf('Get 1') >= 0) ctx.badgeTexts.push(text);
     }
 
     walk(fiber.child, depth + 1, ctx);
     walk(fiber.sibling, depth, ctx);
-  }
-
-  function measureNode(stateNode) {
-    return new Promise(function(resolve) {
-      var pi = stateNode && stateNode.canonical && stateNode.canonical.publicInstance;
-      if (!pi || typeof pi.measureInWindow !== 'function') return resolve(null);
-      pi.measureInWindow(function(x, y, w, h) {
-        resolve({ x: x, y: y, width: w, height: h });
-      });
-    });
-  }
-
-  async function measureCategories(ctx) {
-    var hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-    var catFiber = null;
-    hook.renderers.forEach(function(_, id) {
-      hook.getFiberRoots(id).forEach(function(root) {
-        function find(f) {
-          if (!f) return;
-          if (fiberName(f) === 'Categories') catFiber = f;
-          find(f.child); find(f.sibling);
-        }
-        find(root.current || root);
-      });
-    });
-    if (!catFiber) return;
-    async function collect(f, d) {
-      if (!f || d > 30) return;
-      if (f.stateNode && f.stateNode.canonical) {
-        var rect = await measureNode(f.stateNode);
-        if (rect && rect.width > 200 && rect.height > 40 && rect.height < 120) {
-          ctx.categoryRect = rect;
-        }
-      }
-      await collect(f.child, d + 1);
-      await collect(f.sibling, d);
-    }
-    await collect(catFiber, 0);
   }
 
   var hook = globalThis.__REACT_DEVTOOLS_GLOBAL_HOOK__;
@@ -226,7 +195,6 @@ const SCORE_VIEWPORT = `(function(){
     promotionBadges: 0,
     badgeTexts: [],
     promoTexts: [],
-    categoryRect: null,
   };
 
   hook.renderers.forEach(function(_, rendererID) {
@@ -235,42 +203,54 @@ const SCORE_VIEWPORT = `(function(){
     });
   });
 
-  return measureCategories(ctx).then(function() {
-    var score = 0;
-    if (ctx.onHome) score += 5;
-    if (ctx.hasHeaderTabs) score += 12;
-    if (ctx.hasSearchBar) score += 10;
-    if (ctx.hasDeliveryTab) score += 8;
-    if (ctx.hasCategories) score += 18;
-    if (ctx.hasPromoBanner) score += 22;
-    if (ctx.hasSpecialOffers) score += 16;
-    if (ctx.hasTopRated) score += 10;
-    if (ctx.hasQuickCuisine) score += 6;
-    score += Math.min(ctx.promotionBadges, 4) * 5;
-    if (ctx.badgeTexts.length >= 2) score += 8;
-    if (ctx.categoryRect && ctx.categoryRect.y >= 0 && ctx.categoryRect.y < 900) score += 6;
-
+  var score = 0;
+  if (ctx.onHome) score += 5;
+  if (ctx.hasHeaderTabs) score += 12;
+  if (ctx.hasSearchBar) score += 10;
+  if (ctx.hasDeliveryTab) score += 8;
+  if (ctx.hasCategories) score += 18;
+  if (ctx.hasPromoBanner) score += 22;
+  if (ctx.hasSpecialOffers) score += 16;
+  if (ctx.hasTopRated) score += 10;
+  if (ctx.hasQuickCuisine) score += 6;
+  score += Math.min(ctx.promotionBadges, 4) * 5;
+  if (ctx.badgeTexts.length >= 1) score += 8;
   if (!ctx.hasHeaderTabs) score -= 20;
   if (!ctx.hasCategories && !ctx.hasPromoBanner) score -= 15;
 
-    return JSON.stringify({
-      score: score,
-      metrics: {
-        onHome: ctx.onHome,
-        hasHeaderTabs: ctx.hasHeaderTabs,
-        hasSearchBar: ctx.hasSearchBar,
-        hasCategories: ctx.hasCategories,
-        hasPromoBanner: ctx.hasPromoBanner,
-        hasSpecialOffers: ctx.hasSpecialOffers,
-        hasTopRated: ctx.hasTopRated,
-        hasQuickCuisine: ctx.hasQuickCuisine,
-        promotionBadges: ctx.promotionBadges,
-        badgeTexts: ctx.badgeTexts.slice(0, 4),
-        promoTexts: ctx.promoTexts.slice(0, 2),
-      },
-    });
+  return JSON.stringify({
+    score: score,
+    metrics: {
+      onHome: ctx.onHome,
+      hasHeaderTabs: ctx.hasHeaderTabs,
+      hasSearchBar: ctx.hasSearchBar,
+      hasCategories: ctx.hasCategories,
+      hasPromoBanner: ctx.hasPromoBanner,
+      hasSpecialOffers: ctx.hasSpecialOffers,
+      hasTopRated: ctx.hasTopRated,
+      hasQuickCuisine: ctx.hasQuickCuisine,
+      promotionBadges: ctx.promotionBadges,
+      badgeTexts: ctx.badgeTexts.slice(0, 4),
+      promoTexts: ctx.promoTexts.slice(0, 2),
+    },
   });
 })()`;
+
+function parseScoreResult(raw) {
+  if (!raw) return { score: 0, metrics: {}, error: 'empty' };
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return { score: 0, metrics: {}, error: raw };
+    }
+  }
+  if (typeof raw.score === 'number') return raw;
+  if (raw._h !== undefined) {
+    return { score: 0, metrics: {}, error: 'promise_non_resolue' };
+  }
+  return { score: 0, metrics: raw, error: 'format_inattendu' };
+}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -303,12 +283,21 @@ async function resetToTop(ws) {
 }
 
 async function main() {
+  const testScoreOnly = process.argv.includes('--test-score');
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const ws = await connectHermes();
   await installAutoOkAlerts(ws);
   await evaluate(ws, buildNavigateHomeExpression());
   await sleep(2000);
+
+  if (testScoreOnly) {
+    const scoreResult = parseScoreResult(await evaluate(ws, SCORE_VIEWPORT));
+    ws.close();
+    console.log(JSON.stringify(scoreResult, null, 2));
+    process.exit(scoreResult.score > 0 ? 0 : 1);
+  }
+
   await evaluate(ws, DISCOVER_SCROLL_TARGETS);
   await resetToTop(ws);
 
@@ -333,7 +322,7 @@ async function main() {
         await evaluate(ws, SCROLL_HORIZONTAL(plan.listIndex, plan.offset));
         await sleep(450);
 
-        const scoreResult = await evaluate(ws, SCORE_VIEWPORT, { awaitPromise: true });
+        const scoreResult = parseScoreResult(await evaluate(ws, SCORE_VIEWPORT));
         const id = `p${promoIndex}_y${verticalY}_h${plan.listIndex}-${plan.offset}`;
         const filePath = path.join(OUT_DIR, `${id}.png`);
 

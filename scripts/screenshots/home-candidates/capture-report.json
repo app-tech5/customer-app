@@ -1,0 +1,158 @@
+{
+  "capturedAt": "2026-06-28T11:52:51.503Z",
+  "totalCaptures": 60,
+  "best": {
+    "id": "p0_y0_h0-0",
+    "score": 135,
+    "metrics": {
+      "onHome": true,
+      "hasHeaderTabs": true,
+      "hasSearchBar": true,
+      "hasCategories": true,
+      "hasPromoBanner": true,
+      "hasSpecialOffers": true,
+      "hasTopRated": true,
+      "hasQuickCuisine": true,
+      "promotionBadges": 61,
+      "badgeTexts": [
+        "5% off",
+        "5% off",
+        "15% off",
+        "15% off"
+      ],
+      "promoTexts": [
+        "$0 Delivery Fee",
+        "$0 Delivery Fee"
+      ]
+    },
+    "source": "/Users/nass/Documents/good-food-app-main/customer-app/scripts/screenshots/home-candidates/p0_y0_h0-0.png",
+    "output": "/Users/nass/Documents/good-foods-description/img/screenshots/customer-app.png"
+  },
+  "top5": [
+    {
+      "id": "p0_y0_h0-0",
+      "score": 135,
+      "metrics": {
+        "onHome": true,
+        "hasHeaderTabs": true,
+        "hasSearchBar": true,
+        "hasCategories": true,
+        "hasPromoBanner": true,
+        "hasSpecialOffers": true,
+        "hasTopRated": true,
+        "hasQuickCuisine": true,
+        "promotionBadges": 61,
+        "badgeTexts": [
+          "5% off",
+          "5% off",
+          "15% off",
+          "15% off"
+        ],
+        "promoTexts": [
+          "$0 Delivery Fee",
+          "$0 Delivery Fee"
+        ]
+      }
+    },
+    {
+      "id": "p0_y0_h0-220",
+      "score": 135,
+      "metrics": {
+        "onHome": true,
+        "hasHeaderTabs": true,
+        "hasSearchBar": true,
+        "hasCategories": true,
+        "hasPromoBanner": true,
+        "hasSpecialOffers": true,
+        "hasTopRated": true,
+        "hasQuickCuisine": true,
+        "promotionBadges": 61,
+        "badgeTexts": [
+          "5% off",
+          "5% off",
+          "15% off",
+          "15% off"
+        ],
+        "promoTexts": [
+          "$0 Delivery Fee",
+          "$0 Delivery Fee"
+        ]
+      }
+    },
+    {
+      "id": "p0_y0_h1-0",
+      "score": 135,
+      "metrics": {
+        "onHome": true,
+        "hasHeaderTabs": true,
+        "hasSearchBar": true,
+        "hasCategories": true,
+        "hasPromoBanner": true,
+        "hasSpecialOffers": true,
+        "hasTopRated": true,
+        "hasQuickCuisine": true,
+        "promotionBadges": 61,
+        "badgeTexts": [
+          "5% off",
+          "5% off",
+          "15% off",
+          "15% off"
+        ],
+        "promoTexts": [
+          "$0 Delivery Fee",
+          "$0 Delivery Fee"
+        ]
+      }
+    },
+    {
+      "id": "p0_y0_h1-220",
+      "score": 135,
+      "metrics": {
+        "onHome": true,
+        "hasHeaderTabs": true,
+        "hasSearchBar": true,
+        "hasCategories": true,
+        "hasPromoBanner": true,
+        "hasSpecialOffers": true,
+        "hasTopRated": true,
+        "hasQuickCuisine": true,
+        "promotionBadges": 61,
+        "badgeTexts": [
+          "5% off",
+          "5% off",
+          "15% off",
+          "15% off"
+        ],
+        "promoTexts": [
+          "$0 Delivery Fee",
+          "$0 Delivery Fee"
+        ]
+      }
+    },
+    {
+      "id": "p0_y120_h0-0",
+      "score": 135,
+      "metrics": {
+        "onHome": true,
+        "hasHeaderTabs": true,
+        "hasSearchBar": true,
+        "hasCategories": true,
+        "hasPromoBanner": true,
+        "hasSpecialOffers": true,
+        "hasTopRated": true,
+        "hasQuickCuisine": true,
+        "promotionBadges": 61,
+        "badgeTexts": [
+          "5% off",
+          "5% off",
+          "15% off",
+          "15% off"
+        ],
+        "promoTexts": [
+          "$0 Delivery Fee",
+          "$0 Delivery Fee"
+        ]
+      }
+    }
+  ]
+}
