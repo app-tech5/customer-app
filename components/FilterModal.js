@@ -1,10 +1,12 @@
-import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView, Platform} from 'react-native'
+import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import React, {useState} from 'react'
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AntDesign, Ionicons, FontAwesome, MaterialIcons, Entypo, MaterialCommunityIcons} from '@expo/vector-icons'
 import { colors, currency } from '../global'
 import i18n from '../lang/i18n'
 
-export default function FilterModal({visible, setVisible, onApplyFilters}) {
+function FilterModalContent({setVisible, onApplyFilters}) {
+  const insets = useSafeAreaInsets()
   const [selectedFilters, setSelectedFilters] = useState({
     sort: null,
     maxDeliveryFee: 15,
@@ -70,9 +72,8 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
   }
 
   return (
-      <Modal animationType='slide' visible={visible}>
           <View style={styles.container}>
-              <View style={styles.header}>
+              <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
                 <TouchableOpacity onPress={() => setVisible(false)} style={styles.closeButton}>
                   <AntDesign name="close" size={24} color={colors.text.primary} />
                 </TouchableOpacity>
@@ -230,12 +231,21 @@ export default function FilterModal({visible, setVisible, onApplyFilters}) {
                 </View>
               </ScrollView>
 
-              <View style={styles.footer}>
+              <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
                 <TouchableOpacity style={styles.applyButton} onPress={handleApplyFilters}>
                   <Text style={styles.applyButtonText}>{i18n.t('filters.apply')}</Text>
                 </TouchableOpacity>
               </View>
           </View>
+  )
+}
+
+export default function FilterModal({visible, setVisible, onApplyFilters}) {
+  return (
+    <Modal animationType='slide' visible={visible}>
+      <SafeAreaProvider>
+        <FilterModalContent setVisible={setVisible} onApplyFilters={onApplyFilters} />
+      </SafeAreaProvider>
     </Modal>
   )
 }
@@ -298,7 +308,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'ios' ? 50 : 20,
         paddingBottom: 15,
         borderBottomWidth: 1,
         borderBottomColor: colors.border.light,
@@ -425,7 +434,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         paddingHorizontal: 20,
-        paddingVertical: 20,
+        paddingTop: 20,
         borderTopWidth: 1,
         borderTopColor: colors.border.light,
         backgroundColor: colors.background.primary,

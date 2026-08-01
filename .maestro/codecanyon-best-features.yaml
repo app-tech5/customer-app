@@ -1,0 +1,139 @@
+appId: com.goodfoods.goodfoods
+name: CodeCanyon best feature captures
+---
+# Goal: marketing screenshots of best UI + key actions
+# App already open & logged in as demo.
+
+# ========== HOME (best scroll positions) ==========
+- tapOn: "Home"
+- waitForAnimationToEnd
+- takeScreenshot: 01-home-top
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 01-home-offers
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 01-home-more
+
+# ========== MAP / NEARBY ==========
+- tapOn: "Pickup"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "restaurants-map-screen"
+    timeout: 20000
+- takeScreenshot: 02-map-nearby
+
+- swipe:
+    id: "restaurants-map-horizontal-list"
+    direction: LEFT
+    duration: 400
+- waitForAnimationToEnd
+- takeScreenshot: 02-map-carousel
+
+# ========== RESTAURANT DETAIL + OFFERS + MENU ==========
+- tapOn:
+    id: "restaurants-map-card-index-0"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "restaurant-detail-screen"
+    timeout: 20000
+- takeScreenshot: 03-restaurant-detail
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 04-restaurant-offers
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 05-restaurant-menu-filters
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 05-restaurant-menu-items
+
+# ========== ADD TO CART + VIEW CART POPUP ==========
+# Tap first visible "+" on menu (center-ish)
+- tapOn:
+    text: "+"
+    index: 0
+- waitForAnimationToEnd
+- takeScreenshot: 06-after-add
+
+# If dish detail opened, try add again
+- scroll
+- waitForAnimationToEnd
+- tapOn:
+    text: "+"
+    optional: true
+- waitForAnimationToEnd
+
+# Open floating View Cart bar
+- tapOn:
+    text: "View Cart"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 07-cart-popup
+
+# ========== CHECKOUT ==========
+- tapOn: "Checkout"
+- waitForAnimationToEnd
+- takeScreenshot: 08-checkout
+
+# Back out of checkout if opened
+- back
+- waitForAnimationToEnd
+- back
+- waitForAnimationToEnd
+
+# ========== SEARCH ==========
+- tapOn: "Home"
+- waitForAnimationToEnd
+- tapOn:
+    point: "30%,93%"
+- waitForAnimationToEnd
+- takeScreenshot: 09-search
+- tapOn: "Offers"
+- waitForAnimationToEnd
+- takeScreenshot: 10-offers-from-search
+
+# ========== ORDERS + TRACK ==========
+- tapOn: "Order History"
+- waitForAnimationToEnd
+- takeScreenshot: 11-orders
+- tapOn: "Track Order"
+- waitForAnimationToEnd
+- takeScreenshot: 12-order-tracking
+- back
+- waitForAnimationToEnd
+
+# ========== ACCOUNT ==========
+- tapOn: "My Account"
+- waitForAnimationToEnd
+- takeScreenshot: 13-account
+
+# ========== WALLET + ADD MONEY + ADD CARD ==========
+- tapOn:
+    text: "Open menu"
+- waitForAnimationToEnd
+- takeScreenshot: 14-drawer
+- tapOn: "Wallet"
+- waitForAnimationToEnd
+- takeScreenshot: 15-wallet
+
+- tapOn: "Add Money"
+- waitForAnimationToEnd
+- takeScreenshot: 16-add-money
+- back
+- waitForAnimationToEnd
+
+- tapOn: "+ Add"
+- waitForAnimationToEnd
+- takeScreenshot: 17-add-payment-method
+
+- tapOn: "Add card"
+- waitForAnimationToEnd
+- takeScreenshot: 18-add-card

@@ -1,0 +1,138 @@
+appId: com.goodfoods.goodfoods
+name: CodeCanyon actions - cart popup, checkout, wallet, card
+---
+# Requires: logged-in demo user, AddToCartButton accessibilityLabel="Add to cart"
+# Prefer restaurant menu "Add to cart" over dish-detail FAB.
+
+- tapOn: "Home"
+- waitForAnimationToEnd
+- takeScreenshot: 01-home-top
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 01-home-offers
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 01-home-more
+
+# Open a restaurant from home (first large card area)
+- tapOn:
+    point: "45%,58%"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "restaurant-detail-screen"
+    timeout: 20000
+- takeScreenshot: 03-restaurant-detail
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 04-restaurant-offers
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 05-restaurant-menu-filters
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 05-restaurant-menu-items
+
+# Add from menu list (a11y label)
+- tapOn:
+    text: "Add to cart"
+    index: 1
+- waitForAnimationToEnd
+- takeScreenshot: 06-menu-added
+
+# Floating View Cart bar sits above bottom tabs
+- tapOn:
+    text: "View Cart"
+    optional: true
+- tapOn:
+    point: "50%,85%"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 07-cart-popup
+
+- tapOn: "Checkout"
+- waitForAnimationToEnd
+- takeScreenshot: 08-checkout
+
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 08b-checkout-summary
+
+- tapOn: "Place Order"
+- waitForAnimationToEnd
+- takeScreenshot: 08e-confirm-order
+
+- tapOn: "Confirm Order"
+- waitForAnimationToEnd
+- takeScreenshot: 12-order-tracking
+
+- back
+- waitForAnimationToEnd
+
+# Orders list
+- tapOn: "Order History"
+- waitForAnimationToEnd
+- takeScreenshot: 11-orders
+
+- tapOn:
+    text: "Track Order"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 12b-order-tracking-live
+- back
+- waitForAnimationToEnd
+
+# Account + drawer + wallet
+- tapOn: "My Account"
+- waitForAnimationToEnd
+- takeScreenshot: 13-account
+
+- tapOn: "Open menu"
+- waitForAnimationToEnd
+- takeScreenshot: 14-drawer
+
+- tapOn: "Wallet"
+- waitForAnimationToEnd
+- takeScreenshot: 15-wallet
+
+- tapOn: "Add Money"
+- waitForAnimationToEnd
+- takeScreenshot: 16-add-money
+- back
+- waitForAnimationToEnd
+
+- tapOn: "Add"
+- waitForAnimationToEnd
+- takeScreenshot: 17-add-payment-method
+
+- tapOn: "Credit or debit card"
+- waitForAnimationToEnd
+- takeScreenshot: 18-add-card
+
+- back
+- waitForAnimationToEnd
+- back
+- waitForAnimationToEnd
+
+# Offers + Near me
+- tapOn: "Open menu"
+- waitForAnimationToEnd
+- tapOn: "Offers & Discounts"
+- waitForAnimationToEnd
+- takeScreenshot: 10-offers
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 10b-offers-scrolled
+- back
+- waitForAnimationToEnd
+
+- tapOn: "Open menu"
+- waitForAnimationToEnd
+- tapOn: "Near me"
+- waitForAnimationToEnd
+- takeScreenshot: 20-near-me

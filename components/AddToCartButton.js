@@ -131,6 +131,9 @@ export default function AddToCartButton({ food, restaurant, style }) {
           style={styles.addButton}
           onPress={handleAddToCart}
           activeOpacity={0.8}
+          accessibilityLabel="Add to cart"
+          accessibilityRole="button"
+          testID="add-to-cart-button"
         >
           <LinearGradient
             colors={[colors.grey[700], colors.grey[600]]}
