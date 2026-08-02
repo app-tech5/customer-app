@@ -24,7 +24,7 @@ export default function MyOrdersScreen({ navigation }) {
           onPress={() => navigation.openDrawer()}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Open menu"
+          accessibilityLabel={i18n.t('common.openMenu')}
         >
           <Ionicons name="menu" size={24} color={colors.text.primary} />
         </TouchableOpacity>

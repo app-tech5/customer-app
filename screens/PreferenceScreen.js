@@ -50,7 +50,7 @@ export default class PreferenceScreen extends Component {
                      <View style ={styles.view2}>
                         <Text style={styles.text3}>{i18n.t('preference.chooseMealType')}</Text>
                         <View style = {styles.view3}>
-                           <Text style ={styles.text4}>REQUIRED</Text>
+                           <Text style ={styles.text4}>{i18n.t('preference.required')}</Text>
                         </View>
                      </View>
                      <View style ={styles.view4}>
@@ -75,7 +75,7 @@ export default class PreferenceScreen extends Component {
                              <Text style ={styles.text8}>{menuDetailedData[index].preferenceTitle[this.state.preference.indexOf(item)]}</Text>
                              {this.state.required[this.state.preference.indexOf(item)] &&
                               <View style ={styles.view9}>
-                                  <Text style ={styles.text7}>{this.state.minimum_quantity[this.state.preference.indexOf(item)]} REQUIRED</Text>
+                                  <Text style ={styles.text7}>{i18n.t('preference.requiredCount', { count: this.state.minimum_quantity[this.state.preference.indexOf(item)] })}</Text>
                               </View>
 
                              }
@@ -131,7 +131,7 @@ export default class PreferenceScreen extends Component {
                 </View>
                 <View style ={styles.view17}>
                     <View style ={styles.view18}>
-                        <Text style ={styles.text10}>Add 1 to Cart R78.21</Text>
+                        <Text style ={styles.text10}>{i18n.t('preference.addToCartWithPrice', { qty: 1, price: `R${Number(price).toFixed(2)}` })}</Text>
                     </View>
                 </View>
             </View>

@@ -241,7 +241,7 @@ export default function Settings({ navigation }) {
             subtitle={i18n.t('settings.privacyDescription', 'Read our privacy policy')}
             onPress={() => {
               
-              Alert.alert('Not implemented', 'Privacy policy screen will be implemented')
+              Alert.alert(i18n.t('common.notImplemented'), i18n.t('settings.privacyPolicySoon'))
             }}
           />
 
@@ -252,7 +252,7 @@ export default function Settings({ navigation }) {
             subtitle={i18n.t('settings.termsDescription', 'Read our terms and conditions')}
             onPress={() => {
               
-              Alert.alert('Not implemented', 'Terms of service screen will be implemented')
+              Alert.alert(i18n.t('common.notImplemented'), i18n.t('settings.termsSoon'))
             }}
           />
 
@@ -262,7 +262,7 @@ export default function Settings({ navigation }) {
             subtitle={i18n.t('settings.dataPrivacyDescription', 'Manage your data and privacy settings')}
             onPress={() => {
               
-              Alert.alert('Not implemented', 'Data privacy settings will be implemented')
+              Alert.alert(i18n.t('common.notImplemented'), i18n.t('settings.dataPrivacySoon'))
             }}
           />
         </SettingSection>
@@ -308,7 +308,7 @@ export default function Settings({ navigation }) {
             subtitle={i18n.t('settings.rateAppDescription', 'Rate us on the app store')}
             onPress={() => {
               
-              Alert.alert('Not implemented', 'App rating will be implemented')
+              Alert.alert(i18n.t('common.notImplemented'), i18n.t('settings.rateAppSoon'))
             }}
           />
         </SettingSection>
@@ -328,7 +328,7 @@ export default function Settings({ navigation }) {
             subtitle={i18n.t('settings.openSourceDescription', 'View our open source code')}
             onPress={() => {
               
-              Alert.alert('Not implemented', 'GitHub link will be implemented')
+              Alert.alert(i18n.t('common.notImplemented'), i18n.t('settings.openSourceSoon'))
             }}
           />
         </SettingSection>

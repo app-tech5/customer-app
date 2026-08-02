@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native'
+import i18n from '../lang/i18n'
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
@@ -188,7 +189,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   if (!restaurantData || restaurantData.length === 0) {
     return (
       <View testID="restaurants-map-empty-state" accessibilityLabel="restaurants-map-empty-state" style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text testID="restaurants-map-loading-text" accessibilityLabel="restaurants-map-loading-text">Chargement des restaurants...</Text>
+        <Text testID="restaurants-map-loading-text" accessibilityLabel="restaurants-map-loading-text">{i18n.t('map.loadingRestaurants')}</Text>
       </View>
     )
   }

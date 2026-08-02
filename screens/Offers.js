@@ -344,7 +344,7 @@ export default function Offers({ navigation }) {
           style={styles.headerButton}
           onPress={() => navigation.openDrawer()}
           accessibilityRole="button"
-          accessibilityLabel="Open menu"
+          accessibilityLabel={i18n.t('common.openMenu')}
         >
           <Ionicons name="menu" size={24} color={colors.grey[600]} />
         </TouchableOpacity>
@@ -354,7 +354,7 @@ export default function Offers({ navigation }) {
             style={styles.headerButton}
             onPress={() => navigateToTabSearch(navigation, 'SearchScreen')}
             accessibilityRole="button"
-            accessibilityLabel="Search offers"
+            accessibilityLabel={i18n.t('common.searchOffers')}
             accessibilityHint="Navigate to search screen"
           >
             <Ionicons name="search" size={24} color={colors.grey[600]} />
@@ -363,7 +363,7 @@ export default function Offers({ navigation }) {
             style={styles.headerButton}
             onPress={toggleFilters}
             accessibilityRole="button"
-            accessibilityLabel="Filter offers"
+            accessibilityLabel={i18n.t('common.filterOffers')}
             accessibilityHint="Open advanced filters"
           >
             <Ionicons name="filter" size={24} color={colors.grey[600]} />
@@ -436,7 +436,7 @@ export default function Offers({ navigation }) {
               style={styles.clearSearchButton}
               onPress={() => handleSearch('')}
               accessibilityRole="button"
-              accessibilityLabel="Clear search and show all promotions"
+              accessibilityLabel={i18n.t('common.clearSearchShowAll')}
             >
               <Text style={styles.clearSearchText}>{i18n.t('offers.clearSearch')}</Text>
             </TouchableOpacity>

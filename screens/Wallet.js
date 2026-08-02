@@ -85,7 +85,7 @@ export default function WalletScreen({ navigation, route}) {
           style={styles.balanceActionButton}
           onPress={() => {
             
-            Alert.alert('Not implemented', 'Send money functionality will be implemented')
+            Alert.alert(i18n.t('common.notImplemented'), i18n.t('wallet.sendMoneySoon'))
           }}
         >
           <Ionicons name="send" size={20} color={colors.primary} />
@@ -265,7 +265,7 @@ export default function WalletScreen({ navigation, route}) {
         <TouchableOpacity
           onPress={() => {
             
-            Alert.alert('Not implemented', 'Transaction history screen will be implemented')
+            Alert.alert(i18n.t('common.notImplemented'), i18n.t('wallet.transactionHistorySoon'))
           }}
         >
           <Text style={styles.viewAllText}>
@@ -306,7 +306,7 @@ export default function WalletScreen({ navigation, route}) {
         style={styles.promoCard}
         onPress={() => {
           
-          Alert.alert('Not implemented', 'Add promo code screen will be implemented')
+          Alert.alert(i18n.t('common.notImplemented'), i18n.t('wallet.addPromoSoon'))
         }}
       >
         <View style={styles.promoLeft}>

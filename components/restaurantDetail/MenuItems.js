@@ -179,10 +179,10 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
   }, [activeTab, restaurantData])
 
   const availableFilters = [
-    { id: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
-    { id: 'vegan', label: 'Vegan', icon: 'leaf-circle' },
-    { id: 'spicy', label: 'Spicy', icon: 'fire' },
-    { id: 'popular', label: 'Popular', icon: 'star' },
+    { id: 'vegetarian', label: i18n.t('menu.vegetarian'), icon: 'leaf' },
+    { id: 'vegan', label: i18n.t('menu.vegan'), icon: 'leaf-circle' },
+    { id: 'spicy', label: i18n.t('menu.spicy'), icon: 'fire' },
+    { id: 'popular', label: i18n.t('menu.popular'), icon: 'star' },
   ];
   
   const filteredFoods = useMemo(() => {
@@ -239,7 +239,7 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={20} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search menu items..."
+            placeholder={i18n.t('menu.searchItems')}
             placeholderTextColor={colors.text.secondary}
             value={searchQuery}
             onChangeText={setSearchQuery}

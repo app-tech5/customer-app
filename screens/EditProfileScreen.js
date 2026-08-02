@@ -220,7 +220,7 @@ export default function EditProfileScreen({ navigation }) {
           onPress={handleGoBack}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={i18n.t('common.goBack')}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
@@ -230,7 +230,7 @@ export default function EditProfileScreen({ navigation }) {
           onPress={handleSave}
           style={{ padding: 10, marginRight: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Save changes"
+          accessibilityLabel={i18n.t('profile.saveChanges')}
           disabled={saving}
         >
           <Ionicons name="checkmark" size={24} color={colors.primary} />

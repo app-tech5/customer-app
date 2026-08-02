@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Feather } from '@expo/vector-icons'
 import { colors } from '../global'
 import { addToCart as addToCartAPI } from '../api'
+import i18n from '../../lang/i18n'
 
 export default function AddToCartButton({ food, restaurant, style }) {
   if (!food) {
@@ -131,7 +132,7 @@ export default function AddToCartButton({ food, restaurant, style }) {
           style={styles.addButton}
           onPress={handleAddToCart}
           activeOpacity={0.8}
-          accessibilityLabel="Add to cart"
+          accessibilityLabel={i18n.t('common.addToCartA11y')}
           accessibilityRole="button"
           testID="add-to-cart-button"
         >

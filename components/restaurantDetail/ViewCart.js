@@ -85,7 +85,7 @@ export default function ViewCart({ navigation: _navigation, route, params, deliv
                                 style={styles.button}
                                 onPress={() => setModalVisible(true)}
                                 activeOpacity={0.9}
-                                accessibilityLabel="View Cart"
+                                accessibilityLabel={i18n.t('cart.viewCart')}
                                 accessibilityRole="button"
                                 testID="view-cart-button"
                             >

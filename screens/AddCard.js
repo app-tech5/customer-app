@@ -64,7 +64,7 @@ function AddCard({ navigation }) {
       )
 
       if (error) {
-        Alert.alert('Error', error.message)
+        Alert.alert(i18n.t('common.error'), error.message)
         return
       }
 

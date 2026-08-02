@@ -27,7 +27,7 @@ export default function OrderDetails() {
           onPress={() => navigation.goBack()}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={i18n.t('common.goBack')}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
@@ -422,7 +422,7 @@ export default function OrderDetails() {
                   style: 'destructive',
                   onPress: () => {
                     
-                    Alert.alert('Not implemented', 'Cancel order functionality will be implemented')
+                    Alert.alert(i18n.t('common.notImplemented'), i18n.t('order.cancelSoon'))
                   }
                 }
               ]
@@ -453,7 +453,7 @@ export default function OrderDetails() {
           style={styles.reorderButton}
           onPress={() => {
             
-            Alert.alert('Not implemented', 'Reorder functionality will be implemented')
+            Alert.alert(i18n.t('common.notImplemented'), i18n.t('order.reorderSoon'))
           }}
         >
           <Ionicons name="refresh" size={20} color={colors.primary} />

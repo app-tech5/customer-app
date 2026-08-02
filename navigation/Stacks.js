@@ -129,7 +129,7 @@ export function AccountNavigator() {
         name="EditProfile"
         component={EditProfileScreen}
         options={{
-          title: 'Edit Profile',
+          title: i18n.t('profile.edit'),
           headerShown: true
         }}
       />
@@ -165,7 +165,7 @@ export function AccountNavigator() {
         name="AddressesScreen"
         component={AddressesScreen}
         options={{
-          title: 'Addresses',
+          title: i18n.t('addresses.title'),
           headerShown: true
         }}
       />
@@ -180,7 +180,7 @@ export function AccountNavigator() {
         name="Settings"
         component={Settings}
         options={{
-          title: 'Settings',
+          title: i18n.t('settings.title'),
           headerShown: true
         }}
       />
@@ -250,7 +250,7 @@ export function WalletSectionNavigator({ navigation }) {
               onPress={() => navigation.toggleDrawer()}
               style={{ padding: 10, marginLeft: 5 }}
               accessibilityRole="button"
-              accessibilityLabel="Open menu"
+              accessibilityLabel={i18n.t("common.openMenu")}
             >
               <Ionicons name="menu" size={24} color={colors.text.primary} />
             </TouchableOpacity>
@@ -289,7 +289,7 @@ export function WalletFlowNavigator({ navigation }) {
               onPress={() => navigation.goBack()}
               style={{ padding: 10, marginLeft: 5 }}
               accessibilityRole="button"
-              accessibilityLabel="Go back"
+              accessibilityLabel={i18n.t("common.goBack")}
             >
               <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
@@ -324,14 +324,14 @@ export function CheckoutNavigator({ navigation }) {
         name="CheckoutScreen"
         component={CheckoutScreen}
         options={{
-          title: 'Checkout',
+          title: i18n.t('checkout.title'),
           headerShown: true,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={{ padding: 10, marginLeft: 5 }}
               accessibilityRole="button"
-              accessibilityLabel="Go back"
+              accessibilityLabel={i18n.t("common.goBack")}
             >
               <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
@@ -342,7 +342,7 @@ export function CheckoutNavigator({ navigation }) {
         name="OrderRequest"
         component={OrderRequest}
         options={{
-          title: 'Confirm Order',
+          title: i18n.t('order.confirmOrder'),
           headerShown: true
         }}
       />
@@ -363,7 +363,7 @@ export function OrdersNavigator() {
       <OrdersStack.Screen
         name="MyOrders"
         component={MyOrdersScreen}
-        options={{ headerShown: true, title: 'My Orders' }}
+        options={{ headerShown: true, title: i18n.t('order.title') }}
       />
       <OrdersStack.Screen
         name="OrderDetails"
@@ -398,7 +398,7 @@ export function OrderStatusNavigator({ navigation, route }) {
               onPress={() => navigation.goBack()}
               style={{ padding: 10, marginLeft: 5 }}
               accessibilityRole="button"
-              accessibilityLabel="Go back"
+              accessibilityLabel={i18n.t("common.goBack")}
             >
               <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
@@ -428,14 +428,14 @@ export function SettingsSectionNavigator({ navigation }) {
         name="SettingsScreen"
         component={Settings}
         options={{
-          title: 'Settings',
+          title: i18n.t('settings.title'),
           headerShown: true,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.toggleDrawer()}
               style={{ padding: 10, marginLeft: 5 }}
               accessibilityRole="button"
-              accessibilityLabel="Open menu"
+              accessibilityLabel={i18n.t("common.openMenu")}
             >
               <Ionicons name="menu" size={24} color={colors.text.primary} />
             </TouchableOpacity>
@@ -446,7 +446,7 @@ export function SettingsSectionNavigator({ navigation }) {
         name="EditProfile"
         component={EditProfileScreen}
         options={{
-          title: 'Edit Profile',
+          title: i18n.t('profile.edit'),
           headerShown: true,
         }}
       />

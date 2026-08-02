@@ -54,7 +54,7 @@ export default function CheckoutScreen({ navigation, route }) {
           onPress={() => navigation.goBack()}
           style={{ padding: 10, marginLeft: 5 }}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={i18n.t('common.goBack')}
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
