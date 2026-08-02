@@ -16,7 +16,8 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function evaluateJson(ws, expression, { awaitPromise = false, timeoutMs = 60000 } = {}) {
+/** Fusebox CDP often ignores awaitPromise — fire async work, then poll a global. */
+async function evaluateJson(ws, expression, { timeoutMs = 30000 } = {}) {
   return new Promise((resolve, reject) => {
     const id = Math.floor(Math.random() * 1e6);
     const timer = setTimeout(() => reject(new Error(`Timeout CDP (${timeoutMs}ms)`)), timeoutMs);
@@ -46,9 +47,34 @@ async function evaluateJson(ws, expression, { awaitPromise = false, timeoutMs = 
     ws.send(JSON.stringify({
       id,
       method: 'Runtime.evaluate',
-      params: { expression, returnByValue: true, awaitPromise },
+      params: { expression, returnByValue: true },
     }));
   });
+}
+
+async function runAsyncViaPoll(ws, buildAsyncBody, { timeoutMs = 90000, pollMs = 1000 } = {}) {
+  const key = `__HERMES_E2E_POLL_${Date.now()}__`;
+  const keyLit = JSON.stringify(key);
+  const asyncBody = buildAsyncBody(keyLit);
+  await evaluateJson(ws, `(function(){
+    globalThis[${keyLit}] = { pending: true };
+    (async function(){
+      try {
+        ${asyncBody}
+      } catch (e) {
+        globalThis[${keyLit}] = { ok: false, error: String(e && e.message || e) };
+      }
+    })();
+    return JSON.stringify({ started: true });
+  })()`);
+
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await sleep(pollMs);
+    const state = await evaluateJson(ws, `JSON.stringify(globalThis[${keyLit}] || null)`);
+    if (state && state.pending !== true) return state;
+  }
+  throw new Error(`Timeout waiting for async CDP result (${timeoutMs}ms)`);
 }
 
 const READ_HOME_STATE = `(function(){
@@ -102,16 +128,14 @@ async function main() {
   const ws = await connectHermes();
   await installAutoOkAlerts(ws);
 
-  const loginExpr = `(async function(){
+  console.log('→ Hermes login via live API…');
+  const login = await runAsyncViaPoll(ws, (keyLit) => `
     if (typeof globalThis.__HERMES_E2E_LOGIN__ !== 'function') {
-      return JSON.stringify({ ok: false, error: 'login hook missing — rebuild debug app with hermesE2eHooks' });
+      throw new Error('login hook missing — rebuild debug app with hermesE2eHooks');
     }
     var result = await globalThis.__HERMES_E2E_LOGIN__(${JSON.stringify(EMAIL)}, ${JSON.stringify(PASSWORD)});
-    return JSON.stringify(result);
-  })()`;
-
-  console.log('→ Hermes login via live API…');
-  const login = await evaluateJson(ws, loginExpr, { awaitPromise: true, timeoutMs: 90000 });
+    globalThis[${keyLit}] = result;
+  `, { timeoutMs: 90000 });
   console.log('login:', login);
   if (!login || login.ok !== true) {
     ws.close();

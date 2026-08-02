@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local mirror of .github/workflows/buyer-smoke.yml (JS path only).
+# Local buyer smoke: install + Expo config + JS export (no remote API / no CI).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -33,4 +33,4 @@ npx expo export --platform android --output-dir "$OUT_ANDROID"
 echo "==> expo export ios"
 npx expo export --platform ios --output-dir "$OUT_IOS"
 
-echo "OK — buyer smoke passed (install + config + JS bundles)."
+echo "OK — local smoke passed (install + config + JS bundles)."

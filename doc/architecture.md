@@ -199,15 +199,19 @@ Env-driven via `EXPO_PUBLIC_*` (see `.env.example`):
 ## Scripts
 
 ```bash
-npm start
+npm run android   # first-time / native: install development build
 npm run ios
-npm run android
+npm start         # Metro only (dev client must already be installed)
 npm run web
 npm run lint
 npm run lint-fix
 ```
 
+**Not Expo Go** — requires `expo-dev-client` (see root README Quick start).
+
 Optional EAS: `eas.json` (bring your own Expo account).
+
+Hermes CDP login→home is run locally with `adb` + Metro against the buyer’s own API URL in `.env`.
 
 ---
 

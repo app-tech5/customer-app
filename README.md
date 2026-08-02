@@ -10,25 +10,24 @@ It talks to the **Good Food Pro REST API** (Express + MongoDB) for auth, restaur
 - Node.js **LTS** (20+ recommended)
 - npm
 - Expo CLI (`npx expo`)
-- Android Studio and/or Xcode for device builds
+- Android Studio and/or Xcode (native toolchain for the **development build**)
 - Running **backend** API (`http://localhost:5000/api` by default)
+
+**Expo Go is not supported.** This app uses a custom native stack (`expo-dev-client`, Stripe, MapLibre, etc.). You must install a **development build** once, then use Metro for day-to-day JS changes.
 
 ---
 
 ## Quick start
 
+1. Configure env and install JS deps:
+
 ```bash
 cd customer-app
 cp .env.example .env
 npm install
-npm start
 ```
 
-Then press `a` (Android) or `i` (iOS), or scan the QR code with Expo Go / your dev client.
-
-### Backend
-
-Start the suite backend first:
+2. Start the backend (required for live data):
 
 ```bash
 cd ../backend   # or my-backend, depending on your package layout
@@ -38,6 +37,23 @@ npm start
 ```
 
 Point `EXPO_PUBLIC_API_URL` in `.env` at your API (use your LAN IP instead of `localhost` on a physical device).
+
+3. **Build & install the development client** (first time, or after native dependency changes):
+
+```bash
+cd customer-app
+npm run android   # or: npm run ios
+```
+
+This runs `expo run:android` / `expo run:ios` and installs the Good Food Pro app on the emulator/device. Do **not** use Expo Go.
+
+4. For later sessions (native app already installed), only start Metro:
+
+```bash
+npm start
+```
+
+Then open the **Good Food Pro** app already on the device/emulator (or press `a` / `i` if Expo can resolve your installed development build).
 
 ---
 
@@ -101,22 +117,20 @@ customer-app/
 ## Scripts
 
 ```bash
-npm start           # Expo dev server
-npm run android     # Build & run Android
-npm run ios         # Build & run iOS
+npm start           # Metro only (requires an installed development build)
+npm run android     # Build, install, and run the Android development client
+npm run ios         # Build, install, and run the iOS development client
 npm run web         # Web (limited)
 npm run lint        # ESLint
 npm run lint-fix   # ESLint auto-fix
 npm run smoke       # Local: Node 20+, npm ci, Expo config, JS export
 npm run ci:hermes   # Local: hermesc on an existing export dir (default ./dist)
+npm run test:hermes:smoke  # Hermes CDP login→home (Metro + debug app + adb)
 ```
 
-CI (GitHub Actions) is **split**:
-1. **Buyer smoke** — JS export artifact → Hermes bytecode check + live API curl  
-2. **E2E Hermes** — build debug APK **once** (artifact) → emulator + Metro + Hermes CDP login→home  
-   On a Hermes failure, re-run only the Hermes job (no APK rebuild).
-
 Optional EAS builds: configure your own Expo account, then use `eas.json`.
+
+Hermes login→home: run locally with your backend URL in `.env`, `adb`, Metro, then `npm run test:hermes:smoke`.
 
 ---
 
@@ -136,6 +150,8 @@ Optional EAS builds: configure your own Expo account, then use `eas.json`.
 
 | Issue | Fix |
 |-------|-----|
+| Expo Go / QR only | Install the development build: `npm run android` or `npm run ios` |
+| `unable to resolve Intent` / `exp+…://` | Development build missing or built with a different `slug`/`scheme` — rebuild with `npm run android` |
 | Network request failed | Start backend; check `EXPO_PUBLIC_API_URL` |
 | Demo user missing | Run backend migrations / demo seed |
 | Maps blank | Check network / OSM tiles; location permission for nearby |

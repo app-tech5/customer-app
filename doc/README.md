@@ -30,5 +30,8 @@ Technical notes for developers working on this app. For install and first run, s
 ```bash
 cp .env.example .env
 npm install
-npm start
+npm run android   # first time: install development build (not Expo Go)
+npm start         # later: Metro only
 ```
+
+See the root [`README.md`](../README.md) Quick start for the full flow.
