@@ -37,27 +37,6 @@ Additional module-level docs:
 
 ---
 
-## 📋 Updates History
-
-### 📅 By Month
-
-#### [2025-01] - Demo Mode + Internationalization
-**File:** [`2025-01-updates.md`](./2025-01-updates.md)
-- ✅ **Demo mode**: Automatic login (`demo@customer.com`)
-- ✅ **Complete internationalization**: French/English with auto-detection
-- ✅ **Technical fixes**: Dependencies conflicts resolution, i18n errors
-- ✅ **Functional API**: User route added, no 404 errors
-
-### 📚 Major Versions
-
-#### Historical migration (Firebase → REST API)
-**File:** [`migration-api-firebase.md`](./migration-api-firebase.md)
-- Record of moving from Firebase to the custom REST API
-- JWT, MongoDB, and related client changes
-- Navigation and import fixes from that period
-
----
-
 ## 🚀 Quick Start
 
 ### Current Stack

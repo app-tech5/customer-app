@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Good Foods",
+    "name": "Good Food Customer",
     "icon": "./assets/images/logo512.png",
     "splash": {
       "image": "./assets/images/splash-screen.png",
@@ -8,7 +8,7 @@
       "backgroundColor": "#ffffff"
     },
     "version": "1.1.0",
-    "slug": "good-foods-slug1",
+    "slug": "good-food-customer",
     "scheme": "goodfoods",
     "ios": {
       "bundleIdentifier": "com.goodfoods.goodfoods",
@@ -38,11 +38,6 @@
           "merchantIdentifier": "merchant.com.goodfoods.goodfoods"
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "7a507df9-b5a4-4b0f-b3b0-2c4c051455b5"
-      }
-    }
+    ]
   }
 }
