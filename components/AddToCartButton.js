@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Feather } from '@expo/vector-icons'
 import { colors } from '../global'
 import { addToCart as addToCartAPI } from '../api'
-import i18n from '../../lang/i18n'
+import i18n from '../lang/i18n'
 
 export default function AddToCartButton({ food, restaurant, style }) {
   if (!food) {
