@@ -50,7 +50,6 @@ project.xcworkspace
 # Author / local tooling (not for buyers)
 .maestro/
 scripts/screenshots/
-scripts/hermes/
 .vscode/
 coverage/
 *.log

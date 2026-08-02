@@ -112,11 +112,9 @@ npm run ci:hermes   # Local: hermesc on an existing export dir (default ./dist)
 ```
 
 CI (GitHub Actions) is **split**:
-1. **Build JS bundles** (`expo export`) → artifact  
-2. **Hermes compile** reuses that artifact (no rebuild on Hermes failure)  
-3. **Live API smoke** (login + restaurants) runs in parallel  
-
-No Android emulator / Maestro in this pipeline.
+1. **Buyer smoke** — JS export artifact → Hermes bytecode check + live API curl  
+2. **E2E Hermes** — build debug APK **once** (artifact) → emulator + Metro + Hermes CDP login→home  
+   On a Hermes failure, re-run only the Hermes job (no APK rebuild).
 
 Optional EAS builds: configure your own Expo account, then use `eas.json`.
 

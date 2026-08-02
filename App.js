@@ -1,3 +1,4 @@
+import './utils/hermesAutoOkAlerts';
 import RootNavigation from "./navigation/navigation";
 import {useFonts} from 'expo-font'
 import { useEffect } from 'react';

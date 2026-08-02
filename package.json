@@ -15,7 +15,9 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "smoke": "bash scripts/buyer-smoke.sh",
-    "ci:hermes": "bash scripts/ci/hermes-compile-bundle.sh"
+    "ci:hermes": "bash scripts/ci/hermes-compile-bundle.sh",
+    "test:hermes": "node scripts/hermes/run-all.js",
+    "test:hermes:smoke": "node scripts/hermes/smoke-login-home.js"
   },
   "dependencies": {
     "@expo-google-fonts/roboto": "^0.2.3",
@@ -54,7 +56,8 @@
     "react-redux": "^9.0.0",
     "redux": "^5.0.0",
     "redux-persist": "^6.0.0",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "ws": "^8.21.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

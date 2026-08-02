@@ -1,0 +1,163 @@
+# Build debug APK ONCE (artifact) → Hermes CDP E2E on emulator (re-runnable without rebuild).
+# Live API. Emulator is intentional. Rebuild only when native/JS shell must change.
+name: E2E Hermes
+
+on:
+  push:
+    branches: [codecanyon-sources, main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-hermes-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  EXPO_PUBLIC_API_URL: https://good-foods.digitaldienste.fr/api
+  EXPO_PUBLIC_DEMO_MODE: "true"
+  EXPO_PUBLIC_DEMO_EMAIL: demo@customer.com
+  EXPO_PUBLIC_DEMO_PASSWORD: demo123
+
+jobs:
+  build-debug-apk:
+    name: Build Android debug APK (artifact)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Write .env (baked into Metro later; debug APK is shell only)
+        run: |
+          cat > .env <<EOF
+          EXPO_PUBLIC_API_URL=${{ env.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_DEMO_MODE=true
+          EXPO_PUBLIC_DEMO_EMAIL=demo@customer.com
+          EXPO_PUBLIC_DEMO_PASSWORD=demo123
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+          EXPO_PUBLIC_MAPTILER_API_KEY=
+          EOF
+          sed -i 's/^[[:space:]]*//' .env
+      - run: npm ci
+      - name: Patch ABI for CI emulator (x86_64)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/build.gradle")
+          t = p.read_text()
+          t2 = t.replace('include "arm64-v8a"', 'include "x86_64"')
+          if t == t2:
+              raise SystemExit("ABI patch failed")
+          p.write_text(t2)
+          print("ABI -> x86_64")
+          PY
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: gradle-debug-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'package-lock.json') }}
+      - name: Assemble debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 3
+
+  hermes-login-home:
+    name: Hermes login→home (reuse APK)
+    needs: build-debug-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Write .env for Metro
+        run: |
+          cat > .env <<EOF
+          EXPO_PUBLIC_API_URL=${{ env.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_DEMO_MODE=true
+          EXPO_PUBLIC_DEMO_EMAIL=demo@customer.com
+          EXPO_PUBLIC_DEMO_PASSWORD=demo123
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+          EXPO_PUBLIC_MAPTILER_API_KEY=
+          EOF
+          sed -i 's/^[[:space:]]*//' .env
+      - run: npm ci
+      - name: Download debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-debug-apk
+          path: apk-out
+      - name: Locate APK
+        id: apk
+        run: |
+          APK=$(find apk-out -name '*.apk' | head -n 1)
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          ls -lh "$APK"
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Emulator + Metro + Hermes smoke
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          force-avd-creation: true
+          disable-animations: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            set -euo pipefail
+            adb install -r "${{ steps.apk.outputs.apk }}"
+            adb reverse tcp:8081 tcp:8081
+            npx expo start --port 8081 --localhost > /tmp/metro.log 2>&1 &
+            METRO_PID=$!
+            echo "Metro PID $METRO_PID"
+            for i in $(seq 1 90); do
+              if curl -sf http://127.0.0.1:8081/status >/dev/null; then
+                echo "Metro ready"
+                break
+              fi
+              sleep 2
+            done
+            curl -sf http://127.0.0.1:8081/status >/dev/null
+            adb shell am start -n com.goodfoods.goodfoods/.MainActivity
+            for i in $(seq 1 60); do
+              if curl -sf http://127.0.0.1:8081/json/list | grep -q webSocketDebuggerUrl; then
+                echo "Hermes CDP target ready"
+                break
+              fi
+              sleep 3
+            done
+            curl -sf http://127.0.0.1:8081/json/list | head -c 500 || true
+            node scripts/hermes/smoke-login-home.js
+            kill $METRO_PID || true
+      - name: Upload Metro log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metro-log
+          path: /tmp/metro.log
+          if-no-files-found: ignore

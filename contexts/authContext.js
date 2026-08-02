@@ -1,6 +1,6 @@
-import React, {createContext, useEffect, useReducer, useState} from 'react'
-import SignInReducer from '../redux/reducers/SignInReducer'
+import React, {createContext, useEffect, useState} from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { installHermesE2eAuthHooks } from '../utils/hermesE2eHooks'
 
 export const SignInContext = createContext()
 
@@ -21,6 +21,12 @@ export const SignInContextProvider = (props)=>{
         };
 
         initializeAuthState();
+    }, []);
+
+    useEffect(() => {
+        if (__DEV__) {
+            installHermesE2eAuthHooks(setSignedIn)
+        }
     }, []);
 
     return (
