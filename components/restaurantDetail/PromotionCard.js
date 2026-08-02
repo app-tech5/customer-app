@@ -74,14 +74,12 @@ export default function PromotionCard({ promotion }) {
         <Text style={[styles.title, { color: display.color }]}>{display.title}</Text>
         <Text style={styles.subtitle}>{display.subtitle}</Text>
 
-        {}
         {promotion.minOrderAmount && (
           <Text style={styles.condition}>
             {i18n.t('promotion.minOrder', { price: formatPrice(promotion.minOrderAmount) })}
           </Text>
         )}
 
-        {}
         <Text style={styles.expiry}>
           {formatEndDate(promotion.endDate)}
         </Text>

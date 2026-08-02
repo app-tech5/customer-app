@@ -33,6 +33,7 @@ import AddCard from '../screens/AddCard'
 import AddMoneyScreen from '../screens/AddMoneyScreen'
 import Settings from '../screens/Settings'
 import { colors } from '../global'
+import i18n from '../lang/i18n'
 
 const HomeStack = createStackNavigator()
 
@@ -69,7 +70,7 @@ export function HomeNavigator() {
         name="CartDetails"
         component={CartDetailsScreen}
         options={{
-          title: 'Détails du panier',
+          title: i18n.t('cart.detailsTitle'),
           headerShown: true
         }} />
 
@@ -155,7 +156,7 @@ export function AccountNavigator() {
         name="CartDetails"
         component={CartDetailsScreen}
         options={{
-          title: 'Détails du panier',
+          title: i18n.t('cart.detailsTitle'),
           headerShown: true,
         }}
       />

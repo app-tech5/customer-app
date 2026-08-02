@@ -99,7 +99,6 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
           }
         ]}
       >
-        {}
         <View style={styles.iconContainer}>
           <Ionicons
             name="search"
@@ -108,7 +107,6 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
           />
         </View>
 
-        {}
         <TextInput
           style={styles.input}
           placeholder={i18n.t('home.searchPlaceholder')}
@@ -125,9 +123,7 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
           maxLength={50}
         />
 
-        {}
         <View style={styles.actionsContainer}>
-          {}
           {searchPhrase.length > 0 && (
             <TouchableOpacity
               style={styles.actionButton}
@@ -142,14 +138,12 @@ const SearchComponent = ({clicked, searchPhrase, setSearchPhrase, setCLicked, on
             </TouchableOpacity>
           )}
 
-          {}
           {isFocused && (
             <View style={[styles.focusIndicator, { backgroundColor: colors.primary }]} />
           )}
         </View>
       </Animated.View>
 
-      {}
       {showSuggestions && (
         <Animated.View
           style={[

@@ -106,7 +106,6 @@ export default function NearMeScreen({ route, navigation }) {
         </Text>
       </View>
 
-      {}
       <View style={styles.distanceControls}>
         <Text style={styles.distanceLabel}>{i18n.t('search.distance', 'Distance')}:</Text>
         <View style={styles.distanceButtons}>
@@ -130,7 +129,6 @@ export default function NearMeScreen({ route, navigation }) {
         </View>
       </View>
 
-      {}
       {userLocation && (
         <View style={styles.locationIndicator}>
           <Ionicons name="location" size={16} color={colors.primary} />
@@ -192,7 +190,6 @@ export default function NearMeScreen({ route, navigation }) {
                 city={item.city}
                 distance={item.distance}
               />
-              {}
               <View style={styles.distanceBadge}>
                 <Ionicons name="location" size={12} color="#4CAF50" />
                 <Text style={styles.distanceBadgeText}>

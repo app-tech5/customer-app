@@ -234,7 +234,6 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
 
   return (
     <View style={{ flex: 1, }} >
-      {}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={20} />
@@ -253,7 +252,6 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         </View>
       </View>
 
-      {}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -285,7 +283,6 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         ))}
       </ScrollView>
 
-      {}
       {filteredFoods.length === 0 && foods.length > 0 && (
         <View style={styles.noResultsContainer}>
           <Icon name="magnify" type="material-community" color={colors.text.secondary} size={48} />
@@ -303,7 +300,6 @@ export default function MenuItems({ route, restaurant, activeTab, marginLeft, na
         </View>
       )}
 
-      {}
       {filteredFoods.length > 0 && (categories && categories.length > 0 ? (
         <FlatList
           ref={foodsRef}

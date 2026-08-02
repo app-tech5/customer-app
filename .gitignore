@@ -52,7 +52,7 @@ project.xcworkspace
 .github/
 scripts/screenshots/
 scripts/hermes/
-.vscode/.react/
+.vscode/
 coverage/
 *.log
 

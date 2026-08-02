@@ -124,12 +124,10 @@ export default function Checkout({ restaurantName, setLoader: _setLoader, setVie
                       }}
                       activeOpacity={0.9}
                   >
-                      {}
                       <View style={styles.iconContainer}>
                           <Ionicons name="card" size={24} color="white" />
                       </View>
 
-                      {}
                       <View style={styles.textContainer}>
                           <Text style={styles.checkoutTitle}>{i18n.t('cart.checkout')}</Text>
                           <Text style={styles.checkoutSubtitle}>
@@ -137,7 +135,6 @@ export default function Checkout({ restaurantName, setLoader: _setLoader, setVie
                           </Text>
                       </View>
 
-                      {}
                       <View style={styles.priceContainer}>
                           <Text style={styles.checkoutTotal}>
                               {total ? total.toLocaleString(language, { style: "currency", currency: currency }) : ""}

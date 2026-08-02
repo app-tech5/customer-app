@@ -347,7 +347,6 @@ export default function EditProfileScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {}
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
               <Image
@@ -373,7 +372,6 @@ export default function EditProfileScreen({ navigation }) {
             </Text>
           </View>
 
-          {}
           <View style={styles.formContainer}>
             <ProfileFormField
               icon="person"
@@ -413,7 +411,6 @@ export default function EditProfileScreen({ navigation }) {
             />
           </View>
 
-          {}
           {JSON.stringify(userData) !== JSON.stringify(originalData) && (
             <View style={styles.saveButtonContainer}>
               <TouchableOpacity

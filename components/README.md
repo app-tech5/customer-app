@@ -36,10 +36,7 @@ Components used on the restaurant detail and menu flow.
 |-----------|------|---------|
 | **MenuItems** | Menu list with categories, search, cache; uses AddToCartButton | RestaurantDetail |
 | **ViewCart** | Floating “View cart” bar (count, total, navigate to cart) | RestaurantDetail, MenuDetailScreen |
-| **RestaurantDetailHeader** | Restaurant hero / header | – |
-| **TabviewComponent** | Tabs (e.g. Menu / About / Reviews) | – |
 | **About** | About section | – |
-| **MenuDetailItems** | Detail view for a menu item | – |
 | **OrderItem** | Single order line item | – |
 | **ReviewCard** | One review card | RestaurantDetail |
 | **PromotionCard** | One promotion card | RestaurantDetail |
@@ -60,21 +57,9 @@ Components used on the restaurant detail and menu flow.
 | **PreferenceScreen** | User preferences screen (can be used as a screen) | Stacks (navigation) |
 | **PromotionBadge** | Badge for promotion/discount on a card | RestaurantItems |
 | **Reward** | Reward indicator on restaurant card | RestaurantsMapScreen |
-| **OrderListItem** | One order in a list | Orders screens |
-| **DishListItem** | One dish line | – |
 | **BackButton** | Back navigation button | MenuDetailScreen |
-| **Loading** | Full-screen overlay with Lottie (waiting-pendulum) | Used where a global loading state is shown |
-| **List** | Generic list wrapper | – |
-| **Size** | Size selector (e.g. for variants) | – |
-| **GroupFoodHeader** | Section header for grouped menu items | – |
 | **RestaurantName** | Restaurant name display | – |
 | **RestaurantDescription** | Restaurant description | – |
-| **DisplayPreferences** | Display prefs UI | – |
-| **DisplayMapview** | Map view wrapper | – |
-| **ProgressComponent** | Progress indicator | – |
-| **OrderCountDown** | Countdown for order ETA | – |
-| **CookingProgress** | Cooking status progress | – |
-| **MaxDeliveryFee** | Max delivery fee display/filter | – |
 
 ## Conventions
 

@@ -11,11 +11,10 @@ export const assetUrls = {
     cart: 'https://img.icons8.com/fluency/344/shopping-cart.png',
   },
   avatars: {
-    default:
-      'https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png',
+    default: 'https://via.placeholder.com/120x120/cccccc/666666?text=User',
   },
   demo: {
-    // Generic food placeholder for preference / demo UI samples
-    preferenceRestaurant: 'https://via.placeholder.com/800x400/2E1437/FFFFFF?text=Good+Food',
+    preferenceRestaurant:
+      'https://via.placeholder.com/800x400/2E1437/FFFFFF?text=Good+Food',
   },
 };

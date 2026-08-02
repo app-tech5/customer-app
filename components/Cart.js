@@ -196,7 +196,6 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                 ]}
             >
                 <TouchableOpacity activeOpacity={1} onPress={() => {}} style={{flex: 1}}>
-                    {}
                     <View style={styles.header}>
                         <View style={styles.headerLeft}>
                             <Ionicons name="basket" size={24} color={colors.primary} />
@@ -207,7 +206,6 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                         </TouchableOpacity>
                     </View>
 
-                    {}
                     <ScrollView
                         style={styles.itemsContainer}
                         showsVerticalScrollIndicator={false}
@@ -222,7 +220,6 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                         ) : (
                             groupedItems.map((item, _index) => (
                                 <View key={item.id} style={styles.itemContainer}>
-                                    {}
                                     {item.image && (
                                         <View style={styles.itemImageContainer}>
                                             <Image
@@ -262,7 +259,6 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                                         </TouchableOpacity>
                                     </View>
 
-                                    {}
                                     <TouchableOpacity
                                         onPress={() => updateItemQuantity(item.id, 0)}
                                         style={styles.removeButton}
@@ -274,10 +270,8 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                         )}
                     </ScrollView>
 
-                    {}
                     {groupedItems.length > 0 && (
                         <View style={styles.footer}>
-                            {}
                             <View style={styles.costBreakdown}>
                                 <View style={styles.costRow}>
                                     <Text style={styles.costLabel}>{i18n.t('cart.subtotal')}</Text>

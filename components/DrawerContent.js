@@ -52,7 +52,6 @@ export default function DrawerContent(props) {
   return (
     <SafeAreaView style={styles.container}>
         <DrawerContentScrollView {...props} contentContainerStyle={styles.scrollContainer}>
-            {}
             <View style={styles.header}>
                 <View style={styles.profileContainer}>
                     <Avatar
@@ -68,13 +67,11 @@ export default function DrawerContent(props) {
                 <Divider style={styles.divider} />
             </View>
 
-            {}
             <View style={styles.menuContainer}>
                 <DrawerItemList {...props} state={drawerState} />
             </View>
         </DrawerContentScrollView>
 
-        {}
         <View style={styles.footer}>
             <Divider style={styles.divider} />
             <DrawerItem

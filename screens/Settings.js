@@ -157,7 +157,6 @@ export default function Settings({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 24 }}
       >
-        {}
         <SettingSection title={i18n.t('settings.account', 'Account')}>
           <SettingItem
             icon="person"
@@ -177,7 +176,6 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {}
         <SettingSection title={i18n.t('settings.preferences', 'Preferences')}>
           <SettingItem
             icon="language"
@@ -236,7 +234,6 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {}
         <SettingSection title={i18n.t('settings.privacySecurity', 'Privacy & Security')}>
           <SettingItem
             icon="lock-closed"
@@ -270,7 +267,6 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {}
         <SettingSection title={i18n.t('settings.communication', 'Communication')}>
           <SettingItem
             icon="mail"
@@ -291,7 +287,6 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {}
         <SettingSection title={i18n.t('profile.help', 'Help & Support')}>
           <SettingItem
             icon="help-circle"
@@ -318,7 +313,6 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {}
         <SettingSection title={i18n.t('profile.about', 'About')}>
           <SettingItem
             icon="information-circle"
@@ -339,7 +333,6 @@ export default function Settings({ navigation }) {
           />
         </SettingSection>
 
-        {}
         <View style={styles.logoutSection}>
           <TouchableOpacity
             style={styles.logoutButton}

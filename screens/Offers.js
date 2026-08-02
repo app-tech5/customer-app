@@ -339,7 +339,6 @@ export default function Offers({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.headerButton}
@@ -372,7 +371,6 @@ export default function Offers({ navigation }) {
         </View>
       </View>
 
-      {}
       <View style={styles.categoriesContainer}>
         <FlatList
           data={offerCategories}
@@ -384,7 +382,6 @@ export default function Offers({ navigation }) {
         />
                </View>
 
-      {}
       <View style={styles.sortContainer}>
         <Text style={styles.sortLabel}>{i18n.t('offers.sortBy')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -413,7 +410,6 @@ export default function Offers({ navigation }) {
           </ScrollView>
     </View>
 
-      {}
       {filteredOffers.length > 0 ? (
         <FlatList
           data={filteredOffers}

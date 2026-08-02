@@ -22,35 +22,6 @@ import { filterRestaurantPromotions } from './promotions';
 
 export const api = new ApiClient();
 
-export const auth = {
-  currentUser: null,
-  signOut: () => api.logout(),
-};
-
-export const db = {};
-export const storage = {};
-
-export const signInWithEmailAndPassword = async (authInstance, email, password) => {
-  const result = await api.login(email, password);
-  authInstance.currentUser = { uid: result.user.id, email: result.user.email };
-  return { user: authInstance.currentUser };
-};
-
-export const createUserWithEmailAndPassword = async (authInstance, email, password) => {
-  const result = await api.register({ email, password });
-  authInstance.currentUser = { uid: result.user.id, email: result.user.email };
-  return { user: authInstance.currentUser };
-};
-
-export const onAuthStateChanged = (authInstance, callback) => {
-  if (api.user) {
-    authInstance.currentUser = { uid: api.user.id, email: api.user.email };
-    callback(authInstance.currentUser);
-  } else {
-    callback(null);
-  }
-};
-
 export const refreshToken = () => api.refreshToken();
 export const requestPasswordReset = (email) =>
   api.requestPasswordReset(email);
@@ -185,10 +156,6 @@ export const addMoneyToWallet = (transactionData) =>
   api.addMoneyToWallet(transactionData);
 export const recordOrderPayment = (payload) => api.recordOrderPayment(payload);
 export const updatePaymentMethod = (paymentMethodId, paymentMethodData) =>
-  api.updatePaymentMethod(paymentMethodId, paymentMethodData);      
-export const restaurantsCol = 'restaurants';
-export const categoriesCol = 'categories';
-export const ordersCol = 'orders';
-export const userRef = 'users';
+  api.updatePaymentMethod(paymentMethodId, paymentMethodData);
 
 export default api;

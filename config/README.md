@@ -1,45 +1,38 @@
 # Config (customer-app)
 
-Application configuration and shared non-UI constants.
+Runtime settings and shared non-theme constants.
 
 ## Files
 
 | File | Exports | Purpose |
 |------|---------|---------|
-| `index.js` | `config`, `assetUrls`, `PUBLIC_UPLOAD_FOLDERS` | Runtime settings |
+| `index.js` | `config`, `assetUrls`, `PUBLIC_UPLOAD_FOLDERS` | Main configuration |
 | `assets.js` | `assetUrls` | Placeholder / demo image URLs |
 
-Import with:
-
-```js
-import { config } from '../config';
-```
-
-## `config` keys
+## `config` (`index.js`)
 
 | Key | Meaning |
 |-----|---------|
-| `API_BASE_URL` | Backend API base (`EXPO_PUBLIC_API_URL`) |
+| `API_BASE_URL` | Backend API base URL |
 | `APP_NAME` | Display name |
-| `VERSION` | App version label |
-| `DEMO_MODE` | Prefill demo login when not `false` |
+| `VERSION` | App version string |
+| `DEMO_MODE` | Prefill demo login when true |
 | `DEMO_EMAIL` / `DEMO_PASSWORD` | Demo credentials |
 | `FALLBACK_STRIPE_PUBLISHABLE_KEY` | Stripe key fallback |
-| `MAPTILER_API_KEY` | Maps key |
-| `assetUrls` | Central remote/local asset URLs |
+| `MAPTILER_API_KEY` | MapTiler key |
+| `API_TIMEOUT` | Request timeout (ms) |
+| `assetUrls` | See `assets.js` |
 
-Copy `.env.example` to `.env` and set `EXPO_PUBLIC_*` values for your environment.
+Values come from `EXPO_PUBLIC_*` (see `.env.example`).
+
+```bash
+cp .env.example .env
+# edit EXPO_PUBLIC_API_URL for your backend
+```
 
 ## `assetUrls`
 
-Groups:
-
-- `placeholder.*` — image placeholders
-- `icons.*` — icon URLs
-- `avatars.*` — default avatar
-- `demo.*` — demo-only images (e.g. Preference screen)
-
-Prefer updating URLs here instead of hardcoding them in screens.
+Remote placeholders used when a local image is missing. Prefer updating keys here rather than hardcoding URLs in screens.
 
 ## Not in this folder
 

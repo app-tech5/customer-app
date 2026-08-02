@@ -182,7 +182,6 @@ const CartDetailsScreen = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {}
                 <View style={styles.restaurantHeader}>
                     <View style={styles.restaurantInfo}>
                         <Ionicons name="restaurant" size={24} color={colors.primary} />
@@ -195,7 +194,6 @@ const CartDetailsScreen = () => {
                     )}
                 </View>
 
-                {}
                 <View style={styles.itemsSection}>
                     <Text style={styles.sectionTitle}>{i18n.t('cart.items')}</Text>
 
@@ -214,7 +212,6 @@ const CartDetailsScreen = () => {
                     ) : (
                         groupedItems.map((item, index) => (
                             <View key={item.id} style={styles.itemContainer}>
-                                {}
                                 {item.image && (
                                     <View style={styles.itemImageContainer}>
                                         <Image
@@ -284,7 +281,6 @@ const CartDetailsScreen = () => {
                     )}
                 </View>
 
-                {}
                 {groupedItems.length > 0 && (
                     <View style={styles.summarySection}>
                         <Text style={styles.sectionTitle}>{i18n.t('cart.orderSummary')}</Text>
@@ -318,7 +314,6 @@ const CartDetailsScreen = () => {
                             </View>
                         </View>
 
-                        {}
                         {restaurant && (
                             <View style={styles.deliveryInfo}>
                                 <View style={styles.deliveryRow}>
@@ -336,7 +331,6 @@ const CartDetailsScreen = () => {
                             </View>
                         )}
 
-                        {}
                         <View style={styles.actionButtons}>
                             <TouchableOpacity
                                 onPress={removeAllItems}

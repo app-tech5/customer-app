@@ -84,7 +84,6 @@ function FilterModalContent({setVisible, onApplyFilters}) {
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContent}>
-                {}
                 <SectionTitle text={i18n.t('filters.sortBy')} />
                 <View style={styles.filterGroup}>
                   <FilterOption
@@ -124,7 +123,6 @@ function FilterModalContent({setVisible, onApplyFilters}) {
                   />
                 </View>
 
-                {}
                 <SectionTitle text={i18n.t('filters.maxDeliveryFee')} />
                 <View style={styles.deliveryFeeContainer}>
                   <View style={styles.deliveryFeeOptions}>
@@ -148,7 +146,6 @@ function FilterModalContent({setVisible, onApplyFilters}) {
                   </View>
                 </View>
 
-                {}
                 <SectionTitle text={i18n.t('filters.priceRange')} />
                 <View style={styles.priceRangeContainer}>
                   {[
@@ -175,7 +172,6 @@ function FilterModalContent({setVisible, onApplyFilters}) {
                   ))}
                 </View>
 
-                {}
                 <SectionTitle text={i18n.t('filters.cuisineType')} />
                 <View style={styles.filterGroup}>
                   {[
@@ -197,7 +193,6 @@ function FilterModalContent({setVisible, onApplyFilters}) {
                   ))}
                 </View>
 
-                {}
                 <SectionTitle text={i18n.t('filters.features')} />
                 <View style={styles.filterGroup}>
                   <FilterOption

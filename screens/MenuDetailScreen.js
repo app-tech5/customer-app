@@ -177,7 +177,6 @@ export default function MenuDetailScreen({route}) {
 
   return (
     <>
-      {}
       <BackButton
         onPress={() => navigation.goBack()}
         backgroundColor="rgba(0, 0, 0, 0.6)"
@@ -185,7 +184,6 @@ export default function MenuDetailScreen({route}) {
       />
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {}
         <View style={styles.imageContainer}>
           <Image
             source={currentImage}
@@ -196,7 +194,6 @@ export default function MenuDetailScreen({route}) {
           />
           <View style={styles.imageOverlay} />
 
-          {}
           <View style={[styles.availabilityBadge, { backgroundColor: menu.availability !== false ? colors.success : colors.error }]}>
             <MaterialIcons
               name={menu.availability !== false ? "check-circle" : "cancel"}
@@ -209,11 +206,9 @@ export default function MenuDetailScreen({route}) {
           </View>
         </View>
 
-        {}
         <View style={styles.section1}>
           <Text style={styles.title}>{menu.name}</Text>
 
-          {}
           <View style={styles.priceContainer}>
             {menu.discount?.isActive && priceInfo.discountPercentage > 0 ? (
               <>
@@ -236,7 +231,6 @@ export default function MenuDetailScreen({route}) {
             )}
           </View>
 
-          {}
           <View style={styles.metaContainer}>
             {menu.rating && menu.rating.average > 0 && (
               <View style={styles.ratingContainer}>
@@ -260,7 +254,6 @@ export default function MenuDetailScreen({route}) {
 
         <View style={styles.divider1} />
 
-        {}
         {menu.ingredients && menu.ingredients.length > 0 && (
           <View style={styles.section2}>
             <View style={styles.sectionHeader}>
@@ -274,7 +267,6 @@ export default function MenuDetailScreen({route}) {
           </View>
         )}
 
-        {}
         {menu.variants && menu.variants.length > 0 && (
           <View style={styles.section2}>
             <View style={styles.sectionHeader}>
@@ -286,7 +278,6 @@ export default function MenuDetailScreen({route}) {
               </View>
             </View>
             <View style={styles.variantsList}>
-              {}
               {menu.variants.map((variant, index) => {
                 
                 const variantId = variant.value || variant._id || `variant-${index}`
@@ -299,7 +290,6 @@ export default function MenuDetailScreen({route}) {
                         <Text style={styles.variantName}>{variant.label}</Text>
                         <Text style={styles.variantType}>{i18n.t('menu.customizableOption')}</Text>
                       </View>
-                      {}
                       {(() => {
                         
                         const variantInfo = variantDetails[variantId]
@@ -341,7 +331,6 @@ export default function MenuDetailScreen({route}) {
           </View>
         )}
 
-        {}
         <View style={styles.section3}>
           <Text style={styles.title1}>{i18n.t('menu.productDetails')}</Text>
 
@@ -379,7 +368,6 @@ export default function MenuDetailScreen({route}) {
             )}
           </View>
 
-          {}
           <View style={styles.ctaContainer}>
             <Text style={styles.ctaText}>
               {i18n.t('menu.ctaText')}
@@ -387,7 +375,6 @@ export default function MenuDetailScreen({route}) {
           </View>
         </View>
 
-        {}
         <View style={styles.cartButtonContainer}>
           <AddToCartButton food={foodForCart} restaurant={restaurant} />
         </View>

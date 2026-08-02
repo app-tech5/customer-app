@@ -355,16 +355,12 @@ export default function WalletScreen({ navigation, route}) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {}
         <BalanceCard />
 
-        {}
         <PaymentMethodsSection />
 
-        {}
         <RecentTransactionsSection />
 
-        {}
         <PromoSection />
       </ScrollView>
     </SafeAreaView>

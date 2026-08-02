@@ -10,11 +10,11 @@ This file maps **namespaces** (and representative keys) to **files** in customer
 - **navigation.***, **drawer.*** – DrawerNavigator, DrawerContent (menu labels, home, search, map, offers, my orders, account, wallet, favorites, settings, logout).
 - **search.*** – SearchScreen, SearchResults, RestaurantsMapScreen, NearMeScreen, CategoryResults, ItemResults, SearchComponent, home/SearchBar, home/HeaderTabs. Keys: placeholders, noResults, loading, categories, distance, list, map, etc.
 - **filters.*** – FilterModal (title, sortBy, maxDeliveryFee, priceRange, cuisine, features, apply).
-- **auth.*** – SignIn, SignUp, FormElement (email, password, placeholders, errors, login, register).
+- **auth.*** – SignIn, SignUp (email, password, placeholders, errors, login, register).
 - **home.*** – Home, RestaurantsMapScreen, Offers (title, subtitle, sections, nearby, popular, categories).
 - **restaurant.*** – RestaurantDetail, RestaurantDetailComponent, restaurantDetail/MenuItems, ViewCart, ReviewCard, PromotionCard, About (menu, reviews, addToCart, viewCart, total, deliveryTime, rating, etc.).
 - **menu.*** – MenuDetailScreen, restaurantDetail/MenuItems (product, options, ingredients, category, customization).
-- **order.*** – OrderRequest, OrderTracking, OrderDetails, OrdersScreen, MyOrdersScreen, OrderListItem, OrderCountDown (placeOrder, tracking, status, details, reorder, empty state, filters).
+- **order.*** – OrderRequest, OrderTracking, OrderDetails, OrdersScreen, MyOrdersScreen (placeOrder, tracking, status, details, reorder, empty state, filters).
 - **wallet.*** – WalletScreen, Wallet (title, balance, payment methods, transactions, promo codes).
 - **profile.*** – AccountScreen, EditProfileScreen (title, edit, name, email, phone, save, updateSuccess, addresses, notifications).
 - **addresses.*** – AddressesScreen (title, add address, default, delete, tips).

@@ -61,7 +61,6 @@ export default function ReviewCard({ review }) {
         </Text>
       )}
 
-      {}
       {(review.foodQuality || review.deliveryTime || review.packaging) && (
         <View style={styles.detailsRow}>
           {review.foodQuality && (
@@ -85,7 +84,6 @@ export default function ReviewCard({ review }) {
         </View>
       )}
 
-      {}
       {review.photos && review.photos.length > 0 && (
         <View style={styles.photosRow}>
           {review.photos.slice(0, 3).map((photo, index) => (
@@ -103,7 +101,6 @@ export default function ReviewCard({ review }) {
         </View>
       )}
 
-      {}
       {review.reply && review.reply.text && (
         <View style={styles.replyContainer}>
           <Text style={styles.replyLabel}>{i18n.t('restaurant.reply')}</Text>

@@ -42,7 +42,6 @@ It is part of the Good Food suite (customer, restaurant, driver, admin) and uses
 ### Maps & Location
 | Package | Version | Purpose |
 |---------|---------|---------|
-| react-native-maps | 1.20.1 | Native map views |
 | @maplibre/maplibre-react-native | ^11.0.2 | MapLibre map rendering |
 | react-native-webview | ^13.16.1 | OpenStreetMap WebView fallback |
 | expo-location | ~19.0.0 | Device location |
@@ -56,7 +55,6 @@ It is part of the Good Food suite (customer, restaurant, driver, admin) and uses
 ### UI Components
 | Package | Version | Purpose |
 |---------|---------|---------|
-| @gorhom/bottom-sheet | ^4.6.4 | Bottom sheets |
 | react-native-reanimated | ~4.1.1 | Animations |
 | react-native-gesture-handler | ~2.28.0 | Gestures |
 | lottie-react-native | ~7.3.1 | Lottie animations |
@@ -71,7 +69,6 @@ customer-app/
 ├── App.js                    # Entry point
 ├── api/                      # API layer (ApiClient + endpoints)
 ├── config/                   # App configuration (runtime + asset URLs)
-├── config.js                 # Re-export for backward compatibility
 ├── global/                   # Global constants & theme tokens
 ├── lang/                     # i18n setup + translations
 │
@@ -151,7 +148,6 @@ customer-app/
 │       ├── cartReducer.js    # Cart state
 │       ├── userReducer.js    # User state
 │       ├── SignInReducer.js  # Auth state
-│       └── productsReducer.js # Products state
 │
 ├── lang/
 │   ├── i18n.js               # i18n-js instance + helpers

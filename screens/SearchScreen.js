@@ -106,7 +106,6 @@ export default function SearchScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {}
       <View style={styles.header}>
         <Menu navigation={navigation} />
         <SearchComponent
@@ -118,9 +117,7 @@ export default function SearchScreen({ navigation }) {
         />
       </View>
 
-      {}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {}
         {clicked && (
           <View style={styles.searchingIndicator}>
             <Text style={styles.searchingText}>
@@ -129,7 +126,6 @@ export default function SearchScreen({ navigation }) {
           </View>
         )}
 
-          {}
           <View style={styles.tabContainer}>
             <TouchableOpacity
               style={[styles.tab, activeTab === 'restaurants' && styles.activeTab]}
@@ -160,7 +156,6 @@ export default function SearchScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {}
           <View style={styles.quickActionsContainer}>
             <Text style={styles.sectionTitle}>{i18n.t('search.quickActions')}</Text>
             <View style={styles.quickActionsGrid}>
@@ -189,7 +184,6 @@ export default function SearchScreen({ navigation }) {
             </View>
           </View>
 
-          {}
           {recentSearches.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
@@ -213,7 +207,6 @@ export default function SearchScreen({ navigation }) {
             </View>
           )}
 
-          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{i18n.t('search.trendingSearches')}</Text>
             <View style={styles.trendingContainer}>
@@ -229,7 +222,6 @@ export default function SearchScreen({ navigation }) {
             </View>
           </View>
 
-          {}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{i18n.t('search.browseByCategory')}</Text>
             <FlatList

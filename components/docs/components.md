@@ -20,10 +20,7 @@ All components under `components/` with main props and where they are used. Scre
 |-----------|------------|---------|
 | MenuItems | – | RestaurantDetail |
 | ViewCart | – | RestaurantDetail, MenuDetailScreen |
-| RestaurantDetailHeader | – | – |
-| TabviewComponent | – | – |
 | About | – | – |
-| MenuDetailItems | – | – |
 | OrderItem | – | – |
 | ReviewCard | – | RestaurantDetail |
 | PromotionCard | – | RestaurantDetail |
@@ -60,28 +57,16 @@ All components under `components/` with main props and where they are used. Scre
 | RestaurantItems (root) | – | – |
 | PromotionBadge | – | RestaurantItems (home) |
 | Reward | – | RestaurantsMapScreen |
-| OrderListItem | – | Orders screens |
-| DishListItem | – | – |
 | SearchComponent | – | SearchScreen |
 | RestaurantName | – | – |
 | RestaurantDescription | – | – |
-| List | – | – |
-| Size | – | – |
-| GroupFoodHeader | – | – |
 
 ## Root – feedback & loading
 
 | Component | Main props | Used in |
 |-----------|------------|---------|
-| Loading | – | Where full-screen loading overlay is needed |
-| ProgressComponent | – | – |
-| OrderCountDown | – | – |
-| CookingProgress | – | – |
 
 ## Root – other
 
 | Component | Main props | Used in |
 |-----------|------------|---------|
-| DisplayPreferences | – | – |
-| DisplayMapview | – | – |
-| MaxDeliveryFee | – | – |

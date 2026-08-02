@@ -201,7 +201,6 @@ export default function CheckoutScreen({ navigation, route }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {}
         {restaurant && (
           <View style={styles.restaurantHeader}>
             <Text style={styles.restaurantName}>{restaurant.name}</Text>
@@ -211,7 +210,6 @@ export default function CheckoutScreen({ navigation, route }) {
           </View>
         )}
 
-        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -239,7 +237,6 @@ export default function CheckoutScreen({ navigation, route }) {
           )}
         </View>
 
-        {}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -272,7 +269,6 @@ export default function CheckoutScreen({ navigation, route }) {
           )}
         </View>
 
-        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.orderSummary', 'Order Summary')}
@@ -317,7 +313,6 @@ export default function CheckoutScreen({ navigation, route }) {
           </View>
         </View>
 
-        {}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             {i18n.t('checkout.specialInstructions', 'Special Instructions')}

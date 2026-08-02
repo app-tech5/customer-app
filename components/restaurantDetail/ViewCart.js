@@ -89,17 +89,14 @@ export default function ViewCart({ navigation: _navigation, route, params, deliv
                                 accessibilityRole="button"
                                 testID="view-cart-button"
                             >
-                                {}
                                 <View style={styles.itemBadge}>
                                     <Text style={styles.itemCount}>{itemCount}</Text>
                                 </View>
 
-                                {}
                                 <View style={styles.iconContainer}>
                                     <Ionicons name="basket" size={24} color="white" />
                                 </View>
 
-                                {}
                                 <View style={styles.textContainer}>
                                     <Text style={styles.titleText}>{i18n.t('cart.viewCart')}</Text>
                                     <Text style={styles.subtitleText}>
@@ -107,7 +104,6 @@ export default function ViewCart({ navigation: _navigation, route, params, deliv
                                     </Text>
                                 </View>
 
-                                {}
                                 <View style={styles.priceContainer}>
                                     <Text style={styles.priceText}>{formatPrice(total)}</Text>
                                     <Ionicons name="chevron-forward" size={20} color="white" />
@@ -115,7 +111,6 @@ export default function ViewCart({ navigation: _navigation, route, params, deliv
                             </TouchableOpacity>
                         </LinearGradient>
 
-                        {}
                         <View style={styles.shadow} />
                     </View>
                 </Animated.View>
