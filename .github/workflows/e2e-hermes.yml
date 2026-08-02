@@ -1,5 +1,5 @@
-# Build debug APK ONCE (artifact) → Hermes CDP E2E on emulator (re-runnable without rebuild).
-# Live API. Emulator is intentional. Rebuild only when native/JS shell must change.
+# Build debug APK once → Hermes CDP on emulator (reuse APK artifact).
+# workflow_dispatch input reuse_run_id = skip Gradle, download APK from a prior run.
 name: E2E Hermes
 
 on:
@@ -7,6 +7,11 @@ on:
     branches: [codecanyon-sources, main, master]
   pull_request:
   workflow_dispatch:
+    inputs:
+      reuse_run_id:
+        description: "Skip APK build — reuse android-debug-apk from this Actions run id"
+        required: false
+        type: string
 
 concurrency:
   group: e2e-hermes-${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +26,7 @@ env:
 jobs:
   build-debug-apk:
     name: Build Android debug APK (artifact)
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.reuse_run_id == '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -34,7 +40,7 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
-      - name: Write .env (baked into Metro later; debug APK is shell only)
+      - name: Write .env
         run: |
           cat > .env <<EOF
           EXPO_PUBLIC_API_URL=${{ env.EXPO_PUBLIC_API_URL }}
@@ -82,6 +88,7 @@ jobs:
   hermes-login-home:
     name: Hermes login→home (reuse APK)
     needs: build-debug-apk
+    if: ${{ always() && (needs.build-debug-apk.result == 'success' || needs.build-debug-apk.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -102,15 +109,26 @@ jobs:
           EOF
           sed -i 's/^[[:space:]]*//' .env
       - run: npm ci
-      - name: Download debug APK
+      - name: Download APK from this run
+        if: ${{ needs.build-debug-apk.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: android-debug-apk
           path: apk-out
+      - name: Download APK from prior run (reuse)
+        if: ${{ needs.build-debug-apk.result == 'skipped' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test -n "${{ inputs.reuse_run_id }}"
+          mkdir -p apk-out
+          gh run download "${{ inputs.reuse_run_id }}" -n android-debug-apk -D apk-out -R "${{ github.repository }}"
+          find apk-out -type f
       - name: Locate APK
         id: apk
         run: |
           APK=$(find apk-out -name '*.apk' | head -n 1)
+          test -n "$APK"
           echo "apk=$APK" >> "$GITHUB_OUTPUT"
           ls -lh "$APK"
       - name: Enable KVM
@@ -129,7 +147,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
-            set -euo pipefail
+            bash -euo pipefail <<'SCRIPT'
             adb install -r "${{ steps.apk.outputs.apk }}"
             adb reverse tcp:8081 tcp:8081
             npx expo start --port 8081 --localhost > /tmp/metro.log 2>&1 &
@@ -154,6 +172,7 @@ jobs:
             curl -sf http://127.0.0.1:8081/json/list | head -c 500 || true
             node scripts/hermes/smoke-login-home.js
             kill $METRO_PID || true
+            SCRIPT
       - name: Upload Metro log on failure
         if: failure()
         uses: actions/upload-artifact@v4
