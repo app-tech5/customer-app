@@ -7,8 +7,8 @@ This folder contains the HTTP client and all backend API calls for the customer 
 | File | Role |
 |------|------|
 | **client.js** | `ApiClient` class: token storage, `apiCall()`, headers, persist/clear session |
-| **constants.js** | `API_BASE_URL` (from root `config.js`) |
-| **index.js** | Singleton `api` instance, re-exports all public methods and Firebase-style auth helpers |
+| **constants.js** | `API_BASE_URL` (from `config/index.js` via `../config`) |
+| **index.js** | Singleton `api` instance and re-exports of public API methods |
 
 Each domain (auth, restaurants, orders, etc.) is implemented by adding methods on `ApiClient.prototype` in its own file. `index.js` imports those files (side-effect) and re-exports either `api.<method>` or named functions that delegate to `api`.
 
@@ -16,7 +16,7 @@ Each domain (auth, restaurants, orders, etc.) is implemented by adding methods o
 
 ## Configuration
 
-- **Base URL:** `api/constants.js` exports `API_BASE_URL` from `../config` (`config.API_BASE_URL`). Set the backend URL in the root **config.js**.
+- **Base URL:** `api/constants.js` reads `config.API_BASE_URL` from `config/index.js`. Set `EXPO_PUBLIC_API_URL` in `.env` (see `.env.example`).
 
 ## Usage
 
@@ -29,7 +29,6 @@ import { getRestaurants, getOrders, createOrder } from '../api';
 ```
 
 - **Authenticated calls:** Use `api` (or the named wrappers) so that `apiCall()` attaches the stored token.
-- **Auth helpers:** `signInWithEmailAndPassword`, `createUserWithEmailAndPassword`, `onAuthStateChanged`, etc. are re-exported for compatibility with Firebase-style auth usage; they delegate to `api.login`, `api.register`, etc.
 
 ## Modules and endpoints
 

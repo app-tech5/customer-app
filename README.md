@@ -50,7 +50,7 @@ Point `EXPO_PUBLIC_API_URL` in `.env` at your API (use your LAN IP instead of `l
 | `EXPO_PUBLIC_DEMO_EMAIL` | Demo email | `demo@customer.com` |
 | `EXPO_PUBLIC_DEMO_PASSWORD` | Demo password | `demo123` |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | _(empty)_ |
-| `EXPO_PUBLIC_MAPTILER_API_KEY` | MapTiler key (maps) | _(empty)_ |
+| `EXPO_PUBLIC_MAPTILER_API_KEY` | Optional MapTiler key (reserved) | _(empty)_ |
 
 Runtime config lives in `config/index.js` (reads the env vars above).
 
@@ -77,6 +77,7 @@ Edit `app.json` before store submission:
 ```
 customer-app/
 ├── App.js              # Entry
+├── data.js             # Sample preference data
 ├── app.json            # Expo config
 ├── .env.example        # Env template
 ├── api/                # REST client + demo handlers
@@ -117,7 +118,7 @@ Optional EAS builds: configure your own Expo account, then use `eas.json`.
 - Expo ~54 / React Native 0.81 / React 19
 - React Navigation 7
 - Redux + redux-persist
-- MapLibre + OpenStreetMap (WebView)
+- MapLibre / OpenStreetMap (WebView tracking & restaurant map)
 - Stripe React Native
 - socket.io-client
 - i18n-js (EN / FR)
@@ -130,7 +131,7 @@ Optional EAS builds: configure your own Expo account, then use `eas.json`.
 |-------|-----|
 | Network request failed | Start backend; check `EXPO_PUBLIC_API_URL` |
 | Demo user missing | Run backend migrations / demo seed |
-| Maps blank | Set `EXPO_PUBLIC_MAPTILER_API_KEY` |
+| Maps blank | Check network / OSM tiles; location permission for nearby |
 | Stale bundle | `npx expo start --clear` |
 
 More detail: see `doc/`.

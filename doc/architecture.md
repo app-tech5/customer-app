@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Good Food customer app is a React Native application built with Expo SDK 54. It provides a food ordering experience: browse restaurants, view menus, place orders, and track deliveries.
+The Good Food Pro customer app is a React Native application built with Expo SDK 54. It provides a food ordering experience: browse restaurants, view menus, place orders, and track deliveries.
 
 It is part of the Good Food suite (customer, restaurant, driver, admin) and uses a **custom REST API** (Express.js + MongoDB) as the backend—not Firebase.
 
@@ -66,108 +66,27 @@ It is part of the Good Food suite (customer, restaurant, driver, admin) and uses
 
 ```
 customer-app/
-├── App.js                    # Entry point
-├── api/                      # API layer (ApiClient + endpoints)
-├── config/                   # App configuration (runtime + asset URLs)
-├── global/                   # Global constants & theme tokens
-├── lang/                     # i18n setup + translations
-│
+├── App.js
+├── app.json
+├── data.js                   # Sample preference/menu demo data
+├── api/                      # REST client + demo handlers
+├── config/                   # Runtime config + asset URLs
 ├── components/
-│   ├── home/                 # Home screen components
-│   │   ├── HomeHeader.js
-│   │   ├── HeaderTabs.js
-│   │   ├── SearchBar.js
-│   │   ├── Categories.js
-│   │   └── RestaurantItems.js
-│   │
-│   ├── restaurantDetail/     # Restaurant detail components
-│   │   ├── RestaurantDetailHeader.js
-│   │   ├── MenuItems.js
-│   │   ├── MenuDetailItems.js
-│   │   ├── ReviewCard.js
-│   │   ├── PromotionCard.js
-│   │   ├── About.js
-│   │   ├── ViewCart.js
-│   │   ├── OrderItem.js
-│   │   └── TabviewComponent.js
-│   │
-│   ├── Cart.js               # Cart component
-│   ├── CartModal.js          # Cart modal
-│   ├── Checkout.js           # Checkout component
-│   ├── BackButton.js         # Back navigation
-│   ├── FilterModal.js        # Filter modal
-│   ├── DrawerContent.js      # Drawer menu
-│   ├── Loading.js            # Loading indicator
-│   └── ...
-│
-├── screens/
-│   ├── Home.js               # Home screen
-│   ├── RestaurantDetail.js   # Restaurant detail
-│   ├── MenuDetailScreen.js   # Menu item detail
-│   ├── CartScreen.js         # Cart screen
-│   ├── CheckoutScreen.js     # Checkout flow
-│   ├── OrderTracking.js      # Order tracking
-│   ├── MyOrdersScreen.js     # Order history
-│   ├── OrderDetails.js       # Order details
-│   ├── SearchScreen.js       # Search
-│   ├── SearchResults.js      # Search results
-│   ├── CategoryResults.js    # Category results
-│   ├── ItemResults.js        # Item search results
-│   ├── Offers.js             # Promotions
-│   ├── WalletScreen.js       # Wallet
-│   ├── AccountScreen.js      # Profile
-│   ├── EditProfileScreen.js  # Edit profile
-│   ├── AddressesScreen.js    # Addresses
-│   ├── Settings.js           # Settings
-│   ├── SignIn.js             # Login
-│   ├── SignUp.js             # Registration
-│   ├── Onboarding.js         # Onboarding
-│   ├── Splash.js             # Splash screen
-│   └── Loader.js             # Loading screen
-│
-├── navigation/
-│   ├── navigation.js         # Root navigation
-│   ├── DrawerNavigator.js    # Drawer setup
-│   ├── BottomTabs.js         # Tab navigation
-│   └── Stacks.js             # Stack navigators
-│
-├── contexts/
-│   ├── authContext.js        # Authentication state
-│   ├── SettingContext.js     # App settings
-│   ├── DeliverySettingsContext.js  # Delivery config
-│   ├── FavoritesContext.js   # Favorites
-│   ├── CategoriesContext.js  # Categories
-│   ├── RestaurantsContext.js # Restaurant data
-│   ├── LanguageContext.js    # Language settings
-│   └── LoaderContext.js      # Loading state
-│
-├── redux/
-│   ├── store.js              # Redux store
-│   └── reducers/
-│       ├── index.js          # Combined reducers
-│       ├── cartReducer.js    # Cart state
-│       ├── userReducer.js    # User state
-│       ├── SignInReducer.js  # Auth state
-│
-├── lang/
-│   ├── i18n.js               # i18n-js instance + helpers
-│   ├── en.json               # English translations
-│   ├── fr.json               # French translations
-│   └── docs/                 # i18n documentation
-│
-├── utils/
-│   ├── cacheUtils.js         # Barrel re-export (compat)
-│   ├── cacheCommon.js        # Shared cache config/helpers
-│   ├── cacheFoods.js
-│   ├── cacheRestaurants.js
-│   ├── cachePromotions.js
-│   ├── cacheMenus.js
-│   ├── cacheSignIn.js
-│   └── cacheCleanup.js
-│
-└── doc/                      # Documentation
-    ├── README.md
-    ├── architecture.md
+│   ├── home/                 # HomeHeader, SearchBar, RestaurantItems, …
+│   ├── restaurantDetail/     # MenuItems, ViewCart, ReviewCard, …
+│   ├── restaurantsMap/       # OpenStreetMap, NativeTrackingMap, …
+│   └── …                     # Cart, Checkout, DrawerContent, FilterModal, …
+├── screens/                  # Home, RestaurantDetail, Wallet, PreferenceScreen, …
+├── navigation/               # Root, drawer, tabs, stacks
+├── contexts/                 # Auth, settings, restaurants, favorites, language, …
+├── redux/                    # store + cartReducer, userReducer, SignInReducer
+├── lang/                     # i18n-js + en.json / fr.json
+├── global/                   # colors, parameters, location helpers
+├── utils/                    # cache*, geo, delivery helpers
+├── assets/
+├── android/
+├── ios/
+└── doc/
 ```
 
 ---
@@ -176,58 +95,29 @@ customer-app/
 
 ```
 RootNavigation (Stack)
-├── Onboarding
-├── Splash
-├── SignIn
-├── SignUp
-├── DrawerNavigator
-│   ├── Home (BottomTabs)
-│   │   ├── Home
-│   │   ├── Search
-│   │   └── Settings
-│   ├── RestaurantsMap
-│   ├── Offers
-│   ├── MyOrders
-│   ├── Account
-│   ├── Wallet
-│   ├── Favorites
-│   └── Settings
-├── RestaurantDetail
-├── MenuDetailScreen
-├── CartDetails
-├── CheckoutScreen
-├── OrderTracking
-├── OrderDetails
-├── CategoryResults
-├── ItemResults
-├── SearchResults
-├── Wallet
-├── AddCard
-└── Settings
+├── Onboarding / Splash / SignIn / SignUp   (signed out)
+└── DrawerNavigator                         (signed in)
+    ├── Home tabs (Home, Search, …)
+    ├── Map, Offers, Orders, Account, Wallet, Favorites, Settings
+    └── Stacks for RestaurantDetail, MenuDetail, Cart, Checkout,
+        OrderTracking, PreferenceScreen, Addresses, …
 ```
 
 ---
 
 ## State Management
 
-### Redux Store
-- **cart**: Shopping cart items, quantities, restaurant info
-- **user**: Current user data, preferences
-- **signIn**: Authentication token state
-- **products**: Cached product data
+### Redux
+- **cartReducer** — cart lines
+- **userReducer** — profile snapshot
+- **SignInReducer** — auth token flag (used with auth context)
 
-### React Contexts
-- **SignInContext**: Auth state & dispatch
-- **SettingContext**: App settings (currency, theme)
-- **DeliverySettingsContext**: Delivery fees, thresholds
-- **FavoritesContext**: Favorite restaurants
-- **CategoriesContext**: Food categories
-- **RestaurantsContext**: Restaurant data
-- **LoaderContext**: Global loading state
-- **LanguageContext**: Language preferences
+### React Contexts (wired in `navigation/navigation.js`)
+- SignIn / auth, Settings, Gateway, PaymentMethods, DeliverySettings
+- Restaurants, Orders, Favorites, Categories, Loader, Language
+- CartSyncWrapper syncs cart with the backend when signed in
 
 ---
-
 ## API Client Architecture
 
 The `api/` folder contains a centralized API client (`ApiClient` class) that:
@@ -355,7 +245,7 @@ export const config = {
 };
 ```
 
-The canonical source is now `config/index.js`. The root `config.js` re-exports `config` for backward compatibility.
+The canonical source is `config/index.js` (env-driven via `EXPO_PUBLIC_*`).
 
 ### Asset URL fallbacks
 
@@ -450,7 +340,7 @@ The app connects to a custom REST API (not Firebase):
 - **Authentication**: JWT tokens
 - **Database**: MongoDB
 - **Server**: Express.js
-- **Base URL**: Configurable in `config.js`
+- **Base URL**: Configurable via `EXPO_PUBLIC_API_URL` / `config/index.js`
 
 
 ---

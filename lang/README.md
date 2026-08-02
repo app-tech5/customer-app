@@ -16,7 +16,7 @@ This folder holds the app’s i18n setup and translation files. All user-facing 
 - **Translation files:** Imports `en` and `fr` from `./en.json` and `./fr.json` and passes them to the i18n-js `I18n` constructor.
 - **Fallback:** `enableFallback = true` so that if a key is missing in the current locale, the default locale is used.
 - **Default locale:** `defaultLocale = 'en'`.
-- **Device language:** Uses `expo-localization`’s `Localization.locale`; the first part (e.g. `fr` from `fr-FR`) is used. If that locale exists in `translations`, it is set; otherwise the effective locale is `'fr'` (hard-coded fallback after detection).
+- **Device language:** Uses `expo-localization`’s `Localization.locale`; the first part (e.g. `fr` from `fr-FR`) is used. If that locale exists in `translations`, it is set; otherwise the code falls back to `'fr'` when the device language is unsupported (see `lang/i18n.js`). Prefer `changeLanguage()` for explicit switches.
 - **Setting locale:** `i18n.locale` is set once at load. Use `changeLanguage(locale)` to switch at runtime.
 
 ## Exports from i18n.js
