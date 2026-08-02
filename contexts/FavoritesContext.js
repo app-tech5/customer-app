@@ -16,7 +16,7 @@ export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const reduxFavorites = useSelector(state => state.user?.favorites || []);
+  const reduxFavorites = useSelector(state => state.userReducer?.favorites || []);
   
   const loadFavorites = useCallback(async () => {
     try {

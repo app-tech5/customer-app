@@ -37,6 +37,15 @@ Additional module-level docs:
 
 ---
 
+## Changelog & migration notes
+
+| File | Description |
+|------|-------------|
+| [2025-01-updates.md](./2025-01-updates.md) | Demo mode + i18n updates |
+| [migration-api-firebase.md](./migration-api-firebase.md) | Firebase → REST API migration notes |
+
+---
+
 ## 🚀 Quick Start
 
 ### Current Stack

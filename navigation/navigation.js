@@ -30,6 +30,9 @@ import { SignInContext, SignInContextProvider } from '../contexts/authContext'
 import { useGateway } from '../contexts/GatewayContext'
 import { config } from '../config'
 import { OrdersProvider } from '../contexts/OrdersContext'
+import { FavoritesProvider } from '../contexts/FavoritesContext'
+import { LanguageContextProvider } from '../contexts/LanguageContext'
+import CartSyncWrapper from '../components/CartSyncWrapper'
 
 const FALLBACK_STRIPE_PUBLISHABLE_KEY = config.FALLBACK_STRIPE_PUBLISHABLE_KEY
 
@@ -67,33 +70,38 @@ export default function RootNavigation({ statusBarColor }) {
         ) : (
           <NavigationContainer>
             <LoaderContext.Provider value={{ loading, setLoading }}>
-              <SettingProvider>
-                <GatewayProvider>
-                  <StripeWrappedNavigation>
-                    <PaymentMethodsProvider>
-                      <DeliverySettingsProvider>
-                        <RestaurantsProvider>
-                          <OrdersProvider>
-                            <CategoriesContextProvider>
-                              <Stack.Navigator screenOptions={screenOptions}>
-                                <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
-                                <Stack.Screen name="OrderCompleted" component={OrderCompleted} />
-                                <Stack.Screen name="SearchFlow" component={SearchNavigator} options={{ headerShown: false }} />
-                                <Stack.Screen name="WalletFlow" component={WalletFlowNavigator} options={{ headerShown: false }} />
-                                <Stack.Screen name="CheckoutFlow" component={CheckoutNavigator} options={{ headerShown: false }} />
-                                <Stack.Screen name="OrderStatusFlow" component={OrderStatusNavigator} options={{ headerShown: false }} />
-                                <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
-                                <Stack.Screen name="ItemResults" component={ItemResults} options={{ headerShown: true }} />
-                                { }
-                              </Stack.Navigator>
-                            </CategoriesContextProvider>
-                          </OrdersProvider>
-                        </RestaurantsProvider>
-                      </DeliverySettingsProvider>
-                    </PaymentMethodsProvider>
-                  </StripeWrappedNavigation>
-                </GatewayProvider>
-              </SettingProvider>
+              <LanguageContextProvider>
+                <SettingProvider>
+                  <GatewayProvider>
+                    <StripeWrappedNavigation>
+                      <PaymentMethodsProvider>
+                        <DeliverySettingsProvider>
+                          <RestaurantsProvider>
+                            <OrdersProvider>
+                              <FavoritesProvider>
+                                <CategoriesContextProvider>
+                                  <CartSyncWrapper>
+                                    <Stack.Navigator screenOptions={screenOptions}>
+                                      <Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
+                                      <Stack.Screen name="OrderCompleted" component={OrderCompleted} />
+                                      <Stack.Screen name="SearchFlow" component={SearchNavigator} options={{ headerShown: false }} />
+                                      <Stack.Screen name="WalletFlow" component={WalletFlowNavigator} options={{ headerShown: false }} />
+                                      <Stack.Screen name="CheckoutFlow" component={CheckoutNavigator} options={{ headerShown: false }} />
+                                      <Stack.Screen name="OrderStatusFlow" component={OrderStatusNavigator} options={{ headerShown: false }} />
+                                      <Stack.Screen name="CategoryResults" component={CategoryResults} options={{ headerShown: true }} />
+                                      <Stack.Screen name="ItemResults" component={ItemResults} options={{ headerShown: true }} />
+                                    </Stack.Navigator>
+                                  </CartSyncWrapper>
+                                </CategoriesContextProvider>
+                              </FavoritesProvider>
+                            </OrdersProvider>
+                          </RestaurantsProvider>
+                        </DeliverySettingsProvider>
+                      </PaymentMethodsProvider>
+                    </StripeWrappedNavigation>
+                  </GatewayProvider>
+                </SettingProvider>
+              </LanguageContextProvider>
             </LoaderContext.Provider>
           </NavigationContainer>
         )}

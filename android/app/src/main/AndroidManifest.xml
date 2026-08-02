@@ -27,7 +27,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="goodfoods"/>
-        <data android:scheme="exp+good-foods-slug1"/>
+        <data android:scheme="exp+good-food-customer"/>
       </intent-filter>
     </activity>
   </application>

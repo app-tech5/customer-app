@@ -11,6 +11,8 @@ import SearchScreen from '../screens/SearchScreen'
 import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import OrdersScreen from '../screens/OrdersScreen'
+import MyOrdersScreen from '../screens/MyOrdersScreen'
+import PreferenceScreen from '../screens/PreferenceScreen'
 import OrderTracking from '../screens/OrderTracking'
 import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
@@ -56,6 +58,11 @@ export function HomeNavigator() {
       <HomeStack.Screen
         name="MenuDetailScreen"
         component={MenuDetailScreen}
+        options={{ headerShown: false }} />
+
+      <HomeStack.Screen
+        name="PreferenceScreen"
+        component={PreferenceScreen}
         options={{ headerShown: false }} />
 
       <HomeStack.Screen
@@ -351,6 +358,11 @@ export function OrdersNavigator() {
         name="Orders"
         component={OrdersScreen}
         options={{}}
+      />
+      <OrdersStack.Screen
+        name="MyOrders"
+        component={MyOrdersScreen}
+        options={{ headerShown: true, title: 'My Orders' }}
       />
       <OrdersStack.Screen
         name="OrderDetails"

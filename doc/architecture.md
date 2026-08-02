@@ -42,9 +42,10 @@ It is part of the Good Food suite (customer, restaurant, driver, admin) and uses
 ### Maps & Location
 | Package | Version | Purpose |
 |---------|---------|---------|
-| react-native-maps | 1.20.1 | Map display |
-| @rnmapbox/maps | ^10.2.10 | Mapbox integration |
-| expo-location | ~19.0.0 | Location services |
+| react-native-maps | 1.20.1 | Native map views |
+| @maplibre/maplibre-react-native | ^11.0.2 | MapLibre map rendering |
+| react-native-webview | ^13.16.1 | OpenStreetMap WebView fallback |
+| expo-location | ~19.0.0 | Device location |
 
 ### Internationalization
 | Package | Version | Purpose |

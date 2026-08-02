@@ -731,6 +731,7 @@
     "logoutMessage": "Are you sure you want to logout?"
   },
   "common": {
+    "user": "User",
     "save": "Save",
     "yes": "Yes",
     "openMenu": "Open menu",

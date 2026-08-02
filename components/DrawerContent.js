@@ -61,7 +61,7 @@ export default function DrawerContent(props) {
                         size={60}
                         source={image ? {uri: image} : {uri: config.assetUrls.avatars.default}}/>
                     <View style={styles.userInfo}>
-                        <Text style={styles.userName}>{name || 'Utilisateur'}</Text>
+                        <Text style={styles.userName}>{name || i18n.t('common.user')}</Text>
                         <Text style={styles.userEmail}>{email || 'email@example.com'}</Text>
                     </View>
                 </View>

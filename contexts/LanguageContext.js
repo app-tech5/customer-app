@@ -1,37 +1,42 @@
-import React, { useContext, useEffect, useState } from 'react'
-import en from '../lang/en.json'
-import fr from '../lang/fr.json'
-import * as RNLocalize from 'react-native-localize'
- 
-const LanguageContext = createContext()
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import * as Localization from 'expo-localization';
+import en from '../lang/en.json';
+import fr from '../lang/fr.json';
+
+const LanguageContext = createContext();
 
 const languageObj = {
-    'en': en,
-    'fr': fr
-}
-export const LanguageContextProvider = (props)=>{
+  en,
+  fr,
+};
 
-    const [selectedLanguage, setSelectedLanguage] = useState('en');
-
-    useEffect(()=>{
-        const currentLanguage = RNLocalize.findBestAvailableLanguage(Object.keys(languageObj));
-        setSelectedLanguage(currentLanguage?.languageTag)
-
-    }, [])
-
-    const value = {
-        ...languageObj[selectedLanguage],
-    }
-
-    return (
-        <LanguageContext.Provider value={value}>
-
-            {props.children}
-
-        </LanguageContext.Provider>
-
-    )
+function resolveLanguageTag() {
+  const locales = Localization.getLocales?.() || [];
+  const code = (locales[0]?.languageCode || 'en').toLowerCase();
+  return languageObj[code] ? code : 'en';
 }
 
-export const useTranslation = ()=> useContext(LanguageContext)
-  
+export const LanguageContextProvider = (props) => {
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+  useEffect(() => {
+    setSelectedLanguage(resolveLanguageTag());
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      ...languageObj[selectedLanguage],
+      selectedLanguage,
+      setSelectedLanguage,
+    }),
+    [selectedLanguage]
+  );
+
+  return (
+    <LanguageContext.Provider value={value}>
+      {props.children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useTranslation = () => useContext(LanguageContext);

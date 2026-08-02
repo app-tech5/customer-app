@@ -15,8 +15,7 @@ export const assetUrls = {
       'https://cdn.pixabay.com/photo/2017/02/23/13/05/avatar-2092113_960_720.png',
   },
   demo: {
-    preferenceRestaurant:
-      'https://bukasapics.s3.us-east-2.amazonaws.com/macdo.png',
+    // Generic food placeholder for preference / demo UI samples
+    preferenceRestaurant: 'https://via.placeholder.com/800x400/2E1437/FFFFFF?text=Good+Food',
   },
 };
-

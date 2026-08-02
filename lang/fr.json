@@ -684,6 +684,7 @@
     "logoutMessage": "Êtes-vous sûr de vouloir vous déconnecter ?"
   },
   "common": {
+    "user": "Utilisateur",
     "save": "Enregistrer",
     "openMenu": "Ouvrir le menu",
     "notImplemented": "Non implémenté",

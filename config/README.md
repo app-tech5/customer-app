@@ -1,71 +1,48 @@
 # Config (customer-app)
 
-This folder contains **application configuration** and other cross-cutting constants that are not UI theme tokens (those live in `global/`).
-
-## Goals
-
-- Keep runtime settings (API URL, timeouts, demo mode) in one place.
-- Centralize non-theme constants that are reused or should be consistent (e.g. asset URL fallbacks).
-- Avoid duplicating anything from `global/` (colors, layout tokens, language/currency utilities, etc.).
+Application configuration and shared non-UI constants.
 
 ## Files
 
 | File | Exports | Purpose |
 |------|---------|---------|
-| `index.js` | `config`, `assetUrls` | Main configuration entrypoint |
-| `assets.js` | `assetUrls` | Central asset/placeholder URLs used across UI |
+| `index.js` | `config`, `assetUrls`, `PUBLIC_UPLOAD_FOLDERS` | Runtime settings |
+| `assets.js` | `assetUrls` | Placeholder / demo image URLs |
 
-## Backward compatibility
+Import with:
 
-Existing imports `import { config } from '../config'` still work because the root `config.js` now re-exports from this folder.
+```js
+import { config } from '../config';
+```
 
-## `config`
+## `config` keys
 
-Source: `config/index.js`.
+| Key | Meaning |
+|-----|---------|
+| `API_BASE_URL` | Backend API base (`EXPO_PUBLIC_API_URL`) |
+| `APP_NAME` | Display name |
+| `VERSION` | App version label |
+| `DEMO_MODE` | Prefill demo login when not `false` |
+| `DEMO_EMAIL` / `DEMO_PASSWORD` | Demo credentials |
+| `FALLBACK_STRIPE_PUBLISHABLE_KEY` | Stripe key fallback |
+| `MAPTILER_API_KEY` | Maps key |
+| `assetUrls` | Central remote/local asset URLs |
 
-| Key | Type | Meaning |
-|-----|------|---------|
-| `API_BASE_URL` | `string` | Backend base URL (used by `api/constants.js`) |
-| `APP_NAME` | `string` | Application display name |
-| `VERSION` | `string` | App version (informational; not the Expo version) |
-| `DEMO_MODE` | `boolean` | Enables demo behaviour (pre-filled credentials, demo flows) |
-| `DEMO_EMAIL` | `string` | Demo login email |
-| `DEMO_PASSWORD` | `string` | Demo login password |
-| `MAPTILER_API_KEY` | `string` | MapTiler key (from `EXPO_PUBLIC_MAPTILER_API_KEY`) |
-| `assetUrls` | `object` | Central asset URLs (see below) |
-
-Runtime values use `EXPO_PUBLIC_*` environment variables (see `.env.example`). Release builds on CI: GitHub Variables/Secrets → `eas build` → EAS cloud (`$EXPO_PUBLIC_*` substitution in `eas.json`).
-
-## Deploy / CI
-
-Source: `config/deploy.js`, `.env.example`.
-
-| Variable | Where | Purpose |
-|----------|-------|---------|
-| `PUBLIC_SITE_URL` | GitHub Variable | Base URL for public APK link |
-| `APK_FILENAME` | GitHub Variable | APK file name on VPS |
-| `VPS_DOWNLOADS_DIR` | GitHub Variable | Directory on VPS |
-| `EXPO_TOKEN` | GitHub Secret | EAS authentication |
-| `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` | GitHub Secrets | APK upload to VPS |
-| `EXPO_PUBLIC_*` | GitHub Variables / Secrets | Passed to `eas build` on CI |
+Copy `.env.example` to `.env` and set `EXPO_PUBLIC_*` values for your environment.
 
 ## `assetUrls`
 
-Source: `config/assets.js`. This exists because several screens/components use remote placeholder URLs directly.
+Groups:
 
-If you want to standardize visuals or switch to local placeholders later, update them here.
+- `placeholder.*` — image placeholders
+- `icons.*` — icon URLs
+- `avatars.*` — default avatar
+- `demo.*` — demo-only images (e.g. Preference screen)
 
-### Groups
+Prefer updating URLs here instead of hardcoding them in screens.
 
-- `assetUrls.placeholder.*`: image placeholders
-- `assetUrls.placeholder.*` keys are named after the UI usage (e.g. `orderDetailsHero400x200`, `profileAvatar120`) to keep them self-explanatory.
-- `assetUrls.icons.*`: remote icon URLs
-- `assetUrls.avatars.*`: default avatar URL
-- `assetUrls.demo.*`: demo-only image URLs (e.g. Preference screen)
+## Not in this folder
 
-## What is intentionally NOT here
-
-- Theme tokens: `global/colors.js`, `global/parameters.js`
-- Language and translation setup: `lang/`
-- Cache configuration: `utils/cacheCommon.js` (domain-specific caching)
-
+- Theme tokens → `global/`
+- i18n → `lang/`
+- Cache → `utils/cacheCommon.js`

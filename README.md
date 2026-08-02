@@ -110,6 +110,15 @@ npm run lint-fix   # ESLint auto-fix
 
 Optional EAS builds: configure your own Expo account, then use `eas.json`.
 
+### Extra sample / tooling scripts
+
+```bash
+node scripts/generate-route-points.js   # regenerate route-points.json
+node scripts/simulate-driver-route.js   # simulate driver path for tracking demos
+```
+
+These enrich local demos of order tracking; they are not required to run the app.
+
 ---
 
 ## Tech stack
