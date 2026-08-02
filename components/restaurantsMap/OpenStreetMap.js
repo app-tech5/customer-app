@@ -189,7 +189,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           if (!Array.isArray(coordinates) || !coordinates.length) return;
 
           const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
-          // Base shadow line for depth.
           L.polyline(latLngs, {
             color: '#0f172a',
             weight: 9,
@@ -198,7 +197,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             lineJoin: 'round',
           }).addTo(routeLayer);
 
-          // Main route line.
           L.polyline(latLngs, {
             color: '#2563eb',
             weight: 5,
@@ -207,7 +205,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             lineJoin: 'round',
           }).addTo(routeLayer);
 
-          // Subtle directional accent on top.
           L.polyline(latLngs, {
             color: '#93c5fd',
             weight: 2,
@@ -217,7 +214,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             lineJoin: 'round',
           }).addTo(routeLayer);
         } catch (_error) {
-          // Fallback silencieux: pas de tracé si OSRM indisponible.
         }
       };
 
