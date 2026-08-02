@@ -248,7 +248,8 @@
     "vegan": "Vegan",
     "spicy": "Épicé",
     "popular": "Populaire",
-    "noProductsAvailable": "Aucun produit disponible"
+    "noProductsAvailable": "Aucun produit disponible",
+    "productNotAvailable": "Actuellement indisponible"
   },
   "cart": {
     "title": "Votre panier",

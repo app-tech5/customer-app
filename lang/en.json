@@ -285,7 +285,8 @@
     "vegan": "Vegan",
     "spicy": "Spicy",
     "popular": "Popular",
-    "noProductsAvailable": "No products available"
+    "noProductsAvailable": "No products available",
+    "productNotAvailable": "Currently unavailable"
   },
   "cart": {
     "title": "Your Cart",
