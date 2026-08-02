@@ -49,7 +49,6 @@ project.xcworkspace
 
 # Author / local tooling (not for buyers)
 .maestro/
-.github/
 scripts/screenshots/
 scripts/hermes/
 .vscode/
@@ -62,6 +61,5 @@ storybook-static
 .buckd/
 buck-out/
 route-points.json
-scripts/
 doc/2025-01-updates.md
 doc/migration-api-firebase.md
