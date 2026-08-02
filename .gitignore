@@ -48,9 +48,7 @@ xcuserdata/
 project.xcworkspace
 
 # Author / local tooling (not for buyers)
-# Keep CI smoke Maestro flow tracked; ignore the rest of .maestro/
-.maestro/*
-!.maestro/ci-smoke.yaml
+.maestro/
 scripts/screenshots/
 scripts/hermes/
 .vscode/

@@ -14,7 +14,8 @@
     "web": "expo start --web",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
-    "smoke": "bash scripts/buyer-smoke.sh"
+    "smoke": "bash scripts/buyer-smoke.sh",
+    "ci:hermes": "bash scripts/ci/hermes-compile-bundle.sh"
   },
   "dependencies": {
     "@expo-google-fonts/roboto": "^0.2.3",

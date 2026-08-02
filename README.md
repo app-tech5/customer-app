@@ -107,10 +107,16 @@ npm run ios         # Build & run iOS
 npm run web         # Web (limited)
 npm run lint        # ESLint
 npm run lint-fix   # ESLint auto-fix
-npm run smoke       # Buyer smoke: Node 20+, npm ci, Expo config, JS export
+npm run smoke       # Local: Node 20+, npm ci, Expo config, JS export
+npm run ci:hermes   # Local: hermesc on an existing export dir (default ./dist)
 ```
 
-CI (GitHub Actions): `.github/workflows/buyer-smoke.yml` runs the same checks on push/PR.
+CI (GitHub Actions) is **split**:
+1. **Build JS bundles** (`expo export`) → artifact  
+2. **Hermes compile** reuses that artifact (no rebuild on Hermes failure)  
+3. **Live API smoke** (login + restaurants) runs in parallel  
+
+No Android emulator / Maestro in this pipeline.
 
 Optional EAS builds: configure your own Expo account, then use `eas.json`.
 
