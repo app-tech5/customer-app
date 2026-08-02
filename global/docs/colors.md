@@ -108,4 +108,4 @@ These aliases are kept so existing imports keep working. Prefer `colors.grey[n]`
 
 ## Usage in customer-app
 
-`colors` is imported in: CartDetailsScreen, WalletScreen, Wallet, OrderTracking, OrderDetails, OrderRequest, RestaurantDetail, OrdersScreen, SearchResults, SearchScreen, Home, Offers, MenuDetailScreen, NearMeScreen, AddressesScreen, CheckoutScreen, AccountScreen, MyOrdersScreen, ItemResults, Loader, Settings, EditProfileScreen, CategoryResults, CartScreen, DrawerNavigator, RestaurantItems (home), Size, SearchComponent, Reward, RestaurantDetailComponent, AddToCartButton, PromotionBadge, PreferenceScreen, OrderListItem, DrawerContent, Checkout, Cart, MenuItems (restaurantDetail), FilterModal.
+`colors` is imported across most screens and shared components (home, cart/checkout, orders, wallet, settings, maps, navigation). Prefer `colors.grey[n]` for new greys; legacy `colors.grey1`…`grey5` remain for older screens (e.g. PreferenceScreen styles).

@@ -1,4 +1,4 @@
-# API Reference — Good Food Customer App
+# API Reference — Good Food Pro Customer App
 
 Short pointer to the maintained API documentation. Endpoint lists live next to the client code to avoid drift.
 

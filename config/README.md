@@ -19,7 +19,7 @@ Runtime settings and shared non-theme constants.
 | `DEMO_MODE` | Prefill demo login when true |
 | `DEMO_EMAIL` / `DEMO_PASSWORD` | Demo credentials |
 | `FALLBACK_STRIPE_PUBLISHABLE_KEY` | Stripe key fallback |
-| `MAPTILER_API_KEY` | MapTiler key |
+| `MAPTILER_API_KEY` | Reserved env slot — **not used** by current OSM/MapLibre UI |
 | `API_TIMEOUT` | Request timeout (ms) |
 | `assetUrls` | See `assets.js` |
 

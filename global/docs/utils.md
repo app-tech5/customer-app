@@ -1,22 +1,23 @@
 # Utils
 
-Shared utility functions. Source: `../utils.js`.
+Shared helpers in `../utils.js` (re-exported from `global/index.js`).
+
+## `formatRestaurantRatingDisplay(rating, reviewCount)`
+
+- Returns a one-decimal rating string, or the i18n “no reviews” string when count is 0 / invalid.
+- **Used in:** Restaurant detail surfaces (e.g. `RestaurantDetail.js`).
+
+## `formatRestaurantRatingSummary(rating, reviewCount)`
+
+- Returns localized `ratingWithReviews` text, or “no reviews”.
+- **Used in:** `RestaurantDetailComponent`, `restaurantDetail/About.js`.
 
 ## `generateUID()`
 
-- **Type:** `() => string`
-- **Meaning:** Generates a short unique id (6 characters, base36). Useful for list keys or temporary ids.
-- **Returns:** String of the form `"abc123"`.
-- **Usage in customer-app:** Not currently imported from `global`; available for components that need a quick unique id.
-
----
+- Short random base36 id (6 chars).
+- **Usage:** Available for list keys / temporary ids; not widely imported today.
 
 ## `getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2)`
 
-- **Type:** `(number, number, number, number) => number`
-- **Meaning:** Haversine distance between two WGS84 coordinates, in kilometres.
-- **Parameters:**
-  - `lat1`, `lon1` – latitude and longitude of first point (degrees).
-  - `lat2`, `lon2` – latitude and longitude of second point (degrees).
-- **Returns:** Distance in km.
-- **Used in:** SearchResults, Home, NearMeScreen (e.g. to sort or display distance to restaurants).
+- Haversine distance in km.
+- **Note:** A fuller geo toolkit lives in `utils/geoUtils.js` (preferred for new map code). Some screens still import distance helpers via `../utils` or `../global`.

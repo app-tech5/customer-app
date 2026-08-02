@@ -1,7 +1,7 @@
 # Good Food Pro — Customer App
 
 Expo / React Native customer client for the Good Food Pro food-delivery suite.
-It talks to the **Good Food REST API** (Express + MongoDB) for auth, restaurants, cart, checkout, and order tracking.
+It talks to the **Good Food Pro REST API** (Express + MongoDB) for auth, restaurants, cart, checkout, and order tracking.
 
 ---
 
@@ -50,7 +50,7 @@ Point `EXPO_PUBLIC_API_URL` in `.env` at your API (use your LAN IP instead of `l
 | `EXPO_PUBLIC_DEMO_EMAIL` | Demo email | `demo@customer.com` |
 | `EXPO_PUBLIC_DEMO_PASSWORD` | Demo password | `demo123` |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | _(empty)_ |
-| `EXPO_PUBLIC_MAPTILER_API_KEY` | Optional MapTiler key (reserved) | _(empty)_ |
+| `EXPO_PUBLIC_MAPTILER_API_KEY` | Unused by current maps (OSM / MapLibre); kept in env template only | _(empty)_ |
 
 Runtime config lives in `config/index.js` (reads the env vars above).
 
@@ -107,7 +107,10 @@ npm run ios         # Build & run iOS
 npm run web         # Web (limited)
 npm run lint        # ESLint
 npm run lint-fix   # ESLint auto-fix
+npm run smoke       # Buyer smoke: Node 20+, npm ci, Expo config, JS export
 ```
+
+CI (GitHub Actions): `.github/workflows/buyer-smoke.yml` runs the same checks on push/PR.
 
 Optional EAS builds: configure your own Expo account, then use `eas.json`.
 
@@ -140,4 +143,4 @@ More detail: see `doc/`.
 
 ## Version
 
-**v1.1.0** — Good Food Pro Customer App
+**v1.0.0** — Good Food Pro Customer App

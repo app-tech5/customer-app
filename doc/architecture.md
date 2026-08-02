@@ -1,88 +1,95 @@
-# Architecture — Good Food Customer App
+# Architecture — Good Food Pro Customer App
 
 ## Overview
 
-The Good Food Pro customer app is a React Native application built with Expo SDK 54. It provides a food ordering experience: browse restaurants, view menus, place orders, and track deliveries.
+React Native customer client (Expo SDK 54) for the Good Food Pro suite: browse restaurants, order food, pay, and track deliveries.
 
-It is part of the Good Food suite (customer, restaurant, driver, admin) and uses a **custom REST API** (Express.js + MongoDB) as the backend—not Firebase.
+Backend: **custom REST API** (Express + MongoDB) with JWT auth — not Firebase. Real-time updates use **socket.io-client** (restaurants / orders contexts).
 
 ---
 
-## Tech Stack
+## Tech stack (from `package.json`)
 
 ### Core
+
 | Technology | Version | Purpose |
 |------------|---------|---------|
 | React Native | 0.81.5 | Mobile framework |
-| Expo | ~54.0.0 | Development platform |
-| React | 19.1.0 | UI library |
+| Expo | ~54.0.0 | Tooling / native modules |
+| React | 19.1.0 | UI |
 
 ### Navigation
-| Package | Version | Purpose |
-|---------|---------|---------|
-| @react-navigation/native | ^7.1.26 | Navigation core |
-| @react-navigation/stack | ^7.6.13 | Stack navigation |
-| @react-navigation/drawer | ^7.7.10 | Drawer navigation |
-| @react-navigation/bottom-tabs | ^7.9.0 | Tab navigation |
 
-### State Management
-| Package | Version | Purpose |
-|---------|---------|---------|
-| Redux | ^5.0.0 | Global state |
-| React-Redux | ^9.0.0 | React bindings |
-| React Context API | - | Local state |
+| Package | Version |
+|---------|---------|
+| @react-navigation/native | ^7.1.26 |
+| @react-navigation/stack | ^7.6.13 |
+| @react-navigation/drawer | ^7.7.10 |
+| @react-navigation/bottom-tabs | ^7.9.0 |
 
-### Storage & API
-| Package | Version | Purpose |
-|---------|---------|---------|
-| AsyncStorage | 2.2.0 | Local persistence |
-| Custom REST API | - | Backend communication |
-| JWT Authentication | - | Secure auth |
+### State & storage
 
-### Maps & Location
 | Package | Version | Purpose |
 |---------|---------|---------|
-| @maplibre/maplibre-react-native | ^11.0.2 | MapLibre map rendering |
-| react-native-webview | ^13.16.1 | OpenStreetMap WebView fallback |
+| redux | ^5.0.0 | Cart / user reducers |
+| react-redux | ^9.0.0 | Bindings |
+| redux-persist | ^6.0.0 | Persist store (+ `PersistGate`) |
+| @react-native-async-storage/async-storage | 2.2.0 | Tokens, cache, persist |
+| React Context | – | Auth, catalogs, settings, i18n language, etc. |
+
+### Maps & location
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| @maplibre/maplibre-react-native | ^11.0.2 | Native MapLibre map |
+| react-native-webview | ^13.16.1 | OpenStreetMap WebView map |
 | expo-location | ~19.0.0 | Device location |
 
-### Internationalization
+`EXPO_PUBLIC_MAPTILER_API_KEY` / `config.MAPTILER_API_KEY` exist in config but are **not used** by the current map UI (OSM / MapLibre only).
+
+### Payments, realtime, i18n
+
 | Package | Version | Purpose |
 |---------|---------|---------|
+| @stripe/stripe-react-native | 0.50.3 | Cards / PaymentSheet flows |
+| socket.io-client | ^4.8.3 | Live restaurant / order updates |
 | i18n-js | ^4.3.0 | Translations |
 | expo-localization | ~17.0.0 | Device locale |
 
-### UI Components
-| Package | Version | Purpose |
-|---------|---------|---------|
-| react-native-reanimated | ~4.1.1 | Animations |
-| react-native-gesture-handler | ~2.28.0 | Gestures |
-| lottie-react-native | ~7.3.1 | Lottie animations |
-| react-native-elements | ^3.4.3 | UI kit |
+### UI
+
+| Package | Version |
+|---------|---------|
+| react-native-reanimated | ~4.1.1 |
+| react-native-gesture-handler | ~2.28.0 |
+| lottie-react-native | ~7.3.1 |
+| react-native-elements | ^3.4.3 |
+
+**Dependency counts:** 37 production / 7 development packages in `package.json` (no Husky).
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 customer-app/
 ├── App.js
 ├── app.json
-├── data.js                   # Sample preference/menu demo data
-├── api/                      # REST client + demo handlers
-├── config/                   # Runtime config + asset URLs
+├── data.js                 # Preference / sample choice data
+├── api/                    # REST client, demo handlers, domain modules
+├── config/                 # Runtime config + asset URL fallbacks
 ├── components/
-│   ├── home/                 # HomeHeader, SearchBar, RestaurantItems, …
-│   ├── restaurantDetail/     # MenuItems, ViewCart, ReviewCard, …
-│   ├── restaurantsMap/       # OpenStreetMap, NativeTrackingMap, …
-│   └── …                     # Cart, Checkout, DrawerContent, FilterModal, …
-├── screens/                  # Home, RestaurantDetail, Wallet, PreferenceScreen, …
-├── navigation/               # Root, drawer, tabs, stacks
-├── contexts/                 # Auth, settings, restaurants, favorites, language, …
-├── redux/                    # store + cartReducer, userReducer, SignInReducer
-├── lang/                     # i18n-js + en.json / fr.json
-├── global/                   # colors, parameters, location helpers
-├── utils/                    # cache*, geo, delivery helpers
+│   ├── home/
+│   ├── restaurantDetail/
+│   ├── restaurantsMap/     # MapLibre + OSM WebView + markers
+│   └── …                   # Cart, checkout, drawer, filters, …
+├── screens/
+├── navigation/             # Root stack, drawer, tabs, section stacks
+├── contexts/               # Auth, settings, catalogs, favorites, language, …
+├── redux/                  # store (persisted) + cart/user reducers + cart actions
+├── lang/                   # i18n-js + en.json / fr.json
+├── global/                 # colors, constants, location, rating formatters
+├── utils/                  # cache*, geo, delivery, map helpers, image pick, …
 ├── assets/
 ├── android/
 ├── ios/
@@ -91,258 +98,129 @@ customer-app/
 
 ---
 
-## Navigation Structure
+## Navigation
 
 ```
-RootNavigation (Stack)
-├── Onboarding / Splash / SignIn / SignUp   (signed out)
-└── DrawerNavigator                         (signed in)
-    ├── Home tabs (Home, Search, …)
-    ├── Map, Offers, Orders, Account, Wallet, Favorites, Settings
-    └── Stacks for RestaurantDetail, MenuDetail, Cart, Checkout,
-        OrderTracking, PreferenceScreen, Addresses, …
+RootNavigation (stack)  — navigation/navigation.js
+├── Onboarding / Splash / SignIn / SignUp     (signed out)
+└── (signed in, wrapped in CartSyncWrapper + contexts)
+    ├── DrawerNavigator
+    │   ├── BottomTabs → Home | Search | Cart | Orders | Account stacks
+    │   ├── NearMe
+    │   ├── Offers
+    │   ├── Wallet section stack
+    │   ├── Settings section stack (Settings, Preference, Help, About, …)
+    │   └── Drawer redirects into tabs (Search / Orders / Account)
+    ├── OrderCompleted
+    ├── SearchFlow / WalletFlow / CheckoutFlow / OrderStatusFlow
+    └── CategoryResults / ItemResults
 ```
 
----
-
-## State Management
-
-### Redux
-- **cartReducer** — cart lines
-- **userReducer** — profile snapshot
-- **SignInReducer** — auth token flag (used with auth context)
-
-### React Contexts (wired in `navigation/navigation.js`)
-- SignIn / auth, Settings, Gateway, PaymentMethods, DeliverySettings
-- Restaurants, Orders, Favorites, Categories, Loader, Language
-- CartSyncWrapper syncs cart with the backend when signed in
-
----
-## API Client Architecture
-
-The `api/` folder contains a centralized API client (`ApiClient` class) that:
-
-1. **Authentication**: JWT-based login/logout with token persistence
-2. **Auto-initialization**: Restores token from AsyncStorage on startup
-3. **Header Management**: Automatic Bearer token injection
-
-### Available API Methods
-
-#### Authentication
-- `login(email, password)`
-- `register(userData)`
-- `logout()`
-
-#### Users
-- `getUserInfo(userId)`
-- `updateUser(userId, userData)`
-- `getUserAddresses(userId)`
-- `addUserAddress(userId, addressData)`
-- `updateUserAddress(userId, addressId, addressData)`
-- `deleteUserAddress(userId, addressId)`
-- `setDefaultAddress(userId, addressId)`
-
-#### Favorites
-- `getFavorites()`
-- `addToFavorites(restaurantId)`
-- `removeFromFavorites(restaurantId)`
-
-#### Wallet
-- `getUserPaymentMethods(userId)`
-- `addPaymentMethod(userId, data)`
-- `removePaymentMethod(userId, paymentMethodId)`
-- `getWalletBalance(userId)`
-- `addMoneyToWallet(userId, amount, paymentMethodId)`
-- `withdrawFromWallet(userId, amount, paymentMethodId)`
-- `getUserTransactions(userId, page, limit)`
-
-#### Restaurants
-- `getRestaurants()`
-- `getRestaurantById(id)`
-- `getCategories()`
-- `searchRestaurantsByCategory(categoryId)`
-
-#### Menu & Products
-- `getFoods(restaurantId)`
-- `getAllMenuItems()`
-- `getVariants()`
-
-#### Orders
-- `createOrder(orderData)`
-- `getOrders()`
-- `getOrderById(orderId)`
-- `updateOrderStatus(orderId, status)`
-- `cancelOrder(orderId)`
-
-#### Cart (Server-side)
-- `getCart()`
-- `addToCart(itemData)`
-- `removeFromCart(itemId)`
-- `updateCartItem(itemId, itemData)`
-- `clearCart()`
-- `syncCart(localItems)`
-
-#### Promotions
-- `getAllActiveOffers()`
-- `getRestaurantPromotions(restaurantId)`
-
-#### Reviews
-- `getRestaurantReviews(restaurantId)`
-
-#### Settings
-- `getSettings()`
-- `getDeliverySettings()`
+Home stack also reaches RestaurantDetail, MenuDetail, map, favorites, addresses, etc. (see `navigation/Stacks.js`).
 
 ---
 
-## Internationalization (i18n)
+## State management
 
-### Configuration
-- Auto-detects device language via `expo-localization`
-- Fallback to English if language not supported
-- Currently supports: **English (en)**, **French (fr)**
+### Redux (`redux/`)
 
-### Usage
-```javascript
-import i18n from '../lang/i18n';
+- **cartReducer** — cart lines (persisted)
+- **userReducer** — profile snapshot (persisted)
+- **SignInReducer** — used from `contexts/authContext.js` (not a separate persisted slice in the same way)
+- **actions/cartActions.js** — cart mutations used with sync
 
-// In components
-<Text>{i18n.t('auth.welcome')}</Text>
+Store uses `redux-persist` + AsyncStorage (`redux/store.js`).
 
-// Change language
-import { changeLanguage } from '../lang/i18n';
-changeLanguage('fr');
-```
+### Contexts (`contexts/`)
 
-### Translation Keys Structure
-- `app`: App metadata
-- `auth`: Authentication screens
-- `home`: Home screen
-- `restaurant`: Restaurant details
-- `menu`: Menu items
-- `cart`: Cart & checkout
-- `order`: Order tracking
-- `wallet`: Payment & wallet
-- `profile`: User profile
-- `settings`: App settings
-- `common`: Shared strings
-- `errors`: Error messages
+Wired from `navigation/navigation.js`: auth, Settings, Gateway, PaymentMethods, DeliverySettings, Restaurants, Orders, Favorites, Categories, Loader, Language.
+
+`CartSyncWrapper` syncs the Redux cart with the backend when signed in.
+
+`RestaurantsContext` / `OrdersContext` open socket.io connections to the API host.
 
 ---
 
-## Configuration
+## API layer
 
-### `config/`
-```javascript
-export const config = {
-  API_BASE_URL: 'http://localhost:5000/api',
-  APP_NAME: 'Good Food',
-  VERSION: '1.1.0',
-  DEMO_MODE: true,
-  DEMO_EMAIL: 'demo@customer.com',
-  DEMO_PASSWORD: 'demo123',
-  API_TIMEOUT: 10000,
-};
-```
+Centralized in `api/` (`ApiClient` + domain modules). Full method/path tables: [`api/README.md`](../api/README.md) and [`api/docs/endpoints.md`](../api/docs/endpoints.md).
 
-The canonical source is `config/index.js` (env-driven via `EXPO_PUBLIC_*`).
+Important corrections vs older notes:
 
-### Asset URL fallbacks
-
-Remote placeholder/icon/avatar URLs are centralized in `config/assets.js` as `assetUrls` and exposed as `config.assetUrls`.
-
-### Demo Mode
-When `DEMO_MODE: true`:
-- Login fields are pre-filled with demo credentials
-- Quick testing without manual input
+- Customer login path is **`POST /auth/customer-login`** (not `/auth/login`).
+- Users live under **`/resource/users/...`**.
+- Products under **`/resource/products?...`**.
+- Payment methods under **`/resource/paymentMethods/...`**.
+- Transactions under **`/resource/transactions/...`** (no separate wallet balance/withdraw client methods).
+- App config: **`GET /resource/app_settings`**.
+- Stripe helpers: **`/payments/stripe/...`**.
+- Upload: **`POST /upload/public`**.
 
 ---
 
-## Key Features
+## Internationalization
 
-### 1. Restaurant Discovery
-- Browse restaurants by category
-- Search by name, cuisine, or location
-- Filter by rating, delivery fee, distance
-- View special offers and promotions
+- `lang/i18n.js` (i18n-js) + `en.json` / `fr.json`
+- Device locale via `expo-localization`; if the language code is not in translations, initial locale falls back to **`fr`** (missing keys still fall back via `defaultLocale = 'en'`)
+- Prefer `i18n.t(...)` from `lang/i18n` for new UI
+- `LanguageContext` also loads the JSON files for a separate `useTranslation()` path — prefer `lang/i18n` as the single source of truth for new code
 
-### 2. Menu & Ordering
-- Detailed menu with categories
-- Product customization (variants, extras)
-- Add to cart with quantity management
-- Cart sync between local and server
+Namespaces in the JSON files include: `app`, `cache`, `navigation`, `drawer`, `search`, `filters`, `auth`, `home`, `tabs`, `restaurant`, `menu`, `cart`, `order`, `payment`, `delivery`, `wallet`, `profile`, `addresses`, `checkout`, `settings`, `common`, `onboarding`, `preference`, `progress`, `errors`, `offers`, `promotion`, `about`, `help`, `map`.
 
-### 3. Order Management
-- Place orders with delivery/pickup options
-- Real-time order tracking
-- Order history with reorder feature
-- Order status updates
+---
 
-### 4. User Account
-- Profile management
-- Multiple delivery addresses
-- Payment methods (credit card, mobile money)
-- Wallet with balance management
-- Favorites management
+## Configuration (`config/index.js`)
 
-### 5. Promotions
-- Platform-wide offers
-- Restaurant-specific promotions
-- Category-based discounts
-- Time-limited flash deals
-- Free delivery offers
+Env-driven via `EXPO_PUBLIC_*` (see `.env.example`):
 
-### 6. Maps Integration
-- Restaurant locations on map
-- Delivery tracking
-- Nearby restaurants
-- Distance calculation
+| Key | Role |
+|-----|------|
+| `API_BASE_URL` | Backend base (default `http://localhost:5000/api`) |
+| `APP_NAME` / `VERSION` | Display metadata (`Good Food Pro` / `1.0.0`) |
+| `DEMO_MODE` / demo credentials | Prefill login + demo API handlers |
+| `FALLBACK_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key fallback |
+| `MAPTILER_API_KEY` | Reserved; unused by current maps |
+| `API_TIMEOUT` | Timeout constant |
+| `assetUrls` | Remote placeholder URLs (`config/assets.js`) |
+
+---
+
+## Key product areas
+
+1. **Discovery** — home list, search, filters, near me, map, categories, offers  
+2. **Ordering** — restaurant menu, variants, cart (local + server sync), checkout  
+3. **Orders** — place, track (map), history, reorder/rate APIs  
+4. **Account** — profile, addresses, favorites, settings, preferences  
+5. **Wallet / payments** — payment methods, Stripe, transactions / add money  
+6. **Maps** — restaurant map + delivery tracking (MapLibre / OSM WebView)
 
 ---
 
 ## Scripts
 
 ```bash
-# Start development server
 npm start
-
-# Run on iOS
 npm run ios
-
-# Run on Android
 npm run android
-
-# Run on web
 npm run web
-
-# Lint code
 npm run lint
-
-# Fix lint errors
 npm run lint-fix
 ```
 
----
-
-## Dependencies Overview
-
-### Production (57 packages)
-Core React Native/Expo ecosystem with navigation, maps, animations, and UI components.
-
-### Development (8 packages)
-ESLint with plugins for React, i18n, and unused imports. Husky for git hooks.
+Optional EAS: `eas.json` (bring your own Expo account).
 
 ---
 
-## Backend Integration
+## Backend integration
 
-The app connects to a custom REST API (not Firebase):
-- **Authentication**: JWT tokens
-- **Database**: MongoDB
-- **Server**: Express.js
-- **Base URL**: Configurable via `EXPO_PUBLIC_API_URL` / `config/index.js`
-
+| Concern | Detail |
+|---------|--------|
+| Auth | JWT Bearer |
+| DB | MongoDB (server-side) |
+| Server | Express.js |
+| Base URL | `EXPO_PUBLIC_API_URL` → `config.API_BASE_URL` |
+| Realtime | socket.io against API origin |
 
 ---
 
-*Last updated: March 2026*
+*Last updated: August 2026 — verified against customer-app sources*

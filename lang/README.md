@@ -16,7 +16,7 @@ This folder holds the app’s i18n setup and translation files. All user-facing 
 - **Translation files:** Imports `en` and `fr` from `./en.json` and `./fr.json` and passes them to the i18n-js `I18n` constructor.
 - **Fallback:** `enableFallback = true` so that if a key is missing in the current locale, the default locale is used.
 - **Default locale:** `defaultLocale = 'en'`.
-- **Device language:** Uses `expo-localization`’s `Localization.locale`; the first part (e.g. `fr` from `fr-FR`) is used. If that locale exists in `translations`, it is set; otherwise the code falls back to `'fr'` when the device language is unsupported (see `lang/i18n.js`). Prefer `changeLanguage()` for explicit switches.
+- **Device language:** Uses `expo-localization`’s `Localization.locale`; the first part (e.g. `fr` from `fr-FR`) is used. If that locale exists in `translations`, it is set; otherwise **initial** `i18n.locale` becomes `'fr'` (see `lang/i18n.js`). Missing *keys* still fall back to `defaultLocale` (`'en'`) because `enableFallback` is true. Prefer `changeLanguage()` for explicit switches.
 - **Setting locale:** `i18n.locale` is set once at load. Use `changeLanguage(locale)` to switch at runtime.
 
 ## Exports from i18n.js
@@ -75,6 +75,9 @@ Keys are grouped by feature. Main namespaces:
 - **errors** – Generic and context errors (network, settings, delivery)  
 - **offers** – Offers screen (available at, valid until, loading deals)  
 - **promotion** – Promotion badges (valid until, discount, free delivery)  
+- **about** – About screen  
+- **help** – Help / support  
+- **map** – Map / tracking copy  
 
 Interpolation uses `{{variable}}` in the JSON (e.g. `{{count}}`, `{{query}}`, `{{name}}`). Pass the object as the second argument to `i18n.t()`.
 

@@ -1,19 +1,22 @@
 # Utils – customer-app
 
-Shared utilities: geolocation/distance, delivery time, AsyncStorage cache.
+Shared helpers: geo/distance, delivery fee/time, map list builders, AsyncStorage cache, geocoding, image pick, restaurant id helpers.
 
 ## Structure
 
 ```
 utils/
-├── README.md           (this file)
-├── docs/
-│   └── utils.md        (export reference)
-├── index.js            (barrel: geoUtils + deliveryTime)
-├── geoUtils.js         (bearing, getDistanceFromLatLonInKm)
-├── deliveryTime.js     (calculateDeliveryTime, getRestaurantDeliveryTime)
-├── cacheUtils.js       (cache barrel)
-├── cacheCommon.js      (keys, config, isCacheExpired, hasDataChanged)
+├── index.js              barrel: geoUtils + deliveryTime + deliverySetting + restaurantsMap
+├── geoUtils.js
+├── deliveryTime.js
+├── deliverySetting.js
+├── restaurantsMap.js
+├── geocodeAddress.js     Nominatim (OSM) geocode
+├── orderTime.js          estimated time formatting
+├── pickImage.js          expo-image-picker helpers
+├── restaurantId.js       id getters / matchers
+├── cacheUtils.js         cache barrel
+├── cacheCommon.js
 ├── cacheFoods.js
 ├── cacheRestaurants.js
 ├── cachePromotions.js
@@ -24,15 +27,31 @@ utils/
 
 ## Imports
 
-- **Geo / delivery**: `import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime } from '../utils'` (or `../utils/index.js`).
-- **Cache**: `import { loadRestaurantsWithSmartCache, cleanupExpiredCache, ... } from '../utils/cacheUtils'`.
+```js
+import { getDistanceFromLatLonInKm, getRestaurantDeliveryTime } from '../utils';
+import { calculateDeliveryFeeFromSetting } from '../utils';
+import { loadRestaurantsWithSmartCache, cleanupExpiredCache } from '../utils/cacheUtils';
+import { geocodeAddress } from '../utils/geocodeAddress';
+import { pickImageFromLibrary } from '../utils/pickImage';
+import { getRestaurantId } from '../utils/restaurantId';
+```
 
-## Modules
+`index.js` does **not** re-export cache, geocode, pickImage, orderTime, or restaurantId — import those files directly.
+
+## Modules (short)
 
 | File | Role |
 |------|------|
-| **geoUtils** | `bearing(φ1, λ1, φ2, λ2)`; `getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2)` (Haversine, km). |
-| **deliveryTime** | `calculateDeliveryTime(distanceKm, prepTime)`; `getRestaurantDeliveryTime(restaurant, userLocation)` → `{ min, max, distance }`. |
-| **cacheUtils** | Re-exports cacheCommon, cacheFoods, cacheRestaurants, cachePromotions, cacheMenus, cacheSignIn, cacheCleanup. |
+| **geoUtils** | Bearing, Haversine, coordinate parsing, polyline bearing, GeoJSON helpers |
+| **deliveryTime** | Delivery ETA windows + distance-to-restaurant helpers |
+| **deliverySetting** | Fee calculation from a delivery-settings document |
+| **restaurantsMap** | Default region, focus styles, sorted/map restaurant lists, zoom helpers |
+| **geocodeAddress** | OpenStreetMap Nominatim lookup |
+| **orderTime** | `formatEstimatedTime` |
+| **pickImage** | Library / camera pick |
+| **restaurantId** | `getRestaurantId`, `restaurantIdsMatch` |
+| **cache\*** | Smart cache for foods / restaurants / promotions / menus / sign-in + cleanup |
 
-See `docs/utils.md` for full export details.
+See [docs/utils.md](docs/utils.md) for export details.
+
+**Note:** `global/utils.js` also exports `getDistanceFromLatLonInKm` (and rating formatters). Prefer `utils/geoUtils` for map/geo work; do not assume both are always interchangeable in every screen.

@@ -1,4 +1,4 @@
-# Documentation — Good Food Customer App
+# Documentation — Good Food Pro Customer App
 
 Technical notes for developers working on this app. For install and first run, start with the root [`README.md`](../README.md).
 
@@ -22,7 +22,7 @@ Technical notes for developers working on this app. For install and first run, s
 
 | Item | Value |
 |------|--------|
-| App version | 1.1.0 |
+| App version | 1.0.0 |
 | Expo | ~54 |
 | React Native | 0.81.5 |
 | Demo login | `demo@customer.com` / `demo123` |

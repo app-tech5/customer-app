@@ -1,31 +1,30 @@
 # Global configuration and shared utilities
 
-This folder holds app-wide constants, theme (colors and layout parameters), and shared utilities. Everything is re-exported from `index.js`, so you can import from `../global` or `../../global` as before.
+App-wide constants, theme, location helper, and small formatters. Everything is re-exported from `index.js`.
 
 ## Modules
 
-| Module        | File           | Contents |
-|---------------|----------------|----------|
-| Constants     | `constants.js` | `language`, `currency`, `apikey`, `grey1` |
-| Colors        | `colors.js`    | `colors` (full palette) |
-| Parameters    | `parameters.js`| `parameters`, `title` (layout / buttons) |
-| Location      | `location.js`  | `location()` (device GPS) |
-| Utils         | `utils.js`     | `generateUID`, `getDistanceFromLatLonInKm` |
+| Module | File | Contents |
+|--------|------|----------|
+| Constants | `constants.js` | `language`, `currency`, `apikey`, `grey1` |
+| Colors | `colors.js` | `colors` palette |
+| Parameters | `parameters.js` | `parameters`, `title` layout tokens |
+| Location | `location.js` | `location()` GPS helper |
+| Utils | `utils.js` | Rating formatters, `generateUID`, `getDistanceFromLatLonInKm` |
 
 ## Documentation
 
-Detailed property documentation (meaning, usage in the app, and conventions) is in the **`docs/`** folder:
-
-- [Constants](docs/constants.md) – language, currency, API key, grey1
-- [Colors](docs/colors.md) – full color palette, grey scale, auth, legacy aliases
-- [Parameters](docs/parameters.md) – header height, styled button, title styles
-- [Location](docs/location.md) – location helper
-- [Utils](docs/utils.md) – generateUID, getDistanceFromLatLonInKm
+- [Constants](docs/constants.md)
+- [Colors](docs/colors.md)
+- [Parameters](docs/parameters.md)
+- [Location](docs/location.md)
+- [Utils](docs/utils.md)
 
 ## Import examples
 
 ```js
-import { language, currency, colors } from '../global';
-import { getDistanceFromLatLonInKm } from '../global';
-import { grey1 } from '../global';
+import { language, currency, colors, grey1 } from '../global';
+import { formatRestaurantRatingSummary, getDistanceFromLatLonInKm } from '../global';
 ```
+
+For map/geo pipelines, prefer `utils/geoUtils` (richer helpers). `global/utils.js` still exposes a Haversine helper used by some older call sites.

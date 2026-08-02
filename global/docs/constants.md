@@ -8,8 +8,8 @@ App-wide configuration constants. Source: `../constants.js`.
 
 - **Type:** `string`
 - **Value:** `"en"`
-- **Meaning:** Default app language code. Used for formatting and locale-aware behaviour.
-- **Used in:** CartDetailsScreen, OrderRequest, MenuDetailScreen, CartScreen, Size, MenuItems (restaurantDetail), OrderListItem, Checkout, FilterModal, Cart.
+- **Meaning:** Default language code for formatting where used.
+- **Imported today in:** Cart, Checkout, ViewCart, MenuItems, CartScreen, CartDetailsScreen, MenuDetailScreen, OrderRequest (and similar cart/order UI).
 
 ---
 
@@ -17,8 +17,8 @@ App-wide configuration constants. Source: `../constants.js`.
 
 - **Type:** `string`
 - **Value:** `"USD"`
-- **Meaning:** Default currency code for prices and payments.
-- **Used in:** CartDetailsScreen, OrderRequest, MenuDetailScreen, CartScreen, Size, MenuItems, RestaurantDetailComponent, OrderListItem, Checkout, FilterModal, Cart.
+- **Meaning:** Default currency code for price display.
+- **Imported today in:** Cart, Checkout, FilterModal, RestaurantDetailComponent, PromotionCard, ViewCart, MenuItems, CartScreen, CartDetailsScreen, and several order/wallet screens that format money.
 
 ---
 
@@ -26,8 +26,8 @@ App-wide configuration constants. Source: `../constants.js`.
 
 - **Type:** `object`
 - **Value:** `{}`
-- **Meaning:** Placeholder for external API keys (e.g. Google API). Fill with your key(s) where needed.
-- **Used in:** Not referenced in current codebase; reserved for future map or other services.
+- **Meaning:** Legacy placeholder object. Not populated; maps do not read Google/MapTiler keys from here.
+- **Used in:** Passed through some restaurant/map props historically; not a live secret store.
 
 ---
 
@@ -35,5 +35,5 @@ App-wide configuration constants. Source: `../constants.js`.
 
 - **Type:** `string`
 - **Value:** `"#e6e6e6"`
-- **Meaning:** Standalone grey token (light grey). Distinct from `colors.grey1` (which is darker, alias for grey.700).
-- **Used in:** GroupFoodHeader.
+- **Meaning:** Standalone light grey (distinct from `colors.grey1`, which aliases `colors.grey[700]`).
+- **Used in:** `components/home/HeaderTabs.js`.

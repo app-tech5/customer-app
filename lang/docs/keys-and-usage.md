@@ -22,6 +22,11 @@ This file maps **namespaces** (and representative keys) to **files** in customer
 - **settings.*** – Settings, PreferenceScreen, SettingContext (title, language, notifications, logout, about).
 - **errors.*** – DeliverySettingsContext, SettingContext (deliverySettingsLoad, settingsLoad, context errors).
 - **offers.***, **promotion.*** – Offers screen, PromotionCard (availableAt, validUntil, discount, freeDelivery).
+- **about.*** – AboutScreen.
+- **help.*** – HelpSupportScreen.
+- **map.*** – Map / order-tracking UI strings.
+- **preference.*** – PreferenceScreen.
+- **payment.***, **delivery.***, **tabs.***, **onboarding.***, **progress.*** – Payment labels, delivery/pickup, onboarding and progress copy.
 
 ## Usage pattern
 

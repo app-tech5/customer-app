@@ -1,59 +1,89 @@
 # Backend endpoints reference
 
-Base URL: `config.API_BASE_URL` (see `api/constants.js`). All endpoints below are relative to that base. Auth: `Authorization: Bearer <token>` for protected routes.
+Paths as called by this app’s `api/` client. Base URL: `config.API_BASE_URL` (`api/constants.js`). Relative paths below. Auth: `Authorization: Bearer <token>` when a session token is stored.
 
-## Auth
+> Source of truth: the `api/*.js` modules. If this file drifts, trust the code.
+
+## Auth (`auth.js`)
 
 | Method | Path |
 |--------|------|
-| POST | `/auth/login` |
+| POST | `/auth/customer-login` |
 | POST | `/auth/signup` |
 | POST | `/auth/refresh` |
 | POST | `/auth/forgot-password` |
 | POST | `/auth/reset-password` |
 | POST | `/auth/change-password` |
 
-## Users
+## Users (`user.js`)
 
 | Method | Path |
 |--------|------|
-| GET | `/users/:userId` |
-| PUT | `/users/:userId` |
-| PUT | `/users/:userId/avatar` |
+| GET | `/resource/users/:userId` |
+| PUT | `/resource/users/:userId` |
+| PUT | `/resource/users/:userId/avatar` |
+
+## Favorites (`favorites.js`)
+
+| Method | Path |
+|--------|------|
 | GET | `/users/favorites` |
 | POST | `/users/favorites/:restaurantId` |
 | DELETE | `/users/favorites/:restaurantId` |
+
+## Addresses (`addresses.js`)
+
+| Method | Path |
+|--------|------|
 | GET | `/users/:userId/addresses` |
 | POST | `/users/:userId/addresses` |
 | GET | `/users/:userId/addresses/:addressId` |
 | PUT | `/users/:userId/addresses/:addressId` |
 | DELETE | `/users/:userId/addresses/:addressId` |
 | PUT | `/users/:userId/addresses/:addressId/default` |
-| GET | `/users/:userId/payment-methods` |
-| GET | `/users/:userId/payment-methods/:paymentMethodId` |
-| POST | `/users/:userId/payment-methods` |
-| DELETE | `/users/:userId/payment-methods/:paymentMethodId` |
-| PUT | `/users/:userId/payment-methods/:paymentMethodId/default` |
-| GET | `/users/:userId/transactions` |
-| GET | `/users/:userId/transactions/:transactionId` |
-| GET | `/users/:userId/wallet/balance` |
-| POST | `/users/:userId/wallet/add-money` |
-| POST | `/users/:userId/wallet/withdraw` |
-| GET | `/users/:userId/reviews` |
 
-## Resources (read / global)
+## Payment methods (`paymentMethods.js`)
+
+| Method | Path |
+|--------|------|
+| GET | `/resource/paymentMethods/byUserId` |
+| POST | `/resource/paymentMethods` |
+| GET | `/resource/paymentMethods/:id` |
+| PUT | `/resource/paymentMethods/:id` |
+| DELETE | `/resource/paymentMethods/:id` |
+
+## Stripe payments (`payments.js`)
+
+| Method | Path |
+|--------|------|
+| POST | `/payments/stripe/payment-intent` |
+| POST | `/payments/stripe/attach-payment-method` |
+| POST | `/payments/stripe/remove-payment-method` |
+
+## Wallet / transactions (`wallet.js`)
+
+| Method | Path |
+|--------|------|
+| GET | `/resource/transactions/byUserId` |
+| POST | `/resource/transactions` |
+
+## Resources – restaurants, catalog, orders, …
 
 | Method | Path |
 |--------|------|
 | GET | `/resource/restaurants` |
 | GET | `/resource/restaurants/:id` |
-| GET | `/resource/restaurants/nearby` |
+| GET | `/resource/restaurants/nearby?lat=&lng=&radius=` |
 | GET | `/resource/restaurants/:id/opening-hours` |
 | GET | `/resource/categories` |
 | GET | `/resource/categories/:id` |
 | GET | `/resource/menus` |
+| GET | `/resource/menus?restaurantId=` |
 | GET | `/resource/variants` |
 | GET | `/resource/variants/:id` |
+| GET | `/resource/products?type=:restaurantId` |
+| GET | `/resource/products/:foodId` |
+| GET | `/resource/products/:foodId?restaurantId=` |
 | GET | `/resource/promotions` |
 | GET | `/resource/promotions/:id` |
 | POST | `/resource/promotions/validate-code` |
@@ -62,25 +92,7 @@ Base URL: `config.API_BASE_URL` (see `api/constants.js`). All endpoints below ar
 | POST | `/resource/reviews` |
 | PUT | `/resource/reviews/:id` |
 | DELETE | `/resource/reviews/:id` |
-| GET | `/resource/deliverysettings` |
-| GET | `/resource/deliverysettings/estimate` |
-| GET | `/resource/settings` |
-| GET | `/resource/settings/app-config` |
-| GET | `/resource/drivers/:id` |
-| GET | `/resource/drivers/:id/location` |
-
-## Products (foods)
-
-| Method | Path |
-|--------|------|
-| GET | `/products?type=:restaurantId` |
-| GET | `/products/:foodId` |
-| GET | `/products/:foodId?restaurantId=:restaurantId` |
-
-## Orders
-
-| Method | Path |
-|--------|------|
+| GET | `/users/:userId/reviews` |
 | GET | `/resource/orders` |
 | GET | `/resource/orders/:id` |
 | POST | `/resource/orders` |
@@ -88,8 +100,17 @@ Base URL: `config.API_BASE_URL` (see `api/constants.js`). All endpoints below ar
 | GET | `/resource/orders/:id/tracking` |
 | POST | `/resource/orders/:id/rate` |
 | POST | `/resource/orders/:id/reorder` |
+| GET | `/resource/deliverysettings` |
+| GET | `/resource/deliverysettings?type=:restaurantId` |
+| GET | `/resource/deliverysettings/estimate?addressId=&restaurantId=&amount=` |
+| GET | `/resource/settings` |
+| GET | `/resource/app_settings` |
+| GET | `/resource/gateways` |
+| GET | `/resource/drivers/:id` |
+| GET | `/resource/drivers/:id/location` |
+| GET | `/resource/drivers/:id/location?orderId=` |
 
-## Cart
+## Cart (`cart.js`)
 
 | Method | Path |
 |--------|------|
@@ -102,3 +123,9 @@ Base URL: `config.API_BASE_URL` (see `api/constants.js`). All endpoints below ar
 | POST | `/cart/sync` |
 | POST | `/cart/promo` |
 | DELETE | `/cart/promo` |
+
+## Upload (`upload.js`)
+
+| Method | Path |
+|--------|------|
+| POST | `/upload/public` (multipart) |
