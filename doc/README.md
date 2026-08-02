@@ -86,8 +86,6 @@ doc/
 ├── README.md                    # This file - Documentation index
 ├── architecture.md              # Technical architecture reference
 ├── api-reference.md             # REST API endpoints documentation
-├── 2025-01-updates.md          # Monthly updates (January 2025)
-└── migration-api-firebase.md   # Historical Firebase → REST migration notes
 ```
 
 ### Monthly files:
@@ -109,7 +107,6 @@ Group all updates of the month with:
 ```
 YYYY-MM-updates.md
 ```
-Example: `2025-01-updates.md` (all January 2025 updates)
 
 ### Reference files:
 - `architecture.md` (technical reference)

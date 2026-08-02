@@ -168,8 +168,6 @@ customer-app/
 └── doc/                      # Documentation
     ├── README.md
     ├── architecture.md
-    ├── 2025-01-updates.md
-    └── migration-api-firebase.md
 ```
 
 ---
@@ -454,7 +452,6 @@ The app connects to a custom REST API (not Firebase):
 - **Server**: Express.js
 - **Base URL**: Configurable in `config.js`
 
-See `migration-api-firebase.md` for migration details.
 
 ---
 
