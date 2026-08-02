@@ -1,0 +1,28 @@
+# Buyer runtime smoke against LIVE API (credentials prefilled when DEMO_MODE=true).
+appId: com.goodfoods.goodfoods
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      text: ".*(Continue|Sign In|Welcome!|Get Started|Demo Mode).*"
+    timeout: 120000
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Get Started"
+    commands:
+      - tapOn: "Get Started"
+- extendedWaitUntil:
+    visible: "Sign In"
+    timeout: 60000
+- assertVisible: "Demo Mode"
+- tapOn: "Sign In"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Special Offers|Top Rated|Discover|Most Popular|View All|Restaurants).*"
+    timeout: 120000
+- takeScreenshot: ci-smoke-home
