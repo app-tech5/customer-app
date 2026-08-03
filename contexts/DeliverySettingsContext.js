@@ -61,7 +61,12 @@ export function DeliverySettingsProvider({ children }) {
   const hasMemberFreeDelivery =
     !!subscriptionBenefits?.active && !!subscriptionBenefits?.freeDelivery
 
-  const calculateDeliveryFee = (deliverySetting, subtotal, distance = null) => {
+  const calculateDeliveryFee = (
+    deliverySetting,
+    subtotal,
+    distance = null,
+    options = {}
+  ) => {
     if (!deliverySetting) return 2.99
 
     if (deliverySetting.isDeliveryEnabled === false) {
@@ -85,6 +90,12 @@ export function DeliverySettingsProvider({ children }) {
     ) {
       return 0
     }
+
+    const surgeMultiplier = Number(options.surgeMultiplier)
+    const applySurge =
+      Number.isFinite(surgeMultiplier) && surgeMultiplier > 1
+        ? surgeMultiplier
+        : 1
     
     if (
       ['DYNAMIC', 'RESTAURANT_DEFINED'].includes(
@@ -99,26 +110,40 @@ export function DeliverySettingsProvider({ children }) {
         maxFee
       } = deliverySetting.dynamicDeliveryFee || {}
   
-      const calculatedFee =
+      let calculatedFee =
         (Number(baseFee) || 1.5) +
         distance * (Number(perKmFee) || 0.5)
   
-      return Math.min(
+      calculatedFee = Math.min(
         Math.max(
           calculatedFee,
           Number(minFee) || 1.5
         ),
         Number(maxFee) || 10
       )
+
+      if (applySurge > 1) calculatedFee *= applySurge
+      return Number(calculatedFee.toFixed(2))
     }
     
-    return parseFloat(
-      deliverySetting.fixedDeliveryFee || 2.99
-    )
+    let fixed = parseFloat(deliverySetting.fixedDeliveryFee || 2.99)
+    if (applySurge > 1 && fixed > 0) fixed *= applySurge
+    return Number(fixed.toFixed(2))
   }
 
-  const calculateTotal = (deliverySetting, subtotal, taxRate = null, distance = null) => {
-    const deliveryFee = calculateDeliveryFee(deliverySetting, subtotal, distance)
+  const calculateTotal = (
+    deliverySetting,
+    subtotal,
+    taxRate = null,
+    distance = null,
+    options = {}
+  ) => {
+    const deliveryFee = calculateDeliveryFee(
+      deliverySetting,
+      subtotal,
+      distance,
+      options
+    )
     const finalDeliveryFee = deliveryFee == null ? 0 : deliveryFee
 
     const taxAmount = subtotal * (taxRate || 0.08)
@@ -131,6 +156,7 @@ export function DeliverySettingsProvider({ children }) {
       total,
       isFreeDelivery: finalDeliveryFee === 0,
       memberFreeDelivery: hasMemberFreeDelivery,
+      surgeMultiplier: options.surgeMultiplier || 1,
     }
   }
 

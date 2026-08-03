@@ -2,6 +2,7 @@
 export function calculateDeliveryFeeFromSetting(
   setting,
   distanceKm = null,
+  options = {},
 ) {
   if (!setting) {
     return 0;
@@ -16,6 +17,10 @@ export function calculateDeliveryFeeFromSetting(
     maxDeliveryDistance,
     isDeliveryEnabled,
   } = setting;
+
+  const surgeMultiplier = Number(options.surgeMultiplier);
+  const applySurge =
+    Number.isFinite(surgeMultiplier) && surgeMultiplier > 1 ? surgeMultiplier : 1;
   
   if (isDeliveryEnabled === false) {
     return null;
@@ -33,6 +38,8 @@ export function calculateDeliveryFeeFromSetting(
     return null;
   }
   
+  let fee = 0;
+
   if (
     ['DYNAMIC', 'RESTAURANT_DEFINED'].includes(deliveryFeeType) &&
     distanceKm != null
@@ -46,27 +53,28 @@ export function calculateDeliveryFeeFromSetting(
     
     if (!Number.isFinite(baseFee) || !Number.isFinite(perKmFee)) {
       const fixed = Number(fixedDeliveryFee);
-      return Number.isFinite(fixed) ? fixed : 0;
-    }
-
-    let fee = baseFee + distanceKm * perKmFee;
+      fee = Number.isFinite(fixed) ? fixed : 0;
+    } else {
+      fee = baseFee + distanceKm * perKmFee;
     
-    if (Number.isFinite(minFee)) {
-      fee = Math.max(fee, minFee);
-    }
+      if (Number.isFinite(minFee)) {
+        fee = Math.max(fee, minFee);
+      }
 
-    if (Number.isFinite(maxFee)) {
-      fee = Math.min(fee, maxFee);
+      if (Number.isFinite(maxFee)) {
+        fee = Math.min(fee, maxFee);
+      }
     }
-
-    return Number(fee.toFixed(2));
+  } else {
+    const fixed = Number(fixedDeliveryFee);
+    fee = Number.isFinite(fixed) ? fixed : 0;
   }
-  
-  const fixed = Number(fixedDeliveryFee);
 
-  return Number.isFinite(fixed)
-    ? Number(fixed.toFixed(2))
-    : 0;
+  if (applySurge > 1 && fee > 0) {
+    fee = fee * applySurge;
+  }
+
+  return Number(fee.toFixed(2));
 }
 
 export function usesDynamicDeliveryFee(setting) {

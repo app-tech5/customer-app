@@ -13,6 +13,7 @@ import './categories';
 import './orders';
 import './chat';
 import './subscriptions';
+import './intelligence';
 import './settings';
 import './gateways';
 import './drivers';
@@ -200,5 +201,11 @@ export const getMySubscription = () => api.getMySubscription();
 export const getSubscriptionBenefits = () => api.getSubscriptionBenefits();
 export const subscribeToPlan = (planId) => api.subscribeToPlan(planId);
 export const cancelMySubscription = () => api.cancelMySubscription();
+
+export const getIntelligenceRecommendations = (params) =>
+  api.getIntelligenceRecommendations(params);
+export const getIntelligenceEta = (params) => api.getIntelligenceEta(params);
+export const getIntelligenceSurge = (params) => api.getIntelligenceSurge(params);
+export const getIntelligenceQuote = (params) => api.getIntelligenceQuote(params);
 
 export default api;

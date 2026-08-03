@@ -11,6 +11,8 @@ import HeaderTabs from '../components/home/HeaderTabs'
 import ReviewCard from '../components/restaurantDetail/ReviewCard'
 import PromotionCard from '../components/restaurantDetail/PromotionCard'
 import RestaurantDetailComponent from '../components/RestaurantDetailComponent'
+import RecommendationsStrip from '../components/RecommendationsStrip'
+import IntelligenceBadges from '../components/IntelligenceBadges'
 import { colors, formatRestaurantRatingDisplay } from '../global'
 import { config } from '../config'
 import { getRestaurantDeliveryTime } from '../utils'
@@ -341,6 +343,13 @@ export default function RestaurantDetail({ route, navigation }) {
                 {getRestaurantStatus.statusText}
               </Text>
             </View>
+
+            <IntelligenceBadges
+              restaurantId={getRestaurantMongoId(restaurant) || restaurant._id || restaurant.id}
+              lat={userLocation?.coords?.latitude ?? userLocation?.latitude}
+              lng={userLocation?.coords?.longitude ?? userLocation?.longitude}
+              compact
+            />
             
             {(restaurant.address || restaurant.phone) && (
               <View style={styles.restaurantInfoRow}>
@@ -398,6 +407,12 @@ export default function RestaurantDetail({ route, navigation }) {
           )}
 
           <Divider width={1} color={colors.divider} style={{ marginHorizontal: 20, marginTop: reviews.length > 0 ? 10 : 0 }} />
+
+          <RecommendationsStrip
+            restaurant={restaurant}
+            lat={userLocation?.coords?.latitude ?? userLocation?.latitude}
+            lng={userLocation?.coords?.longitude ?? userLocation?.longitude}
+          />
           
           <View style={styles.tabsWrapper}>
             <HeaderTabs

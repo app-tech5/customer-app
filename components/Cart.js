@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {language, currency, colors}  from '../global'
 import Checkout from './Checkout'
+import IntelligenceBadges from './IntelligenceBadges'
+import RecommendationsStrip from './RecommendationsStrip'
 import { Ionicons } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
 import { getRestaurantDeliverySettings } from '../api'
@@ -20,9 +22,19 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
     const dispatch = useDispatch()
     const { calculateTotal } = useDeliverySettings()
     const [deliverySetting, setDeliverySetting] = useState(null)
+    const [surgeMultiplier, setSurgeMultiplier] = useState(1)
+    const [etaArrivalAt, setEtaArrivalAt] = useState(null)
+    const userState = useSelector((state) => state.userReducer)
+    const productIds = items
+      .map((it) => it.item || it.id)
+      .filter(Boolean)
+      .map(String)
+    const restaurantId =
+      restaurant?.restaurantId || restaurant?.id || restaurant?._id
+    const userLat = userState?.lat ?? userState?.latitude
+    const userLng = userState?.lng ?? userState?.longitude
 
     useEffect(() => {
-        const restaurantId = restaurant?.restaurantId || restaurant?.id || restaurant?._id
         if (!restaurantId) {
             setDeliverySetting(null)
             return undefined
@@ -77,7 +89,13 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
     }, [])
     
     const distance = restaurant?.distance > 0 ? restaurant.distance : null
-    const totals = calculateTotal(deliverySetting, total, restaurant?.taxRate, distance) || {
+    const totals = calculateTotal(
+      deliverySetting,
+      total,
+      restaurant?.taxRate,
+      distance,
+      { surgeMultiplier }
+    ) || {
       subtotal: total,
       deliveryFee: 2.99,
       taxAmount: total * 0.08,
@@ -213,6 +231,28 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.itemsContent}
                     >
+                        {restaurantId ? (
+                          <>
+                            <IntelligenceBadges
+                              restaurantId={restaurantId}
+                              lat={userLat}
+                              lng={userLng}
+                              subtotal={total}
+                              productIds={productIds}
+                              compact
+                              onQuote={(q) => {
+                                setSurgeMultiplier(q?.surge?.active ? q.surge.multiplier : 1)
+                                setEtaArrivalAt(q?.eta?.estimatedArrivalAt || null)
+                              }}
+                            />
+                            <RecommendationsStrip
+                              restaurant={restaurant}
+                              productIds={productIds}
+                              lat={userLat}
+                              lng={userLng}
+                            />
+                          </>
+                        ) : null}
                         {groupedItems.length === 0 ? (
                             <View style={styles.emptyContainer}>
                                 <Ionicons name="basket-outline" size={64} color={colors.grey[300]} />
@@ -330,6 +370,8 @@ const Cart = ({restaurantName, setViewCartButton, setModalVisible, restaurant})=
                                     closeModal={closeModal}
                                     deliverySetting={deliverySetting}
                                     restaurant={restaurant}
+                                    surgeMultiplier={surgeMultiplier}
+                                    estimatedArrivalAt={etaArrivalAt}
                                 />
                             </View>
                         </View>
