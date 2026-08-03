@@ -259,6 +259,33 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
     return { client_secret: `demo_pi_${Date.now()}_secret` };
   }
 
+  const chatPost = matchPath(endpoint, '/orders/:orderId/chat');
+  if (chatPost && method === 'POST') {
+    const orderId = chatPost[1];
+    const text = String(body.text || '').trim();
+    if (!text) throw new Error('Message text is required');
+    const msg = {
+      id: newId('demo_chat'),
+      order: orderId,
+      sender: String(client.user?.id || 'demo_user'),
+      senderName: client.user?.name || 'You',
+      senderRole: 'customer',
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    await updateDemoState((state) => {
+      const prev = state.chatMessagesByOrder?.[orderId] || [];
+      return {
+        ...state,
+        chatMessagesByOrder: {
+          ...(state.chatMessagesByOrder || {}),
+          [orderId]: [...prev, msg],
+        },
+      };
+    });
+    return msg;
+  }
+
   if (endpoint === '/resource/transactions' && method === 'POST') {
     const transaction = {
       _id: newId('demo_tx'),
@@ -419,6 +446,15 @@ export async function handleDemoRead(client, endpoint, method) {
       if (order) return order;
       throw new Error('Order not found');
     }
+  }
+
+  const chatGet = matchPath(endpoint, '/orders/:orderId/chat');
+  if (chatGet) {
+    const orderId = chatGet[1];
+    return {
+      orderId,
+      messages: state.chatMessagesByOrder?.[orderId] || [],
+    };
   }
 
   if (!client.token?.startsWith('demo_token_')) {

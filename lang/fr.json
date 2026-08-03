@@ -764,5 +764,14 @@
     "limitedTime": "Durée limitée",
     "freeDelivery": "Livraison gratuite",
     "discount": "{{value}}% de réduction"
+  },
+  "chat": {
+    "titleWith": "Chat avec {{name}}",
+    "driver": "Livreur",
+    "withDriver": "Discuter avec le livreur",
+    "emptyTitle": "Aucun message",
+    "emptySub": "Dites bonjour pour coordonner la livraison.",
+    "placeholder": "Écrire un message…",
+    "send": "Envoyer"
   }
 }

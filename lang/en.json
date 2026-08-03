@@ -812,5 +812,14 @@
     "limitedTime": "Limited Time",
     "freeDelivery": "Free Delivery",
     "discount": "{{value}}% OFF"
+  },
+  "chat": {
+    "titleWith": "Chat with {{name}}",
+    "driver": "Driver",
+    "withDriver": "Chat with driver",
+    "emptyTitle": "No messages yet",
+    "emptySub": "Say hello to coordinate the delivery.",
+    "placeholder": "Type a message…",
+    "send": "Send"
   }
 }

@@ -12,6 +12,7 @@ import CategoryResults from '../screens/CategoryResults'
 import ItemResults from '../screens/ItemResults'
 import OrdersScreen from '../screens/OrdersScreen'
 import OrderTracking from '../screens/OrderTracking'
+import OrderChatScreen from '../screens/OrderChatScreen'
 import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
 import CartDetailsScreen from '../screens/CartDetailsScreen'
@@ -100,6 +101,11 @@ export function CartNavigator() {
       <CartStack.Screen
         name="OrderTracking"
         component={OrderTracking}
+        options={{ headerShown: true }} />
+
+      <CartStack.Screen
+        name="OrderChat"
+        component={OrderChatScreen}
         options={{ headerShown: true }} />
 
     </CartStack.Navigator>
@@ -362,6 +368,11 @@ export function OrdersNavigator() {
         component={OrderTracking}
         options={{ headerShown: true }}
       />
+      <OrdersStack.Screen
+        name="OrderChat"
+        component={OrderChatScreen}
+        options={{ headerShown: true }}
+      />
     </OrdersStack.Navigator>
   )
 }
@@ -401,6 +412,11 @@ export function OrderStatusNavigator({ navigation, route }) {
           headerBackVisible: false,
           headerLeft: () => null,
         }}
+      />
+      <OrderStatusStack.Screen
+        name="OrderChat"
+        component={OrderChatScreen}
+        options={{ headerShown: true }}
       />
     </OrderStatusStack.Navigator>
   )

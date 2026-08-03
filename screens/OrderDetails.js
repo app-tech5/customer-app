@@ -436,7 +436,7 @@ export default function OrderDetails() {
         </TouchableOpacity>
       )}
 
-      {['preparing', 'out_for_delivery'].includes(order.status?.toLowerCase()) && (
+      {['preparing', 'out_for_delivery', 'ready'].includes(order.status?.toLowerCase()) && (
         <TouchableOpacity
           style={styles.trackButton}
           onPress={() => navigation.navigate('OrderTracking', { order })}
@@ -444,6 +444,27 @@ export default function OrderDetails() {
           <Ionicons name="location" size={20} color={colors.primary} />
           <Text style={styles.trackButtonText}>
             {i18n.t('order.track', 'Track Order')}
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {order.driver && !['cancelled'].includes(order.status?.toLowerCase()) && (
+        <TouchableOpacity
+          style={styles.trackButton}
+          onPress={() =>
+            navigation.navigate('OrderChat', {
+              order,
+              orderId: order.id || order._id,
+              peerName:
+                order.driver?.userId?.name ||
+                order.driver?.name ||
+                i18n.t('chat.driver', 'Driver'),
+            })
+          }
+        >
+          <Ionicons name="chatbubble-ellipses" size={20} color={colors.primary} />
+          <Text style={styles.trackButtonText}>
+            {i18n.t('chat.withDriver', 'Chat with driver')}
           </Text>
         </TouchableOpacity>
       )}

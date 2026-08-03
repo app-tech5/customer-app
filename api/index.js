@@ -11,6 +11,7 @@ import './foods';
 import './reviews';
 import './categories';
 import './orders';
+import './chat';
 import './settings';
 import './gateways';
 import './drivers';
@@ -185,10 +186,13 @@ export const addMoneyToWallet = (transactionData) =>
   api.addMoneyToWallet(transactionData);
 export const recordOrderPayment = (payload) => api.recordOrderPayment(payload);
 export const updatePaymentMethod = (paymentMethodId, paymentMethodData) =>
-  api.updatePaymentMethod(paymentMethodId, paymentMethodData);      
+  api.updatePaymentMethod(paymentMethodId, paymentMethodData);
 export const restaurantsCol = 'restaurants';
 export const categoriesCol = 'categories';
 export const ordersCol = 'orders';
 export const userRef = 'users';
+export const getOrderChat = (orderId) => api.getOrderChat(orderId);
+export const sendOrderChatMessage = (orderId, text) =>
+  api.sendOrderChatMessage(orderId, text);
 
 export default api;
