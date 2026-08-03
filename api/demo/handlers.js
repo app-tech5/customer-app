@@ -23,6 +23,47 @@ const parseBody = (options) => {
 
 const newId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
+const DEMO_CUSTOMER_PLAN = {
+  id: 'demo_plan_customer_plus',
+  name: 'Good Food Plus',
+  target: 'customer',
+  price: 4.99,
+  currency: 'USD',
+  billingCycle: 'monthly',
+  benefits: ['Free delivery on all orders', 'Exclusive member deals', 'Priority support'],
+  benefitFlags: {
+    freeDelivery: true,
+    discountPercent: 0,
+    reducedCommissionPercent: 0,
+    prioritySupport: true,
+  },
+  isActive: true,
+};
+
+const demoBenefitsFromEnrollment = (enrollment) => {
+  if (!enrollment || enrollment.status !== 'active') {
+    return {
+      active: false,
+      freeDelivery: false,
+      discountPercent: 0,
+      reducedCommissionPercent: 0,
+      prioritySupport: false,
+      planName: null,
+      currentPeriodEnd: null,
+    };
+  }
+  return {
+    active: true,
+    freeDelivery: true,
+    discountPercent: 0,
+    reducedCommissionPercent: 0,
+    prioritySupport: true,
+    planName: DEMO_CUSTOMER_PLAN.name,
+    currentPeriodEnd: enrollment.currentPeriodEnd,
+    benefits: DEMO_CUSTOMER_PLAN.benefits,
+  };
+};
+
 const getRestaurantId = (restaurantRef) => {
   if (!restaurantRef) return null;
   if (typeof restaurantRef === 'string' || typeof restaurantRef === 'number') {
@@ -286,6 +327,51 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
     return msg;
   }
 
+  const subSubscribe = matchPath(endpoint, '/subscriptions/:id/subscribe');
+  if (subSubscribe && method === 'POST') {
+    const planId = subSubscribe[1];
+    if (planId !== DEMO_CUSTOMER_PLAN.id) {
+      throw new Error('Subscription plan not found');
+    }
+    const end = new Date();
+    end.setMonth(end.getMonth() + 1);
+    const enrollment = {
+      id: newId('demo_sub'),
+      status: 'active',
+      target: 'customer',
+      startedAt: new Date().toISOString(),
+      currentPeriodEnd: end.toISOString(),
+      cancelledAt: null,
+      autoRenew: true,
+      paymentMethod: 'wallet',
+      plan: DEMO_CUSTOMER_PLAN,
+    };
+    await updateDemoState((state) => ({ ...state, subscriptionEnrollment: enrollment }));
+    return {
+      enrollment,
+      benefits: demoBenefitsFromEnrollment(enrollment),
+    };
+  }
+
+  if (endpoint === '/subscriptions/mine/cancel' && method === 'POST') {
+    const enrollment = {
+      id: 'demo_sub_cancelled',
+      status: 'cancelled',
+      target: 'customer',
+      startedAt: new Date().toISOString(),
+      currentPeriodEnd: new Date().toISOString(),
+      cancelledAt: new Date().toISOString(),
+      autoRenew: false,
+      paymentMethod: 'wallet',
+      plan: DEMO_CUSTOMER_PLAN,
+    };
+    await updateDemoState((state) => ({ ...state, subscriptionEnrollment: null }));
+    return {
+      enrollment,
+      benefits: demoBenefitsFromEnrollment(null),
+    };
+  }
+
   if (endpoint === '/resource/transactions' && method === 'POST') {
     const transaction = {
       _id: newId('demo_tx'),
@@ -455,6 +541,23 @@ export async function handleDemoRead(client, endpoint, method) {
       orderId,
       messages: state.chatMessagesByOrder?.[orderId] || [],
     };
+  }
+
+  if (endpoint.startsWith('/subscriptions') && endpoint.split('?')[0] === '/subscriptions') {
+    return { target: 'customer', plans: [DEMO_CUSTOMER_PLAN] };
+  }
+
+  if (endpoint === '/subscriptions/mine') {
+    const enrollment = state.subscriptionEnrollment || null;
+    return {
+      target: 'customer',
+      enrollment,
+      benefits: demoBenefitsFromEnrollment(enrollment),
+    };
+  }
+
+  if (endpoint === '/subscriptions/mine/benefits') {
+    return demoBenefitsFromEnrollment(state.subscriptionEnrollment || null);
   }
 
   if (!client.token?.startsWith('demo_token_')) {

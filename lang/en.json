@@ -821,5 +821,26 @@
     "emptySub": "Say hello to coordinate the delivery.",
     "placeholder": "Type a message…",
     "send": "Send"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "menuSubtitle": "Free delivery and member perks",
+    "introTitle": "Good Food Plus",
+    "introSub": "Subscribe once and unlock free delivery on every order, plus member-only perks.",
+    "activePlan": "Active plan",
+    "validUntil": "Valid until {{date}}",
+    "subscribe": "Subscribe",
+    "free": "Free",
+    "noPlans": "No plans available right now.",
+    "confirmTitle": "Confirm subscription",
+    "confirmMessage": "Subscribe to {{name}} for {{price}} / {{cycle}}? The amount is charged from your wallet.",
+    "subscribeSuccess": "You are subscribed. Enjoy free delivery!",
+    "subscribeError": "Could not subscribe. Check your wallet balance and try again.",
+    "cancelTitle": "Cancel subscription",
+    "cancelMessage": "You will lose member benefits at the end of the current period.",
+    "cancelAction": "Cancel plan",
+    "cancelSuccess": "Subscription cancelled.",
+    "cancelError": "Could not cancel subscription.",
+    "loadError": "Could not load subscription plans."
   }
 }

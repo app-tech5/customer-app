@@ -261,6 +261,13 @@ export default function AccountScreen({ navigation }) {
       />
 
       <MenuItem
+        icon="diamond-outline"
+        title={i18n.t('subscription.title')}
+        subtitle={i18n.t('subscription.menuSubtitle')}
+        onPress={() => navigation.navigate('Subscriptions')}
+      />
+
+      <MenuItem
         icon="location"
         title={i18n.t('addresses.title')}
         subtitle={i18n.t('profile.manageAddresses')}

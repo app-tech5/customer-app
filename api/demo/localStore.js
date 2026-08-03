@@ -17,6 +17,7 @@ const emptyState = () => ({
   transactions: [],
   registeredUsers: [],
   chatMessagesByOrder: {},
+  subscriptionEnrollment: null,
 });
 
 export async function getDemoState() {

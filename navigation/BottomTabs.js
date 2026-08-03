@@ -1,13 +1,26 @@
 import React from 'react'
 import { Icon, withBadge} from 'react-native-elements'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
 import { HomeNavigator, SearchNavigator, AccountNavigator, OrdersNavigator } from './Stacks'
 import { CartNavigator } from './Stacks'
 import { useSelector } from 'react-redux'
 import { Ionicons, Feather } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
-const Tab = createBottomTabNavigator() 
+
+const Tab = createBottomTabNavigator()
+
+const HIDE_TAB_ROUTES = new Set(['OrderChat', 'OrderTracking', 'OrderDetails'])
+
+function tabBarVisibleForRoute(route) {
+  const routeName = getFocusedRouteNameFromRoute(route)
+  if (HIDE_TAB_ROUTES.has(routeName)) {
+    return { display: 'none' }
+  }
+  return undefined
+}
+
 export default function BottomTabs() {
   const cartCount = useSelector((state) => state.cartReducer.length)
   const BadgeIcon = withBadge(cartCount)(Icon)
@@ -50,8 +63,9 @@ export default function BottomTabs() {
          <Tab.Screen 
         name = "Cart"
          component={CartNavigator} 
-         options ={{
+         options={({ route }) => ({
            headerShown: false,
+           tabBarStyle: tabBarVisibleForRoute(route),
            tabBarIcon: ({ color, size }) => (
             <BadgeIcon
               type="material-community"
@@ -60,18 +74,19 @@ export default function BottomTabs() {
               color={color}
             />
            )
-         }}
+         })}
          />
       <Tab.Screen
         name="Orders"
         component={OrdersNavigator}
-        options={{
+        options={({ route }) => ({
           headerShown: false,
           title: i18n.t('drawer.orderHistory'),
+          tabBarStyle: tabBarVisibleForRoute(route),
           tabBarIcon: ({ color, size }) => (
             <Feather name="clock" color={color} size={size} />
           ),
-        }}
+        })}
       />
       <Tab.Screen
         name="Account"

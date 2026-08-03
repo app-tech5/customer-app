@@ -12,6 +12,7 @@ import './reviews';
 import './categories';
 import './orders';
 import './chat';
+import './subscriptions';
 import './settings';
 import './gateways';
 import './drivers';
@@ -194,5 +195,10 @@ export const userRef = 'users';
 export const getOrderChat = (orderId) => api.getOrderChat(orderId);
 export const sendOrderChatMessage = (orderId, text) =>
   api.sendOrderChatMessage(orderId, text);
+export const listSubscriptionPlans = (target) => api.listSubscriptionPlans(target);
+export const getMySubscription = () => api.getMySubscription();
+export const getSubscriptionBenefits = () => api.getSubscriptionBenefits();
+export const subscribeToPlan = (planId) => api.subscribeToPlan(planId);
+export const cancelMySubscription = () => api.cancelMySubscription();
 
 export default api;
