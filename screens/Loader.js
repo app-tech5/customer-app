@@ -6,7 +6,7 @@ import { colors } from '../global'
 import i18n from '../lang/i18n'
 
 const isWeb = Platform.OS === 'web'
-const webLogoAsset = require('../assets/images/goodFood.png')
+const webLogoAsset = require('../assets/images/logo512.png')
 const webLogoUri =
   typeof webLogoAsset === 'string' ? webLogoAsset : webLogoAsset?.default || webLogoAsset?.uri
 
@@ -24,6 +24,7 @@ function LoaderMark({ checkout = false }) {
           height: size,
           objectFit: 'contain',
           display: 'block',
+          background: 'transparent',
           marginBottom: checkout ? 20 : 0,
         }}
       />
@@ -42,18 +43,14 @@ function LoaderMark({ checkout = false }) {
 }
 
 export default function Loader({ checkout = false, transparent = false }) {
-  const webGradient = ['#b3b3b3', '#9e9e9e']
-
   return (
-    <View style={[styles.overlay, transparent && styles.transparentOverlay, isWeb && !transparent && styles.overlayWeb]}>
+    <View style={[styles.overlay, transparent && styles.transparentOverlay]}>
       {!checkout && (
         <LinearGradient
           colors={
             transparent
               ? ['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.15)']
-              : isWeb
-                ? webGradient
-                : [colors.background.primary, colors.background.secondary]
+              : [colors.background.primary, colors.background.secondary]
           }
           style={styles.gradient}
         >
@@ -63,15 +60,15 @@ export default function Loader({ checkout = false, transparent = false }) {
             </View>
 
             <View style={styles.textContainer}>
-              <Text style={[styles.title, isWeb && styles.titleWeb]}>{i18n.t('common.preparingExperience')}</Text>
-              <Text style={[styles.subtitle, isWeb && styles.subtitleWeb]}>
+              <Text style={styles.title}>{i18n.t('common.preparingExperience')}</Text>
+              <Text style={styles.subtitle}>
                 {i18n.t('common.loadingDeliciousOptions')}
               </Text>
             </View>
 
             <ActivityIndicator
               size="small"
-              color={isWeb ? '#111111' : colors.primary}
+              color={colors.primary}
               style={styles.indicator}
             />
           </View>
@@ -106,10 +103,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 999,
     backgroundColor: colors.background.primary, 
-  },
-
-  overlayWeb: {
-    backgroundColor: '#b3b3b3',
   },
 
   transparentOverlay: {
@@ -162,21 +155,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  titleWeb: {
-    color: '#111111',
-  },
-
   subtitle: {
     fontSize: 16,
     fontWeight: '400',
     color: colors.text.secondary,
     textAlign: 'center',
     opacity: 0.8,
-  },
-
-  subtitleWeb: {
-    color: '#3d5c5c',
-    opacity: 1,
   },
 
   indicator: {
