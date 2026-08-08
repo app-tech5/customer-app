@@ -336,7 +336,7 @@ export default function RestaurantsView({
               navigation={navigation}
             />
           )}
-          scrollEnabled={horizontal ? true : true}
+          scrollEnabled
           nestedScrollEnabled
           showsVerticalScrollIndicator={!horizontal}
           showsHorizontalScrollIndicator={false}
@@ -389,16 +389,6 @@ export default function RestaurantsView({
           } : (event) => {
             setDirection?.(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
             setOffset?.(event.nativeEvent.contentOffset.y)
-
-            if (
-              event.nativeEvent.contentOffset.y <= 0 &&
-              direction === 'down' &&
-              setVisible
-            ) {
-              // Pulling down at top of list closes sheet (mobile-like).
-              setVisible(false)
-              setScrollEnabled?.(false)
-            }
           }}
           onScrollToIndexFailed={horizontal ? (info) => {
             snapToCarouselIndex(info.index, true)
