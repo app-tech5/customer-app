@@ -4,6 +4,19 @@ import { WebView } from 'react-native-webview'
 
 const isWeb = Platform.OS === 'web'
 
+const zoomFromDelta = (latitudeDelta) => {
+  const safeDelta = Math.max(Number(latitudeDelta) || 0.01, 0.0005)
+  return Math.max(3, Math.min(18, Math.round(Math.log2(360 / safeDelta))))
+}
+
+/** Public Google Maps embed — no API key (consumer maps.google.com iframe). */
+const buildGoogleMapsEmbedUrl = ({ latitude, longitude, zoom = 15, label }) => {
+  const q = label
+    ? `${encodeURIComponent(String(label))}@${latitude},${longitude}`
+    : `${latitude},${longitude}`
+  return `https://www.google.com/maps?q=${q}&z=${Math.round(zoom)}&hl=en&output=embed`
+}
+
 const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 <html>
   <head>
@@ -347,8 +360,74 @@ export default function OpenStreetMap({
   onMarkerPress,
   testID,
 }) {
+  // Web uses Google Maps public embed (no API key). Native keeps Leaflet/OSM in WebView.
+  if (isWeb) {
+    const focusedRestaurant = Array.isArray(restaurants)
+      ? restaurants.find((restaurant) => restaurant.originalIndex === focusedOriginalIndex)
+      : null
+    const latitude =
+      focusedRestaurant?.latitude ??
+      targetRegion?.latitude ??
+      initialRegion?.latitude ??
+      48.8566
+    const longitude =
+      focusedRestaurant?.longitude ??
+      targetRegion?.longitude ??
+      initialRegion?.longitude ??
+      2.3522
+    const zoom = zoomFromDelta(targetRegion?.latitudeDelta ?? initialRegion?.latitudeDelta)
+    const embedUrl = buildGoogleMapsEmbedUrl({
+      latitude,
+      longitude,
+      zoom,
+      label: focusedRestaurant?.name,
+    })
+
+    return (
+      <View style={StyleSheet.absoluteFill} testID={testID} accessibilityLabel={testID}>
+        <iframe
+          key={`${latitude.toFixed(5)},${longitude.toFixed(5)},${zoom}`}
+          title="Google Maps"
+          src={embedUrl}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          style={{
+            border: 'none',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            inset: 0,
+            background: '#e8eaed',
+          }}
+          allowFullScreen
+        />
+      </View>
+    )
+  }
+
+  return (
+    <OpenStreetMapNative
+      testID={testID}
+      initialRegion={initialRegion}
+      targetRegion={targetRegion}
+      restaurants={restaurants}
+      focusedOriginalIndex={focusedOriginalIndex}
+      userLocation={userLocation}
+      onMarkerPress={onMarkerPress}
+    />
+  )
+}
+
+function OpenStreetMapNative({
+  initialRegion,
+  targetRegion,
+  restaurants,
+  focusedOriginalIndex,
+  userLocation,
+  onMarkerPress,
+  testID,
+}) {
   const webViewRef = useRef(null)
-  const iframeRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
   const mapHtml = useMemo(() => createOpenStreetMapHtml(initialRegion), [initialRegion])
 
@@ -371,19 +450,7 @@ export default function OpenStreetMap({
   }, [onMarkerPress])
 
   const injectMapMessage = useCallback((message) => {
-    if (!mapReady) {
-      return
-    }
-
-    if (isWeb) {
-      const win = iframeRef.current?.contentWindow
-      if (win?.__updateMap) {
-        win.__updateMap(message)
-      }
-      return
-    }
-
-    if (!webViewRef.current) {
+    if (!mapReady || !webViewRef.current) {
       return
     }
 
@@ -395,20 +462,6 @@ export default function OpenStreetMap({
       true;
     `)
   }, [mapReady])
-
-  useEffect(() => {
-    if (!isWeb) return undefined
-
-    const onWindowMessage = (event) => {
-      if (iframeRef.current && event.source !== iframeRef.current.contentWindow) {
-        return
-      }
-      handleHostMessage(event.data)
-    }
-
-    window.addEventListener('message', onWindowMessage)
-    return () => window.removeEventListener('message', onWindowMessage)
-  }, [handleHostMessage])
 
   useEffect(() => {
     injectMapMessage({
@@ -431,26 +484,6 @@ export default function OpenStreetMap({
   const handleMessage = useCallback((event) => {
     handleHostMessage(event.nativeEvent.data)
   }, [handleHostMessage])
-
-  if (isWeb) {
-    return (
-      <View style={StyleSheet.absoluteFill} testID={testID} accessibilityLabel={testID}>
-        <iframe
-          ref={iframeRef}
-          title="OpenStreetMap"
-          srcDoc={mapHtml}
-          style={{
-            border: 'none',
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            inset: 0,
-            background: '#f5f5f5',
-          }}
-        />
-      </View>
-    )
-  }
 
   return (
     <WebView
