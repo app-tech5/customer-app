@@ -1,10 +1,8 @@
 name: Build and publish APK
 
+# Manual only — avoids a second failing/red APK run every time we push a web-demo fix.
+# Publish APK explicitly: gh workflow run build-apk.yml --ref dev-clean-1
 on:
-  push:
-    branches: [dev-clean-1]
-    paths-ignore:
-      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
