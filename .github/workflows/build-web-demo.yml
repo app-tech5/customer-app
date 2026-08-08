@@ -30,7 +30,8 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # Use npm install: package-lock can drift from package.json (npm ci fails in CI).
+        run: npm install
 
       - name: Set web baseUrl for /demo/customer
         run: |
