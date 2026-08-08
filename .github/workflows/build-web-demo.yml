@@ -1,11 +1,15 @@
 name: Build and publish web demo
 
-# Manual only — a normal push does NOT run this (APK CI stays unchanged).
+# Manual only for real publishes. A push of THIS file alone registers the workflow in Actions.
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-web-demo.yml'
 
 jobs:
   build-and-publish:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     name: Export web + publish demo
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -19,6 +23,7 @@ jobs:
       EXPO_PUBLIC_MAPTILER_API_KEY: ${{ secrets.EXPO_PUBLIC_MAPTILER_API_KEY }}
       WEB_DEMO_SLUG: customer
       VPS_WEB_DEMO_DIR: /var/www/html/demo/customer
+      PUBLIC_DEMO_URL: https://good-foods.digitaldienste.fr/demo/customer/index.html
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,8 +35,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # Use npm install: package-lock can drift from package.json (npm ci fails in CI).
         run: npm install
+
+      - name: Ensure web peer deps (CI only)
+        run: npx expo install @lottiefiles/dotlottie-react
 
       - name: Set web baseUrl for /demo/customer
         run: |
@@ -92,9 +99,15 @@ jobs:
             rsync -a --delete "$SRC/" "$WEB/"
             chmod -R a+rX "$WEB"
             test -f "$WEB/index.html"
+            # Directory URL /demo/customer/ is swallowed by admin SPA; index.html is the public URL.
+            grep -qi 'Admin Panel' "$WEB/index.html" && { echo 'Published admin SPA by mistake'; exit 1; } || true
+            head -c 200 "$WEB/index.html"
 
-      - name: Web demo published
+      - name: Verify public URL
         run: |
-          BASE="${PUBLIC_SITE_URL:-https://good-foods.digitaldienste.fr}"
-          BASE="${BASE%/}"
-          echo "Customer web demo: ${BASE}/demo/customer/"
+          html="$(curl -fsSL "$PUBLIC_DEMO_URL")"
+          echo "$html" | head -c 240
+          echo
+          echo "$html" | grep -qi 'Admin Panel' && { echo 'URL still serves admin'; exit 1; }
+          echo "$html" | grep -qiE '_expo|react-native-web|Good Food' || { echo 'Unexpected demo HTML'; exit 1; }
+          echo "OK $PUBLIC_DEMO_URL"
