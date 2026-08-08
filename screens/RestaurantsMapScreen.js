@@ -15,7 +15,6 @@ import {
   buildSortedRestaurants,
   createDefaultFocus,
   createFocusedState,
-  getDistanceFromLatLonInKm,
   getNearbyRestaurantsRegion,
   getRestaurantCoordinates,
 } from '../utils'
@@ -121,7 +120,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     }
   }, [animateMapToRegion, restaurantData, userLocation])
 
-  const centerMapOnRestaurant = (restaurant) => {
+  const centerMapOnRestaurant = useCallback((restaurant) => {
     const coordinates = getRestaurantCoordinates(restaurant)
     if (!coordinates) return
 
@@ -131,27 +130,16 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     })
-  }
+  }, [animateMapToRegion])
 
   const setFocusFunction = useCallback((index) => {
+    if (index == null || index < 0 || !restaurantData?.[index]) return
+
     setFocus(createFocusedState(restaurantData.length, index))
-
-    const restaurant = restaurantData[index]
-    if (restaurant && userLocation?.lat && userLocation?.lng) {
-      const coordinates = getRestaurantCoordinates(restaurant)
-      if (!coordinates) return
-
-      const distance = getDistanceFromLatLonInKm(
-        userLocation.lat, userLocation.lng,
-        coordinates.latitude,
-        coordinates.longitude
-      )
-
-      if (distance < 10) {
-        centerMapOnRestaurant(restaurant)
-      }
-    }
-  }, [restaurantData, userLocation])
+    // Always center on the focused restaurant (carousel / marker).
+    // Previously gated on userLocation + distance, so web demos never moved the map.
+    centerMapOnRestaurant(restaurantData[index])
+  }, [centerMapOnRestaurant, restaurantData])
 
   const handleMarkerPress = useCallback((originalIndex) => {
     const restaurant = restaurantData?.[originalIndex]

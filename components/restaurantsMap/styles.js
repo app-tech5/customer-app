@@ -9,7 +9,11 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 50,
+    paddingTop: Platform.OS === 'android'
+      ? (StatusBar.currentHeight || 24) + 10
+      : Platform.OS === 'web'
+        ? 12
+        : 50,
     paddingBottom: 15,
     paddingHorizontal: 15,
     zIndex: 1000,
@@ -39,7 +43,11 @@ export default StyleSheet.create({
   locationIndicator: {
     position: 'absolute',
     right: 20,
-    top: Platform.OS === 'android' ? StatusBar.currentHeight + 15 : 55,
+    top: Platform.OS === 'android'
+      ? (StatusBar.currentHeight || 24) + 15
+      : Platform.OS === 'web'
+        ? 18
+        : 55,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -80,32 +88,38 @@ export default StyleSheet.create({
   },
   flatlist: {
     position: 'absolute',
-    bottom: 0,
+    bottom: Platform.OS === 'web' ? 64 : 0,
     left: 0,
     right: 0,
-    paddingBottom: 30,
+    paddingBottom: Platform.OS === 'web' ? 8 : 30,
     paddingLeft: 20,
+    zIndex: 30,
+    elevation: 30,
   },
   categories: {
     marginBottom: 10,
   },
   restaurant: {
     borderRadius: 15,
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     marginHorizontal: 8,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    borderColor: 'rgba(0,0,0,0.08)',
   },
   restaurantImageInfo: {
-    marginHorizontal: 10,
+    marginHorizontal: 0,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    backgroundColor: '#ffffff',
   },
   menuList: {
     flexDirection: 'row',
@@ -133,18 +147,18 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingBottom: 20,
+    paddingVertical: 8,
+    paddingBottom: Platform.OS === 'web' ? 4 : 20,
   },
   paginationDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
     marginHorizontal: 4,
   },
   paginationDotActive: {
-    backgroundColor: '#fff',
+    backgroundColor: '#111111',
     width: 12,
     height: 8,
     borderRadius: 4,

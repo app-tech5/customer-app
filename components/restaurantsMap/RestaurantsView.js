@@ -81,6 +81,10 @@ export default function RestaurantsView({
         animated: true,
         viewPosition: 0.5,
       })
+      // Web FlatList often skips momentum end — clear the lock shortly after.
+      setTimeout(() => {
+        programmaticScrollRef.current = false
+      }, 450)
     })
   }, [horizontal, restaurantsRef, sortedRestaurants.length])
 
@@ -122,8 +126,9 @@ export default function RestaurantsView({
               style={{
                 ...styles.restaurant,
                 width: horizontal ? width * 0.85 : 'auto',
-                transform: horizontal ? [{ scale: isActive ? 1 : 0.95 }] : [],
-                opacity: horizontal ? (isActive ? 1 : 0.7) : 1,
+                transform: horizontal ? [{ scale: isActive ? 1 : 0.96 }] : [],
+                // Keep cards opaque — opacity < 1 lets the map bleed through text on web.
+                opacity: 1,
               }}
               onPress={() => navigation.navigate('RestaurantDetail', { restaurant: item })}
               activeOpacity={0.8}
@@ -165,14 +170,26 @@ export default function RestaurantsView({
         decelerationRate={horizontal ? 'fast' : 'normal'}
         onScrollBeginDrag={horizontal ? () => {
           setIsScrolling(true)
+          programmaticScrollRef.current = false
 
           if (scrollTimeout.current) {
             clearTimeout(scrollTimeout.current)
           }
         } : undefined}
-        onScrollEndDrag={horizontal ? () => {
+        onScrollEndDrag={horizontal ? (event) => {
+          const scrollX = event.nativeEvent.contentOffset.x
+          const finalIndex = calculateIndexFromScroll(scrollX)
+          setCurrentIndex(finalIndex)
+
+          const restaurant = sortedRestaurants[finalIndex]
+          if (restaurant?.originalIndex !== undefined && !programmaticScrollRef.current) {
+            setFocusFunction(restaurant.originalIndex)
+            onSelectRestaurant?.(restaurant)
+          }
+
           scrollTimeout.current = setTimeout(() => {
             setIsScrolling(false)
+            programmaticScrollRef.current = false
           }, 100)
         } : undefined}
         onMomentumScrollEnd={horizontal ? (event) => {
@@ -183,9 +200,10 @@ export default function RestaurantsView({
           setIsScrolling(false)
           programmaticScrollRef.current = false
 
-          const originalIndex = sortedRestaurants[finalIndex]?.originalIndex
-          if (originalIndex !== undefined) {
-            setFocusFunction(originalIndex)
+          const restaurant = sortedRestaurants[finalIndex]
+          if (restaurant?.originalIndex !== undefined) {
+            setFocusFunction(restaurant.originalIndex)
+            onSelectRestaurant?.(restaurant)
           }
         } : () => {}}
         onScroll={horizontal ? (event) => {
@@ -194,6 +212,15 @@ export default function RestaurantsView({
 
           if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex)
+
+            // Web often never fires onMomentumScrollEnd — focus marker while snapping.
+            if (!programmaticScrollRef.current) {
+              const restaurant = sortedRestaurants[newIndex]
+              if (restaurant?.originalIndex !== undefined) {
+                setFocusFunction(restaurant.originalIndex)
+                onSelectRestaurant?.(restaurant)
+              }
+            }
           }
         } : (event) => {
           setDirection(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
