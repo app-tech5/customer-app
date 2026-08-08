@@ -211,13 +211,15 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             submitTestID="restaurants-map-search-submit"
             restaurantData={restaurantData}
             navigation={navigation}
+            showSubmitButton={false}
+            containerStyle={{ marginTop: 0, flex: 1 }}
           />
         </View>
         {userLocation && (
           <TouchableOpacity
             testID="restaurants-map-location-button"
             accessibilityLabel="restaurants-map-location-button"
-            style={styles.locationIndicator}
+            style={styles.locationButton}
             onPress={() => {
               if (userLocation.lat && userLocation.lng) {
                 animateMapToRegion({
@@ -229,7 +231,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
               }
             }}
           >
-            <MaterialIcons name="my-location" size={16} color="#4CAF50" />
+            <MaterialIcons name="my-location" size={18} color="#4CAF50" />
           </TouchableOpacity>
         )}
       </View>

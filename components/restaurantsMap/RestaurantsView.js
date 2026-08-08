@@ -1,12 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { TouchableOpacity, View } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList as RNFlatList, Platform, TouchableOpacity, View } from 'react-native'
+import { FlatList as GHFlatList } from 'react-native-gesture-handler'
 import { Icon } from 'react-native-elements'
 import Reward from '../Reward'
 import Categories from '../home/Categories'
 import { RestaurantImage, RestaurantInfo } from '../home/RestaurantItems'
 import { buildSortedRestaurants } from '../../utils'
 import styles from './styles'
+
+// gesture-handler FlatList snap is unreliable on web — cards stop between items.
+const FlatList = Platform.OS === 'web' ? RNFlatList : GHFlatList
 
 const ListButton = ({ setVisible, horizontal }) => {
   const iconName = horizontal ? 'menu' : 'map'
@@ -55,38 +58,51 @@ export default function RestaurantsView({
   const programmaticScrollRef = useRef(false)
   const snapInterval = width * 0.85 + 16
   const listPaddingLeft = 20
+  const listPaddingRight = Math.max(20, width * 0.15 - 8)
 
   const sortedRestaurants = React.useMemo(() => {
     console.warn('🏪 RestaurantsView - Filtrage restaurants proches, horizontal:', horizontal)
     return buildSortedRestaurants(restaurantData, userLocation)
   }, [horizontal, restaurantData, userLocation])
 
+  const snapOffsets = useMemo(
+    () => sortedRestaurants.map((_, index) => index * snapInterval),
+    [snapInterval, sortedRestaurants]
+  )
+
   const calculateIndexFromScroll = useCallback((scrollX) => {
-    const adjusted = Math.max(0, scrollX - listPaddingLeft + snapInterval / 2)
     return Math.max(
       0,
-      Math.min(sortedRestaurants.length - 1, Math.round(adjusted / snapInterval))
+      Math.min(sortedRestaurants.length - 1, Math.round(scrollX / snapInterval))
     )
-  }, [listPaddingLeft, snapInterval, sortedRestaurants.length])
+  }, [snapInterval, sortedRestaurants.length])
+
+  const snapToCarouselIndex = useCallback((index, animated = true) => {
+    if (!horizontal || index < 0 || index >= sortedRestaurants.length) return
+    const offset = snapOffsets[index] ?? index * snapInterval
+    restaurantsRef.current?.scrollToOffset({ offset, animated })
+  }, [horizontal, restaurantsRef, snapInterval, snapOffsets, sortedRestaurants.length])
+
+  const focusCarouselIndex = useCallback((index) => {
+    const restaurant = sortedRestaurants[index]
+    if (!restaurant || restaurant.originalIndex === undefined) return
+    setCurrentIndex(index)
+    setFocusFunction(restaurant.originalIndex)
+    onSelectRestaurant?.(restaurant)
+  }, [onSelectRestaurant, setFocusFunction, sortedRestaurants])
 
   const scrollToCarouselIndex = useCallback((index) => {
     if (!horizontal || index < 0 || index >= sortedRestaurants.length) return
 
     programmaticScrollRef.current = true
     setCurrentIndex(index)
-
     requestAnimationFrame(() => {
-      restaurantsRef.current?.scrollToIndex({
-        index,
-        animated: true,
-        viewPosition: 0.5,
-      })
-      // Web FlatList often skips momentum end — clear the lock shortly after.
+      snapToCarouselIndex(index, true)
       setTimeout(() => {
         programmaticScrollRef.current = false
       }, 450)
     })
-  }, [horizontal, restaurantsRef, sortedRestaurants.length])
+  }, [horizontal, snapToCarouselIndex, sortedRestaurants.length])
 
   useEffect(() => {
     if (!horizontal || targetCarouselIndex == null) return
@@ -163,10 +179,17 @@ export default function RestaurantsView({
             </TouchableOpacity>
           )
         }}
-        scrollEnabled={scrollEnabled}
+        scrollEnabled={horizontal ? true : scrollEnabled}
         showsHorizontalScrollIndicator={false}
-        snapToAlignment={horizontal ? 'center' : 'start'}
-        snapToInterval={horizontal ? width * 0.85 + 16 : undefined}
+        contentContainerStyle={
+          horizontal
+            ? { paddingLeft: listPaddingLeft, paddingRight: listPaddingRight }
+            : undefined
+        }
+        snapToAlignment={horizontal ? 'start' : 'start'}
+        snapToInterval={horizontal && Platform.OS !== 'web' ? snapInterval : undefined}
+        snapToOffsets={horizontal && Platform.OS === 'web' ? snapOffsets : undefined}
+        disableIntervalMomentum={!!horizontal}
         decelerationRate={horizontal ? 'fast' : 'normal'}
         onScrollBeginDrag={horizontal ? () => {
           setIsScrolling(true)
@@ -179,32 +202,22 @@ export default function RestaurantsView({
         onScrollEndDrag={horizontal ? (event) => {
           const scrollX = event.nativeEvent.contentOffset.x
           const finalIndex = calculateIndexFromScroll(scrollX)
-          setCurrentIndex(finalIndex)
-
-          const restaurant = sortedRestaurants[finalIndex]
-          if (restaurant?.originalIndex !== undefined && !programmaticScrollRef.current) {
-            setFocusFunction(restaurant.originalIndex)
-            onSelectRestaurant?.(restaurant)
-          }
-
+          // Force a clean one-card snap (web often leaves the list between two cards).
+          programmaticScrollRef.current = true
+          snapToCarouselIndex(finalIndex, true)
+          focusCarouselIndex(finalIndex)
           scrollTimeout.current = setTimeout(() => {
             setIsScrolling(false)
             programmaticScrollRef.current = false
-          }, 100)
+          }, 120)
         } : undefined}
         onMomentumScrollEnd={horizontal ? (event) => {
           const scrollX = event.nativeEvent.contentOffset.x
           const finalIndex = calculateIndexFromScroll(scrollX)
-
-          setCurrentIndex(finalIndex)
+          snapToCarouselIndex(finalIndex, true)
+          focusCarouselIndex(finalIndex)
           setIsScrolling(false)
           programmaticScrollRef.current = false
-
-          const restaurant = sortedRestaurants[finalIndex]
-          if (restaurant?.originalIndex !== undefined) {
-            setFocusFunction(restaurant.originalIndex)
-            onSelectRestaurant?.(restaurant)
-          }
         } : () => {}}
         onScroll={horizontal ? (event) => {
           const scrollX = event.nativeEvent.contentOffset.x
@@ -212,8 +225,6 @@ export default function RestaurantsView({
 
           if (newIndex !== currentIndex) {
             setCurrentIndex(newIndex)
-
-            // Web often never fires onMomentumScrollEnd — focus marker while snapping.
             if (!programmaticScrollRef.current) {
               const restaurant = sortedRestaurants[newIndex]
               if (restaurant?.originalIndex !== undefined) {
@@ -231,11 +242,13 @@ export default function RestaurantsView({
           }
         }}
         onScrollToIndexFailed={horizontal ? (info) => {
-          restaurantsRef.current?.scrollToOffset({
-            offset: Math.max(0, info.index * snapInterval),
-            animated: true,
-          })
+          snapToCarouselIndex(info.index, true)
         } : undefined}
+        getItemLayout={horizontal ? (_data, index) => ({
+          length: snapInterval,
+          offset: snapInterval * index,
+          index,
+        }) : undefined}
         ListHeaderComponent={!horizontal ? () => (
           <View style={styles.categories}>
             <Categories
