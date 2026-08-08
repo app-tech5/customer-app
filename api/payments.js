@@ -20,3 +20,18 @@ ApiClient.prototype.removeStripePaymentMethod = async function (paymentMethodId)
     body: JSON.stringify({ paymentMethodId }),
   });
 };
+
+ApiClient.prototype.listPaymentProviders = async function () {
+  return await this.apiCall('/gateways/providers', { method: 'GET' });
+};
+
+ApiClient.prototype.initializeGatewayPayment = async function (payload) {
+  return await this.apiCall('/gateways/initialize', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+};
+
+ApiClient.prototype.getChannelConfig = async function () {
+  return await this.apiCall('/channels/config', { method: 'GET' });
+};

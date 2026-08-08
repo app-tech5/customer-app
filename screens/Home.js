@@ -13,7 +13,7 @@ import { calculateDeliveryFeeFromSetting } from '../utils/deliverySetting'
 import HomeHeader from '../components/home/HomeHeader'
 import Categories from '../components/home/Categories'
 import HomePromoBanner from '../components/home/HomePromoBanner'
-import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
+import { getRestaurants, getAllPromotions, getAllMenuItems, getActiveSponsoredListings } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusWithSmartCache } from '../utils/cacheUtils'
 import Loader from './Loader'
@@ -28,6 +28,7 @@ export default function Home({navigation}) {
   const [city, setCity] = useState("Paris");
   const [activeTab, setActiveTab]= useState("Delivery")
   const [allPromotions, setAllPromotions] = useState([])
+  const [sponsoredListings, setSponsoredListings] = useState([])
   const [allMenus, setAllMenus] = useState([])
   const [appliedFilters, setAppliedFilters] = useState(null)
   const [userLocation, setUserLocation] = useState(null)
@@ -106,6 +107,10 @@ export default function Home({navigation}) {
       
       null
     );
+
+    getActiveSponsoredListings()
+      .then((res) => setSponsoredListings(res?.listings || []))
+      .catch(() => setSponsoredListings([]));
     
     loadMenusWithSmartCache(
       
@@ -345,7 +350,29 @@ export default function Home({navigation}) {
     if (!restaurantData || restaurantData.length === 0) return []
     
     const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantsWithDistance) : restaurantsWithDistance
-    const sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
+    let sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
+
+    // Sponsored search placements float to the top on the default home feed.
+    if (sponsoredListings?.length) {
+      const sponsoredIds = new Set(
+        sponsoredListings
+          .filter((l) => l.placement === 'search' || l.placement === 'both')
+          .map((l) => String(l.restaurantId))
+      )
+      if (sponsoredIds.size) {
+        const boosted = []
+        const rest = []
+        sortedData.forEach((r) => {
+          const id = String(getRestaurantId(r) || '')
+          if (sponsoredIds.has(id)) {
+            boosted.push({ ...r, isSponsored: true })
+          } else {
+            rest.push(r)
+          }
+        })
+        sortedData = [...boosted, ...rest]
+      }
+    }
 
     const sections = []
     
@@ -483,7 +510,7 @@ export default function Home({navigation}) {
     }
 
     return sections
-  }, [restaurantData, allPromotions, appliedFilters, userLocation])
+  }, [restaurantData, allPromotions, sponsoredListings, appliedFilters, userLocation])
   if (restaurantsLoading && !restaurantData?.length) {
     return <Loader />
   }
@@ -503,6 +530,7 @@ export default function Home({navigation}) {
           <Categories navigation={navigation} />
           <HomePromoBanner
             promotions={allPromotions}
+            sponsoredListings={sponsoredListings}
             navigation={navigation}
           />
           {createDynamicSections.map((section) => (

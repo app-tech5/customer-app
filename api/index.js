@@ -19,6 +19,7 @@ import './gateways';
 import './drivers';
 import './deliverySettings';
 import './promotions';
+import './sponsored';
 import './cart';
 import './upload';
 import { filterRestaurantPromotions } from './promotions';
@@ -125,6 +126,10 @@ export const estimateDeliveryFee = (addressId, restaurantId, cartAmount) =>
   api.estimateDeliveryFee(addressId, restaurantId, cartAmount);
 export const getAllActiveOffers = () => api.getAllActiveOffers();
 export const getAllPromotions = () => api.apiCall('/resource/promotions');
+export const getActiveSponsoredListings = (placement) =>
+  api.getActiveSponsoredListings(placement);
+export const trackSponsoredListing = (id, type) =>
+  api.trackSponsoredListing(id, type);
 export const getPromotionById = (promotionId) =>
   api.getPromotionById(promotionId);
 export const validatePromoCode = (code, restaurantId, cartAmount) =>

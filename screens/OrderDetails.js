@@ -267,12 +267,35 @@ export default function OrderDetails() {
             <Ionicons name="location-outline" size={20} color={colors.primary} />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>
-                {i18n.t('order.deliveryAddress', 'Delivery Address')}
+                {i18n.t('order.deliveryAddress')}
               </Text>
               <Text style={styles.infoValue}>{order.delivery.address}</Text>
             </View>
           </View>
         )}
+
+        {order.delivery?.proofOfDelivery?.photoUrl ? (
+          <View style={styles.infoItem}>
+            <Ionicons name="camera-outline" size={20} color={colors.primary} />
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>
+                {i18n.t('order.proofOfDelivery')}
+              </Text>
+              <Image
+                source={{ uri: order.delivery.proofOfDelivery.photoUrl }}
+                style={{ width: '100%', height: 160, borderRadius: 10, marginTop: 8 }}
+                resizeMode="cover"
+              />
+              {order.delivery.proofOfDelivery.geofenceOk != null ? (
+                <Text style={[styles.infoValue, { marginTop: 6 }]}>
+                  {order.delivery.proofOfDelivery.geofenceOk
+                    ? i18n.t('order.proofGeofenceOk')
+                    : i18n.t('order.proofGeofenceSoft')}
+                </Text>
+              ) : null}
+            </View>
+          </View>
+        ) : null}
 
         {order.delivery?.estimatedTime && (
           <View style={styles.infoItem}>

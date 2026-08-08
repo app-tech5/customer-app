@@ -18,7 +18,7 @@ export default function DriverCarTopIcon({ size, color }) {
     >
       <Path
         d={DRIVER_CAR_TOP_PATH_D}
-        fill="none"
+        fill="#ffffff"
         fillRule="evenodd"
         clipRule="evenodd"
         stroke={color}

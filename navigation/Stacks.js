@@ -33,6 +33,7 @@ import AddCard from '../screens/AddCard'
 import AddMoneyScreen from '../screens/AddMoneyScreen'
 import Settings from '../screens/Settings'
 import { colors } from '../global'
+import i18n from '../lang/i18n'
 
 const HomeStack = createStackNavigator()
 
@@ -179,7 +180,7 @@ export function AccountNavigator() {
         name="Settings"
         component={Settings}
         options={{
-          title: 'Settings',
+          title: i18n.t('settings.title', 'Settings'),
           headerShown: true
         }}
       />
@@ -438,7 +439,7 @@ export function SettingsSectionNavigator({ navigation }) {
         name="SettingsScreen"
         component={Settings}
         options={{
-          title: 'Settings',
+          title: i18n.t('settings.title', 'Settings'),
           headerShown: true,
           headerLeft: () => (
             <TouchableOpacity

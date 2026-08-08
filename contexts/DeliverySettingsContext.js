@@ -61,6 +61,18 @@ export function DeliverySettingsProvider({ children }) {
   const hasMemberFreeDelivery =
     !!subscriptionBenefits?.active && !!subscriptionBenefits?.freeDelivery
 
+  const memberDiscountPercent = Math.min(
+    100,
+    Math.max(
+      0,
+      Number(
+        subscriptionBenefits?.active
+          ? subscriptionBenefits?.discountPercent
+          : 0
+      ) || 0
+    )
+  )
+
   const calculateDeliveryFee = (
     deliverySetting,
     subtotal,
@@ -138,22 +150,38 @@ export function DeliverySettingsProvider({ children }) {
     distance = null,
     options = {}
   ) => {
+    const cartSubtotal = Number(subtotal) || 0
+    const discountAmount =
+      memberDiscountPercent > 0
+        ? Number(((cartSubtotal * memberDiscountPercent) / 100).toFixed(2))
+        : 0
+    const discountedSubtotal = Number(
+      (cartSubtotal - discountAmount).toFixed(2)
+    )
+
     const deliveryFee = calculateDeliveryFee(
       deliverySetting,
-      subtotal,
+      discountedSubtotal,
       distance,
       options
     )
     const finalDeliveryFee = deliveryFee == null ? 0 : deliveryFee
 
-    const taxAmount = subtotal * (taxRate || 0.08)
-    const total = subtotal + finalDeliveryFee + taxAmount
+    const taxAmount = Number(
+      (discountedSubtotal * (taxRate || 0.08)).toFixed(2)
+    )
+    const total = Number(
+      (discountedSubtotal + finalDeliveryFee + taxAmount).toFixed(2)
+    )
 
     return {
-      subtotal,
+      subtotal: discountedSubtotal,
+      originalSubtotal: cartSubtotal,
       deliveryFee: finalDeliveryFee,
       taxAmount,
       total,
+      discountPercent: memberDiscountPercent,
+      discountAmount,
       isFreeDelivery: finalDeliveryFee === 0,
       memberFreeDelivery: hasMemberFreeDelivery,
       surgeMultiplier: options.surgeMultiplier || 1,

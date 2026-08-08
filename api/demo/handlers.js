@@ -23,22 +23,67 @@ const parseBody = (options) => {
 
 const newId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-const DEMO_CUSTOMER_PLAN = {
-  id: 'demo_plan_customer_plus',
-  name: 'Good Food Plus',
-  target: 'customer',
-  price: 4.99,
-  currency: 'USD',
-  billingCycle: 'monthly',
-  benefits: ['Free delivery on all orders', 'Exclusive member deals', 'Priority support'],
-  benefitFlags: {
-    freeDelivery: true,
-    discountPercent: 0,
-    reducedCommissionPercent: 0,
-    prioritySupport: true,
+const DEMO_CUSTOMER_PLANS = [
+  {
+    id: 'demo_plan_customer_starter',
+    name: 'Good Food Plus',
+    target: 'customer',
+    price: 4.99,
+    currency: 'USD',
+    billingCycle: 'monthly',
+    benefits: ['Free delivery on eligible orders', 'Member-only offers', 'Priority support'],
+    benefitFlags: {
+      freeDelivery: true,
+      discountPercent: 5,
+      reducedCommissionPercent: 0,
+      prioritySupport: true,
+    },
+    isActive: true,
   },
-  isActive: true,
-};
+  {
+    id: 'demo_plan_customer_plus',
+    name: 'Customer Plus',
+    target: 'customer',
+    price: 9.99,
+    currency: 'USD',
+    billingCycle: 'monthly',
+    benefits: [
+      'Free delivery on all orders',
+      'Exclusive member deals',
+      '5% off food subtotal',
+      'Priority support',
+    ],
+    benefitFlags: {
+      freeDelivery: true,
+      discountPercent: 5,
+      reducedCommissionPercent: 0,
+      prioritySupport: true,
+    },
+    isActive: true,
+  },
+  {
+    id: 'demo_plan_customer_family',
+    name: 'Customer Family',
+    target: 'customer',
+    price: 14.99,
+    currency: 'USD',
+    billingCycle: 'monthly',
+    benefits: [
+      'Free delivery on all orders',
+      '10% off food subtotal',
+      'Priority support',
+      'Early access to flash deals',
+    ],
+    benefitFlags: {
+      freeDelivery: true,
+      discountPercent: 10,
+      reducedCommissionPercent: 0,
+      prioritySupport: true,
+    },
+    isActive: true,
+  },
+];
+const DEMO_CUSTOMER_PLAN = DEMO_CUSTOMER_PLANS[1];
 
 const demoBenefitsFromEnrollment = (enrollment) => {
   if (!enrollment || enrollment.status !== 'active') {
@@ -330,7 +375,8 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
   const subSubscribe = matchPath(endpoint, '/subscriptions/:id/subscribe');
   if (subSubscribe && method === 'POST') {
     const planId = subSubscribe[1];
-    if (planId !== DEMO_CUSTOMER_PLAN.id) {
+    const plan = DEMO_CUSTOMER_PLANS.find((p) => p.id === planId);
+    if (!plan) {
       throw new Error('Subscription plan not found');
     }
     const end = new Date();
@@ -344,7 +390,7 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
       cancelledAt: null,
       autoRenew: true,
       paymentMethod: 'wallet',
-      plan: DEMO_CUSTOMER_PLAN,
+      plan,
     };
     await updateDemoState((state) => ({ ...state, subscriptionEnrollment: enrollment }));
     return {
@@ -544,7 +590,7 @@ export async function handleDemoRead(client, endpoint, method) {
   }
 
   if (endpoint.startsWith('/subscriptions') && endpoint.split('?')[0] === '/subscriptions') {
-    return { target: 'customer', plans: [DEMO_CUSTOMER_PLAN] };
+    return { target: 'customer', plans: DEMO_CUSTOMER_PLANS };
   }
 
   if (endpoint === '/subscriptions/mine') {

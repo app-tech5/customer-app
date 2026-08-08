@@ -328,6 +328,9 @@
     "customer": "Client",
     "driverName": "Livreur",
     "deliveryAddress": "Adresse de livraison",
+    "proofOfDelivery": "Preuve de livraison",
+    "proofGeofenceOk": "Terminée dans la zone de livraison",
+    "proofGeofenceSoft": "Terminée avec contrôle géofence souple",
     "mapTracking": "Carte de livraison",
     "mapMarkerDriver": "Livreur",
     "mapMarkerDropoff": "Point de livraison",
@@ -680,7 +683,8 @@
     "aboutDescription": "Votre application de livraison de nourriture préférée",
     "openSource": "Open Source",
     "openSourceDescription": "Voir notre code open source",
-    "logoutMessage": "Êtes-vous sûr de vouloir vous déconnecter ?"
+    "logoutMessage": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "languageChangedRtl": "Langue mise à jour. Redémarrez l’application pour appliquer la disposition de droite à gauche."
   },
   "common": {
     "save": "Enregistrer",

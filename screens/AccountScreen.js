@@ -5,7 +5,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { api, userInfos, updateUser, getOrders } from '../api'
 import { SignInContext } from '../contexts/authContext'
-import i18n from '../lang/i18n'
+import i18n, { resetLanguageAfterLogout } from '../lang/i18n'
 import { colors } from '../global'
 import { config } from '../config'
 import { navigateToTabOrders } from '../navigation/navigationHelpers'
@@ -96,6 +96,7 @@ export default function AccountScreen({ navigation }) {
               setSignedIn(null)
               dispatch({ type: 'CLEAR' })
               dispatch({ type: 'LOGOUT_USER' })
+              await resetLanguageAfterLogout({ reloadIfNeeded: true })
             } catch (err) {
               console.error('Error during logout:', err)
               Alert.alert(i18n.t('common.error'), i18n.t('profile.logoutError'))

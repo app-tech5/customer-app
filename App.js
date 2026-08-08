@@ -1,8 +1,9 @@
 import './utils/hermesAutoOkAlerts';
 import RootNavigation from "./navigation/navigation";
 import {useFonts} from 'expo-font'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SignInContextProvider } from './contexts/authContext';
+import { initLanguage } from './lang/i18n';
 
 import { 
   Roboto_100Thin,
@@ -22,6 +23,7 @@ import Loader from "./screens/Loader";
 import { cleanupExpiredCache } from "./utils/cacheUtils";
 
 export default function App() {
+  const [langReady, setLangReady] = useState(false);
 
   let [fontsLoaded, error] = useFonts({
 
@@ -41,12 +43,24 @@ export default function App() {
   })
 
   useEffect(() => {
+    let cancelled = false;
+    initLanguage()
+      .catch(console.error)
+      .finally(() => {
+        if (!cancelled) setLangReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (fontsLoaded) {
       cleanupExpiredCache().catch(console.error);
     }
   }, [fontsLoaded]);
 
-   if(!fontsLoaded)
+   if(!fontsLoaded || !langReady)
    return <Loader />
    
   return (

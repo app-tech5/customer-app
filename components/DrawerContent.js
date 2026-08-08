@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { MaterialIcons } from '@expo/vector-icons'
 import { colors } from '../global'
-import i18n from '../lang/i18n'
+import i18n, { resetLanguageAfterLogout } from '../lang/i18n'
 import { useSelector, useDispatch } from 'react-redux'
 import { config } from '../config'
 import { SignInContext } from '../contexts/authContext'
@@ -45,6 +45,8 @@ export default function DrawerContent(props) {
             }
             await api.logout()
             setSignedIn(null)
+            // Demo UI language must not stick (local only — never backend).
+            await resetLanguageAfterLogout({ reloadIfNeeded: true })
         } catch (err) {
             console.error(err)
         }
