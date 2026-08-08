@@ -305,7 +305,7 @@ export default function RestaurantsView({
     <View
       testID={horizontal ? 'restaurants-map-horizontal-container' : 'restaurants-map-vertical-container'}
       accessibilityLabel={horizontal ? 'restaurants-map-horizontal-container' : 'restaurants-map-vertical-container'}
-      style={horizontal ? styles.flatlist : null}
+      style={horizontal ? styles.flatlist : styles.verticalListContainer}
     >
       {setVisible && <ListButton setVisible={setVisible} horizontal={horizontal} />}
       {useWebSnap ? (
@@ -325,6 +325,7 @@ export default function RestaurantsView({
           horizontal={horizontal}
           data={sortedRestaurants}
           keyExtractor={(item, index) => `${item.id || item._id || index}`}
+          style={!horizontal ? styles.verticalList : undefined}
           renderItem={({ item, index }) => (
             <RestaurantMapCard
               item={item}
@@ -335,12 +336,14 @@ export default function RestaurantsView({
               navigation={navigation}
             />
           )}
-          scrollEnabled={horizontal ? true : scrollEnabled}
+          scrollEnabled={horizontal ? true : true}
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={!horizontal}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={
             horizontal
               ? { paddingLeft: LIST_PADDING_LEFT, paddingRight: listPaddingRight }
-              : undefined
+              : { paddingBottom: 24 }
           }
           snapToAlignment="start"
           snapToInterval={horizontal ? snapInterval : undefined}
@@ -384,11 +387,17 @@ export default function RestaurantsView({
               }
             }
           } : (event) => {
-            setDirection(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
-            setOffset(event.nativeEvent.contentOffset.y)
+            setDirection?.(event.nativeEvent.contentOffset.y > offset ? 'up' : 'down')
+            setOffset?.(event.nativeEvent.contentOffset.y)
 
-            if (event.nativeEvent.contentOffset.y === 0 && direction === 'down') {
-              setScrollEnabled(false)
+            if (
+              event.nativeEvent.contentOffset.y <= 0 &&
+              direction === 'down' &&
+              setVisible
+            ) {
+              // Pulling down at top of list closes sheet (mobile-like).
+              setVisible(false)
+              setScrollEnabled?.(false)
             }
           }}
           onScrollToIndexFailed={horizontal ? (info) => {

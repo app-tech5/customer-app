@@ -90,6 +90,8 @@ export default StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 10,
+    overflow: 'hidden',
+    flexDirection: 'column',
   },
   bottomSheetHandle: {
     height: 4,
@@ -97,8 +99,19 @@ export default StyleSheet.create({
     backgroundColor: '#d9d9d9',
     borderRadius: 2,
     alignSelf: 'center',
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  bottomSheetBody: {
+    flex: 1,
+    minHeight: 0,
+  },
+  verticalListContainer: {
+    flex: 1,
+    minHeight: 0,
+  },
+  verticalList: {
+    flex: 1,
   },
   flatlist: {
     position: 'absolute',

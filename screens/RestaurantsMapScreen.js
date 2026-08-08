@@ -8,6 +8,7 @@ import * as Location from 'expo-location'
 import SearchBar from '../components/home/SearchBar'
 import OpenStreetMap from '../components/restaurantsMap/OpenStreetMap'
 import RestaurantsView from '../components/restaurantsMap/RestaurantsView'
+import MapBottomSheet from '../components/restaurantsMap/MapBottomSheet'
 import styles from '../components/restaurantsMap/styles'
 import {
   DEFAULT_REGION,
@@ -234,8 +235,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
         )}
       </View>
       {visible && (
-        <View testID="restaurants-map-bottom-sheet" accessibilityLabel="restaurants-map-bottom-sheet" style={styles.bottomSheet}>
-          <View testID="restaurants-map-bottom-sheet-handle" accessibilityLabel="restaurants-map-bottom-sheet-handle" style={styles.bottomSheetHandle} />
+        <MapBottomSheet visible={visible} onClose={() => setVisible(false)}>
           <RestaurantsView
             restaurantsRef={restaurantsRef}
             restaurantData={restaurantData}
@@ -251,8 +251,9 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             setVisible={setVisible}
             navigation={navigation}
             userLocation={userLocation}
-            onSelectRestaurant={centerMapOnRestaurant} />
-        </View>
+            onSelectRestaurant={centerMapOnRestaurant}
+          />
+        </MapBottomSheet>
       )}
       {!visible && (
         <RestaurantsView
