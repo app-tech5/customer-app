@@ -250,15 +250,21 @@ const createOpenStreetMapHtml = (initialRegion, { googleTiles = false } = {}) =>
         let customerPoint = null;
 
         (payload.restaurants || []).forEach((restaurant) => {
+          const lat = Number(restaurant?.latitude);
+          const lng = Number(restaurant?.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            return;
+          }
+
           if (restaurant?.entityType === 'delivery') {
-            deliveryPoint = { latitude: restaurant.latitude, longitude: restaurant.longitude };
+            deliveryPoint = { latitude: lat, longitude: lng };
           }
           if (restaurant?.entityType === 'customer') {
-            customerPoint = { latitude: restaurant.latitude, longitude: restaurant.longitude };
+            customerPoint = { latitude: lat, longitude: lng };
           }
 
           const marker = L.marker(
-            [restaurant.latitude, restaurant.longitude],
+            [lat, lng],
             {
               icon: getMarkerIcon(
                 restaurant.originalIndex === payload.focusedOriginalIndex,
@@ -318,6 +324,9 @@ const createOpenStreetMapHtml = (initialRegion, { googleTiles = false } = {}) =>
 
       const setRegion = (region, animated = true) => {
         if (!region || typeof region.latitude !== 'number' || typeof region.longitude !== 'number') {
+          return;
+        }
+        if (!Number.isFinite(region.latitude) || !Number.isFinite(region.longitude)) {
           return;
         }
 

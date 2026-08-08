@@ -22,12 +22,15 @@ export default function IntelligenceBadges({
 
   const load = useCallback(async () => {
     if (!restaurantId) return;
+    const safeLat = Number(lat);
+    const safeLng = Number(lng);
+    if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng)) return;
     try {
       setLoading(true);
       const data = await getIntelligenceQuote({
         restaurantId,
-        lat,
-        lng,
+        lat: safeLat,
+        lng: safeLng,
         subtotal,
         productIds,
       });

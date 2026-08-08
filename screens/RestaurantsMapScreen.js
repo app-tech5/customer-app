@@ -181,8 +181,16 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   }
 
   return (
-    <View testID="restaurants-map-screen" accessibilityLabel="restaurants-map-screen">
-      <View testID="restaurants-map-container" accessibilityLabel="restaurants-map-container" style={{ height, width }}>
+    <View
+      testID="restaurants-map-screen"
+      accessibilityLabel="restaurants-map-screen"
+      style={{ flex: 1, width, height: '100%', backgroundColor: '#e8eaed' }}
+    >
+      <View
+        testID="restaurants-map-container"
+        accessibilityLabel="restaurants-map-container"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      >
         <OpenStreetMap
           testID="restaurants-map-webview"
           initialRegion={initialRegion}

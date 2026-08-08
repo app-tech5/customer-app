@@ -31,8 +31,8 @@ import i18n from '../lang/i18n'
 const { width, height } = Dimensions.get('window')
 
 export default function RestaurantDetail({ route, navigation }) {
-  const { restaurant } = route.params
-  const { image } = restaurant
+  const restaurant = route?.params?.restaurant
+  const image = restaurant?.image
   const dispatch = useDispatch()
 
   const scrollViewRef = useRef(null)
@@ -88,6 +88,7 @@ export default function RestaurantDetail({ route, navigation }) {
   }, [])
   
   useEffect(() => {
+    if (!restaurant) return
     const loadReviews = async () => {
       const restaurantId = getRestaurantMongoId(restaurant);
       if (!restaurantId) return;
@@ -109,6 +110,7 @@ export default function RestaurantDetail({ route, navigation }) {
   }, [restaurant])
   
   useEffect(() => {
+    if (!restaurant) return
     const loadPromotions = async () => {
       const restaurantId = getRestaurantMongoId(restaurant);
       if (!restaurantId) return;
@@ -180,7 +182,7 @@ export default function RestaurantDetail({ route, navigation }) {
   }, [])
   
   const deliveryTime = useMemo(() => {
-    const prepTime = parseInt(restaurant.collectTime, 10) || 25;
+    const prepTime = parseInt(restaurant?.collectTime, 10) || 25;
 
     if (config.DEMO_MODE) {
       return {
@@ -190,8 +192,12 @@ export default function RestaurantDetail({ route, navigation }) {
       };
     }
 
+    if (!restaurant) {
+      return { min: prepTime + 10, max: prepTime + 20, distance: 0 };
+    }
+
     return getRestaurantDeliveryTime(restaurant, userLocation);
-  }, [userLocation, restaurant.latitude, restaurant.longitude, restaurant.collectTime]);
+  }, [userLocation, restaurant?.latitude, restaurant?.longitude, restaurant?.collectTime, restaurant]);
 
   const distance = deliveryTime.distance > 0 ? deliveryTime.distance : null;
   
@@ -201,8 +207,8 @@ export default function RestaurantDetail({ route, navigation }) {
     const currentMinute = now.getMinutes();
     const currentTime = currentHour * 60 + currentMinute; 
 
-    const openingTime = restaurant.openingTime || "09:00";
-    const closingTime = restaurant.closingTime || "21:00";
+    const openingTime = restaurant?.openingTime || "09:00";
+    const closingTime = restaurant?.closingTime || "21:00";
 
     const [openHour, openMin] = openingTime.split(':').map(Number);
     const [closeHour, closeMin] = closingTime.split(':').map(Number);
@@ -226,12 +232,15 @@ export default function RestaurantDetail({ route, navigation }) {
       statusColor: isOpen ? colors.success : colors.error,
       statusIcon: isOpen ? 'check-circle' : 'close-circle'
     };
-  }, [restaurant.openingTime, restaurant.closingTime]);
+  }, [restaurant?.openingTime, restaurant?.closingTime]);
 
-  if (!userLocation) {
+  if (!restaurant) {
     return (
-      <View testID="restaurant-detail-screen" accessibilityLabel="restaurant-detail-screen">
-        <Loader />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
+        <Text style={{ color: '#333', marginBottom: 12 }}>Restaurant unavailable</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={{ color: colors.primary || '#111' }}>Go back</Text>
+        </TouchableOpacity>
       </View>
     )
   }
