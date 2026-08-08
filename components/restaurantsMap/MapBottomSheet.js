@@ -203,9 +203,9 @@ export default function MapBottomSheet({
           data-testid="restaurants-map-bottom-sheet-handle"
           aria-label="restaurants-map-bottom-sheet-handle"
           style={{
-            paddingTop: 14,
-            paddingBottom: 14,
-            minHeight: 36,
+            paddingTop: 6,
+            paddingBottom: 4,
+            minHeight: 20,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -269,10 +269,11 @@ const localStyles = StyleSheet.create({
     elevation: 40,
   },
   handleHit: {
-    paddingVertical: 14,
+    paddingTop: 6,
+    paddingBottom: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 36,
+    minHeight: 20,
   },
   content: {
     flex: 1,

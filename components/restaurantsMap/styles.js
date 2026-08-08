@@ -124,7 +124,8 @@ export default StyleSheet.create({
     elevation: 30,
   },
   categories: {
-    marginBottom: 10,
+    marginBottom: 4,
+    marginTop: 0,
   },
   restaurant: {
     borderRadius: 15,
@@ -152,6 +153,9 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
+    marginTop: 0,
+    marginBottom: 0,
+    minHeight: 0,
   },
   menuListBloc: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -163,7 +167,8 @@ export default StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 20,
     padding: 0,
-    marginBottom: 10,
+    marginBottom: 0,
+    marginTop: -4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
