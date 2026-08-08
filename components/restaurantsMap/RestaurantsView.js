@@ -409,27 +409,6 @@ export default function RestaurantsView({
           ) : <></>}
         />
       )}
-      {horizontal && sortedRestaurants.length > 1 && (
-        <View style={styles.paginationContainer}>
-          {sortedRestaurants.map((restaurant, index) => (
-            <TouchableOpacity
-              key={index}
-              testID={`restaurants-map-pagination-dot-${index}`}
-              accessibilityLabel={`restaurants-map-pagination-dot-${index}`}
-              style={[
-                styles.paginationDot,
-                index === currentIndex && styles.paginationDotActive,
-              ]}
-              onPress={() => {
-                setCurrentIndex(index)
-                scrollToCarouselIndex(index)
-                onSelectRestaurant?.(restaurant)
-                setFocusFunction(restaurant.originalIndex)
-              }}
-            />
-          ))}
-        </View>
-      )}
     </View>
   )
 }
