@@ -1,9 +1,35 @@
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator, Image, Platform } from 'react-native'
 import React from 'react'
 import LottieView from 'lottie-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
+
+const isWeb = Platform.OS === 'web'
+const webLogo = require('../assets/images/logo512.png')
+
+function LoaderMark({ checkout = false }) {
+  if (isWeb) {
+    return (
+      <Image
+        source={webLogo}
+        style={checkout ? styles.checkoutWebLogo : styles.webLogo}
+        resizeMode="contain"
+        accessibilityLabel="Good Foods"
+      />
+    )
+  }
+
+  return (
+    <LottieView
+      style={checkout ? styles.checkoutAnimation : styles.animation}
+      source={require('../assets/animations/food-transition2.json')}
+      autoPlay
+      speed={checkout ? 2 : 1.5}
+      loop
+    />
+  )
+}
 
 export default function Loader({ checkout = false, transparent = false }) {
   return (
@@ -18,14 +44,8 @@ export default function Loader({ checkout = false, transparent = false }) {
           style={styles.gradient}
         >
           <View style={styles.content}>
-            <View style={styles.animationContainer}>
-              <LottieView
-                style={styles.animation}
-                source={require('../assets/animations/food-transition2.json')}
-                autoPlay
-                speed={1.5}
-                loop
-              />
+            <View style={[styles.animationContainer, isWeb && styles.animationContainerWeb]}>
+              <LoaderMark />
             </View>
 
             <View style={styles.textContainer}>
@@ -51,13 +71,7 @@ export default function Loader({ checkout = false, transparent = false }) {
             transparent && styles.transparentCheckout,
           ]}
         >
-          <LottieView
-            style={styles.checkoutAnimation}
-            source={require('../assets/animations/food-transition2.json')}
-            autoPlay
-            speed={2}
-            loop
-          />
+          <LoaderMark checkout />
           <Text style={styles.checkoutText}>
             Processing your order...
           </Text>
@@ -105,9 +119,27 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
+  animationContainerWeb: {
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+    backgroundColor: 'transparent',
+  },
+
   animation: {
     height: 180,
     width: 180,
+  },
+
+  webLogo: {
+    height: 140,
+    width: 140,
+  },
+
+  checkoutWebLogo: {
+    height: 96,
+    width: 96,
+    marginBottom: 20,
   },
 
   textContainer: {
