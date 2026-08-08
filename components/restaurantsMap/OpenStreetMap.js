@@ -1,6 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Platform, StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
+
+const isWeb = Platform.OS === 'web'
 
 const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 <html>
@@ -84,6 +86,15 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+      const postToHost = (payload) => {
+        const msg = typeof payload === 'string' ? payload : JSON.stringify(payload);
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(msg);
+        } else if (window.parent && window.parent !== window) {
+          window.parent.postMessage(msg, '*');
+        }
+      };
+
       const initialRegion = ${JSON.stringify(initialRegion)};
 
       const regionToBounds = (region) => {
@@ -189,7 +200,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           if (!Array.isArray(coordinates) || !coordinates.length) return;
 
           const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
-          // Base shadow line for depth.
           L.polyline(latLngs, {
             color: '#0f172a',
             weight: 9,
@@ -198,7 +208,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             lineJoin: 'round',
           }).addTo(routeLayer);
 
-          // Main route line.
           L.polyline(latLngs, {
             color: '#2563eb',
             weight: 5,
@@ -207,7 +216,6 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             lineJoin: 'round',
           }).addTo(routeLayer);
 
-          // Subtle directional accent on top.
           L.polyline(latLngs, {
             color: '#93c5fd',
             weight: 2,
@@ -262,14 +270,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           );
 
           marker.on('click', () => {
-            if (window.ReactNativeWebView) {
-              window.ReactNativeWebView.postMessage(
-                JSON.stringify({
-                  type: 'MARKER_PRESS',
-                  payload: { originalIndex: restaurant.originalIndex },
-                })
-              );
-            }
+            postToHost({
+              type: 'MARKER_PRESS',
+              payload: { originalIndex: restaurant.originalIndex },
+            });
           });
 
           marker.addTo(markerLayer);
@@ -294,6 +298,9 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             }
           ).addTo(map);
         }
+
+        // Leaflet in iframe often needs a resize after first paint on web.
+        setTimeout(() => map.invalidateSize(), 50);
       };
 
       const setRegion = (region, animated = true) => {
@@ -325,9 +332,8 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
         }
       };
 
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MAP_READY' }));
-      }
+      postToHost({ type: 'MAP_READY' });
+      setTimeout(() => map.invalidateSize(), 100);
     </script>
   </body>
 </html>`
@@ -342,10 +348,42 @@ export default function OpenStreetMap({
   testID,
 }) {
   const webViewRef = useRef(null)
+  const iframeRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
+  const mapHtml = useMemo(() => createOpenStreetMapHtml(initialRegion), [initialRegion])
+
+  const handleHostMessage = useCallback((raw) => {
+    try {
+      const data = typeof raw === 'string' ? JSON.parse(raw) : raw
+      if (!data || typeof data !== 'object') return
+
+      if (data.type === 'MAP_READY') {
+        setMapReady(true)
+        return
+      }
+
+      if (data.type === 'MARKER_PRESS') {
+        onMarkerPress?.(data.payload?.originalIndex)
+      }
+    } catch (error) {
+      console.warn('Erreur message carte OSM:', error)
+    }
+  }, [onMarkerPress])
 
   const injectMapMessage = useCallback((message) => {
-    if (!webViewRef.current || !mapReady) {
+    if (!mapReady) {
+      return
+    }
+
+    if (isWeb) {
+      const win = iframeRef.current?.contentWindow
+      if (win?.__updateMap) {
+        win.__updateMap(message)
+      }
+      return
+    }
+
+    if (!webViewRef.current) {
       return
     }
 
@@ -357,6 +395,20 @@ export default function OpenStreetMap({
       true;
     `)
   }, [mapReady])
+
+  useEffect(() => {
+    if (!isWeb) return undefined
+
+    const onWindowMessage = (event) => {
+      if (iframeRef.current && event.source !== iframeRef.current.contentWindow) {
+        return
+      }
+      handleHostMessage(event.data)
+    }
+
+    window.addEventListener('message', onWindowMessage)
+    return () => window.removeEventListener('message', onWindowMessage)
+  }, [handleHostMessage])
 
   useEffect(() => {
     injectMapMessage({
@@ -377,21 +429,28 @@ export default function OpenStreetMap({
   }, [injectMapMessage, targetRegion])
 
   const handleMessage = useCallback((event) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data)
+    handleHostMessage(event.nativeEvent.data)
+  }, [handleHostMessage])
 
-      if (data.type === 'MAP_READY') {
-        setMapReady(true)
-        return
-      }
-
-      if (data.type === 'MARKER_PRESS') {
-        onMarkerPress?.(data.payload?.originalIndex)
-      }
-    } catch (error) {
-      console.warn('Erreur message carte OSM:', error)
-    }
-  }, [onMarkerPress])
+  if (isWeb) {
+    return (
+      <View style={StyleSheet.absoluteFill} testID={testID} accessibilityLabel={testID}>
+        <iframe
+          ref={iframeRef}
+          title="OpenStreetMap"
+          srcDoc={mapHtml}
+          style={{
+            border: 'none',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            inset: 0,
+            background: '#f5f5f5',
+          }}
+        />
+      </View>
+    )
+  }
 
   return (
     <WebView
@@ -399,7 +458,7 @@ export default function OpenStreetMap({
       accessibilityLabel={testID}
       ref={webViewRef}
       originWhitelist={['*']}
-      source={{ html: createOpenStreetMapHtml(initialRegion) }}
+      source={{ html: mapHtml }}
       onMessage={handleMessage}
       javaScriptEnabled
       domStorageEnabled
