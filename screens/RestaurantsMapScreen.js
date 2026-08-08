@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native'
+import { View, Text, TouchableOpacity, useWindowDimensions, Platform } from 'react-native'
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
@@ -136,9 +136,10 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     if (index == null || index < 0 || !restaurantData?.[index]) return
 
     setFocus(createFocusedState(restaurantData.length, index))
-    // Always center on the focused restaurant (carousel / marker).
-    // Previously gated on userLocation + distance, so web demos never moved the map.
-    centerMapOnRestaurant(restaurantData[index])
+    // Web Google Maps embed reloads (blank flash) if we recenter on every carousel slide.
+    if (Platform.OS !== 'web') {
+      centerMapOnRestaurant(restaurantData[index])
+    }
   }, [centerMapOnRestaurant, restaurantData])
 
   const handleMarkerPress = useCallback((originalIndex) => {
@@ -266,7 +267,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
           setVisible={setVisible}
           navigation={navigation}
           userLocation={userLocation}
-          onSelectRestaurant={centerMapOnRestaurant}
+          onSelectRestaurant={Platform.OS === 'web' ? undefined : centerMapOnRestaurant}
           targetCarouselIndex={targetCarouselIndex}
           onTargetCarouselIndexHandled={() => setTargetCarouselIndex(null)}
         />

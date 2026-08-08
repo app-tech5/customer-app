@@ -360,56 +360,41 @@ export default function OpenStreetMap(props) {
 function GoogleMapsWeb({
   initialRegion,
   targetRegion,
-  restaurants,
-  focusedOriginalIndex,
   testID,
 }) {
-  const iframeRef = useRef(null)
-  const lastSrcRef = useRef('')
+  // Changing iframe `src` reloads Google Maps (blank flash). Set once, never again.
+  const [src, setSrc] = useState(() =>
+    buildGoogleMapsEmbedUrl({
+      latitude: initialRegion?.latitude ?? 48.8566,
+      longitude: initialRegion?.longitude ?? 2.3522,
+      zoom: zoomFromDelta(initialRegion?.latitudeDelta),
+    })
+  )
+  const lockedRef = useRef(false)
 
-  const focusedRestaurant = Array.isArray(restaurants)
-    ? restaurants.find((restaurant) => restaurant.originalIndex === focusedOriginalIndex)
-    : null
-
-  const latitude =
-    focusedRestaurant?.latitude ??
-    targetRegion?.latitude ??
-    initialRegion?.latitude ??
-    48.8566
-  const longitude =
-    focusedRestaurant?.longitude ??
-    targetRegion?.longitude ??
-    initialRegion?.longitude ??
-    2.3522
-  const zoom = zoomFromDelta(targetRegion?.latitudeDelta ?? initialRegion?.latitudeDelta)
-  const embedUrl = buildGoogleMapsEmbedUrl({
-    latitude,
-    longitude,
-    zoom,
-    label: focusedRestaurant?.name,
-  })
-
-  // Imperative src only — a changing React `src`/`key` remounts and blanks the map.
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!iframeRef.current || lastSrcRef.current === embedUrl) return
-      lastSrcRef.current = embedUrl
-      iframeRef.current.src = embedUrl
-    }, 280)
-    return () => clearTimeout(timer)
-  }, [embedUrl])
+    if (lockedRef.current) return
+    if (typeof targetRegion?.latitude !== 'number') return
+    lockedRef.current = true
+    setSrc(
+      buildGoogleMapsEmbedUrl({
+        latitude: targetRegion.latitude,
+        longitude: targetRegion.longitude,
+        zoom: zoomFromDelta(targetRegion.latitudeDelta),
+      })
+    )
+  }, [targetRegion])
 
   return (
-    <View style={StyleSheet.absoluteFill} testID={testID} accessibilityLabel={testID}>
+    <View
+      style={StyleSheet.absoluteFill}
+      testID={testID}
+      accessibilityLabel={testID}
+      pointerEvents="box-none"
+    >
       <iframe
-        ref={(node) => {
-          iframeRef.current = node
-          if (node && !lastSrcRef.current) {
-            lastSrcRef.current = embedUrl
-            node.src = embedUrl
-          }
-        }}
         title="Google Maps"
+        src={src}
         loading="eager"
         referrerPolicy="no-referrer-when-downgrade"
         style={{
@@ -419,6 +404,7 @@ function GoogleMapsWeb({
           position: 'absolute',
           inset: 0,
           background: '#e8eaed',
+          pointerEvents: 'auto',
         }}
         allowFullScreen
       />
