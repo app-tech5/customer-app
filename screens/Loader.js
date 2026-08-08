@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ActivityIndicator, Image, Platform } from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native'
 import React from 'react'
 import LottieView from 'lottie-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -6,16 +6,26 @@ import { colors } from '../global'
 import i18n from '../lang/i18n'
 
 const isWeb = Platform.OS === 'web'
-const webLogo = require('../assets/images/logo512.png')
+const webLogoAsset = require('../assets/images/goodFood.png')
+const webLogoUri =
+  typeof webLogoAsset === 'string' ? webLogoAsset : webLogoAsset?.default || webLogoAsset?.uri
 
 function LoaderMark({ checkout = false }) {
   if (isWeb) {
+    const size = checkout ? 96 : 160
     return (
-      <Image
-        source={webLogo}
-        style={checkout ? styles.checkoutWebLogo : styles.webLogo}
-        resizeMode="contain"
-        accessibilityLabel="Good Foods"
+      <img
+        src={webLogoUri}
+        alt="Good Foods"
+        width={size}
+        height={size}
+        style={{
+          width: size,
+          height: size,
+          objectFit: 'contain',
+          display: 'block',
+          marginBottom: checkout ? 20 : 0,
+        }}
       />
     )
   }
@@ -32,14 +42,18 @@ function LoaderMark({ checkout = false }) {
 }
 
 export default function Loader({ checkout = false, transparent = false }) {
+  const webGradient = ['#b3b3b3', '#9e9e9e']
+
   return (
-    <View style={[styles.overlay, transparent && styles.transparentOverlay]}>
+    <View style={[styles.overlay, transparent && styles.transparentOverlay, isWeb && !transparent && styles.overlayWeb]}>
       {!checkout && (
         <LinearGradient
           colors={
             transparent
               ? ['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.15)']
-              : [colors.background.primary, colors.background.secondary]
+              : isWeb
+                ? webGradient
+                : [colors.background.primary, colors.background.secondary]
           }
           style={styles.gradient}
         >
@@ -49,15 +63,15 @@ export default function Loader({ checkout = false, transparent = false }) {
             </View>
 
             <View style={styles.textContainer}>
-              <Text style={styles.title}>{i18n.t('common.preparingExperience')}</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.title, isWeb && styles.titleWeb]}>{i18n.t('common.preparingExperience')}</Text>
+              <Text style={[styles.subtitle, isWeb && styles.subtitleWeb]}>
                 {i18n.t('common.loadingDeliciousOptions')}
               </Text>
             </View>
 
             <ActivityIndicator
               size="small"
-              color={colors.primary}
+              color={isWeb ? '#111111' : colors.primary}
               style={styles.indicator}
             />
           </View>
@@ -92,6 +106,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 999,
     backgroundColor: colors.background.primary, 
+  },
+
+  overlayWeb: {
+    backgroundColor: '#b3b3b3',
   },
 
   transparentOverlay: {
@@ -131,17 +149,6 @@ const styles = StyleSheet.create({
     width: 180,
   },
 
-  webLogo: {
-    height: 140,
-    width: 140,
-  },
-
-  checkoutWebLogo: {
-    height: 96,
-    width: 96,
-    marginBottom: 20,
-  },
-
   textContainer: {
     alignItems: 'center',
     marginBottom: 30,
@@ -155,12 +162,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  titleWeb: {
+    color: '#111111',
+  },
+
   subtitle: {
     fontSize: 16,
     fontWeight: '400',
     color: colors.text.secondary,
     textAlign: 'center',
     opacity: 0.8,
+  },
+
+  subtitleWeb: {
+    color: '#3d5c5c',
+    opacity: 1,
   },
 
   indicator: {
