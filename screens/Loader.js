@@ -1,34 +1,80 @@
 import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native'
-import React from 'react'
+import React, { createElement, useEffect, useRef, useState } from 'react'
 import LottieView from 'lottie-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
 
 const isWeb = Platform.OS === 'web'
-const webLogoAsset = require('../assets/images/logo512.png')
-const webLogoUri =
-  typeof webLogoAsset === 'string' ? webLogoAsset : webLogoAsset?.default || webLogoAsset?.uri
+/** Web-safe copy of food-transition2 without opaque `bg` layer (white square on web). */
+const loaderAnimation = require('../assets/animations/food-transition-web.json')
+
+function WebLottieMark({ checkout = false }) {
+  const containerRef = useRef(null)
+  const [failed, setFailed] = useState(false)
+  const size = checkout ? 120 : 180
+
+  useEffect(() => {
+    if (!isWeb || failed || !containerRef.current) return undefined
+    let anim
+    let cancelled = false
+    ;(async () => {
+      try {
+        const lottie = (await import('lottie-web')).default
+        if (cancelled || !containerRef.current) return
+        anim = lottie.loadAnimation({
+          container: containerRef.current,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: loaderAnimation,
+        })
+        anim.setSpeed(checkout ? 2 : 1.5)
+      } catch {
+        if (!cancelled) setFailed(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+      if (anim) anim.destroy()
+    }
+  }, [checkout, failed])
+
+  if (failed) {
+    const webLogoAsset = require('../assets/images/logo512.png')
+    const webLogoUri =
+      typeof webLogoAsset === 'string' ? webLogoAsset : webLogoAsset?.default || webLogoAsset?.uri
+    const logoSize = checkout ? 96 : 160
+    return createElement('img', {
+      src: webLogoUri,
+      alt: 'Good Foods',
+      width: logoSize,
+      height: logoSize,
+      style: {
+        width: logoSize,
+        height: logoSize,
+        objectFit: 'contain',
+        display: 'block',
+        background: 'transparent',
+        marginBottom: checkout ? 20 : 0,
+      },
+    })
+  }
+
+  return createElement('div', {
+    ref: containerRef,
+    style: {
+      width: size,
+      height: size,
+      marginBottom: checkout ? 20 : 0,
+      background: 'transparent',
+    },
+  })
+}
 
 function LoaderMark({ checkout = false }) {
   if (isWeb) {
-    const size = checkout ? 96 : 160
-    return (
-      <img
-        src={webLogoUri}
-        alt="Good Foods"
-        width={size}
-        height={size}
-        style={{
-          width: size,
-          height: size,
-          objectFit: 'contain',
-          display: 'block',
-          background: 'transparent',
-          marginBottom: checkout ? 20 : 0,
-        }}
-      />
-    )
+    return <WebLottieMark checkout={checkout} />
   }
 
   return (
@@ -102,7 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
-    backgroundColor: colors.background.primary, 
+    backgroundColor: colors.background.primary,
   },
 
   transparentOverlay: {

@@ -4,7 +4,7 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
 import { HomeNavigator, SearchNavigator, AccountNavigator, OrdersNavigator } from './Stacks'
 import { CartNavigator } from './Stacks'
 import { useSelector } from 'react-redux'
-import { Ionicons, Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons'
 import i18n from '../lang/i18n'
 import { colors } from '../global'
 
