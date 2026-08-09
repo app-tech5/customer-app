@@ -197,7 +197,7 @@ export default function AddressesScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.headerInfo}>
           <Text style={styles.headerText}>{i18n.t('addresses.description')}</Text>
         </View>
@@ -251,6 +251,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 24,
   },
   loadingContainer: {
     flex: 1,

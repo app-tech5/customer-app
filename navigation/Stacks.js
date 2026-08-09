@@ -118,7 +118,7 @@ const AccountStack = createStackNavigator()
 
 export function AccountNavigator() {
   return (
-    <AccountStack.Navigator>
+    <AccountStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <AccountStack.Screen
         name="AccountScreen"
         component={AccountScreen}
@@ -245,7 +245,7 @@ const WalletStack = createStackNavigator()
 
 export function WalletSectionNavigator({ navigation }) {
   return (
-    <WalletStack.Navigator>
+    <WalletStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <WalletStack.Screen
         name="Wallet"
         component={Wallet}
@@ -284,7 +284,7 @@ export function WalletSectionNavigator({ navigation }) {
 
 export function WalletFlowNavigator({ navigation }) {
   return (
-    <WalletStack.Navigator>
+    <WalletStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <WalletStack.Screen
         name="Wallet"
         component={Wallet}
@@ -434,7 +434,7 @@ const SettingsStack = createStackNavigator()
 
 export function SettingsSectionNavigator({ navigation }) {
   return (
-    <SettingsStack.Navigator>
+    <SettingsStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <SettingsStack.Screen
         name="SettingsScreen"
         component={Settings}

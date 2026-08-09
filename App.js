@@ -2,8 +2,10 @@ import './utils/hermesAutoOkAlerts';
 import RootNavigation from "./navigation/navigation";
 import {useFonts} from 'expo-font'
 import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { SignInContextProvider } from './contexts/authContext';
 import { initLanguage } from './lang/i18n';
+import { installWebScrollFix } from './utils/installWebScrollFix';
 
 import { 
   Roboto_100Thin,
@@ -52,6 +54,10 @@ export default function App() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') installWebScrollFix()
   }, []);
 
   useEffect(() => {

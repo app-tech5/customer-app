@@ -164,7 +164,7 @@ export default function AddMoneyScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Text style={styles.label}>{i18n.t('wallet.addMoneyAmountLabel')}</Text>
         <TextInput
           style={styles.input}
@@ -234,6 +234,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
     padding: 20,

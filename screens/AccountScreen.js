@@ -349,13 +349,14 @@ export default function AccountScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <ScrollView showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={loader} onRefresh={loadUserData} />}>
-        
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={loader} onRefresh={loadUserData} />}
+      >
         <ProfileHeader />
-
         <StatsSection />
-
         <MenuSection />
       </ScrollView>
     </SafeAreaView>
@@ -366,6 +367,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 24,
   },
   headerContainer: {
     backgroundColor: colors.background.primary,

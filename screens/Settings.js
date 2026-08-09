@@ -170,6 +170,7 @@ export default function Settings({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 24 }}
       >
@@ -374,6 +375,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  scroll: {
+    flex: 1,
   },
   section: {
     backgroundColor: colors.background.primary,
