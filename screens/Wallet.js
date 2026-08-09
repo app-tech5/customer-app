@@ -377,8 +377,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 96,
+    paddingBottom: 120,
   },
   balanceCard: {
     backgroundColor: colors.background.primary,

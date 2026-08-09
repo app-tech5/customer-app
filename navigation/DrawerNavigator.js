@@ -26,9 +26,13 @@ export default function DrawerNavigator() {
     <Drawer.Navigator
     screenOptions={{
         headerShown: false,
+        // Ensure drawer closes after navigation on web (RN drawer can leave overlay).
+        swipeEnabled: true,
         drawerStyle: {
             backgroundColor: '#ffffff',
             width: 280,
+            // Avoid permanent scrollbar track from web overflow hacks
+            overflow: 'hidden',
         },
         drawerLabelStyle: {
             fontSize: 16,
