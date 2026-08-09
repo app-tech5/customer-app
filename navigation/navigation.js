@@ -30,6 +30,7 @@ import { SignInContext, SignInContextProvider } from '../contexts/authContext'
 import { useGateway } from '../contexts/GatewayContext'
 import { config } from '../config'
 import { OrdersProvider } from '../contexts/OrdersContext'
+import { rootNavigationRef, installWebCrawlBridge } from './rootNavigationRef'
 
 const FALLBACK_STRIPE_PUBLISHABLE_KEY = config.FALLBACK_STRIPE_PUBLISHABLE_KEY
 
@@ -65,7 +66,10 @@ export default function RootNavigation({ statusBarColor }) {
             </Stack.Navigator>
           </NavigationContainer>
         ) : (
-          <NavigationContainer>
+          <NavigationContainer
+            ref={rootNavigationRef}
+            onReady={installWebCrawlBridge}
+          >
             <LoaderContext.Provider value={{ loading, setLoading }}>
               <SettingProvider>
                 <GatewayProvider>
