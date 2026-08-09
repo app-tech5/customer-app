@@ -26,6 +26,12 @@ export function installWebScrollFix() {
     el.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important')
     el.style.setProperty('overscroll-behavior-y', 'contain', 'important')
     el.style.setProperty('min-height', '0', 'important')
+    // Keep last rows above the bottom tab bar on web
+    if (!el.dataset.gfPad) {
+      const pad = Math.max(96, Number.parseInt(el.style.paddingBottom || '0', 10) || 0)
+      el.style.paddingBottom = `${pad}px`
+      el.dataset.gfPad = '1'
+    }
     el.dataset.gfScrollOk = '1'
   }
 

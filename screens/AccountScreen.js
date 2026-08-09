@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 24,
+    paddingBottom: 96,
   },
   headerContainer: {
     backgroundColor: colors.background.primary,

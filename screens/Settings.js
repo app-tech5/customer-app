@@ -172,7 +172,7 @@ export default function Settings({ navigation }) {
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 24 }}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 96 }}
       >
         {}
         <SettingSection title={i18n.t('settings.account', 'Account')}>
