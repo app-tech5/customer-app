@@ -66,7 +66,7 @@ export default function BottomTabs() {
             lineHeight: 14,
           },
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cart" size={size} color={color} />
+            <MaterialIcons name="shopping-cart" size={size} color={color} />
           ),
         })}
       />
