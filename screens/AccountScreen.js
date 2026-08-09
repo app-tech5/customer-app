@@ -533,10 +533,8 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   logoutContainer: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    marginTop: 8,
+    paddingTop: 8,
   },
   logoutButton: {
     flexDirection: 'row',
