@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity} from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity, ActivityIndicator} from 'react-native'
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import { Icon } from 'react-native-elements'
 import i18n from '../lang/i18n'
@@ -16,10 +16,8 @@ import HomePromoBanner from '../components/home/HomePromoBanner'
 import { getRestaurants, getAllPromotions, getAllMenuItems, getActiveSponsoredListings } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusWithSmartCache } from '../utils/cacheUtils'
-import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import * as Location from 'expo-location'
-import SettingContext from '../contexts/SettingContext'
 import { navigateToTabSearch } from '../navigation/navigationHelpers'
 import { getRestaurantId, restaurantIdsMatch } from '../utils/restaurantId'
 
@@ -35,7 +33,6 @@ export default function Home({navigation}) {
   const [restaurantsLoading, setRestaurantsLoading] = useState(true)
   const flatlist = useRef(null)
   const searchbar = useRef(null)
-  const { settings } = useContext(SettingContext)
   
   const getUserLocation = async () => {
     try {
@@ -74,10 +71,7 @@ export default function Home({navigation}) {
   }
 
   useEffect(()=>{
-    
-    getUserLocation()
-    
-    if(settings) {
+    // Do not wait for settings API — that serialized boot behind a second network round-trip.
     loadRestaurantsWithSmartCache(
       async () => {
         return await getRestaurants();
@@ -92,44 +86,49 @@ export default function Home({navigation}) {
     );
     
     loadPromotionsWithSmartCache(
-      
       async () => {
         return await getAllPromotions();
       },
-      
       (promotions, fromCache) => {
         setAllPromotions(promotions || []);
       },
-      
       (freshPromotions) => {
         setAllPromotions(freshPromotions || []);
       },
-      
       null
     );
 
     getActiveSponsoredListings()
       .then((res) => setSponsoredListings(res?.listings || []))
       .catch(() => setSponsoredListings([]));
-    
-    loadMenusWithSmartCache(
-      
-      async () => {
-        return await getAllMenuItems();
-      },
-      
-      (menus, fromCache) => {
-        setAllMenus(menus || []);
-      },
-      
-      (freshMenus) => {
-        setAllMenus(freshMenus || []);
-      },
-      
-      null
-    );
-  }
-  },[settings])
+
+    // Menus payload is large and not needed for first Home paint — defer.
+    const deferMenus = () => {
+      loadMenusWithSmartCache(
+        async () => {
+          return await getAllMenuItems();
+        },
+        (menus, fromCache) => {
+          setAllMenus(menus || []);
+        },
+        (freshMenus) => {
+          setAllMenus(freshMenus || []);
+        },
+        null
+      );
+    };
+    const menusTimer = setTimeout(deferMenus, 1500);
+
+    // Location permission / GPS can hang on web — defer after first content.
+    const locTimer = setTimeout(() => {
+      getUserLocation();
+    }, 2000);
+
+    return () => {
+      clearTimeout(menusTimer);
+      clearTimeout(locTimer);
+    };
+  },[])
   
   const applyFiltersToRestaurants = (restaurants) => {
     let filtered = [...restaurants]
@@ -511,9 +510,8 @@ export default function Home({navigation}) {
 
     return sections
   }, [restaurantData, allPromotions, sponsoredListings, appliedFilters, userLocation])
-  if (restaurantsLoading && !restaurantData?.length) {
-    return <Loader />
-  }
+  const showRestaurantsSpinner = restaurantsLoading && !restaurantData?.length
+
   return (
     <SafeAreaView style={{
       paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
@@ -533,7 +531,12 @@ export default function Home({navigation}) {
             sponsoredListings={sponsoredListings}
             navigation={navigation}
           />
-          {createDynamicSections.map((section) => (
+          {showRestaurantsSpinner ? (
+            <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+          ) : (
+            createDynamicSections.map((section) => (
             <View key={section.id} style={styles.sectionContainer}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
@@ -574,7 +577,8 @@ export default function Home({navigation}) {
                 />
               </View>
             </View>
-          ))}
+          ))
+          )}
         </ScrollView>
       <Divider width={1}/>
      </View>
