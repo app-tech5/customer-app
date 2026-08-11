@@ -1,0 +1,13 @@
+---
+description: HARD data budget — mirrors user-global anti-siphon; ≤4 tools/turn
+alwaysApply: true
+---
+
+# HARD data budget (project mirror)
+
+Follow `~/.cursor/rules/hard-data-budget.mdc` and user hooks in `~/.cursor/hooks.json`.
+
+- ≤4 tool calls/turn; no Task/subagents; no unbounded Glob
+- No push/gh/CI/CDP/MCP unless current message explicitly asks
+- Hard timeouts on ADB/shell; kill hangs; no leftover watchers
+- After chat: hooks kill crawls; user must **Quit Cursor** (`~/.cursor/bin/cursor-quit-data.sh` or Cmd+Q) to stop idle `api*`/`repo42`

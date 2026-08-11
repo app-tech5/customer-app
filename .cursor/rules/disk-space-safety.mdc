@@ -1,0 +1,35 @@
+---
+description: Constrain shell/tools so agent work never eats free disk (chronically <15GB free)
+alwaysApply: true
+---
+
+# Disk space safety (always on)
+
+This machine usually has **&lt; 15 GB free** (often ~10–12 GB). Treat low disk as the **default** operating mode — not an exception.
+
+## Hard limits
+
+- **Never** run full-table / aggregate scans on large DBs or files, especially:
+  - `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb*`
+  - Any SQLite/DB/`du`/`find` that can create multi-GB temp files
+- **Never** use `GROUP BY`, `ORDER BY length(value)`, `SUM(length(...))`, or full exports on DBs multi-GB
+- **Never** leave long background jobs that write heavily (Playwright batch shots, chrome CDP dumps, ffmpeg, zip of huge trees, recursive `find`/`du` on `$HOME` or `/Users`) without a kill plan
+- Prefer **targeted** commands (one path, one size check with `ls -lh`, `stat`) over whole-disk inventories
+
+## Before risky shell work
+
+If a command might write a lot or scan something large:
+
+1. Check free space: `df -h /Users/nass | tail -1`
+2. If free **&lt; 5 GB** → stop disk-heavy work; tell the user; do only tiny reads
+3. Cap runtime and watch for sudden free-space drops; **kill -9** the process immediately if free space falls sharply
+
+## Temp / cache discipline
+
+- Do not install Playwright browsers, large npm caches, or bulk screenshot pipelines unless the user explicitly asks
+- Prefer writing small outputs to the project; avoid dumping large artifacts under `/tmp` or Library caches
+- Do not “investigate disk” by rescanning `state.vscdb` — use known sizes (`ls -lh`) only
+
+## Reminder
+
+Recovered free space after killing a process usually means **SQLite/OS temp files**, not that `state.vscdb` shrank. Do not re-trigger that pattern.
