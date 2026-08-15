@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-# Emulator smoke: reuse debug APK + Metro + Hermes CDP login → Home.
-# Single command for android-emulator-runner (KVM path). NO Gradle here.
+# Reuse debug APK + Metro + Hermes login→home. Single command for emulator-runner.
 set -euo pipefail
 
 APK="${1:?APK path required}"
 test -f "$APK"
 
 adb reverse tcp:8081 tcp:8081
+adb reverse tcp:8097 tcp:8097 || true
 
-# Metro first — debug APK loads JS from the packager.
+# GitHub sets CI=true which puts Metro in a mode that never exposes a Hermes CDP target.
+unset CI
+export CI=false
+
 npx expo start --port 8081 --localhost > /tmp/metro.log 2>&1 &
 METRO_PID=$!
-echo "Metro PID $METRO_PID"
+echo "Metro PID $METRO_PID (CI=$CI)"
 
-for i in $(seq 1 60); do
+for i in $(seq 1 45); do
   if curl -sf http://127.0.0.1:8081/status >/dev/null; then
     echo "Metro ready (${i})"
     break
@@ -28,9 +31,8 @@ adb shell am start -n com.goodfoods.goodfoods/.MainActivity \
   -a android.intent.action.MAIN \
   -c android.intent.category.LAUNCHER
 
-# Wait for Hermes/Fusebox CDP target (app must attach to Metro).
 READY=0
-for i in $(seq 1 90); do
+for i in $(seq 1 60); do
   LIST="$(curl -sf http://127.0.0.1:8081/json/list || true)"
   if echo "$LIST" | grep -q webSocketDebuggerUrl; then
     echo "Hermes CDP target ready (${i})"
@@ -38,10 +40,10 @@ for i in $(seq 1 90); do
     READY=1
     break
   fi
-  # Nudge reload periodically
-  if (( i % 15 == 0 )); then
-    adb shell input keyevent 82 || true
-    adb shell am start -n com.goodfoods.goodfoods/.MainActivity || true
+  if (( i % 10 == 0 )); then
+    echo "still waiting CDP… metro tail:"
+    tail -n 5 /tmp/metro.log || true
+    adb shell am start -n com.goodfoods.goodfoods/.MainActivity >/dev/null || true
   fi
   sleep 2
 done
@@ -49,12 +51,13 @@ done
 if [[ "$READY" != "1" ]]; then
   echo "ERROR: no Hermes CDP target"
   curl -sf http://127.0.0.1:8081/json/list || true
-  tail -n 80 /tmp/metro.log || true
-  adb logcat -d | tail -n 80 || true
+  echo "==== metro.log ===="
+  cat /tmp/metro.log || true
+  echo "==== logcat RN ===="
+  adb logcat -d -s ReactNative:V ReactNativeJS:V Expo:V | tail -n 100 || true
   kill "$METRO_PID" || true
   exit 1
 fi
 
 node scripts/hermes/smoke-login-home.js
-
 kill "$METRO_PID" || true

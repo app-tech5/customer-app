@@ -1,20 +1,13 @@
-# Fast login→home: REUSE an existing x86 APK artifact — never rebuild by default.
-# Pass reuse_run_id = Actions run that uploaded android-debug-apk (e.g. 31879265705).
+# Login→home with reused x86 debug APK. No Gradle. One emulator boot (KVM).
 name: E2E login→home
 
 on:
   workflow_dispatch:
     inputs:
       reuse_run_id:
-        description: "Run id that has artifact android-debug-apk (required unless force_rebuild)"
-        required: false
+        description: "Run id with artifact android-debug-apk (required)"
+        required: true
         type: string
-        default: ""
-      force_rebuild_apk:
-        description: "ONLY if you must rebuild (slow). Default false = reuse artifact."
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: e2e-login-home-${{ github.ref }}
@@ -36,9 +29,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Require API URL var
+      - name: Require vars + reuse_run_id
         run: |
           test -n "${{ vars.EXPO_PUBLIC_API_URL }}" || { echo "Missing vars.EXPO_PUBLIC_API_URL"; exit 1; }
+          test -n "${{ inputs.reuse_run_id }}" || { echo "Missing reuse_run_id"; exit 1; }
 
       - name: Enable KVM
         run: |
@@ -46,16 +40,8 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           ls -l /dev/kvm
-          egrep -c '(vmx|svm)' /proc/cpuinfo
-
-      - name: Fail fast if no APK source
-        if: ${{ inputs.force_rebuild_apk != true && inputs.reuse_run_id == '' }}
-        run: |
-          echo "Pass reuse_run_id (run that uploaded android-debug-apk). Do NOT rebuild unless forced."
-          exit 1
 
       - name: Download existing android-debug-apk
-        if: ${{ inputs.force_rebuild_apk != true }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -99,29 +85,18 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-v2
+          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-v3
+          restore-keys: |
+            avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-
 
-      - name: Warm AVD snapshot (cache miss only)
-        if: ${{ steps.avd-cache.outputs.cache-hit != 'true' }}
+      - name: Hermes login→home (one KVM boot)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ env.AVD_API }}
           arch: ${{ env.AVD_ARCH }}
           target: google_apis
           profile: pixel_6
-          force-avd-creation: true
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: echo "AVD warmed"
-
-      - name: Hermes login→home (KVM, reused APK)
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ env.AVD_API }}
-          arch: ${{ env.AVD_ARCH }}
-          target: google_apis
-          profile: pixel_6
-          force-avd-creation: false
+          force-avd-creation: ${{ steps.avd-cache.outputs.cache-hit != 'true' }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: bash -euo pipefail scripts/ci/run-hermes-smoke-on-emulator.sh "${{ steps.apk.outputs.apk }}"
