@@ -1,4 +1,5 @@
-# Maestro login→home. Reuses existing android-debug-apk — NEVER builds APK.
+# Maestro login→home. Reuses android-debug-apk — NEVER builds APK.
+# On Maestro failure: keep emulator up and open interactive SSH (tmate).
 name: E2E login→home
 
 on:
@@ -8,6 +9,11 @@ on:
         description: "Run id that uploaded android-debug-apk"
         required: true
         type: string
+      debug_ssh_on_failure:
+        description: "If Maestro fails, pause with tmate SSH (emulator stays up)"
+        required: false
+        type: boolean
+        default: true
 
 concurrency:
   group: e2e-login-home-${{ github.ref }}
@@ -20,12 +26,14 @@ env:
   EXPO_PUBLIC_DEMO_PASSWORD: ${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
   AVD_API: "30"
   AVD_ARCH: x86_64
+  DEBUG_SSH_ON_FAILURE: ${{ inputs.debug_ssh_on_failure }}
 
 jobs:
   login-home:
     name: Maestro login→home (reuse APK)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Long enough to SSH-debug without tearing down the runner.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -95,7 +103,8 @@ jobs:
           restore-keys: |
             avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-
 
-      - name: Maestro login→home
+      # tmate MUST run inside this step: android-emulator-runner kills the emulator when the script exits.
+      - name: Maestro login→home (SSH pause on failure)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ env.AVD_API }}
