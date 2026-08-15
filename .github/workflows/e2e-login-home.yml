@@ -1,21 +1,20 @@
-# Fast login→home on Ubuntu KVM (~90s when APK+AVD caches hit).
-# No Gradle / no Metro on the hot path — release x86_64 APK + Maestro UI smoke.
+# Fast login→home: REUSE an existing x86 APK artifact — never rebuild by default.
+# Pass reuse_run_id = Actions run that uploaded android-debug-apk (e.g. 31879265705).
 name: E2E login→home
 
 on:
   workflow_dispatch:
     inputs:
+      reuse_run_id:
+        description: "Run id that has artifact android-debug-apk (required unless force_rebuild)"
+        required: false
+        type: string
+        default: ""
       force_rebuild_apk:
-        description: "Rebuild x86_64 release APK (ignore cache)"
+        description: "ONLY if you must rebuild (slow). Default false = reuse artifact."
         required: false
         type: boolean
         default: false
-  push:
-    branches: [codecanyon-sources]
-    paths:
-      - ".github/workflows/e2e-login-home.yml"
-      - ".maestro/ci-smoke.yaml"
-      - "scripts/ci/**"
 
 concurrency:
   group: e2e-login-home-${{ github.ref }}
@@ -31,9 +30,9 @@ env:
 
 jobs:
   login-home:
-    name: KVM emulator login→home
+    name: KVM login→home (reuse APK)
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
@@ -43,79 +42,28 @@ jobs:
 
       - name: Enable KVM
         run: |
-          # Without this, the emulator falls back to slow software virt and boots take minutes.
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           ls -l /dev/kvm
-          # Prove hardware accel is available to the runner
           egrep -c '(vmx|svm)' /proc/cpuinfo
 
-      - name: Restore cached x86_64 release APK
-        id: apk-cache
+      - name: Fail fast if no APK source
+        if: ${{ inputs.force_rebuild_apk != true && inputs.reuse_run_id == '' }}
+        run: |
+          echo "Pass reuse_run_id (run that uploaded android-debug-apk). Do NOT rebuild unless forced."
+          exit 1
+
+      - name: Download existing android-debug-apk
         if: ${{ inputs.force_rebuild_apk != true }}
-        uses: actions/cache/restore@v4
-        with:
-          path: apk-out
-          key: e2e-apk-x86_64-release-${{ hashFiles('package-lock.json', 'android/app/build.gradle', 'app.json', 'app.config.*') }}
-          restore-keys: |
-            e2e-apk-x86_64-release-
-
-      - name: Setup Node (APK rebuild only)
-        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-
-      - name: Setup Java (APK rebuild only)
-        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Setup Android SDK (APK rebuild only)
-        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
-        uses: android-actions/setup-android@v3
-
-      - name: Build x86_64 release APK (cache miss)
-        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          cat > .env <<EOF
-          EXPO_PUBLIC_API_URL=${{ vars.EXPO_PUBLIC_API_URL }}
-          EXPO_PUBLIC_DEMO_MODE=${{ vars.EXPO_PUBLIC_DEMO_MODE }}
-          EXPO_PUBLIC_DEMO_EMAIL=${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
-          EXPO_PUBLIC_DEMO_PASSWORD=${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
-          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-          EXPO_PUBLIC_MAPTILER_API_KEY=
-          EOF
-          sed -i 's/^[[:space:]]*//' .env
-          npm ci
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("android/app/build.gradle")
-          t = p.read_text()
-          t2 = t.replace('include "arm64-v8a"', 'include "x86_64"')
-          if t == t2:
-              raise SystemExit("ABI patch failed — expected arm64-v8a abiFilters")
-          p.write_text(t2)
-          print("ABI -> x86_64")
-          PY
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
-          mkdir -p ../apk-out
-          find app/build/outputs/apk -name '*.apk' -exec cp {} ../apk-out/ \;
-          ls -lh ../apk-out
-
-      - name: Save APK cache
-        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v4
-        with:
-          path: apk-out
-          key: e2e-apk-x86_64-release-${{ hashFiles('package-lock.json', 'android/app/build.gradle', 'app.json', 'app.config.*') }}
+          mkdir -p apk-out
+          echo "Reusing APK from run ${{ inputs.reuse_run_id }}"
+          gh run download "${{ inputs.reuse_run_id }}" -n android-debug-apk -D apk-out -R "${{ github.repository }}"
+          find apk-out -type f -ls
 
       - name: Locate APK
         id: apk
@@ -125,11 +73,24 @@ jobs:
           echo "apk=$APK" >> "$GITHUB_OUTPUT"
           ls -lh "$APK"
 
-      - name: Install Maestro
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Write .env for Metro
         run: |
-          curl -fsSL "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-          "$HOME/.maestro/bin/maestro" --version
+          cat > .env <<EOF
+          EXPO_PUBLIC_API_URL=${{ vars.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_DEMO_MODE=${{ vars.EXPO_PUBLIC_DEMO_MODE }}
+          EXPO_PUBLIC_DEMO_EMAIL=${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
+          EXPO_PUBLIC_DEMO_PASSWORD=${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+          EXPO_PUBLIC_MAPTILER_API_KEY=
+          EOF
+          sed -i 's/^[[:space:]]*//' .env
+
+      - run: npm ci
 
       - name: AVD cache
         uses: actions/cache@v4
@@ -138,9 +99,9 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-v1
+          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-v2
 
-      - name: Create AVD snapshot (cache miss only)
+      - name: Warm AVD snapshot (cache miss only)
         if: ${{ steps.avd-cache.outputs.cache-hit != 'true' }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -151,9 +112,9 @@ jobs:
           force-avd-creation: true
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: echo "AVD ready for snapshot cache"
+          script: echo "AVD warmed"
 
-      - name: Maestro login→home (KVM + snapshot)
+      - name: Hermes login→home (KVM, reused APK)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ env.AVD_API }}
@@ -162,6 +123,13 @@ jobs:
           profile: pixel_6
           force-avd-creation: false
           disable-animations: true
-          # Snapshots ON (do not pass -no-snapshot) — second boots are much faster under KVM.
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: bash -euo pipefail scripts/ci/run-maestro-login-home.sh "${{ steps.apk.outputs.apk }}"
+          script: bash -euo pipefail scripts/ci/run-hermes-smoke-on-emulator.sh "${{ steps.apk.outputs.apk }}"
+
+      - name: Upload Metro log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metro-log
+          path: /tmp/metro.log
+          if-no-files-found: ignore
