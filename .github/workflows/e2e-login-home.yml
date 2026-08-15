@@ -1,11 +1,11 @@
-# Login→home with reused x86 debug APK. No Gradle. One emulator boot (KVM).
+# Maestro login→home. Reuses existing android-debug-apk — NEVER builds APK.
 name: E2E login→home
 
 on:
   workflow_dispatch:
     inputs:
       reuse_run_id:
-        description: "Run id with artifact android-debug-apk (required)"
+        description: "Run id that uploaded android-debug-apk"
         required: true
         type: string
 
@@ -23,16 +23,16 @@ env:
 
 jobs:
   login-home:
-    name: KVM login→home (reuse APK)
+    name: Maestro login→home (reuse APK)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - name: Require vars + reuse_run_id
+      - name: Require vars
         run: |
-          test -n "${{ vars.EXPO_PUBLIC_API_URL }}" || { echo "Missing vars.EXPO_PUBLIC_API_URL"; exit 1; }
-          test -n "${{ inputs.reuse_run_id }}" || { echo "Missing reuse_run_id"; exit 1; }
+          test -n "${{ vars.EXPO_PUBLIC_API_URL }}"
+          test -n "${{ inputs.reuse_run_id }}"
 
       - name: Enable KVM
         run: |
@@ -41,13 +41,13 @@ jobs:
           sudo udevadm trigger --name-match=kvm
           ls -l /dev/kvm
 
-      - name: Download existing android-debug-apk
+      - name: Download existing android-debug-apk (no rebuild)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p apk-out
-          echo "Reusing APK from run ${{ inputs.reuse_run_id }}"
+          echo "REUSE ONLY — run ${{ inputs.reuse_run_id }}"
           gh run download "${{ inputs.reuse_run_id }}" -n android-debug-apk -D apk-out -R "${{ github.repository }}"
           find apk-out -type f -ls
 
@@ -78,6 +78,12 @@ jobs:
 
       - run: npm ci
 
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -85,11 +91,11 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-v3
+          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-maestro-reuse-v1
           restore-keys: |
-            avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-
+            avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-
 
-      - name: Hermes login→home (one KVM boot)
+      - name: Maestro login→home
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ env.AVD_API }}
@@ -99,12 +105,16 @@ jobs:
           force-avd-creation: ${{ steps.avd-cache.outputs.cache-hit != 'true' }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: bash -euo pipefail scripts/ci/run-hermes-smoke-on-emulator.sh "${{ steps.apk.outputs.apk }}"
+          script: bash -euo pipefail scripts/ci/run-maestro-login-home.sh "${{ steps.apk.outputs.apk }}"
 
-      - name: Upload Metro log on failure
-        if: failure()
+      - name: Upload Maestro artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: metro-log
-          path: /tmp/metro.log
+          name: maestro-login-home
+          path: |
+            /tmp/maestro-login-home.xml
+            /tmp/metro.log
+            ~/.maestro/tests
+            ci-smoke-home*.png
           if-no-files-found: ignore
