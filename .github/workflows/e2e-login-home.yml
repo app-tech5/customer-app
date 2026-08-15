@@ -1,19 +1,18 @@
-# Maestro login→home. Reuses android-debug-apk — NEVER builds APK.
-# On Maestro failure: keep emulator up and open interactive SSH (tmate).
+# CI = parcours acheteur (README), pas un APK debug recyclé.
+# 1) .env + npm ci
+# 2) npm start (Metro)
+# 3) npm run android (expo run:android sur l’émulateur)
+# 4) Maestro: Sign In (démo préremplie) → Home
 name: E2E login→home
 
 on:
   workflow_dispatch:
     inputs:
-      reuse_run_id:
-        description: "Run id that uploaded android-debug-apk"
-        required: true
-        type: string
       debug_ssh_on_failure:
         description: "If Maestro fails, pause with tmate SSH (emulator stays up)"
         required: false
         type: boolean
-        default: true
+        default: false
 
 concurrency:
   group: e2e-login-home-${{ github.ref }}
@@ -28,19 +27,19 @@ env:
   AVD_ARCH: x86_64
   DEBUG_SSH_ON_FAILURE: ${{ inputs.debug_ssh_on_failure }}
 
+permissions:
+  contents: read
+
 jobs:
-  login-home:
-    name: Maestro login→home (reuse APK)
+  buyer-login-home:
+    name: Buyer path login→home
     runs-on: ubuntu-latest
-    # Long enough to SSH-debug without tearing down the runner.
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
-      - name: Require vars
-        run: |
-          test -n "${{ vars.EXPO_PUBLIC_API_URL }}"
-          test -n "${{ inputs.reuse_run_id }}"
+      - name: Require API URL var
+        run: test -n "${{ vars.EXPO_PUBLIC_API_URL }}"
 
       - name: Enable KVM
         run: |
@@ -49,30 +48,19 @@ jobs:
           sudo udevadm trigger --name-match=kvm
           ls -l /dev/kvm
 
-      - name: Download existing android-debug-apk (no rebuild)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p apk-out
-          echo "REUSE ONLY — run ${{ inputs.reuse_run_id }}"
-          gh run download "${{ inputs.reuse_run_id }}" -n android-debug-apk -D apk-out -R "${{ github.repository }}"
-          find apk-out -type f -ls
-
-      - name: Locate APK
-        id: apk
-        run: |
-          APK=$(find apk-out -name '*.apk' | head -n 1)
-          test -n "$APK"
-          echo "apk=$APK" >> "$GITHUB_OUTPUT"
-          ls -lh "$APK"
-
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
 
-      - name: Write .env for Metro
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Buyer .env (same as README / .env.example)
         run: |
           cat > .env <<EOF
           EXPO_PUBLIC_API_URL=${{ vars.EXPO_PUBLIC_API_URL }}
@@ -83,14 +71,25 @@ jobs:
           EXPO_PUBLIC_MAPTILER_API_KEY=
           EOF
           sed -i 's/^[[:space:]]*//' .env
+          cat .env
 
-      - run: npm ci
+      - name: Buyer npm install
+        run: npm ci
 
       - name: Install Maestro
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
+
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: gradle-buyer-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'package-lock.json') }}
 
       - name: AVD cache
         uses: actions/cache@v4
@@ -99,12 +98,11 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-maestro-reuse-v1
+          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-buyer-v1
           restore-keys: |
             avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-
 
-      # tmate MUST run inside this step: android-emulator-runner kills the emulator when the script exits.
-      - name: Maestro login→home (SSH pause on failure)
+      - name: Buyer path — android + Metro + Maestro login→home
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ env.AVD_API }}
@@ -114,16 +112,17 @@ jobs:
           force-avd-creation: ${{ steps.avd-cache.outputs.cache-hit != 'true' }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: bash -euo pipefail scripts/ci/run-maestro-login-home.sh "${{ steps.apk.outputs.apk }}"
+          script: bash -euo pipefail scripts/ci/run-buyer-login-home.sh
 
       - name: Upload Maestro artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: maestro-login-home
+          name: buyer-login-home
           path: |
             /tmp/maestro-login-home.xml
             /tmp/metro.log
+            /tmp/expo-android.log
             ~/.maestro/tests
             ci-smoke-home*.png
           if-no-files-found: ignore

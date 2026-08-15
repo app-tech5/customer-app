@@ -1,12 +1,11 @@
-# Buyer runtime smoke: debug APK shows Expo launcher first → tap Metro → Sign In → Home.
+# Parcours acheteur UI (expo-dev-client) : éventuel launcher Metro → Sign In démo → Home.
 appId: com.goodfoods.goodfoods
 ---
 - launchApp
 - extendedWaitUntil:
     visible:
       text: ".*(DEVELOPMENT SERVERS|10\\.0\\.2\\.2:8081|Continue|Sign In|Welcome!|Get Started|Demo Mode|Bienvenue).*"
-    timeout: 120000
-# Dev client launcher: connect to Metro on the emulator host loopback.
+    timeout: 180000
 - runFlow:
     when:
       visible: ".*10\\.0\\.2\\.2:8081.*"
