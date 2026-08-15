@@ -150,33 +150,8 @@ jobs:
           force-avd-creation: true
           disable-animations: true
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: |
-            bash -euo pipefail <<'SCRIPT'
-            adb install -r "${{ steps.apk.outputs.apk }}"
-            adb reverse tcp:8081 tcp:8081
-            npx expo start --port 8081 --localhost > /tmp/metro.log 2>&1 &
-            METRO_PID=$!
-            echo "Metro PID $METRO_PID"
-            for i in $(seq 1 90); do
-              if curl -sf http://127.0.0.1:8081/status >/dev/null; then
-                echo "Metro ready"
-                break
-              fi
-              sleep 2
-            done
-            curl -sf http://127.0.0.1:8081/status >/dev/null
-            adb shell am start -n com.goodfoods.goodfoods/.MainActivity
-            for i in $(seq 1 60); do
-              if curl -sf http://127.0.0.1:8081/json/list | grep -q webSocketDebuggerUrl; then
-                echo "Hermes CDP target ready"
-                break
-              fi
-              sleep 3
-            done
-            curl -sf http://127.0.0.1:8081/json/list | head -c 500 || true
-            node scripts/hermes/smoke-login-home.js
-            kill $METRO_PID || true
-            SCRIPT
+          # One command only — this action runs each script line as a separate shell.
+          script: bash -euo pipefail scripts/ci/run-hermes-smoke-on-emulator.sh "${{ steps.apk.outputs.apk }}"
       - name: Upload Metro log on failure
         if: failure()
         uses: actions/upload-artifact@v4
