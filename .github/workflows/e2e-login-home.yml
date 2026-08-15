@@ -1,0 +1,167 @@
+# Fast login→home on Ubuntu KVM (~90s when APK+AVD caches hit).
+# No Gradle / no Metro on the hot path — release x86_64 APK + Maestro UI smoke.
+name: E2E login→home
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_rebuild_apk:
+        description: "Rebuild x86_64 release APK (ignore cache)"
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [codecanyon-sources]
+    paths:
+      - ".github/workflows/e2e-login-home.yml"
+      - ".maestro/ci-smoke.yaml"
+      - "scripts/ci/**"
+
+concurrency:
+  group: e2e-login-home-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+  EXPO_PUBLIC_DEMO_MODE: ${{ vars.EXPO_PUBLIC_DEMO_MODE }}
+  EXPO_PUBLIC_DEMO_EMAIL: ${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
+  EXPO_PUBLIC_DEMO_PASSWORD: ${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
+  AVD_API: "30"
+  AVD_ARCH: x86_64
+
+jobs:
+  login-home:
+    name: KVM emulator login→home
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require API URL var
+        run: |
+          test -n "${{ vars.EXPO_PUBLIC_API_URL }}" || { echo "Missing vars.EXPO_PUBLIC_API_URL"; exit 1; }
+
+      - name: Enable KVM
+        run: |
+          # Without this, the emulator falls back to slow software virt and boots take minutes.
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+          # Prove hardware accel is available to the runner
+          egrep -c '(vmx|svm)' /proc/cpuinfo
+
+      - name: Restore cached x86_64 release APK
+        id: apk-cache
+        if: ${{ inputs.force_rebuild_apk != true }}
+        uses: actions/cache/restore@v4
+        with:
+          path: apk-out
+          key: e2e-apk-x86_64-release-${{ hashFiles('package-lock.json', 'android/app/build.gradle', 'app.json', 'app.config.*') }}
+          restore-keys: |
+            e2e-apk-x86_64-release-
+
+      - name: Setup Node (APK rebuild only)
+        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Setup Java (APK rebuild only)
+        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK (APK rebuild only)
+        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
+        uses: android-actions/setup-android@v3
+
+      - name: Build x86_64 release APK (cache miss)
+        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
+        run: |
+          set -euo pipefail
+          cat > .env <<EOF
+          EXPO_PUBLIC_API_URL=${{ vars.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_DEMO_MODE=${{ vars.EXPO_PUBLIC_DEMO_MODE }}
+          EXPO_PUBLIC_DEMO_EMAIL=${{ vars.EXPO_PUBLIC_DEMO_EMAIL }}
+          EXPO_PUBLIC_DEMO_PASSWORD=${{ vars.EXPO_PUBLIC_DEMO_PASSWORD }}
+          EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+          EXPO_PUBLIC_MAPTILER_API_KEY=
+          EOF
+          sed -i 's/^[[:space:]]*//' .env
+          npm ci
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/build.gradle")
+          t = p.read_text()
+          t2 = t.replace('include "arm64-v8a"', 'include "x86_64"')
+          if t == t2:
+              raise SystemExit("ABI patch failed — expected arm64-v8a abiFilters")
+          p.write_text(t2)
+          print("ABI -> x86_64")
+          PY
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          mkdir -p ../apk-out
+          find app/build/outputs/apk -name '*.apk' -exec cp {} ../apk-out/ \;
+          ls -lh ../apk-out
+
+      - name: Save APK cache
+        if: ${{ steps.apk-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: apk-out
+          key: e2e-apk-x86_64-release-${{ hashFiles('package-lock.json', 'android/app/build.gradle', 'app.json', 'app.config.*') }}
+
+      - name: Locate APK
+        id: apk
+        run: |
+          APK=$(find apk-out -name '*.apk' | head -n 1)
+          test -n "$APK"
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          ls -lh "$APK"
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.AVD_API }}-${{ env.AVD_ARCH }}-login-home-v1
+
+      - name: Create AVD snapshot (cache miss only)
+        if: ${{ steps.avd-cache.outputs.cache-hit != 'true' }}
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.AVD_API }}
+          arch: ${{ env.AVD_ARCH }}
+          target: google_apis
+          profile: pixel_6
+          force-avd-creation: true
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: echo "AVD ready for snapshot cache"
+
+      - name: Maestro login→home (KVM + snapshot)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.AVD_API }}
+          arch: ${{ env.AVD_ARCH }}
+          target: google_apis
+          profile: pixel_6
+          force-avd-creation: false
+          disable-animations: true
+          # Snapshots ON (do not pass -no-snapshot) — second boots are much faster under KVM.
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: bash -euo pipefail scripts/ci/run-maestro-login-home.sh "${{ steps.apk.outputs.apk }}"

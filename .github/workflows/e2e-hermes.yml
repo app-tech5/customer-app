@@ -2,10 +2,8 @@
 # Uses repo Actions variables (no hardcoded demo domain in workflow source).
 name: E2E Hermes
 
+# Slow path (Gradle debug + Metro + Hermes). Prefer e2e-login-home.yml (KVM + Maestro ~90s).
 on:
-  push:
-    branches: [codecanyon-sources, main, master]
-  pull_request:
   workflow_dispatch:
     inputs:
       reuse_run_id:
