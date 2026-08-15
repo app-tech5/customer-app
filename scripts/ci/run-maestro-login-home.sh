@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reuse debug APK + Metro (JS) + Maestro (UI login→home). No Gradle.
+# Reuse debug APK + Metro + Maestro. No Gradle.
 set -euo pipefail
 
 APK="${1:?APK path required}"
@@ -8,7 +8,6 @@ test -f .maestro/ci-smoke.yaml
 
 adb reverse tcp:8081 tcp:8081
 
-# GitHub sets CI=true; that breaks Metro for the debug app.
 unset CI
 export CI=false
 
@@ -29,10 +28,11 @@ adb install -r "$APK"
 adb shell settings put system system_locales en-US || true
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS || true
 
-# Give the debug app a moment to pull the JS bundle from Metro.
-sleep 8
-
+echo "Starting Maestro…"
 maestro test .maestro/ci-smoke.yaml --format junit --output /tmp/maestro-login-home.xml
 echo "OK maestro login→home"
+
+echo "==== metro tail ===="
+tail -n 40 /tmp/metro.log || true
 
 kill "$METRO_PID" || true
