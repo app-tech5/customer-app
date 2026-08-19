@@ -1,10 +1,54 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
+import { config } from '../../config'
 
 const isWeb = Platform.OS === 'web'
 
-const createOpenStreetMapHtml = (initialRegion, { googleTiles = false } = {}) => `<!DOCTYPE html>
+/**
+ * Build the Leaflet tileLayer JS snippet based on MAP_PROVIDER env var.
+ * Supported: 'osm' (default, free) | 'maptiler' | 'mapbox' | 'google'
+ */
+function buildTileLayerSnippet() {
+  const provider = (config.MAP_PROVIDER || 'osm').toLowerCase()
+  switch (provider) {
+    case 'maptiler': {
+      const key = config.MAPTILER_API_KEY || ''
+      return `L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${key}', {
+        maxZoom: 20,
+        crossOrigin: true,
+        attribution: '\\u00a9 <a href="https://www.maptiler.com/">MapTiler</a> \\u00a9 OpenStreetMap',
+      }).addTo(map);`
+    }
+    case 'mapbox': {
+      const token = config.MAPBOX_ACCESS_TOKEN || ''
+      return `L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${token}', {
+        maxZoom: 22,
+        tileSize: 512,
+        zoomOffset: -1,
+        attribution: '\\u00a9 <a href="https://www.mapbox.com/about/maps/">Mapbox</a> \\u00a9 OpenStreetMap',
+      }).addTo(map);`
+    }
+    case 'google': {
+      const key = config.GOOGLE_MAPS_API_KEY || ''
+      const keyParam = key ? \`&key=\${key}\` : ''
+      return \`L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}\${keyParam}', {
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+        attribution: '\\u00a9 Google',
+      }).addTo(map);\`
+    }
+    default: // 'osm' — free, no key
+      return `L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '\\u00a9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);`
+  }
+}
+
+const TILE_LAYER_SNIPPET = buildTileLayerSnippet()
+
+const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -125,18 +169,7 @@ const createOpenStreetMapHtml = (initialRegion, { googleTiles = false } = {}) =>
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      ${
-        googleTiles
-          ? `L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
-        subdomains: ['0', '1', '2', '3'],
-        attribution: '&copy; Google',
-      }).addTo(map);`
-          : `L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(map);`
-      }
+      ${TILE_LAYER_SNIPPET}
 
       const markerLayer = L.layerGroup().addTo(map);
       const routeLayer = L.layerGroup().addTo(map);
@@ -378,7 +411,7 @@ export default function OpenStreetMap({
   const iframeRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
   const mapHtml = useMemo(
-    () => createOpenStreetMapHtml(initialRegion, { googleTiles: isWeb }),
+    () => createOpenStreetMapHtml(initialRegion),
     [initialRegion]
   )
 

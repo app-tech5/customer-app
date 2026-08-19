@@ -11,7 +11,11 @@ export const config = {
   DEMO_PASSWORD: process.env.EXPO_PUBLIC_DEMO_PASSWORD || 'demo123',
 
   API_TIMEOUT: 10000,
+  // Map provider: 'osm' (default, free) | 'maptiler' | 'mapbox' | 'google'
+  MAP_PROVIDER: process.env.EXPO_PUBLIC_MAP_PROVIDER || 'osm',
   MAPTILER_API_KEY: process.env.EXPO_PUBLIC_MAPTILER_API_KEY || '',
+  MAPBOX_ACCESS_TOKEN: process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || '',
+  GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '',
 
   assetUrls,
 };
