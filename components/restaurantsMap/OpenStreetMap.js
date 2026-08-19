@@ -31,12 +31,14 @@ function buildTileLayerSnippet() {
     }
     case 'google': {
       const key = config.GOOGLE_MAPS_API_KEY || ''
-      const keyParam = key ? \`&key=\${key}\` : ''
-      return \`L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}\${keyParam}', {
-        maxZoom: 20,
-        subdomains: ['0', '1', '2', '3'],
-        attribution: '\\u00a9 Google',
-      }).addTo(map);\`
+      const keyParam = key ? ('&key=' + key) : ''
+      return (
+        "L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" + keyParam + "', {" +
+        "maxZoom: 20," +
+        "subdomains: ['0', '1', '2', '3']," +
+        "attribution: '\\u00a9 Google'," +
+        "}).addTo(map);"
+      )
     }
     default: // 'osm' — free, no key
       return `L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
