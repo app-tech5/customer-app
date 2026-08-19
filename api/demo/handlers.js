@@ -23,6 +23,92 @@ const parseBody = (options) => {
 
 const newId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
+const DEMO_CUSTOMER_PLANS = [
+  {
+    id: 'demo_plan_customer_starter',
+    name: 'Good Food Plus',
+    target: 'customer',
+    price: 4.99,
+    currency: 'USD',
+    billingCycle: 'monthly',
+    benefits: ['Free delivery on eligible orders', 'Member-only offers', 'Priority support'],
+    benefitFlags: {
+      freeDelivery: true,
+      discountPercent: 5,
+      reducedCommissionPercent: 0,
+      prioritySupport: true,
+    },
+    isActive: true,
+  },
+  {
+    id: 'demo_plan_customer_plus',
+    name: 'Customer Plus',
+    target: 'customer',
+    price: 9.99,
+    currency: 'USD',
+    billingCycle: 'monthly',
+    benefits: [
+      'Free delivery on all orders',
+      'Exclusive member deals',
+      '5% off food subtotal',
+      'Priority support',
+    ],
+    benefitFlags: {
+      freeDelivery: true,
+      discountPercent: 5,
+      reducedCommissionPercent: 0,
+      prioritySupport: true,
+    },
+    isActive: true,
+  },
+  {
+    id: 'demo_plan_customer_family',
+    name: 'Customer Family',
+    target: 'customer',
+    price: 14.99,
+    currency: 'USD',
+    billingCycle: 'monthly',
+    benefits: [
+      'Free delivery on all orders',
+      '10% off food subtotal',
+      'Priority support',
+      'Early access to flash deals',
+    ],
+    benefitFlags: {
+      freeDelivery: true,
+      discountPercent: 10,
+      reducedCommissionPercent: 0,
+      prioritySupport: true,
+    },
+    isActive: true,
+  },
+];
+const DEMO_CUSTOMER_PLAN = DEMO_CUSTOMER_PLANS[1];
+
+const demoBenefitsFromEnrollment = (enrollment) => {
+  if (!enrollment || enrollment.status !== 'active') {
+    return {
+      active: false,
+      freeDelivery: false,
+      discountPercent: 0,
+      reducedCommissionPercent: 0,
+      prioritySupport: false,
+      planName: null,
+      currentPeriodEnd: null,
+    };
+  }
+  return {
+    active: true,
+    freeDelivery: true,
+    discountPercent: 0,
+    reducedCommissionPercent: 0,
+    prioritySupport: true,
+    planName: DEMO_CUSTOMER_PLAN.name,
+    currentPeriodEnd: enrollment.currentPeriodEnd,
+    benefits: DEMO_CUSTOMER_PLAN.benefits,
+  };
+};
+
 const getRestaurantId = (restaurantRef) => {
   if (!restaurantRef) return null;
   if (typeof restaurantRef === 'string' || typeof restaurantRef === 'number') {
@@ -259,6 +345,79 @@ export async function handleDemoWrite(client, endpoint, method, options = {}) {
     return { client_secret: `demo_pi_${Date.now()}_secret` };
   }
 
+  const chatPost = matchPath(endpoint, '/orders/:orderId/chat');
+  if (chatPost && method === 'POST') {
+    const orderId = chatPost[1];
+    const text = String(body.text || '').trim();
+    if (!text) throw new Error('Message text is required');
+    const msg = {
+      id: newId('demo_chat'),
+      order: orderId,
+      sender: String(client.user?.id || 'demo_user'),
+      senderName: client.user?.name || 'You',
+      senderRole: 'customer',
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    await updateDemoState((state) => {
+      const prev = state.chatMessagesByOrder?.[orderId] || [];
+      return {
+        ...state,
+        chatMessagesByOrder: {
+          ...(state.chatMessagesByOrder || {}),
+          [orderId]: [...prev, msg],
+        },
+      };
+    });
+    return msg;
+  }
+
+  const subSubscribe = matchPath(endpoint, '/subscriptions/:id/subscribe');
+  if (subSubscribe && method === 'POST') {
+    const planId = subSubscribe[1];
+    const plan = DEMO_CUSTOMER_PLANS.find((p) => p.id === planId);
+    if (!plan) {
+      throw new Error('Subscription plan not found');
+    }
+    const end = new Date();
+    end.setMonth(end.getMonth() + 1);
+    const enrollment = {
+      id: newId('demo_sub'),
+      status: 'active',
+      target: 'customer',
+      startedAt: new Date().toISOString(),
+      currentPeriodEnd: end.toISOString(),
+      cancelledAt: null,
+      autoRenew: true,
+      paymentMethod: 'wallet',
+      plan,
+    };
+    await updateDemoState((state) => ({ ...state, subscriptionEnrollment: enrollment }));
+    return {
+      enrollment,
+      benefits: demoBenefitsFromEnrollment(enrollment),
+    };
+  }
+
+  if (endpoint === '/subscriptions/mine/cancel' && method === 'POST') {
+    const enrollment = {
+      id: 'demo_sub_cancelled',
+      status: 'cancelled',
+      target: 'customer',
+      startedAt: new Date().toISOString(),
+      currentPeriodEnd: new Date().toISOString(),
+      cancelledAt: new Date().toISOString(),
+      autoRenew: false,
+      paymentMethod: 'wallet',
+      plan: DEMO_CUSTOMER_PLAN,
+    };
+    await updateDemoState((state) => ({ ...state, subscriptionEnrollment: null }));
+    return {
+      enrollment,
+      benefits: demoBenefitsFromEnrollment(null),
+    };
+  }
+
   if (endpoint === '/resource/transactions' && method === 'POST') {
     const transaction = {
       _id: newId('demo_tx'),
@@ -419,6 +578,32 @@ export async function handleDemoRead(client, endpoint, method) {
       if (order) return order;
       throw new Error('Order not found');
     }
+  }
+
+  const chatGet = matchPath(endpoint, '/orders/:orderId/chat');
+  if (chatGet) {
+    const orderId = chatGet[1];
+    return {
+      orderId,
+      messages: state.chatMessagesByOrder?.[orderId] || [],
+    };
+  }
+
+  if (endpoint.startsWith('/subscriptions') && endpoint.split('?')[0] === '/subscriptions') {
+    return { target: 'customer', plans: DEMO_CUSTOMER_PLANS };
+  }
+
+  if (endpoint === '/subscriptions/mine') {
+    const enrollment = state.subscriptionEnrollment || null;
+    return {
+      target: 'customer',
+      enrollment,
+      benefits: demoBenefitsFromEnrollment(enrollment),
+    };
+  }
+
+  if (endpoint === '/subscriptions/mine/benefits') {
+    return demoBenefitsFromEnrollment(state.subscriptionEnrollment || null);
   }
 
   if (!client.token?.startsWith('demo_token_')) {

@@ -1,9 +1,15 @@
-import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native'
+import { View, Text, StatusBar, StyleSheet, TouchableOpacity, ScrollView, Alert, Switch, I18nManager } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons, MaterialIcons, FontAwesome, Entypo, Feather } from '@expo/vector-icons'
-import { useSelector, useDispatch } from 'react-redux'
-import i18n from '../lang/i18n'
+import { useDispatch } from 'react-redux'
+import i18n, {
+  changeLanguage as applyI18nLanguage,
+  getCurrentLanguage,
+  getLanguageOption,
+  LANGUAGE_OPTIONS,
+  resetLanguageAfterLogout,
+} from '../lang/i18n'
 import { config } from '../config'
 import { colors } from '../global'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -14,16 +20,17 @@ export default function Settings({ navigation }) {
   const dispatch = useDispatch()
   const { setSignedIn } = useContext(SignInContext)
   const insets = useSafeAreaInsets()
-  const { language } = useSelector((state) => state.settings || {})
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [locationEnabled, setLocationEnabled] = useState(true)
   const [marketingEmails, setMarketingEmails] = useState(false)
-  const [currentLanguage, setCurrentLanguage] = useState(language || 'en')
+  const [currentLanguage, setCurrentLanguage] = useState(getCurrentLanguage())
 
   useEffect(() => {
     loadSettings()
-  }, [])
+    setCurrentLanguage(getCurrentLanguage())
+    navigation.setOptions?.({ title: i18n.t('settings.title', 'Settings') })
+  }, [navigation, currentLanguage])
 
   const loadSettings = async () => {
     try {
@@ -39,6 +46,8 @@ export default function Settings({ navigation }) {
     }
   }
 
+  const languageOption = getLanguageOption(currentLanguage)
+
   const saveSetting = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(value))
@@ -48,10 +57,7 @@ export default function Settings({ navigation }) {
   }
 
   const handleLanguageChange = () => {
-    const languages = [
-      { code: 'en', name: 'English' },
-      { code: 'fr', name: 'Français' }
-    ]
+    const languages = LANGUAGE_OPTIONS
 
     const currentIndex = languages.findIndex(lang => lang.code === currentLanguage)
     const nextIndex = (currentIndex + 1) % languages.length
@@ -66,12 +72,15 @@ export default function Settings({ navigation }) {
           text: i18n.t('common.confirm', 'Confirm'),
           onPress: async () => {
             try {
-              await AsyncStorage.setItem('language', nextLanguage.code)
+              const result = await applyI18nLanguage(nextLanguage.code, {
+                reloadIfNeeded: true,
+              })
               setCurrentLanguage(nextLanguage.code)
-              
-              dispatch({ type: 'SET_LANGUAGE', payload: nextLanguage.code })
-              
-              i18n.locale = nextLanguage.code
+              navigation.setOptions?.({ title: i18n.t('settings.title', 'Settings') })
+
+              if (result?.needsReload) {
+                return
+              }
 
               Alert.alert(
                 i18n.t('common.success', 'Success'),
@@ -102,6 +111,7 @@ export default function Settings({ navigation }) {
               setSignedIn(null)
               dispatch({ type: 'CLEAR' })
               dispatch({ type: 'LOGOUT_USER' })
+              await resetLanguageAfterLogout({ reloadIfNeeded: true })
             } catch (error) {
               console.error('Error during logout:', error)
               Alert.alert(i18n.t('common.error', 'Error'), i18n.t('settings.logoutError', 'Failed to logout'))
@@ -136,7 +146,13 @@ export default function Settings({ navigation }) {
 
         <View style={styles.settingRight}>
           {rightComponent}
-          {showArrow && <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />}
+          {showArrow && (
+            <Ionicons
+              name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'}
+              size={20}
+              color={colors.text.secondary}
+            />
+          )}
         </View>
       </TouchableOpacity>
     )
@@ -154,8 +170,9 @@ export default function Settings({ navigation }) {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 24 }}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 12) + 96 }}
       >
         <SettingSection title={i18n.t('settings.account', 'Account')}>
           <SettingItem
@@ -180,12 +197,10 @@ export default function Settings({ navigation }) {
           <SettingItem
             icon="language"
             title={i18n.t('settings.language', 'Language')}
-            subtitle={currentLanguage === 'en' ? 'English' : 'Français'}
+            subtitle={languageOption.name}
             rightComponent={
               <TouchableOpacity onPress={handleLanguageChange} style={styles.languageButton}>
-                <Text style={styles.languageText}>
-                  {currentLanguage === 'en' ? 'EN' : 'FR'}
-                </Text>
+                <Text style={styles.languageText}>{languageOption.badge}</Text>
               </TouchableOpacity>
             }
             onPress={handleLanguageChange}
@@ -353,6 +368,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  scroll: {
+    flex: 1,
   },
   section: {
     backgroundColor: colors.background.primary,

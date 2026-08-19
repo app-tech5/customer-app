@@ -377,6 +377,9 @@
     "customer": "Customer",
     "driverName": "Driver",
     "deliveryAddress": "Delivery Address",
+    "proofOfDelivery": "Proof of delivery",
+    "proofGeofenceOk": "Completed inside the delivery geofence",
+    "proofGeofenceSoft": "Completed with soft geofence check",
     "mapTracking": "Delivery Map",
     "mapMarkerDriver": "Driver",
     "mapMarkerDropoff": "Delivery location",
@@ -743,7 +746,8 @@
     "termsSoon": "Terms of service screen will be available soon.",
     "dataPrivacySoon": "Data privacy settings will be available soon.",
     "rateAppSoon": "App rating will be available soon.",
-    "openSourceSoon": "Open source link will be available soon."
+    "openSourceSoon": "Open source link will be available soon.",
+    "languageChangedRtl": "Language updated. Restart the app to apply right-to-left layout."
   },
   "common": {
     "user": "User",
@@ -841,5 +845,45 @@
   },
   "map": {
     "loadingRestaurants": "Loading restaurants..."
+  },
+  "chat": {
+    "titleWith": "Chat with {{name}}",
+    "driver": "Driver",
+    "withDriver": "Chat with driver",
+    "emptyTitle": "No messages yet",
+    "emptySub": "Say hello to coordinate the delivery.",
+    "placeholder": "Type a message…",
+    "send": "Send"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "menuSubtitle": "Free delivery and member perks",
+    "introTitle": "Good Food Plus",
+    "introSub": "Subscribe once and unlock free delivery on every order, plus member-only perks.",
+    "activePlan": "Active plan",
+    "validUntil": "Valid until {{date}}",
+    "subscribe": "Subscribe",
+    "free": "Free",
+    "noPlans": "No plans available right now.",
+    "confirmTitle": "Confirm subscription",
+    "confirmMessage": "Subscribe to {{name}} for {{price}} / {{cycle}}? The amount is charged from your wallet.",
+    "subscribeSuccess": "You are subscribed. Enjoy free delivery!",
+    "subscribeError": "Could not subscribe. Check your wallet balance and try again.",
+    "cancelTitle": "Cancel subscription",
+    "cancelMessage": "You will lose member benefits at the end of the current period.",
+    "cancelAction": "Cancel plan",
+    "cancelSuccess": "Subscription cancelled.",
+    "cancelError": "Could not cancel subscription.",
+    "loadError": "Could not load subscription plans."
+  },
+  "intelligence": {
+    "recommendationsTitle": "Recommended for you",
+    "recommendationsSubtitle": "Based on your orders, time of day & weather",
+    "recommended": "Recommended",
+    "etaLabel": "ETA",
+    "etaUnavailable": "—",
+    "surgeActive": "Surge",
+    "standardFee": "Standard fee",
+    "sectionTitle": "AI & personalization"
   }
 }

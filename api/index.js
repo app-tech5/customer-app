@@ -11,11 +11,15 @@ import './foods';
 import './reviews';
 import './categories';
 import './orders';
+import './chat';
+import './subscriptions';
+import './intelligence';
 import './settings';
 import './gateways';
 import './drivers';
 import './deliverySettings';
 import './promotions';
+import './sponsored';
 import './cart';
 import './upload';
 import { filterRestaurantPromotions } from './promotions';
@@ -93,6 +97,10 @@ export const estimateDeliveryFee = (addressId, restaurantId, cartAmount) =>
   api.estimateDeliveryFee(addressId, restaurantId, cartAmount);
 export const getAllActiveOffers = () => api.getAllActiveOffers();
 export const getAllPromotions = () => api.apiCall('/resource/promotions');
+export const getActiveSponsoredListings = (placement) =>
+  api.getActiveSponsoredListings(placement);
+export const trackSponsoredListing = (id, type) =>
+  api.trackSponsoredListing(id, type);
 export const getPromotionById = (promotionId) =>
   api.getPromotionById(promotionId);
 export const validatePromoCode = (code, restaurantId, cartAmount) =>
@@ -157,5 +165,23 @@ export const addMoneyToWallet = (transactionData) =>
 export const recordOrderPayment = (payload) => api.recordOrderPayment(payload);
 export const updatePaymentMethod = (paymentMethodId, paymentMethodData) =>
   api.updatePaymentMethod(paymentMethodId, paymentMethodData);
+export const restaurantsCol = 'restaurants';
+export const categoriesCol = 'categories';
+export const ordersCol = 'orders';
+export const userRef = 'users';
+export const getOrderChat = (orderId) => api.getOrderChat(orderId);
+export const sendOrderChatMessage = (orderId, text) =>
+  api.sendOrderChatMessage(orderId, text);
+export const listSubscriptionPlans = (target) => api.listSubscriptionPlans(target);
+export const getMySubscription = () => api.getMySubscription();
+export const getSubscriptionBenefits = () => api.getSubscriptionBenefits();
+export const subscribeToPlan = (planId) => api.subscribeToPlan(planId);
+export const cancelMySubscription = () => api.cancelMySubscription();
+
+export const getIntelligenceRecommendations = (params) =>
+  api.getIntelligenceRecommendations(params);
+export const getIntelligenceEta = (params) => api.getIntelligenceEta(params);
+export const getIntelligenceSurge = (params) => api.getIntelligenceSurge(params);
+export const getIntelligenceQuote = (params) => api.getIntelligenceQuote(params);
 
 export default api;

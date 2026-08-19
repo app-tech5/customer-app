@@ -5,7 +5,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { api, userInfos, updateUser, getOrders } from '../api'
 import { SignInContext } from '../contexts/authContext'
-import i18n from '../lang/i18n'
+import i18n, { resetLanguageAfterLogout } from '../lang/i18n'
 import { colors } from '../global'
 import { config } from '../config'
 import { navigateToTabOrders } from '../navigation/navigationHelpers'
@@ -96,6 +96,7 @@ export default function AccountScreen({ navigation }) {
               setSignedIn(null)
               dispatch({ type: 'CLEAR' })
               dispatch({ type: 'LOGOUT_USER' })
+              await resetLanguageAfterLogout({ reloadIfNeeded: true })
             } catch (err) {
               console.error('Error during logout:', err)
               Alert.alert(i18n.t('common.error'), i18n.t('profile.logoutError'))
@@ -261,6 +262,13 @@ export default function AccountScreen({ navigation }) {
       />
 
       <MenuItem
+        icon="diamond-outline"
+        title={i18n.t('subscription.title')}
+        subtitle={i18n.t('subscription.menuSubtitle')}
+        onPress={() => navigation.navigate('Subscriptions')}
+      />
+
+      <MenuItem
         icon="location"
         title={i18n.t('addresses.title')}
         subtitle={i18n.t('profile.manageAddresses')}
@@ -341,13 +349,14 @@ export default function AccountScreen({ navigation }) {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
-      <ScrollView showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={loader} onRefresh={loadUserData} />}>
-        
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={loader} onRefresh={loadUserData} />}
+      >
         <ProfileHeader />
-
         <StatsSection />
-
         <MenuSection />
       </ScrollView>
     </SafeAreaView>
@@ -358,6 +367,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 120,
   },
   headerContainer: {
     backgroundColor: colors.background.primary,
@@ -518,10 +533,8 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   logoutContainer: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
+    marginTop: 8,
+    paddingTop: 8,
   },
   logoutButton: {
     flexDirection: 'row',

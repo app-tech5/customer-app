@@ -336,6 +336,9 @@
     "customer": "Client",
     "driverName": "Livreur",
     "deliveryAddress": "Adresse de livraison",
+    "proofOfDelivery": "Preuve de livraison",
+    "proofGeofenceOk": "Terminée dans la zone de livraison",
+    "proofGeofenceSoft": "Terminée avec contrôle géofence souple",
     "mapTracking": "Carte de livraison",
     "mapMarkerDriver": "Livreur",
     "mapMarkerDropoff": "Point de livraison",
@@ -698,7 +701,8 @@
     "termsSoon": "L’écran des conditions d’utilisation sera bientôt disponible.",
     "dataPrivacySoon": "Les paramètres de confidentialité des données seront bientôt disponibles.",
     "rateAppSoon": "La notation de l’application sera bientôt disponible.",
-    "openSourceSoon": "Le lien open source sera bientôt disponible."
+    "openSourceSoon": "Le lien open source sera bientôt disponible.",
+    "languageChangedRtl": "Langue mise à jour. Redémarrez l’application pour appliquer la disposition de droite à gauche."
   },
   "common": {
     "user": "Utilisateur",
@@ -796,5 +800,45 @@
   },
   "map": {
     "loadingRestaurants": "Chargement des restaurants..."
+  },
+  "chat": {
+    "titleWith": "Chat avec {{name}}",
+    "driver": "Livreur",
+    "withDriver": "Discuter avec le livreur",
+    "emptyTitle": "Aucun message",
+    "emptySub": "Dites bonjour pour coordonner la livraison.",
+    "placeholder": "Écrire un message…",
+    "send": "Envoyer"
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "menuSubtitle": "Livraison gratuite et avantages membres",
+    "introTitle": "Good Food Plus",
+    "introSub": "Abonnez-vous une fois et profitez de la livraison gratuite sur toutes vos commandes, plus des avantages membres.",
+    "activePlan": "Plan actif",
+    "validUntil": "Valable jusqu'au {{date}}",
+    "subscribe": "S'abonner",
+    "free": "Gratuit",
+    "noPlans": "Aucun plan disponible pour le moment.",
+    "confirmTitle": "Confirmer l'abonnement",
+    "confirmMessage": "S'abonner à {{name}} pour {{price}} / {{cycle}} ? Le montant est débité de votre portefeuille.",
+    "subscribeSuccess": "Vous êtes abonné. Profitez de la livraison gratuite !",
+    "subscribeError": "Impossible de s'abonner. Vérifiez le solde du portefeuille.",
+    "cancelTitle": "Résilier l'abonnement",
+    "cancelMessage": "Vous perdrez les avantages membres à la fin de la période en cours.",
+    "cancelAction": "Résilier",
+    "cancelSuccess": "Abonnement résilié.",
+    "cancelError": "Impossible de résilier l'abonnement.",
+    "loadError": "Impossible de charger les plans d'abonnement."
+  },
+  "intelligence": {
+    "recommendationsTitle": "Recommandé pour vous",
+    "recommendationsSubtitle": "Selon vos commandes, l'heure et la météo",
+    "recommended": "Recommandé",
+    "etaLabel": "ETA",
+    "etaUnavailable": "—",
+    "surgeActive": "Surge",
+    "standardFee": "Tarif standard",
+    "sectionTitle": "IA & personnalisation"
   }
 }

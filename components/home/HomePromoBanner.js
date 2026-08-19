@@ -73,7 +73,22 @@ function buildFallbackSlides() {
   ];
 }
 
-function buildSlides(promotions) {
+function buildSlides(promotions, sponsoredListings) {
+  const sponsoredSlides = (sponsoredListings || [])
+    .filter((l) => l.placement === 'home_banner' || l.placement === 'both')
+    .slice(0, 2)
+    .map((listing, index) => ({
+      id: `sponsored-${listing.id || index}`,
+      headline: listing.headline || listing.restaurantName || 'Sponsored',
+      subheadline: listing.restaurantName
+        ? `${listing.restaurantName} · Sponsored`
+        : 'Sponsored listing',
+      image: listing.image || listing.restaurantImage || null,
+      panelColor: PANEL_COLORS[index % PANEL_COLORS.length],
+      sponsored: true,
+      restaurantId: listing.restaurantId,
+    }));
+
   const active = (promotions || [])
     .filter((promotion) => isPromotionActive(promotion))
     .sort((a, b) => (b.priority || 0) - (a.priority || 0));
@@ -86,15 +101,15 @@ function buildSlides(promotions) {
       headline: buildHeadline(promotion),
       subheadline: buildSubheadline(promotion),
       image: promotion.image || null,
-      panelColor: PANEL_COLORS[index % PANEL_COLORS.length],
+      panelColor: PANEL_COLORS[(index + sponsoredSlides.length) % PANEL_COLORS.length],
     }));
 
-  if (platformSlides.length >= 2) {
-    return platformSlides;
+  const merged = [...sponsoredSlides, ...platformSlides];
+  if (merged.length >= 2) {
+    return merged.slice(0, 4);
   }
 
   const fallback = buildFallbackSlides();
-  const merged = [...platformSlides];
   fallback.forEach((slide) => {
     if (merged.length < 3 && !merged.some((item) => item.headline === slide.headline)) {
       merged.push(slide);
@@ -145,12 +160,12 @@ function PromoSlide({ item, onPress }) {
   );
 }
 
-export default function HomePromoBanner({ promotions, navigation }) {
+export default function HomePromoBanner({ promotions, sponsoredListings, navigation }) {
   const listRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const slides = useMemo(
-    () => buildSlides(promotions),
-    [promotions]
+    () => buildSlides(promotions, sponsoredListings),
+    [promotions, sponsoredListings]
   );
 
   const handlePress = () => {

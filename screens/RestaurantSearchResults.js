@@ -20,5 +20,8 @@ export default function RestaurantSearchResults({route, navigation}) {
 }
 
 const styles = StyleSheet.create({
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0,
+  },
 })

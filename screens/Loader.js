@@ -1,9 +1,92 @@
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
-import React from 'react'
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native'
+import React, { createElement, useEffect, useRef, useState } from 'react'
 import LottieView from 'lottie-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { colors } from '../global'
 import i18n from '../lang/i18n'
+
+const isWeb = Platform.OS === 'web'
+/** Web-safe copy of food-transition2 without opaque `bg` layer (white square on web). */
+const loaderAnimation = require('../assets/animations/food-transition-web.json')
+
+function WebLottieMark({ checkout = false }) {
+  const containerRef = useRef(null)
+  const [failed, setFailed] = useState(false)
+  const size = checkout ? 120 : 180
+
+  useEffect(() => {
+    if (!isWeb || failed || !containerRef.current) return undefined
+    let anim
+    let cancelled = false
+    ;(async () => {
+      try {
+        const lottie = (await import('lottie-web')).default
+        if (cancelled || !containerRef.current) return
+        anim = lottie.loadAnimation({
+          container: containerRef.current,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: loaderAnimation,
+        })
+        anim.setSpeed(checkout ? 2 : 1.5)
+      } catch {
+        if (!cancelled) setFailed(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+      if (anim) anim.destroy()
+    }
+  }, [checkout, failed])
+
+  if (failed) {
+    const webLogoAsset = require('../assets/images/logo512.png')
+    const webLogoUri =
+      typeof webLogoAsset === 'string' ? webLogoAsset : webLogoAsset?.default || webLogoAsset?.uri
+    const logoSize = checkout ? 96 : 160
+    return createElement('img', {
+      src: webLogoUri,
+      alt: 'Good Foods',
+      width: logoSize,
+      height: logoSize,
+      style: {
+        width: logoSize,
+        height: logoSize,
+        objectFit: 'contain',
+        display: 'block',
+        background: 'transparent',
+        marginBottom: checkout ? 20 : 0,
+      },
+    })
+  }
+
+  return createElement('div', {
+    ref: containerRef,
+    style: {
+      width: size,
+      height: size,
+      marginBottom: checkout ? 20 : 0,
+      background: 'transparent',
+    },
+  })
+}
+
+function LoaderMark({ checkout = false }) {
+  if (isWeb) {
+    return <WebLottieMark checkout={checkout} />
+  }
+
+  return (
+    <LottieView
+      style={checkout ? styles.checkoutAnimation : styles.animation}
+      source={require('../assets/animations/food-transition2.json')}
+      autoPlay
+      speed={checkout ? 2 : 1.5}
+      loop
+    />
+  )
+}
 
 export default function Loader({ checkout = false, transparent = false }) {
   return (
@@ -18,14 +101,8 @@ export default function Loader({ checkout = false, transparent = false }) {
           style={styles.gradient}
         >
           <View style={styles.content}>
-            <View style={styles.animationContainer}>
-              <LottieView
-                style={styles.animation}
-                source={require('../assets/animations/food-transition2.json')}
-                autoPlay
-                speed={1.5}
-                loop
-              />
+            <View style={[styles.animationContainer, isWeb && styles.animationContainerWeb]}>
+              <LoaderMark />
             </View>
 
             <View style={styles.textContainer}>
@@ -51,13 +128,7 @@ export default function Loader({ checkout = false, transparent = false }) {
             transparent && styles.transparentCheckout,
           ]}
         >
-          <LottieView
-            style={styles.checkoutAnimation}
-            source={require('../assets/animations/food-transition2.json')}
-            autoPlay
-            speed={2}
-            loop
-          />
+          <LoaderMark checkout />
           <Text style={styles.checkoutText}>
             Processing your order...
           </Text>
@@ -77,7 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
-    backgroundColor: colors.background.primary, 
+    backgroundColor: colors.background.primary,
   },
 
   transparentOverlay: {
@@ -103,6 +174,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 10,
+  },
+
+  animationContainerWeb: {
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+    backgroundColor: 'transparent',
   },
 
   animation: {

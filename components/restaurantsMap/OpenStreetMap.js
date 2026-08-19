@@ -1,6 +1,54 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Platform, StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
+import { config } from '../../config'
+
+const isWeb = Platform.OS === 'web'
+
+/**
+ * Build the Leaflet tileLayer JS snippet based on MAP_PROVIDER env var.
+ * Supported: 'osm' (default, free) | 'maptiler' | 'mapbox' | 'google'
+ */
+function buildTileLayerSnippet() {
+  const provider = (config.MAP_PROVIDER || 'osm').toLowerCase()
+  switch (provider) {
+    case 'maptiler': {
+      const key = config.MAPTILER_API_KEY || ''
+      return `L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${key}', {
+        maxZoom: 20,
+        crossOrigin: true,
+        attribution: '\\u00a9 <a href="https://www.maptiler.com/">MapTiler</a> \\u00a9 OpenStreetMap',
+      }).addTo(map);`
+    }
+    case 'mapbox': {
+      const token = config.MAPBOX_ACCESS_TOKEN || ''
+      return `L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/{z}/{x}/{y}?access_token=${token}', {
+        maxZoom: 22,
+        tileSize: 512,
+        zoomOffset: -1,
+        attribution: '\\u00a9 <a href="https://www.mapbox.com/about/maps/">Mapbox</a> \\u00a9 OpenStreetMap',
+      }).addTo(map);`
+    }
+    case 'google': {
+      const key = config.GOOGLE_MAPS_API_KEY || ''
+      const keyParam = key ? ('&key=' + key) : ''
+      return (
+        "L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" + keyParam + "', {" +
+        "maxZoom: 20," +
+        "subdomains: ['0', '1', '2', '3']," +
+        "attribution: '\\u00a9 Google'," +
+        "}).addTo(map);"
+      )
+    }
+    default: // 'osm' — free, no key
+      return `L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '\\u00a9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);`
+  }
+}
+
+const TILE_LAYER_SNIPPET = buildTileLayerSnippet()
 
 const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 <html>
@@ -37,11 +85,11 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
       }
 
       .map-marker {
-        width: 30px;
-        height: 30px;
-        border-radius: 15px;
+        width: 36px;
+        height: 36px;
+        border-radius: 18px;
         background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.15);
+        border: 2px solid rgba(0, 0, 0, 0.12);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
         display: flex;
         align-items: center;
@@ -49,25 +97,27 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
       }
 
       .map-marker.active {
-        border-color: #111827;
-        box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.15), 0 2px 8px rgba(0, 0, 0, 0.22);
-      }
-
-      .map-marker-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 6px;
-        background: #000000;
+        width: 46px;
+        height: 46px;
+        border-radius: 23px;
+        background: #111827;
+        border: 3px solid #ffffff;
+        box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.18), 0 4px 14px rgba(0, 0, 0, 0.28);
       }
 
       .map-marker-icon {
         color: #111827;
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1;
       }
 
+      .map-marker.active .map-marker-icon {
+        color: #ffffff;
+        font-size: 17px;
+      }
+
       .map-marker-icon.restaurant {
-        color: #111827;
+        color: inherit;
       }
 
       .user-marker {
@@ -84,6 +134,15 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+      const postToHost = (payload) => {
+        const msg = typeof payload === 'string' ? payload : JSON.stringify(payload);
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(msg);
+        } else if (window.parent && window.parent !== window) {
+          window.parent.postMessage(msg, '*');
+        }
+      };
+
       const initialRegion = ${JSON.stringify(initialRegion)};
 
       const regionToBounds = (region) => {
@@ -112,10 +171,7 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(map);
+      ${TILE_LAYER_SNIPPET}
 
       const markerLayer = L.layerGroup().addTo(map);
       const routeLayer = L.layerGroup().addTo(map);
@@ -140,8 +196,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#39;');
 
-      const getMarkerIcon = (isActive, entityType = 'restaurant') =>
-        L.divIcon({
+      const getMarkerIcon = (isActive, entityType = 'restaurant') => {
+        const size = isActive ? 46 : 36;
+        const anchor = size / 2;
+        return L.divIcon({
           className: 'map-marker-wrapper',
           html:
             '<div class="map-marker' +
@@ -151,9 +209,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             '"><i class="fa-solid ' +
             (entityType === 'delivery' ? 'fa-motorcycle' : entityType === 'customer' ? 'fa-user' : 'fa-utensils') +
             '"></i></span></div>',
-          iconSize: [30, 30],
-          iconAnchor: [15, 15],
+          iconSize: [size, size],
+          iconAnchor: [anchor, anchor],
         });
+      };
 
       const estimateEtaMinutesFromDistance = (distanceKm) => {
         const avgSpeedKmh = 25;
@@ -225,15 +284,21 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
         let customerPoint = null;
 
         (payload.restaurants || []).forEach((restaurant) => {
+          const lat = Number(restaurant?.latitude);
+          const lng = Number(restaurant?.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            return;
+          }
+
           if (restaurant?.entityType === 'delivery') {
-            deliveryPoint = { latitude: restaurant.latitude, longitude: restaurant.longitude };
+            deliveryPoint = { latitude: lat, longitude: lng };
           }
           if (restaurant?.entityType === 'customer') {
-            customerPoint = { latitude: restaurant.latitude, longitude: restaurant.longitude };
+            customerPoint = { latitude: lat, longitude: lng };
           }
 
           const marker = L.marker(
-            [restaurant.latitude, restaurant.longitude],
+            [lat, lng],
             {
               icon: getMarkerIcon(
                 restaurant.originalIndex === payload.focusedOriginalIndex,
@@ -258,14 +323,10 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
           );
 
           marker.on('click', () => {
-            if (window.ReactNativeWebView) {
-              window.ReactNativeWebView.postMessage(
-                JSON.stringify({
-                  type: 'MARKER_PRESS',
-                  payload: { originalIndex: restaurant.originalIndex },
-                })
-              );
-            }
+            postToHost({
+              type: 'MARKER_PRESS',
+              payload: { originalIndex: restaurant.originalIndex },
+            });
           });
 
           marker.addTo(markerLayer);
@@ -290,22 +351,33 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
             }
           ).addTo(map);
         }
+
+        // Leaflet in iframe often needs a resize after first paint on web.
+        setTimeout(() => map.invalidateSize(), 50);
       };
 
       const setRegion = (region, animated = true) => {
-        if (!region) return;
-
-        const bounds = regionToBounds(region);
-        if (!bounds || !bounds.isValid()) return;
-
-        const fitOpts = { padding: [20, 20], maxZoom: 18 };
-
-        if (animated && map.flyToBounds) {
-          map.flyToBounds(bounds, { ...fitOpts, duration: 0.5 });
+        if (!region || typeof region.latitude !== 'number' || typeof region.longitude !== 'number') {
+          return;
+        }
+        if (!Number.isFinite(region.latitude) || !Number.isFinite(region.longitude)) {
           return;
         }
 
-        map.fitBounds(bounds, fitOpts);
+        const zoom = Math.max(
+          3,
+          Math.min(
+            18,
+            Math.round(Math.log2(360 / Math.max(Number(region.latitudeDelta) || 0.01, 0.0005)))
+          )
+        );
+
+        if (animated && map.flyTo) {
+          map.flyTo([region.latitude, region.longitude], zoom, { duration: 0.45 });
+          return;
+        }
+
+        map.setView([region.latitude, region.longitude], zoom);
       };
 
       window.__updateMap = (message) => {
@@ -321,9 +393,8 @@ const createOpenStreetMapHtml = (initialRegion) => `<!DOCTYPE html>
         }
       };
 
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MAP_READY' }));
-      }
+      postToHost({ type: 'MAP_READY' });
+      setTimeout(() => map.invalidateSize(), 100);
     </script>
   </body>
 </html>`
@@ -338,12 +409,43 @@ export default function OpenStreetMap({
   testID,
 }) {
   const webViewRef = useRef(null)
+  const iframeRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
+  const mapHtml = useMemo(
+    () => createOpenStreetMapHtml(initialRegion),
+    [initialRegion]
+  )
+
+  const handleHostMessage = useCallback((raw) => {
+    try {
+      const data = typeof raw === 'string' ? JSON.parse(raw) : raw
+      if (!data || typeof data !== 'object') return
+
+      if (data.type === 'MAP_READY') {
+        setMapReady(true)
+        return
+      }
+
+      if (data.type === 'MARKER_PRESS') {
+        onMarkerPress?.(data.payload?.originalIndex)
+      }
+    } catch (error) {
+      console.warn('Erreur message carte OSM:', error)
+    }
+  }, [onMarkerPress])
 
   const injectMapMessage = useCallback((message) => {
-    if (!webViewRef.current || !mapReady) {
+    if (!mapReady) return
+
+    if (isWeb) {
+      const win = iframeRef.current?.contentWindow
+      if (win?.__updateMap) {
+        win.__updateMap(message)
+      }
       return
     }
+
+    if (!webViewRef.current) return
 
     const escapedMessage = JSON.stringify(message).replace(/\\/g, '\\\\').replace(/'/g, "\\'")
     webViewRef.current.injectJavaScript(`
@@ -353,6 +455,20 @@ export default function OpenStreetMap({
       true;
     `)
   }, [mapReady])
+
+  useEffect(() => {
+    if (!isWeb) return undefined
+
+    const onWindowMessage = (event) => {
+      if (iframeRef.current && event.source !== iframeRef.current.contentWindow) {
+        return
+      }
+      handleHostMessage(event.data)
+    }
+
+    window.addEventListener('message', onWindowMessage)
+    return () => window.removeEventListener('message', onWindowMessage)
+  }, [handleHostMessage])
 
   useEffect(() => {
     injectMapMessage({
@@ -373,21 +489,28 @@ export default function OpenStreetMap({
   }, [injectMapMessage, targetRegion])
 
   const handleMessage = useCallback((event) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data)
+    handleHostMessage(event.nativeEvent.data)
+  }, [handleHostMessage])
 
-      if (data.type === 'MAP_READY') {
-        setMapReady(true)
-        return
-      }
-
-      if (data.type === 'MARKER_PRESS') {
-        onMarkerPress?.(data.payload?.originalIndex)
-      }
-    } catch (error) {
-      console.warn('Erreur message carte OSM:', error)
-    }
-  }, [onMarkerPress])
+  if (isWeb) {
+    return (
+      <View style={StyleSheet.absoluteFill} testID={testID} accessibilityLabel={testID}>
+        <iframe
+          ref={iframeRef}
+          title="Google Maps"
+          srcDoc={mapHtml}
+          style={{
+            border: 'none',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            inset: 0,
+            background: '#e8eaed',
+          }}
+        />
+      </View>
+    )
+  }
 
   return (
     <WebView
@@ -395,7 +518,7 @@ export default function OpenStreetMap({
       accessibilityLabel={testID}
       ref={webViewRef}
       originWhitelist={['*']}
-      source={{ html: createOpenStreetMapHtml(initialRegion) }}
+      source={{ html: mapHtml }}
       onMessage={handleMessage}
       javaScriptEnabled
       domStorageEnabled

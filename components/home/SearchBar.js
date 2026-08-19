@@ -13,6 +13,8 @@ export default function SearchBar({
   navigation,
   inputTestID,
   submitTestID,
+  showSubmitButton = true,
+  containerStyle,
 }) {
   const { restaurantData = [] } = useContext(RestaurantsContext) || {}
   const [searchText, setSearchText] = useState('')
@@ -61,14 +63,16 @@ export default function SearchBar({
     handleSearch()
   }
 
+  const showSubmit = showSubmitButton && !style
+
   return (
-    <View style={{marginTop: 15, flexDirection: "row"}}>
+    <View style={[{ marginTop: 15, flexDirection: 'row' }, containerStyle]}>
       <View style={{
         backgroundColor: !style?'#eee':style.backgroundColor,
         borderRadius: !style?50:0,
         flexDirection: "row",
         alignItems: "center",
-        marginRight: 10,
+        marginRight: showSubmit ? 10 : 0,
         flex: 1,
         ...style?{borderBottomWidth: style.borderBottomWidth, borderBottomColor: style.borderBottomColor}:{}
       }}>
@@ -95,7 +99,7 @@ export default function SearchBar({
           onSubmitEditing={handleSubmitEditing}
           returnKeyType="search"
         />
-        {!style && (
+        {showSubmit && (
           <TouchableOpacity
             testID={submitTestID}
             accessibilityLabel={submitTestID}

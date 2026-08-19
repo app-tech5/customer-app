@@ -14,6 +14,7 @@ import OrdersScreen from '../screens/OrdersScreen'
 import MyOrdersScreen from '../screens/MyOrdersScreen'
 import PreferenceScreen from '../screens/PreferenceScreen'
 import OrderTracking from '../screens/OrderTracking'
+import OrderChatScreen from '../screens/OrderChatScreen'
 import OrderRequest from '../screens/OrderRequest'
 import CartScreen from '../screens/CartScreen'
 import CartDetailsScreen from '../screens/CartDetailsScreen'
@@ -26,6 +27,7 @@ import AddressesScreen from '../screens/AddressesScreen'
 import EditAddressScreen from '../screens/EditAddressScreen'
 import HelpSupportScreen from '../screens/HelpSupportScreen'
 import AboutScreen from '../screens/AboutScreen'
+import SubscriptionsScreen from '../screens/SubscriptionsScreen'
 import CheckoutScreen from '../screens/CheckoutScreen'
 import Wallet from '../screens/Wallet'
 import AddPaymentMethodScreen from '../screens/AddPaymentMethodScreen'
@@ -110,6 +112,11 @@ export function CartNavigator() {
         component={OrderTracking}
         options={{ headerShown: true }} />
 
+      <CartStack.Screen
+        name="OrderChat"
+        component={OrderChatScreen}
+        options={{ headerShown: true }} />
+
     </CartStack.Navigator>
   )
 }
@@ -118,7 +125,7 @@ const AccountStack = createStackNavigator()
 
 export function AccountNavigator() {
   return (
-    <AccountStack.Navigator>
+    <AccountStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <AccountStack.Screen
         name="AccountScreen"
         component={AccountScreen}
@@ -180,7 +187,7 @@ export function AccountNavigator() {
         name="Settings"
         component={Settings}
         options={{
-          title: i18n.t('settings.title'),
+          title: i18n.t('settings.title', 'Settings'),
           headerShown: true
         }}
       />
@@ -188,6 +195,12 @@ export function AccountNavigator() {
       <AccountStack.Screen
         name="HelpSupport"
         component={HelpSupportScreen}
+        options={{ headerShown: true }}
+      />
+
+      <AccountStack.Screen
+        name="Subscriptions"
+        component={SubscriptionsScreen}
         options={{ headerShown: true }}
       />
 
@@ -239,7 +252,7 @@ const WalletStack = createStackNavigator()
 
 export function WalletSectionNavigator({ navigation }) {
   return (
-    <WalletStack.Navigator>
+    <WalletStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <WalletStack.Screen
         name="Wallet"
         component={Wallet}
@@ -278,7 +291,7 @@ export function WalletSectionNavigator({ navigation }) {
 
 export function WalletFlowNavigator({ navigation }) {
   return (
-    <WalletStack.Navigator>
+    <WalletStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <WalletStack.Screen
         name="Wallet"
         component={Wallet}
@@ -375,6 +388,11 @@ export function OrdersNavigator() {
         component={OrderTracking}
         options={{ headerShown: true }}
       />
+      <OrdersStack.Screen
+        name="OrderChat"
+        component={OrderChatScreen}
+        options={{ headerShown: true }}
+      />
     </OrdersStack.Navigator>
   )
 }
@@ -415,6 +433,11 @@ export function OrderStatusNavigator({ navigation, route }) {
           headerLeft: () => null,
         }}
       />
+      <OrderStatusStack.Screen
+        name="OrderChat"
+        component={OrderChatScreen}
+        options={{ headerShown: true }}
+      />
     </OrderStatusStack.Navigator>
   )
 }
@@ -423,12 +446,12 @@ const SettingsStack = createStackNavigator()
 
 export function SettingsSectionNavigator({ navigation }) {
   return (
-    <SettingsStack.Navigator>
+    <SettingsStack.Navigator screenOptions={{ cardStyle: { flex: 1 } }}>
       <SettingsStack.Screen
         name="SettingsScreen"
         component={Settings}
         options={{
-          title: i18n.t('settings.title'),
+          title: i18n.t('settings.title', 'Settings'),
           headerShown: true,
           headerLeft: () => (
             <TouchableOpacity

@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity} from 'react-native'
+import { View, Text, SafeAreaView, StatusBar, ScrollView, StyleSheet, Platform, TouchableOpacity, ActivityIndicator} from 'react-native'
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import { Icon } from 'react-native-elements'
 import i18n from '../lang/i18n'
@@ -13,13 +13,11 @@ import { calculateDeliveryFeeFromSetting } from '../utils/deliverySetting'
 import HomeHeader from '../components/home/HomeHeader'
 import Categories from '../components/home/Categories'
 import HomePromoBanner from '../components/home/HomePromoBanner'
-import { getRestaurants, getAllPromotions, getAllMenuItems } from '../api'
+import { getRestaurants, getAllPromotions, getAllMenuItems, getActiveSponsoredListings } from '../api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { loadRestaurantsWithSmartCache, loadPromotionsWithSmartCache, loadMenusWithSmartCache } from '../utils/cacheUtils'
-import Loader from './Loader'
 import { RestaurantsContext } from '../contexts/RestaurantsContext'
 import * as Location from 'expo-location'
-import SettingContext from '../contexts/SettingContext'
 import { navigateToTabSearch } from '../navigation/navigationHelpers'
 import { getRestaurantId, restaurantIdsMatch } from '../utils/restaurantId'
 
@@ -28,13 +26,13 @@ export default function Home({navigation}) {
   const [city, setCity] = useState("Paris");
   const [activeTab, setActiveTab]= useState("Delivery")
   const [allPromotions, setAllPromotions] = useState([])
+  const [sponsoredListings, setSponsoredListings] = useState([])
   const [allMenus, setAllMenus] = useState([])
   const [appliedFilters, setAppliedFilters] = useState(null)
   const [userLocation, setUserLocation] = useState(null)
   const [restaurantsLoading, setRestaurantsLoading] = useState(true)
   const flatlist = useRef(null)
   const searchbar = useRef(null)
-  const { settings } = useContext(SettingContext)
   
   const getUserLocation = async () => {
     try {
@@ -73,10 +71,7 @@ export default function Home({navigation}) {
   }
 
   useEffect(()=>{
-    
-    getUserLocation()
-    
-    if(settings) {
+    // Do not wait for settings API — that serialized boot behind a second network round-trip.
     loadRestaurantsWithSmartCache(
       async () => {
         return await getRestaurants();
@@ -91,40 +86,49 @@ export default function Home({navigation}) {
     );
     
     loadPromotionsWithSmartCache(
-      
       async () => {
         return await getAllPromotions();
       },
-      
       (promotions, fromCache) => {
         setAllPromotions(promotions || []);
       },
-      
       (freshPromotions) => {
         setAllPromotions(freshPromotions || []);
       },
-      
       null
     );
-    
-    loadMenusWithSmartCache(
-      
-      async () => {
-        return await getAllMenuItems();
-      },
-      
-      (menus, fromCache) => {
-        setAllMenus(menus || []);
-      },
-      
-      (freshMenus) => {
-        setAllMenus(freshMenus || []);
-      },
-      
-      null
-    );
-  }
-  },[settings])
+
+    getActiveSponsoredListings()
+      .then((res) => setSponsoredListings(res?.listings || []))
+      .catch(() => setSponsoredListings([]));
+
+    // Menus payload is large and not needed for first Home paint — defer.
+    const deferMenus = () => {
+      loadMenusWithSmartCache(
+        async () => {
+          return await getAllMenuItems();
+        },
+        (menus, fromCache) => {
+          setAllMenus(menus || []);
+        },
+        (freshMenus) => {
+          setAllMenus(freshMenus || []);
+        },
+        null
+      );
+    };
+    const menusTimer = setTimeout(deferMenus, 1500);
+
+    // Location permission / GPS can hang on web — defer after first content.
+    const locTimer = setTimeout(() => {
+      getUserLocation();
+    }, 2000);
+
+    return () => {
+      clearTimeout(menusTimer);
+      clearTimeout(locTimer);
+    };
+  },[])
   
   const applyFiltersToRestaurants = (restaurants) => {
     let filtered = [...restaurants]
@@ -345,7 +349,29 @@ export default function Home({navigation}) {
     if (!restaurantData || restaurantData.length === 0) return []
     
     const filteredData = appliedFilters ? applyFiltersToRestaurants(restaurantsWithDistance) : restaurantsWithDistance
-    const sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
+    let sortedData = appliedFilters ? sortRestaurants(filteredData) : filteredData
+
+    // Sponsored search placements float to the top on the default home feed.
+    if (sponsoredListings?.length) {
+      const sponsoredIds = new Set(
+        sponsoredListings
+          .filter((l) => l.placement === 'search' || l.placement === 'both')
+          .map((l) => String(l.restaurantId))
+      )
+      if (sponsoredIds.size) {
+        const boosted = []
+        const rest = []
+        sortedData.forEach((r) => {
+          const id = String(getRestaurantId(r) || '')
+          if (sponsoredIds.has(id)) {
+            boosted.push({ ...r, isSponsored: true })
+          } else {
+            rest.push(r)
+          }
+        })
+        sortedData = [...boosted, ...rest]
+      }
+    }
 
     const sections = []
     
@@ -483,10 +509,9 @@ export default function Home({navigation}) {
     }
 
     return sections
-  }, [restaurantData, allPromotions, appliedFilters, userLocation])
-  if (restaurantsLoading && !restaurantData?.length) {
-    return <Loader />
-  }
+  }, [restaurantData, allPromotions, sponsoredListings, appliedFilters, userLocation])
+  const showRestaurantsSpinner = restaurantsLoading && !restaurantData?.length
+
   return (
     <SafeAreaView style={{
       paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
@@ -503,9 +528,15 @@ export default function Home({navigation}) {
           <Categories navigation={navigation} />
           <HomePromoBanner
             promotions={allPromotions}
+            sponsoredListings={sponsoredListings}
             navigation={navigation}
           />
-          {createDynamicSections.map((section) => (
+          {showRestaurantsSpinner ? (
+            <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+          ) : (
+            createDynamicSections.map((section) => (
             <View key={section.id} style={styles.sectionContainer}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleContainer}>
@@ -546,7 +577,8 @@ export default function Home({navigation}) {
                 />
               </View>
             </View>
-          ))}
+          ))
+          )}
         </ScrollView>
       <Divider width={1}/>
      </View>

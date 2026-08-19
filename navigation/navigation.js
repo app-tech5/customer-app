@@ -33,6 +33,7 @@ import { OrdersProvider } from '../contexts/OrdersContext'
 import { FavoritesProvider } from '../contexts/FavoritesContext'
 import { LanguageContextProvider } from '../contexts/LanguageContext'
 import CartSyncWrapper from '../components/CartSyncWrapper'
+import { rootNavigationRef, installWebCrawlBridge } from './rootNavigationRef'
 
 const FALLBACK_STRIPE_PUBLISHABLE_KEY = config.FALLBACK_STRIPE_PUBLISHABLE_KEY
 
@@ -68,7 +69,10 @@ export default function RootNavigation({ statusBarColor }) {
             </Stack.Navigator>
           </NavigationContainer>
         ) : (
-          <NavigationContainer>
+          <NavigationContainer
+            ref={rootNavigationRef}
+            onReady={installWebCrawlBridge}
+          >
             <LoaderContext.Provider value={{ loading, setLoading }}>
               <LanguageContextProvider>
                 <SettingProvider>

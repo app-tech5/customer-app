@@ -9,6 +9,7 @@ import * as Location from 'expo-location'
 import SearchBar from '../components/home/SearchBar'
 import OpenStreetMap from '../components/restaurantsMap/OpenStreetMap'
 import RestaurantsView from '../components/restaurantsMap/RestaurantsView'
+import MapBottomSheet from '../components/restaurantsMap/MapBottomSheet'
 import styles from '../components/restaurantsMap/styles'
 import {
   DEFAULT_REGION,
@@ -16,7 +17,6 @@ import {
   buildSortedRestaurants,
   createDefaultFocus,
   createFocusedState,
-  getDistanceFromLatLonInKm,
   getNearbyRestaurantsRegion,
   getRestaurantCoordinates,
 } from '../utils'
@@ -122,7 +122,7 @@ export default function RestaurantsMapScreen({ route, navigation }) {
     }
   }, [animateMapToRegion, restaurantData, userLocation])
 
-  const centerMapOnRestaurant = (restaurant) => {
+  const centerMapOnRestaurant = useCallback((restaurant) => {
     const coordinates = getRestaurantCoordinates(restaurant)
     if (!coordinates) return
 
@@ -132,27 +132,14 @@ export default function RestaurantsMapScreen({ route, navigation }) {
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     })
-  }
+  }, [animateMapToRegion])
 
   const setFocusFunction = useCallback((index) => {
+    if (index == null || index < 0 || !restaurantData?.[index]) return
+
     setFocus(createFocusedState(restaurantData.length, index))
-
-    const restaurant = restaurantData[index]
-    if (restaurant && userLocation?.lat && userLocation?.lng) {
-      const coordinates = getRestaurantCoordinates(restaurant)
-      if (!coordinates) return
-
-      const distance = getDistanceFromLatLonInKm(
-        userLocation.lat, userLocation.lng,
-        coordinates.latitude,
-        coordinates.longitude
-      )
-
-      if (distance < 10) {
-        centerMapOnRestaurant(restaurant)
-      }
-    }
-  }, [restaurantData, userLocation])
+    centerMapOnRestaurant(restaurantData[index])
+  }, [centerMapOnRestaurant, restaurantData])
 
   const handleMarkerPress = useCallback((originalIndex) => {
     const restaurant = restaurantData?.[originalIndex]
@@ -195,8 +182,16 @@ export default function RestaurantsMapScreen({ route, navigation }) {
   }
 
   return (
-    <View testID="restaurants-map-screen" accessibilityLabel="restaurants-map-screen">
-      <View testID="restaurants-map-container" accessibilityLabel="restaurants-map-container" style={{ height, width }}>
+    <View
+      testID="restaurants-map-screen"
+      accessibilityLabel="restaurants-map-screen"
+      style={{ flex: 1, width, height: '100%', backgroundColor: '#e8eaed' }}
+    >
+      <View
+        testID="restaurants-map-container"
+        accessibilityLabel="restaurants-map-container"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      >
         <OpenStreetMap
           testID="restaurants-map-webview"
           initialRegion={initialRegion}
@@ -224,13 +219,15 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             submitTestID="restaurants-map-search-submit"
             restaurantData={restaurantData}
             navigation={navigation}
+            showSubmitButton={false}
+            containerStyle={{ marginTop: 0, flex: 1 }}
           />
         </View>
         {userLocation && (
           <TouchableOpacity
             testID="restaurants-map-location-button"
             accessibilityLabel="restaurants-map-location-button"
-            style={styles.locationIndicator}
+            style={styles.locationButton}
             onPress={() => {
               if (userLocation.lat && userLocation.lng) {
                 animateMapToRegion({
@@ -242,13 +239,12 @@ export default function RestaurantsMapScreen({ route, navigation }) {
               }
             }}
           >
-            <MaterialIcons name="my-location" size={16} color="#4CAF50" />
+            <MaterialIcons name="my-location" size={18} color="#4CAF50" />
           </TouchableOpacity>
         )}
       </View>
       {visible && (
-        <View testID="restaurants-map-bottom-sheet" accessibilityLabel="restaurants-map-bottom-sheet" style={styles.bottomSheet}>
-          <View testID="restaurants-map-bottom-sheet-handle" accessibilityLabel="restaurants-map-bottom-sheet-handle" style={styles.bottomSheetHandle} />
+        <MapBottomSheet visible={visible} onClose={() => setVisible(false)}>
           <RestaurantsView
             restaurantsRef={restaurantsRef}
             restaurantData={restaurantData}
@@ -264,8 +260,9 @@ export default function RestaurantsMapScreen({ route, navigation }) {
             setVisible={setVisible}
             navigation={navigation}
             userLocation={userLocation}
-            onSelectRestaurant={centerMapOnRestaurant} />
-        </View>
+            onSelectRestaurant={centerMapOnRestaurant}
+          />
+        </MapBottomSheet>
       )}
       {!visible && (
         <RestaurantsView

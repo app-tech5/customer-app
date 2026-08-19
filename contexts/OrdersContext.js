@@ -1,5 +1,6 @@
  
 import { createContext, useState, useEffect } from 'react'
+import { Platform } from 'react-native'
 import { io } from 'socket.io-client'
 import { config } from '../config'
 import { useSelector } from 'react-redux'
@@ -25,7 +26,15 @@ export const OrdersProvider = ({ children }) => {
             socket.emit('leaveOrderRoom')
             socket.disconnect()
         }
-    }, [])
+        }, [])
+
+    useEffect(() => {
+        if (Platform.OS !== 'web' || typeof window === 'undefined') return
+        window.__GF_ORDERS__ = orders || []
+        return () => {
+            if (window.__GF_ORDERS__ === orders) window.__GF_ORDERS__ = []
+        }
+    }, [orders])
      
     return <OrdersContext.Provider value={{ orders, setOrders, socket }}>{children}</OrdersContext.Provider>
 }
