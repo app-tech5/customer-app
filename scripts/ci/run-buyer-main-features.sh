@@ -14,6 +14,31 @@ adb reverse tcp:8097 tcp:8097 || true
 unset CI
 export CI=false
 
+# Debug signing key (gitignored *.keystore) — ensure present for assembleDebug.
+if [[ ! -f android/app/debug.keystore ]]; then
+  echo "==> Generating android/app/debug.keystore"
+  keytool -genkeypair -v \
+    -storetype JKS \
+    -keystore android/app/debug.keystore \
+    -alias androiddebugkey \
+    -keyalg RSA -keysize 2048 -validity 10000 \
+    -storepass android -keypass android \
+    -dname "CN=Android Debug,O=Android,C=US"
+fi
+
+# CI emulator is x86_64 — native splits default to arm64-v8a only.
+python3 - <<'PY'
+from pathlib import Path
+p = Path("android/app/build.gradle")
+t = p.read_text()
+t2 = t.replace('include "arm64-v8a"', 'include "x86_64"')
+if t == t2:
+    raise SystemExit("ABI patch failed: arm64-v8a include not found")
+p.write_text(t2)
+print("ABI splits -> x86_64")
+PY
+export ORG_GRADLE_PROJECT_reactNativeArchitectures=x86_64
+
 echo "==> Expo: npm run android (dev client + Metro on emulator)"
 npm run android > /tmp/expo-android.log 2>&1 &
 ANDROID_PID=$!

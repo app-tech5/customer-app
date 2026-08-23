@@ -60,3 +60,6 @@ web-build/
 
 *storybook.log
 storybook-static
+
+# Needed for Expo/CI debug builds (standard Android debug key)
+!android/app/debug.keystore
