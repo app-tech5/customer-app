@@ -1,0 +1,157 @@
+# Customer main features — Expo Dev Client + Metro (CI).
+# Asserts core screens open after demo Sign In. No separate APK job.
+appId: com.goodfoods.goodfoods
+name: Customer main features
+---
+# ---- Login / Home (buyer path) ----
+- launchApp
+- extendedWaitUntil:
+    visible:
+      text: ".*(DEVELOPMENT SERVERS|10\\.0\\.2\\.2:8081|Continue|Sign In|Welcome!|Get Started|Demo Mode|Bienvenue).*"
+    timeout: 180000
+- runFlow:
+    when:
+      visible: ".*10\\.0\\.2\\.2:8081.*"
+    commands:
+      - tapOn:
+          text: ".*10\\.0\\.2\\.2:8081.*"
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Get Started"
+    commands:
+      - tapOn: "Get Started"
+- runFlow:
+    when:
+      visible: "Continuer"
+    commands:
+      - tapOn: "Continuer"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Sign In|Demo Mode|Welcome!|Bienvenue|Mode Démo).*"
+    timeout: 180000
+- runFlow:
+    when:
+      visible: "Sign In"
+    commands:
+      - tapOn: "Sign In"
+- runFlow:
+    when:
+      visible: "Connexion"
+    commands:
+      - tapOn: "Connexion"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Special Offers|Top Rated|Discover|Most Popular|View All|Restaurants|Offres|Mieux not).*"
+    timeout: 180000
+- takeScreenshot: mf-01-home
+- assertVisible:
+    text: ".*(Special Offers|Top Rated|Discover|Most Popular|View All|Offres|Mieux not).*"
+
+# ---- Search ----
+- tapOn: "Search"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Near me|Offers|Top rated|Quick Actions|Browse by Category|Restaurants|Près de moi|Offres).*"
+    timeout: 60000
+- takeScreenshot: mf-02-search
+- assertVisible:
+    text: ".*(Near me|Offers|Top rated|Quick Actions|Browse by Category).*"
+
+# ---- Near me / map (from Search) ----
+- tapOn:
+    text: "Near me"
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: "restaurants-map-screen"
+    commands:
+      - assertVisible:
+          id: "restaurants-map-screen"
+      - takeScreenshot: mf-03-map
+      - tapOn:
+          id: "restaurants-map-back-button"
+          optional: true
+      - back:
+          optional: true
+
+# ---- Cart ----
+- tapOn: "Cart"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Cart|Your cart|Empty|Add|Checkout|Panier|Vider).*"
+    timeout: 60000
+- takeScreenshot: mf-04-cart
+- assertVisible:
+    text: ".*(Cart|Your cart|Empty|Checkout|Panier|Add).*"
+
+# ---- Orders ----
+- tapOn:
+    text: ".*(Order History|Orders|Historique).*"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Order|Orders|Track|History|No order|Commande|Historique).*"
+    timeout: 60000
+- takeScreenshot: mf-05-orders
+- assertVisible:
+    text: ".*(Order|Orders|Track|History|No order|Commande|Historique).*"
+
+# ---- Account ----
+- tapOn:
+    text: ".*(My Account|Account|Mon compte).*"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Profile|Settings|Account|Logout|Wallet|Favoris|Profil|Déconnexion).*"
+    timeout: 60000
+- takeScreenshot: mf-06-account
+- assertVisible:
+    text: ".*(Profile|Settings|Account|Logout|Wallet|Profil|Déconnexion).*"
+
+# ---- Drawer → Offers ----
+- tapOn:
+    text: "Open menu"
+    optional: true
+- runFlow:
+    when:
+      visible: "Offers & Discounts"
+    commands:
+      - tapOn: "Offers & Discounts"
+      - extendedWaitUntil:
+          visible:
+            text: ".*(Offer|Discount|Promo|No offer|Offre).*"
+          timeout: 60000
+      - takeScreenshot: mf-07-offers
+      - assertVisible:
+          text: ".*(Offer|Discount|Promo|No offer|Offre).*"
+
+# ---- Drawer → Wallet ----
+- tapOn:
+    text: "Open menu"
+    optional: true
+- runFlow:
+    when:
+      visible: "Wallet"
+    commands:
+      - tapOn: "Wallet"
+      - extendedWaitUntil:
+          visible:
+            text: ".*(Wallet|Balance|Add Money|Payment|Portefeuille|Solde|Recharg).*"
+          timeout: 60000
+      - takeScreenshot: mf-08-wallet
+      - assertVisible:
+          text: ".*(Wallet|Balance|Add Money|Payment|Portefeuille|Solde).*"
+
+# ---- Back to Home (sanity) ----
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Special Offers|Top Rated|Discover|Most Popular|View All|Offres|Mieux not).*"
+    timeout: 60000
+- takeScreenshot: mf-09-home-again
+- assertVisible:
+    text: ".*(Special Offers|Top Rated|Discover|Most Popular|View All|Offres|Mieux not).*"

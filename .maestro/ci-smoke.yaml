@@ -1,0 +1,48 @@
+# Parcours acheteur UI (expo-dev-client) : éventuel launcher Metro → Sign In démo → Home.
+appId: com.goodfoods.goodfoods
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      text: ".*(DEVELOPMENT SERVERS|10\\.0\\.2\\.2:8081|Continue|Sign In|Welcome!|Get Started|Demo Mode|Bienvenue).*"
+    timeout: 180000
+- runFlow:
+    when:
+      visible: ".*10\\.0\\.2\\.2:8081.*"
+    commands:
+      - tapOn:
+          text: ".*10\\.0\\.2\\.2:8081.*"
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+- runFlow:
+    when:
+      visible: "Get Started"
+    commands:
+      - tapOn: "Get Started"
+- runFlow:
+    when:
+      visible: "Continuer"
+    commands:
+      - tapOn: "Continuer"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Sign In|Demo Mode|Welcome!|Bienvenue|Mode Démo).*"
+    timeout: 180000
+- runFlow:
+    when:
+      visible: "Sign In"
+    commands:
+      - tapOn: "Sign In"
+- runFlow:
+    when:
+      visible: "Connexion"
+    commands:
+      - tapOn: "Connexion"
+- extendedWaitUntil:
+    visible:
+      text: ".*(Special Offers|Top Rated|Discover|Most Popular|View All|Restaurants|Offres|Mieux not).*"
+    timeout: 180000
+- takeScreenshot: ci-smoke-home
