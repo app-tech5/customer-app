@@ -33,7 +33,7 @@ jobs:
   buyer-main-features:
     name: Buyer path main features
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
@@ -121,6 +121,7 @@ jobs:
           path: |
             /tmp/maestro-main-features.xml
             /tmp/metro.log
+            /tmp/metro-copy.log
             /tmp/expo-android.log
             ~/.maestro/tests
             mf-*.png

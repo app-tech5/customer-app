@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Customer main features on CI emulator — Expo Dev Client path only.
-#   npm run android  →  Metro  →  Maestro main-features
+#   Metro first → expo run:android --no-bundler → Maestro main-features
 # No APK download / no assembleDebug artifact job.
 set -euo pipefail
 
@@ -26,54 +26,85 @@ if [[ ! -f android/app/debug.keystore ]]; then
     -dname "CN=Android Debug,O=Android,C=US"
 fi
 
-# CI emulator is x86_64 — native splits default to arm64-v8a only.
+# CI emulator is x86_64 — force one ABI (gradle.properties defaults to arm64-v8a).
 python3 - <<'PY'
 from pathlib import Path
-p = Path("android/app/build.gradle")
-t = p.read_text()
-t2 = t.replace('include "arm64-v8a"', 'include "x86_64"')
-if t == t2:
-    raise SystemExit("ABI patch failed: arm64-v8a include not found")
-p.write_text(t2)
-print("ABI splits -> x86_64")
+
+props = Path("android/gradle.properties")
+text = props.read_text()
+lines = []
+found = False
+for line in text.splitlines():
+    if line.startswith("reactNativeArchitectures="):
+        lines.append("reactNativeArchitectures=x86_64")
+        found = True
+    else:
+        lines.append(line)
+if not found:
+    lines.append("reactNativeArchitectures=x86_64")
+props.write_text("\n".join(lines) + "\n")
+print("gradle.properties reactNativeArchitectures=x86_64")
+
+gradle = Path("android/app/build.gradle")
+t = gradle.read_text()
+# Prefer disabling ABI splits on CI so install is a single APK.
+t2 = t.replace("enable true", "enable false", 1) if "splits" in t else t
+if 'include "arm64-v8a"' in t2:
+    t2 = t2.replace('include "arm64-v8a"', 'include "x86_64"')
+gradle.write_text(t2)
+print("ABI splits disabled / x86_64")
 PY
 export ORG_GRADLE_PROJECT_reactNativeArchitectures=x86_64
 
-echo "==> Expo: npm run android (dev client + Metro on emulator)"
-npm run android > /tmp/expo-android.log 2>&1 &
-ANDROID_PID=$!
+echo "==> Metro first (so Gradle build does not block status endpoint)"
+npx expo start --localhost --port 8081 > /tmp/metro.log 2>&1 &
+METRO_PID=$!
 
-for i in $(seq 1 120); do
+for i in $(seq 1 60); do
   if curl -sf http://127.0.0.1:8081/status >/dev/null 2>&1; then
     echo "Metro ready (${i})"
     break
   fi
-  if ! kill -0 "$ANDROID_PID" 2>/dev/null; then
-    echo "npm run android exited before Metro was ready"
-    tail -n 120 /tmp/expo-android.log || true
+  if ! kill -0 "$METRO_PID" 2>/dev/null; then
+    echo "Metro exited early"
+    tail -n 120 /tmp/metro.log || true
     exit 1
   fi
-  sleep 5
+  sleep 2
 done
 curl -sf http://127.0.0.1:8081/status >/dev/null
 
-for i in $(seq 1 90); do
+echo "==> Expo: run:android --no-bundler (dev client install on emulator)"
+npx expo run:android --no-bundler > /tmp/expo-android.log 2>&1 &
+ANDROID_PID=$!
+
+# First CI Gradle+NDK build can take 20–35+ minutes.
+for i in $(seq 1 240); do
   if adb shell pm path com.goodfoods.goodfoods >/dev/null 2>&1; then
     echo "App installed (${i})"
     break
   fi
   if ! kill -0 "$ANDROID_PID" 2>/dev/null; then
-    echo "npm run android exited before app install"
-    tail -n 160 /tmp/expo-android.log || true
+    echo "expo run:android exited before app install"
+    tail -n 200 /tmp/expo-android.log || true
+    kill "$METRO_PID" 2>/dev/null || true
     exit 1
+  fi
+  # heartbeat every ~2 minutes
+  if (( i % 12 == 0 )); then
+    echo "still building… (${i}/240) last log:"
+    tail -n 3 /tmp/expo-android.log || true
   fi
   sleep 10
 done
 adb shell pm path com.goodfoods.goodfoods >/dev/null
 
-sleep 15
+sleep 20
 adb shell settings put system system_locales en-US || true
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS || true
+# Launch app if install finished but process already exited.
+adb shell monkey -p com.goodfoods.goodfoods -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1 || true
+sleep 8
 
 echo "==> Maestro main features"
 set +e
@@ -81,12 +112,18 @@ maestro test .maestro/main-features.yaml --format junit --output /tmp/maestro-ma
 MAESTRO_EXIT=$?
 set -e
 
-cp /tmp/expo-android.log /tmp/metro.log 2>/dev/null || true
+cp /tmp/metro.log /tmp/metro-copy.log 2>/dev/null || true
 tail -n 40 /tmp/expo-android.log || true
+tail -n 20 /tmp/metro.log || true
+
+cleanup() {
+  kill "$ANDROID_PID" 2>/dev/null || true
+  kill "$METRO_PID" 2>/dev/null || true
+}
 
 if [[ "$MAESTRO_EXIT" -eq 0 ]]; then
   echo "OK buyer path: main features"
-  kill "$ANDROID_PID" 2>/dev/null || true
+  cleanup
   exit 0
 fi
 
@@ -110,5 +147,5 @@ if [[ "${DEBUG_SSH_ON_FAILURE:-false}" == "true" ]]; then
   tmate -S /tmp/tmate.sock wait tmate-dead || true
 fi
 
-kill "$ANDROID_PID" 2>/dev/null || true
+cleanup
 exit "$MAESTRO_EXIT"
